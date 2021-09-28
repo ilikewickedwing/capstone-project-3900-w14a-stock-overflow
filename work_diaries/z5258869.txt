@@ -1,0 +1,10 @@
+Week 1
+	We discussed and talked about what project we wanted to do and we ended up with the stocks project
+	Lily was designated as the scrum master
+	We decided to briefly talk about possible technologies to use and to think about what API to use
+Week 2
+	I was delegated the System Archtiecture part of the proposal
+	I was responsible for thinking about the API to use for the backend
+	Mison was delegated the background part of the proposal and user stories
+	Lily was designated user sprints and technical depth
+	
