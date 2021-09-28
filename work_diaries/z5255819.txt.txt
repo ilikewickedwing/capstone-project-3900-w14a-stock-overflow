@@ -1,0 +1,5 @@
+Week 1
+
+Group formed. Discussed with group which project to develop(Stock Portfolio Management System)
+and figured out which language to use. Thought of 8 additional functionality that could be used in our project
+to be shared with group in week 2.
