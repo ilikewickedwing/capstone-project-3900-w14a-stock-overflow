@@ -58,9 +58,6 @@ You can run all tests with the following command
 yarn test
 ```
 
-### 2.3	Documentation
-The backend server automatically generates the REST API documentation based on the JSdocs comments that you put in your code. You can access the documentation by going to the **/docs** subdomain on the server. So for example, you could find it in the **https://localhost:5050/docs**
-
 ## 3 Database (MongoDB) 
 To be added
 
