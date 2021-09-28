@@ -1,0 +1,12 @@
+- what was planned for the period since last diary
+- what was finished
+- what were the main technical and non-technical obstacle and how they were overcome
+- what was not finished, why, how this affected overall progress
+- what is planned for next period
+
+Week 1
+Group formed. Group voted and decided on implementing project 4 - stock portfolio management. Discussed ways of implementing said project such as which software to use and what platform we would decide on.
+I was assigned as scrum master and jira page was created. We each individually came up with our own set of requirements to discuss on a consensus of what functionalty to implement for our next scrum meeting.
+We will delegate sections of the proposal and discuss further implementations for the next session that we attend.
+
+Week 2
