@@ -1,0 +1,8 @@
+Week 1
+The group was formed, and we chose the stock portfolio management system project. The Jira group was formed, and roles distributed. 
+I was given the role of working on the back end, and together we decided that the project would be hosted online, and that we would use
+Express.js and React to build the system. Each member was tasked with coming up with 8 functionalities that fit the requirements of the 
+project proposal.
+
+Week 2
+The core functionalities were chosen, and some novelties were also decided. I was assigned to work on user stories and accpetance criteria.
