@@ -1,5 +1,6 @@
 import express from "express";
 import cors from 'cors';
+import { Database } from "./database";
 import swaggerUI from 'swagger-ui-express';
 import { swaggerDocs } from "./docs";
 
@@ -23,11 +24,9 @@ app.use(express.json())
 // Middleware used to generate automatic REST API documentation
 app.use('/docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
 
-//////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////
-//                  Endpoint definitons below                   //
-//////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////
+// Intialise database
+const d = new Database();
+d.connect();
 
 // Makes a GET endpoint for the server
 app.get('/', (req, res) => {
@@ -35,8 +34,6 @@ app.get('/', (req, res) => {
 })
 
 // Makes a POST endpoint for the server
-// The @swagger comment is used by the automatic documentation
-// generator
 /**
  * @swagger
  * /dummy:
