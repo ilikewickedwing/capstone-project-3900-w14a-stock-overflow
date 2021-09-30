@@ -25,8 +25,8 @@ app.use(express.json())
 app.use('/docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
 
 // Intialise database
-const d = new Database();
-d.connect();
+const database = new Database();
+database.connect();
 
 // Makes a GET endpoint for the server
 app.get('/', (req, res) => {
