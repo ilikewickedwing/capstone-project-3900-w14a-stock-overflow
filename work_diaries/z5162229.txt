@@ -1,0 +1,19 @@
+Week 1:
+
+Team matching. Met team members and introduction.
+Look into what projects we wanted to do.
+Voting on the projects and settled on Stock portfolio management
+Roles assigned for Scrum Master
+I am assigned as front-end engineer
+Looked into the technology stack
+
+Week 2:
+
+Didn't attend due to COVID-19 vaccination
+
+Week 3:
+
+Discussion on user stories, epics.
+Setting up github classroom.
+Discussion on system design.
+Using React for front-end and MaterialUI for UI components
