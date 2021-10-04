@@ -6,3 +6,6 @@ project proposal.
 
 Week 2
 The core functionalities were chosen, and some novelties were also decided. I was assigned to work on user stories and accpetance criteria.
+
+Week 3
+We finished the project proposal, assigned tasks to sprints and to members as well. We then started working on sprint 1.
