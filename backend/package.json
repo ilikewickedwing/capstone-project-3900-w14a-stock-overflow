@@ -6,7 +6,7 @@
   "license": "MIT",
   "scripts": {
     "start": "nodemon --experimental-specifier-resolution=node --exec babel-node src/index.js $PORT",
-    "test": "jest"
+    "test": "jest --watchAll"
   },
   "dependencies": {
     "cors": "^2.8.5",

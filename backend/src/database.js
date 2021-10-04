@@ -53,6 +53,9 @@ export class Database {
     this.testmode = testmode;
     // Stores the mongodb database instance
     this.database = null;
+    // This stores the mongodb test server if it is in
+    // test mode
+    this.mongoTestServer = null;
   }
   /**
    * Returns whether the database has the given username
@@ -82,9 +85,22 @@ export class Database {
       projection: { uid: 1 }
     }
     const user = await users.findOne(query, options);
-    console.log(user);
     if (user !== null) {
       return user.uid;
+    }
+    return null;
+  }
+  /**
+   * Given a uid, return the user data
+   * @param {string} uid 
+   * @returns {Promise<User | string>}
+   */
+  async getUser(uid) {
+    const users = this.database.collection('users');
+    const query = { uid: uid };
+    const user = await users.findOne(query);
+    if (user !== null) {
+      return user;
     }
     return null;
   }
@@ -116,7 +132,6 @@ export class Database {
       projection: { password: 1 }
     }
     const password = await passwords.findOne(query, options);
-    console.log(password);
     if (password !== null) {
       return password.password;
     }
@@ -149,15 +164,34 @@ export class Database {
     return token;
   }
   /**
+   * Returns the uid of the token owner
+   * else returns null if token is invalid
+   * @param {string} token 
+   * @returns {Promise<string | null>}
+   */
+  async getTokenUid(token) {
+    const tokens = this.database.collection('tokens');
+    const query = { token: token };
+    const options = {
+      // Only include the 'uid' field in the returned document
+      projection: { ownerUid: 1 }
+    }
+    const tokenResp = await tokens.findOne(query, options);
+    if (tokenResp !== null) {
+      return tokenResp.ownerUid;
+    }
+    return null;
+  }
+  /**
    * Connect to the database
    */
   async connect() {
     let uri = URI;
     if (this.testmode) {
       // Start test server in memory
-      const devMongoDb = await MongoMemoryServer.create();
+      this.mongoTestServer = await MongoMemoryServer.create();
       // Get uri string
-      uri = devMongoDb.getUri();
+      uri = this.mongoTestServer.getUri();
     }
     // Start client
     this.client = new MongoClient(uri);
@@ -179,6 +213,15 @@ export class Database {
         this.database.createCollection(collection);
         console.log(`Created collection ${collection}`);
       }
+    }
+  }
+  /**
+   * Disconnects from the database
+   */
+  async disconnect() {
+    this.client.close();
+    if (this.testmode) {
+      this.mongoTestServer.stop();
     }
   }
 }
