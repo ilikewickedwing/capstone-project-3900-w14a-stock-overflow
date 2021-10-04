@@ -67,7 +67,7 @@ app.post('/auth/login', async (req, res) => {
     return;
   }
   // Invalid so send 403 response
-  res.status(403).send();
+  res.status(403).send({ message: 'Invalid username and password combination' });
 })
 
 // Post endpoint for logging into the server
@@ -96,7 +96,7 @@ app.post('/auth/logout', async (req, res) => {
     res.status(200).send();
     return;
   }
-  res.status(403).send();
+  res.status(403).send({ message: 'Invalid token' });
 })
 
 // Post endpoint for logging into the server
@@ -132,7 +132,7 @@ app.post('/auth/register', async (req, res) => {
     return;
   }
   // Invalid so send 403 response
-  res.status(403).send();
+  res.status(403).send({ message: 'username already exists' });
 })
 
 // Start the server instance

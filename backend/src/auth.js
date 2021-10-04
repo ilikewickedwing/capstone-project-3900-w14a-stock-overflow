@@ -12,7 +12,21 @@ import { Database } from "./database";
  * @returns {Promise<obj | null>} - returns the token of the user and uid or null if invalid
  */
 export const authLogin = async (username, password, database) => {
-  return null;
+  const uid = await database.getUid(username);
+  if (uid === null) {
+    return null;
+  }
+  // Check if password matches
+  const realPassword = await database.getPassword(uid);
+  if (password !== realPassword) {
+    return null;
+  }
+  // Create a new token
+  const token = await database.insertToken(uid);
+  return {
+    uid: uid,
+    token: token
+  }
 }
 
 /**

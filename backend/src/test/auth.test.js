@@ -1,4 +1,4 @@
-import { authLogout, authRegister } from "../auth";
+import { authLogin, authLogout, authRegister } from "../auth";
 import { Database } from "../database";
 
 describe('Auth register', () => {
@@ -54,6 +54,38 @@ describe('Auth Logout', () => {
   it('Logging out an invalid token returns false', async () => {
     const hasLoggedout = await authLogout('my very cool token bro', d);
     expect(hasLoggedout).toBe(false);
+  })
+  // Close the database after all tests
+  afterAll(async () => {
+    await d.disconnect();
+  })
+})
+
+describe('Auth login', () => {
+  const d = new Database(true);
+  // Run this before all the tests
+  beforeAll(async () => {
+    await d.connect();
+  })
+  it('Logging in returns a valid uid and token', async () => {
+    const resp = await authRegister('Ashley', 'bobiscool', d);
+    await authLogout(resp.token, d);
+    const loginResp = await authLogin('Ashley', 'bobiscool', d);
+    expect(loginResp).not.toBe(null);
+    const user = await d.getUser(loginResp.uid);
+    expect(user).not.toBe(null);
+    const validToken = (await d.getTokenUid(loginResp.token) !== null);
+    expect(validToken).toBe(true);
+  })
+  it('Cannot log in to existing user with wrong password', async () => {
+    const resp = await authRegister('Ashley2', 'bobiscool', d);
+    await authLogout(resp.token, d);
+    const loginResp = await authLogin('Ashley2', 'wrongpassword', d);
+    expect(loginResp).toBe(null);
+  })
+  it('Cannot log in to user that doesnt exist', async () => {
+    const loginResp = await authLogin('Nonexistent user', 'wrongpassword', d);
+    expect(loginResp).toBe(null);
   })
   // Close the database after all tests
   afterAll(async () => {
