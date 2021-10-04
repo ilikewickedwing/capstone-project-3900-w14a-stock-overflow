@@ -69,7 +69,13 @@ yarn test
 The backend server automatically generates the REST API documentation based on the JSdocs comments that you put in your code. You can access the documentation by going to the **/docs** subdomain on the server. So for example, you could find it in the **https://localhost:5050/docs**
 
 ## 3 Database (MongoDB) 
-To be added
+
+The database is MongoDB and it is hosted in the cloud.
+
+During developement, a mock MongoDB instance is run in memory instead of calling the actual database on the cloud. During deployment this will be changed.
+
+You can change this manually by changing the **testmode** parameter in **./src/database.js** to false so that it
+will call the actual database in the cloud instead of the mock database
 
 ## 4 Frontend
 The frontend is written with react
