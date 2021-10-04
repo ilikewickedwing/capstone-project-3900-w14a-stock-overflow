@@ -105,7 +105,9 @@ export class Database {
     return null;
   }
   /**
-   * Inserts a new user into the database and returns the uid
+   * Inserts a new user into the database and returns the uid.
+   * This function does not check if the username already exists, so you must check
+   * before hand to ensure that there arent any duplicate usernames
    * @param {string} username 
    * @returns {Promise<string>}
    */
