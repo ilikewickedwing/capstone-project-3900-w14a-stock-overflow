@@ -53,19 +53,17 @@ app.get('/', (req, res) => {
  *        type: string
  *     responses:
  *       200:
- *         description: Returns the user token
+ *         description: Returns the user token and uid
  *       403:
  *         description: Invalid username and password combination
  */
-app.post('/auth/login', (req, res) => {
+app.post('/auth/login', async (req, res) => {
   // Get the post parameter
   const { username, password } = req.body;
-  const token = authLogin(username, password, database);
+  const resp = authLogin(username, password, database);
   // Valid so return token
-  if (token !== null) {
-    res.status(200).send({
-      token: token
-    });
+  if (resp !== null) {
+    res.status(200).send(resp);
     return;
   }
   // Invalid so send 403 response
@@ -90,7 +88,7 @@ app.post('/auth/login', (req, res) => {
  *       403:
  *         description: Invalid token
  */
-app.post('/auth/logout', (req, res) => {
+app.post('/auth/logout', async (req, res) => {
   // Get the post parameter
   const { token } = req.body;
   const resp = authLogout(token, database);
@@ -120,19 +118,17 @@ app.post('/auth/logout', (req, res) => {
  *        type: string
  *     responses:
  *       200:
- *         description: Returns the user token
+ *         description: Returns the user token and uid
  *       403:
  *         description: Username already exists
  */
-app.post('/auth/register', (req, res) => {
+app.post('/auth/register', async (req, res) => {
   // Get the post parameter
   const { username, password } = req.body;
-  const token = authRegister(username, password, database);
+  const resp = await authRegister(username, password, database);
   // Valid so return token
-  if (token !== null) {
-    res.status(200).send({
-      token: token
-    });
+  if (resp !== null) {
+    res.status(200).send(resp);
     return;
   }
   // Invalid so send 403 response

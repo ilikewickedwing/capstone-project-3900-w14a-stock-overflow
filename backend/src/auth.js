@@ -5,13 +5,13 @@
 import { Database } from "./database";
 
 /**
- * Authenticates a login and returns a token on success otherwise return null
+ * Authenticates a login and returns token and uid on success otherwise return null
  * @param {string} username 
  * @param {string} password 
  * @param {Database} database 
- * @returns {string | null} - returns the token of the user or null if invalid
+ * @returns {obj | null} - returns the token of the user and uid or null if invalid
  */
-export const authLogin = (username, password, database) => {
+export const authLogin = async (username, password, database) => {
   return null;
 }
 
@@ -21,17 +21,27 @@ export const authLogin = (username, password, database) => {
  * @param {Database} database
  * @returns {boolean}
  */
-export const authLogout = (token, database) => {
+export const authLogout = async (token, database) => {
 
 }
 
 /**
- * Authenticates a register and returns a token on success otherwise return null
+ * Authenticates a register and returns a token and uid on success otherwise return null
  * @param {string} username 
  * @param {string} password 
  * @param {Database} database
- * @returns {string | null} - returns the token of the user or null if invalid
+ * @returns {obj | null} - returns the token of the user and uid or null if invalid
  */
-export const authRegister = (username, password, database) => {
-
+export const authRegister = async (username, password, database) => {
+  const hasUsername = await database.hasUsername(username);
+  if (hasUsername) {
+    return null;
+  }
+  const uid = await database.insertUser(username);
+  await database.insertPassword(uid, password);
+  const token = await database.insertToken(uid);
+  return {
+    uid: uid,
+    token: token
+  }
 }
