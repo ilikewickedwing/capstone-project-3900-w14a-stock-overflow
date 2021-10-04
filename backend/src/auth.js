@@ -36,7 +36,8 @@ export const authLogin = async (username, password, database) => {
  * @returns {Promise<boolean>}
  */
 export const authLogout = async (token, database) => {
-  return database.deleteToken(token);
+  const value = await database.deleteToken(token);
+  return value;
 }
 
 /**

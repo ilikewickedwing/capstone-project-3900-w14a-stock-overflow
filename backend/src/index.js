@@ -4,6 +4,7 @@ import { Database } from "./database";
 import swaggerUI from 'swagger-ui-express';
 import { swaggerDocs } from "./docs";
 import { authLogin, authLogout, authRegister } from "./auth";
+import { userProfile } from "./user";
 
 // Make the server instance
 const app = express();
@@ -23,15 +24,39 @@ app.use(cors());
 app.use(express.json())
 
 // Middleware used to generate automatic REST API documentation
-app.use('/docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
+app.use('/', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
 
 // Intialise database
 const database = new Database();
 database.connect();
 
-// Makes a GET endpoint for the server
-app.get('/', (req, res) => {
-  res.status(200).send('Mockup for Stockup');
+// Get endpoint for getting user data
+/**
+ * @swagger
+ * /user/profile:
+ *   get:
+ *     tags: [User]
+ *     description: Endpoint for fetching a users profile
+ *     parameters:
+ *      - name: uid
+ *        description: The uid of the user
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Returns the user profile information
+ *       403:
+ *         description: Invalid uid
+ */
+app.get('user/profile', async (req, res) => {
+  const { uid } = req.query;
+  const resp = await userProfile(uid, database);
+  if (resp !== null) {
+    res.status(200).send(resp);
+    return;
+  }
+  res.status(403).send({ message: 'Invalid uid' });
 })
 
 // Post endpoint for logging into the server
@@ -39,6 +64,7 @@ app.get('/', (req, res) => {
  * @swagger
  * /auth/login:
  *   post:
+ *     tags: [Authentication]
  *     description: Endpoint for logging in a user
  *     parameters:
  *      - name: username
@@ -75,6 +101,7 @@ app.post('/auth/login', async (req, res) => {
  * @swagger
  * /auth/logout:
  *   post:
+ *     tags: [Authentication]
  *     description: Endpoint for logging out a user
  *     parameters:
  *      - name: token
@@ -104,6 +131,7 @@ app.post('/auth/logout', async (req, res) => {
  * @swagger
  * /auth/register:
  *   post:
+ *     tags: [Authentication]
  *     description: Endpoint for registering a user
  *     parameters:
  *      - name: username
