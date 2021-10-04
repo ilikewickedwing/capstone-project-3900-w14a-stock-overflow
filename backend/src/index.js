@@ -30,6 +30,27 @@ app.use('/docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
 const database = new Database();
 database.connect();
 
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     User:
+ *       type: object
+ *       properties:
+ *         uid:
+ *           type: string
+ *           description: The uid of the user
+ *         username:
+ *           type: string
+ *           description: The username of the user
+ *       example:
+ *         uid: 9ThIGIrYNeSNIVuMa2jGU
+ *         username: XStockMaster64X
+ */
+app.get('/', (req, res) => {
+  res.status(200).send('This is the root page. Go to /docs for documentation.')
+})
+
 // Get endpoint for getting user data
 /**
  * @swagger
@@ -47,16 +68,8 @@ database.connect();
  *     responses:
  *       200:
  *         description: Returns the user profile information
- *         content:
- *            application/json:
- *              schema:
- *                type: object
- *                properties:
- *                  data:
- *                    type: object
- *                    properties:
- *                      uid:
- *                      type: string
+ *         schema:
+ *             $ref: '#/components/schemas/User'
  *       403:
  *         description: Invalid uid
  */
@@ -80,17 +93,29 @@ app.get('/user/profile', async (req, res) => {
  *     parameters:
  *      - name: username
  *        description: The username of the user
+ *        example: BobDylan24
  *        in: body
  *        required: true
  *        type: string
  *      - name: password
  *        description: The password of the user
+ *        example: My password
  *        in: body
  *        required: true
  *        type: string
  *     responses:
  *       200:
  *         description: Returns the user token and uid
+ *         schema:
+ *            type: object
+ *            properties:
+ *              uid:
+ *                type: string
+ *                description: The uid of the user
+ *              token:
+ *                type: string
+ *                description: The token of the session
+ *            
  *       403:
  *         description: Invalid username and password combination
  */
@@ -158,6 +183,15 @@ app.post('/auth/logout', async (req, res) => {
  *     responses:
  *       200:
  *         description: Returns the user token and uid
+ *         schema:
+ *            type: object
+ *            properties:
+ *              uid:
+ *                type: string
+ *                description: The uid of the user
+ *              token:
+ *                type: string
+ *                description: The token of the session
  *       403:
  *         description: Username already exists
  */
