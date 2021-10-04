@@ -60,7 +60,7 @@ app.get('/', (req, res) => {
 app.post('/auth/login', async (req, res) => {
   // Get the post parameter
   const { username, password } = req.body;
-  const resp = authLogin(username, password, database);
+  const resp = await authLogin(username, password, database);
   // Valid so return token
   if (resp !== null) {
     res.status(200).send(resp);
@@ -91,7 +91,7 @@ app.post('/auth/login', async (req, res) => {
 app.post('/auth/logout', async (req, res) => {
   // Get the post parameter
   const { token } = req.body;
-  const resp = authLogout(token, database);
+  const resp = await authLogout(token, database);
   if (resp) {
     res.status(200).send();
     return;
