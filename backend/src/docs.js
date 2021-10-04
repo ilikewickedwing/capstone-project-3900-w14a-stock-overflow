@@ -11,6 +11,6 @@ const swaggerOptions = {
       version: '1.0.0'
     }
   },
-  apis: ['./src/index.js']
+  apis: ['./src/*.js']
 }
 export const swaggerDocs = swaggerJSDoc(swaggerOptions); 

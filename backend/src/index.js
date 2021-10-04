@@ -24,7 +24,7 @@ app.use(cors());
 app.use(express.json())
 
 // Middleware used to generate automatic REST API documentation
-app.use('/', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
+app.use('/docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
 
 // Intialise database
 const database = new Database();
@@ -40,16 +40,27 @@ database.connect();
  *     parameters:
  *      - name: uid
  *        description: The uid of the user
+ *        example: 9ThIGIrYNeSNIVuMa2jGU
  *        in: body
  *        required: true
  *        type: string
  *     responses:
  *       200:
  *         description: Returns the user profile information
+ *         content:
+ *            application/json:
+ *              schema:
+ *                type: object
+ *                properties:
+ *                  data:
+ *                    type: object
+ *                    properties:
+ *                      uid:
+ *                      type: string
  *       403:
  *         description: Invalid uid
  */
-app.get('user/profile', async (req, res) => {
+app.get('/user/profile', async (req, res) => {
   const { uid } = req.query;
   const resp = await userProfile(uid, database);
   if (resp !== null) {
