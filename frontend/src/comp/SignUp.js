@@ -1,23 +1,24 @@
-import { Grid,Paper, Avatar, TextField, Button, Typography,Link } from '@material-ui/core'
+import { Grid,Paper, Avatar, TextField, Button } from '@material-ui/core'
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import { useContext, useState } from 'react';
 import { ApiContext } from '../api';
 import { useHistory } from 'react-router-dom';
 
-function Login() {
+function SignUp() {
     const api = useContext(ApiContext);
     const [ username, setUsername ] = useState('');
     const [ password, setPassword ] = useState('');
     let history = useHistory();
     const onLogIn = async () => {
-        const resp = await api.authLogin(username, password);
+        const resp = await api.authRegister(username, password);
         if (resp.status === 403) {
-            alert('Invalid username and password combination')
+            alert('username already exists')
+            history.push('/');
         } else if (resp.status === 200) {
             const jsondata = await resp.json();
-            alert('Log in successful')
+            alert('Signup successfull')
             console.log(jsondata);
-            history.push('/dashboard');
+            history.push('/');
         } else {
             alert(`Server returned unexpected status code of ${resp.status}`);
         }
@@ -30,7 +31,7 @@ function Login() {
             <Paper elevation={10} style={paperStyle}>
                 <Grid align='center'>
                      <Avatar style={avatarStyle}><LockOutlinedIcon/></Avatar>
-                    <h2>Log In</h2>
+                    <h2>Sign Up</h2>
                 </Grid>
                 <TextField 
                     value = {username} onChange={e => setUsername(e.target.value)}
@@ -41,16 +42,10 @@ function Login() {
              
                 <Button 
                     onClick = {onLogIn}
-                    type='submit' color='primary' variant="contained" style={btnstyle} fullWidth>Log in</Button>
-
-                <Typography >
-                    <Link onClick={() => {history.push('/signup')}}>
-                    Sign Up
-                    </Link>
-                </Typography>
+                    type='submit' color='primary' variant="contained" style={btnstyle} fullWidth>Sign Up</Button>
             </Paper>
         </Grid>
     )
 }
 
-export default Login
+export default SignUp
