@@ -166,6 +166,18 @@ export class Database {
     return token;
   }
   /**
+   * Removes a given token from the database and returns whether
+   * the token was removed or not
+   * @param {string} token 
+   * @returns {Promise<boolean>}
+   */
+  async deleteToken(token) {
+    const tokens = this.database.collection('tokens');
+    const query = { token: token }
+    const result = await tokens.deleteOne(query);
+    return result.deletedCount !== 0 ;
+  }
+  /**
    * Returns the uid of the token owner
    * else returns null if token is invalid
    * @param {string} token 

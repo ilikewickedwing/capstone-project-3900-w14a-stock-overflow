@@ -9,7 +9,7 @@ import { Database } from "./database";
  * @param {string} username 
  * @param {string} password 
  * @param {Database} database 
- * @returns {obj | null} - returns the token of the user and uid or null if invalid
+ * @returns {Promise<obj | null>} - returns the token of the user and uid or null if invalid
  */
 export const authLogin = async (username, password, database) => {
   return null;
@@ -19,10 +19,10 @@ export const authLogin = async (username, password, database) => {
  * Logouts out a user and returns whether its successful
  * @param {string} token 
  * @param {Database} database
- * @returns {boolean}
+ * @returns {Promise<boolean>}
  */
 export const authLogout = async (token, database) => {
-
+  return database.deleteToken(token);
 }
 
 /**
@@ -30,7 +30,7 @@ export const authLogout = async (token, database) => {
  * @param {string} username 
  * @param {string} password 
  * @param {Database} database
- * @returns {obj | null} - returns the token of the user and uid or null if invalid
+ * @returns {Promise<obj | null>} - returns the token of the user and uid or null if invalid
  */
 export const authRegister = async (username, password, database) => {
   const hasUsername = await database.hasUsername(username);
