@@ -15,8 +15,10 @@ function Login() {
             alert('Invalid username and password combination')
         } else if (resp.status === 200) {
             const jsondata = await resp.json();
-            alert('Log in successful')
+            alert('Log in successful');
             console.log(jsondata);
+            localStorage.setItem('token', jsondata.token);
+            localStorage.setItem('uid', jsondata.uid); 
             history.push('/dashboard');
         } else {
             alert(`Server returned unexpected status code of ${resp.status}`);
