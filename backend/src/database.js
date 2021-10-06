@@ -122,6 +122,19 @@ export class Database {
     return uid;
   }
   /**
+   * Given a uid, delete it from the database. Returns whether it was
+   * successful or not. Note: This only deletes the user but not its password, nor
+   * does it invalidate its tokens
+   * @param {string} uid
+   * @returns {Promise<boolean>}
+   */
+  async deleteUser(uid) {
+    const users = this.database.collection('users');
+    const query = { uid: uid }
+    const result = await users.deleteOne(query);
+    return result.deletedCount !== 0 ;
+  }
+  /**
    * Returns the password for a given uid, else return null
    * @param {string} uid 
    * @returns {Promise<string | null>}
@@ -152,6 +165,19 @@ export class Database {
     })
   }
   /**
+   * deletes a password from the database and returns whether it was successful.
+   * Note: Make sure the user is also deleted otherwise you will be left with a user
+   * with no password
+   * @param {string} ownerUid
+   * @returns {Promise<boolean>}
+   */
+  async deletePassword(ownerUid) {
+    const passwords = this.database.collection('passwords');
+    const query = { ownerUid: ownerUid }
+    const result = await passwords.deleteOne(query);
+    return result.deletedCount !== 0 ;
+  }
+  /**
    * Creates a new token and adds it to the database and returns it
    * @param {string} uid 
    * @returns {Promise<string>}
@@ -166,8 +192,8 @@ export class Database {
     return token;
   }
   /**
-   * Removes a given token from the database and returns whether
-   * the token was removed or not
+   * deletes a given token from the database and returns whether
+   * the token was deleted or not
    * @param {string} token 
    * @returns {Promise<boolean>}
    */
@@ -176,6 +202,18 @@ export class Database {
     const query = { token: token }
     const result = await tokens.deleteOne(query);
     return result.deletedCount !== 0 ;
+  }
+  /**
+   * Given a uid, delete all the tokens that belong to the user and
+   * return the number of tokens deleted
+   * @param {string} uid
+   * @returns {Promise<number>}
+   */
+  async deleteAllTokensOfUser(ownerUid) {
+    const tokens = this.database.collection('tokens');
+    const query = { ownerUid: ownerUid }
+    const result = await tokens.deleteMany(query);
+    return result.deletedCount;
   }
   /**
    * Returns the uid of the token owner
@@ -211,11 +249,11 @@ export class Database {
     this.client = new MongoClient(uri);
     // Connect to server
     try {
-      console.log('Connecting to MongoDB database...');
+      // console.log('Connecting to MongoDB database...');
       await this.client.connect();
-      console.log('Successfully connected to MongoDB database');
+      // console.log('Successfully connected to MongoDB database');
     } catch (err) {
-      console.error('Unable to connect to MongoDb database');
+      // console.error('Unable to connect to MongoDb database');
     }
     // Initialise database
     this.database = this.client.db(DATABASENAME);
@@ -225,7 +263,7 @@ export class Database {
       cursor.close();
       if (!hasNext) {
         this.database.createCollection(collection);
-        console.log(`Created collection ${collection}`);
+        // console.log(`Created collection ${collection}`);
       }
     }
   }

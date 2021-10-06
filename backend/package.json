@@ -1,12 +1,12 @@
 {
   "name": "stock-portfolio-backend",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "start.js",
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "start": "nodemon --experimental-specifier-resolution=node --exec babel-node src/index.js $PORT",
-    "test": "jest --watchAll --silent"
+    "start": "nodemon --experimental-specifier-resolution=node --exec babel-node src/start.js $PORT",
+    "test": "jest --watchAll --verbose"
   },
   "dependencies": {
     "cors": "^2.8.5",
@@ -23,7 +23,8 @@
     "@babel/node": "^7.15.4",
     "@babel/preset-env": "^7.15.6",
     "jest": "^27.2.3",
-    "nodemon": "^2.0.13"
+    "nodemon": "^2.0.13",
+    "supertest": "^6.1.6"
   },
   "engines": {
     "node": "14.x"
