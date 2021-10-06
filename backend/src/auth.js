@@ -60,3 +60,21 @@ export const authRegister = async (username, password, database) => {
     token: token
   }
 }
+
+/**
+ * Deletes a user from the database and returns whether it is successful
+ * @param {string} token 
+ * @param {Database} database 
+ * @returns {Promise<boolean>}
+ */
+export const authDelete = async (token, database) => {
+  const uid = await database.getTokenUid(token);
+  if (uid === null) {
+    return false;
+  }
+  // Delete user
+  await database.deleteUser(uid);
+  await database.deletePassword(uid);
+  await database.deleteAllTokensOfUser(uid);
+  return true;
+}

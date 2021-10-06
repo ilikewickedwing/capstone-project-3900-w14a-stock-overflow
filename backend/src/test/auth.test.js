@@ -1,5 +1,7 @@
-import { authLogin, authLogout, authRegister } from "../auth";
+import { authDelete, authLogin, authLogout, authRegister } from "../auth";
 import { Database } from "../database";
+import request from 'supertest';
+import { app } from '../index';
 
 describe('Auth register', () => {
   const d = new Database(true);
@@ -33,6 +35,15 @@ describe('Auth register', () => {
     await d.disconnect();
   })
 })
+
+// describe('Auth Endpoint Test', () => {
+//   it('200 on new user', async () => {
+//     const response = await request(app).post('/auth/register').send({
+//       username: 'Ashley',
+//       password: 'password'
+//     });
+//   })
+// })
 
 describe('Auth Logout', () => {
   const d = new Database(true);
@@ -85,6 +96,48 @@ describe('Auth login', () => {
   })
   it('Cannot log in to user that doesnt exist', async () => {
     const loginResp = await authLogin('Nonexistent user', 'wrongpassword', d);
+    expect(loginResp).toBe(null);
+  })
+  // Close the database after all tests
+  afterAll(async () => {
+    await d.disconnect();
+  })
+})
+
+describe('Auth Delete', () => {
+  const d = new Database(true);
+  // Run this before all the tests
+  beforeAll(async () => {
+    await d.connect();
+  })
+  it('Deleting the user will cause it to no longer have a valid uid', async () => {
+    const resp = await authRegister('Ashley', 'bobiscool', d);
+    const delResp = await authDelete(resp.token, d);
+    expect(delResp).toBe(true);
+    const userData = await d.getUser(resp.uid)
+    expect(userData).toBe(null);
+    // const password = await d.getPassword(resp.uid);
+    // expect(password).toBe(null);
+    // const tokenUid = await d.getTokenUid(resp.uid);
+    // expect(tokenUid).toBe(null);
+  })
+  it('Deleting user will remove the password from the database', async () => {
+    const resp = await authRegister('Ashleydsfads', 'bobiasdfdsascool', d);
+    const delResp = await authDelete(resp.token, d);
+    expect(delResp).toBe(true);
+    const password = await d.getPassword(resp.uid);
+    expect(password).toBe(null);
+  })
+  it('Deleting the user will invalidate all tokens', async () => {
+    const resp = await authRegister('Ashley2', 'bobiscool', d);
+    const delResp = await authDelete(resp.token, d);
+    const tokenUid = await d.getTokenUid(resp.uid);
+    expect(tokenUid).toBe(null);
+  })
+  it('Deleting the user will not allow for login again', async () => {
+    const resp = await authRegister('Ashley5', 'bobiscool', d);
+    const delResp = await authDelete(resp.token, d);
+    const loginResp = await authLogin('Ashley5', 'bobiscool', d);
     expect(loginResp).toBe(null);
   })
   // Close the database after all tests

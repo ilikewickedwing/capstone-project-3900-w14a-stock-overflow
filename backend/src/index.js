@@ -7,10 +7,7 @@ import { authLogin, authLogout, authRegister } from "./auth";
 import { userProfile } from "./user";
 
 // Make the server instance
-const app = express();
-
-// Set the command line argument as the port. If not given, it is set as 5050
-const PORT = process.argv.length > 2 ? Number(process.argv[2]) : 5050;
+export const app = express();
 
 // Attach a CORS middleware for the server
 // Cors is a security mechanism that browsers implement that prevent
@@ -208,7 +205,26 @@ app.post('/auth/register', async (req, res) => {
   res.status(403).send({ message: 'username already exists' });
 })
 
-// Start the server instance
-app.listen(PORT, () => {
-  console.log(`Server is listening at http://localhost:${PORT}`)
+// Delete endpoint for removing user from server
+/**
+ * @swagger
+ * /auth/delete:
+ *   delete:
+ *     tags: [Authentication]
+ *     description: Endpoint for deleting a user account
+ *     parameters:
+ *      - name: token
+ *        description: The token of the user
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Successfully deleted account
+ *       403:
+ *         description: Invalid token
+ */
+app.delete('/auth/delete', async (req, res) => {
+  // Get the post parameter
+  const { token } = req.body;
 })
