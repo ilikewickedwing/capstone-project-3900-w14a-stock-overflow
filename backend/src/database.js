@@ -34,6 +34,14 @@ const COLLECTIONS = [
     }
   */
   'tokens',
+  /**
+    Stores all the portfolios of a user in the following form:
+    {
+      ownerUid: string,
+      portfolios: [],
+    }
+  */
+  'portfolioList',
 ]
 
 /**
@@ -117,7 +125,7 @@ export class Database {
     const users = this.database.collection('users');
     await users.insertOne({
       uid: uid,
-      username: username
+      username: username,
     })
     return uid;
   }
@@ -233,6 +241,40 @@ export class Database {
       return tokenResp.ownerUid;
     }
     return null;
+  }
+  async insertPortfolio(uid, name) {
+    const portfolioList = this.database.collection('portfolioList');
+    const query = { ownerUid: uid };
+    const options = {
+      // Only include the 'portfolios' field in the returned document
+      projection: { portfolios: 1 }
+    }
+    const portfolioResp = await portfolioList.findOne(query, options);
+    // If user owns no portfolios create a portfolioList with 
+    // the new portfolio inside
+    if (portfolioResp == null) {
+      await portfolioList.insertOne({
+        uid: uid,
+        portfolios: [
+          {
+            name: name,
+          }
+        ],
+      });
+    }
+    // Else
+    else {
+      const portfolios = portfolioResp.portfolio;
+      // if portfolio with name doesn't exists, create, else do nothing
+      if (portfolios.filter(portfolio => portfolio.name == name) !== []) {
+        portfolios.push({name: name,});
+        await portfolioList.updateOne(query, {"portfolios" : portfolios});
+      }
+      else {
+        return false;
+      }
+    }
+    return true;
   }
   /**
    * Connect to the database
