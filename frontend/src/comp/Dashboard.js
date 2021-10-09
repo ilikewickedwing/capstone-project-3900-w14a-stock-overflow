@@ -1,43 +1,90 @@
 import * as React from 'react';
+// MUI5 for navabr
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
+import Button from '@mui/material/Button';
 import MenuIcon from '@mui/icons-material/Menu';
-
-import { styled } from '@mui/material/styles';
-import Paper from '@mui/material/Paper';
-import Grid from '@mui/material/Grid';
 
 import { useHistory } from 'react-router';
 import { ApiContext } from '../api';
-import { useState } from 'react';
+
+// MUI4 for the rest
+import { makeStyles } from '@material-ui/core/styles';
+
+import { Typography } from '@material-ui/core';
+import { Grid } from '@material-ui/core';
+
+
+import Card from '@material-ui/core/Card';
+import CardActions from '@material-ui/core/CardActions';
+import CardContent from '@material-ui/core/CardContent';
+
+// adjust container height to change how many cards are displayed on the right column. hacky solution
+const useStyles = makeStyles({
+  box: {
+    height: "100%",
+    width: "100%"
+  },
+  container: {
+    height: "800px"
+  },
+  innerContainer: {
+    height: "100%"
+  },
+  item: {
+    flex: "auto"
+  },
+  root: {
+    minWidth: 275,
+  },
+  bullet: {
+    display: 'inline-block',
+    margin: '0 2px',
+    transform: 'scale(0.8)',
+  },
+  title: {
+    fontSize: 14,
+  },
+  pos: {
+    marginBottom: 12,
+  },
+});
 
 export default function Dashboard() {
   const api = React.useContext(ApiContext);
   let history = useHistory(); 
+
+  const classes = useStyles();
+
+  // handle logout
   const onLogOut = async () => {
     const token = localStorage.getItem('token');
     const resp = await api.authLogout(token);
-    if (resp.status === 403) alert('Invalid token')
+    if (resp.status === 403) alert('Invalid token');
     if (resp.status === 200) {
         alert('Token has been invalidated');
         history.push('/');
     } else {
         alert(`Server returned unexpected status code of ${resp.status}`);
     }
-    history.push('/');
   }
 
-  // grild
-  const Item = styled(Paper)(({ theme }) => ({
-    ...theme.typography.body2,
-    padding: theme.spacing(1),
-    textAlign: 'center',
-    color: theme.palette.text.secondary,
-  }));
+  // handle delete user
+  const onDeleteUser = async () => {
+    const token = localStorage.getItem('token');
+    console.log(token);
+
+    const resp = await api.authDelete(token);
+    if (resp.status === 403) alert('Invalid token');
+    if (resp.status === 200) {
+        alert('Account has been delted');
+        history.push('/');
+    } else {
+        alert(`Server returned unexpected status code of ${resp.status}`);
+    }
+  }
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -53,25 +100,115 @@ export default function Dashboard() {
           <MenuIcon />
           </IconButton>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Welcome
+            Stock Overflow
           </Typography>
-          <Button color="inherit" >Delete User</Button>
+          
           <Button color="inherit" onClick={onLogOut}>Logout</Button>
+          <Button color="inherit" onClick={onDeleteUser}>Delete Account</Button>
+          <Button color="inherit">Edit Profile</Button>
         </Toolbar>
       </AppBar>
+      <br/>
 
-      <Grid container spacing={2}>
-        <Grid item xs={8}>
-          <Item>xs=8</Item>
+      <Grid spacing={4} className={classes.container} container>
+        <Grid xs={9} item>
+          
+          <Card className={classes.root}>
+            <CardContent>
+              <Typography className={classes.title} color="textSecondary" gutterBottom>
+                Word of the Day Word of the DayWord of the DayWord of the
+                Word of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of the ord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWoord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWoord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWoord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWoord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWoord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWoord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWoord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWoord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWoord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWoord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWoord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWoord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWo
+              </Typography>
+              
+              <Typography className={classes.pos} color="textSecondary">
+                adjective
+              </Typography>
+              <Typography variant="body2" component="p">
+                well meaning and kindly.
+                <br />
+                {'"a benevolent smile"'}
+              </Typography>
+            </CardContent>
+            <CardActions>
+              <Button size="small">Learn More</Button>
+            </CardActions>
+          </Card>
         </Grid>
-        <Grid item xs={4}>
-          <Item>xs=4</Item>
-        </Grid>
-        <Grid item xs={4}>
-          <Item>xs=4</Item>
-        </Grid>
-        <Grid item xs={8}>
-          <Item>xs=8</Item>
+
+        <Grid xs={3} item>
+          <Grid
+            spacing={4}
+            direction="column"
+            justifyContent="space-evenly"
+            className={classes.container}
+            container
+          >
+            <Grid className={classes.item} item>
+              <Card className={classes.root}>
+                <CardContent>
+                  <Typography className={classes.title} color="textSecondary" gutterBottom>
+                    Overview of earnings/losses
+                  </Typography>
+                  
+                  <Typography className={classes.pos} color="textSecondary">
+                    adjective
+                  </Typography>
+                  <Typography variant="body2" component="p">
+                    well meaning and kindly.
+                    <br />
+                    {'"a benevolent smile"'}
+                  </Typography>
+                </CardContent>
+                <CardActions>
+                  <Button size="small">Learn More</Button>
+                </CardActions>
+              </Card>
+            </Grid>
+
+            <Grid className={classes.item} item>
+              <Card className={classes.root}>
+                <CardContent>
+                  <Typography className={classes.title} color="textSecondary" gutterBottom>
+                    Weekly leaderboard
+                  </Typography>
+                  
+                  <Typography className={classes.pos} color="textSecondary">
+                    adjective
+                  </Typography>
+                  <Typography variant="body2" component="p">
+                    well meaning and kindly.
+                    <br />
+                    {'"a benevolent smile"'}
+                  </Typography>
+                </CardContent>
+                <CardActions>
+                  <Button size="small">Learn More</Button>
+                </CardActions>
+              </Card>
+            </Grid>
+
+            <Grid className={classes.item} item>
+              <Card className={classes.root}>
+                <CardContent>
+                  <Typography className={classes.title} color="textSecondary" gutterBottom>
+                    All user's recent activity
+                  </Typography>
+                  
+                  <Typography className={classes.pos} color="textSecondary">
+                    adjective
+                  </Typography>
+                  <Typography variant="body2" component="p">
+                    well meaning and kindly.
+                    <br />
+                    {'"a benevolent smile"'}
+                  </Typography>
+                </CardContent>
+                <CardActions>
+                  <Button size="small">Learn More</Button>
+                </CardActions>
+              </Card>
+            </Grid>
+          </Grid>
         </Grid>
       </Grid>
     </Box>
