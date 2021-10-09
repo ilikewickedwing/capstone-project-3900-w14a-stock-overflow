@@ -34,6 +34,14 @@ const COLLECTIONS = [
     }
   */
   'tokens',
+  /**
+    Stores all the portfolios of a user in the following form:
+    {
+      ownerUid: string,
+      portfolio: string,
+    }
+   */
+  'portfolios',
 ]
 
 /**
@@ -275,5 +283,21 @@ export class Database {
     if (this.testmode) {
       this.mongoTestServer.stop();
     }
+  }
+
+  /**
+   * Returns the portfolios owned by the user
+   * Currently can only find one at a time - fix!
+   * @param {string} uid
+   * @returns {Promise<array>}
+   */
+  async getPortfolios(uid) {
+    const portfolios = this.database.collection('portfolios');
+    const query = { uid: uid };
+    const portfolioResp = await portfolios.findOne(query);
+    if (portfolioResp !== null) {
+      return portfolioResp.portfolio;
+    }
+    return null;
   }
 }

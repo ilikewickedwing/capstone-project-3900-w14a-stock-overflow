@@ -5,6 +5,7 @@ import swaggerUI from 'swagger-ui-express';
 import { swaggerDocs } from "./docs";
 import { authLogin, authLogout, authRegister } from "./auth";
 import { userProfile } from "./user";
+import { userPortfolios } from "./portfolio";
 
 // Make the server instance
 export const app = express();
@@ -227,4 +228,16 @@ app.post('/auth/register', async (req, res) => {
 app.delete('/auth/delete', async (req, res) => {
   // Get the post parameter
   const { token } = req.body;
+})
+
+
+// Get endpoint for getting user portfolios
+app.get('/user/portfolios', async (req, res) => {
+  const { uid } = req.query;
+  const resp = await userPortfolios(uid, database);
+  if (resp !== null) {
+    res.status(200).send(resp);
+    return;
+  }
+  res.status(403).send({ message: 'Invalid uid' });
 })
