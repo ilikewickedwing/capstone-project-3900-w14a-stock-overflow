@@ -44,3 +44,24 @@ describe('Porfolio create', () => {
   })
 })
 
+describe('Porfolio delete', () => {
+	const d = new Database(true);
+  beforeAll(async () => {
+    await d.connect();
+  })
+
+  it('Delete portfolio', async () => {
+    const rego = await authRegister('Ashley', 'strongpassword', d);
+    const token = rego.token;
+    const resp = await createPf(token, 'myPf', d);
+    const delResp = await deletePf(resp, d);
+    expect(delResp).toBe(true);
+    const pid = await openPf(resp, d);
+    expect(pid).toBe(null);
+  })
+
+  afterAll(async () => {
+    await d.disconnect();
+  })
+})
+
