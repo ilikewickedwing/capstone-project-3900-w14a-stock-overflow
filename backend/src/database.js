@@ -38,7 +38,21 @@ const COLLECTIONS = [
     Stores all the portfolios of a user in the following form:
     {
       ownerUid: string,
-      portfolio: string,
+      portfolios: [string],
+    }
+   */
+  'userPortos',
+  /**
+    Stores all the portfolios and their stocks in the following form:
+    {
+      portfolioId: string,
+      stocks: [
+        [
+          stock: string,
+          buy-in date: string,
+          buy-in price: int,
+        ]
+      ]
     }
    */
   'portfolios',
@@ -287,17 +301,33 @@ export class Database {
 
   /**
    * Returns the portfolios owned by the user
-   * Currently can only find one at a time - fix!
+   * else returns null if the id is invalid
    * @param {string} uid
-   * @returns {Promise<array>}
+   * @returns {Promise<array | null>}
    */
   async getPortfolios(uid) {
-    const portfolios = this.database.collection('portfolios');
+    const portfolios = this.database.collection('userPortos');
     const query = { uid: uid };
     const portfolioResp = await portfolios.findOne(query);
     if (portfolioResp !== null) {
       return portfolioResp.portfolio;
     }
     return null;
+  }
+
+  /**
+   * Returns the portfolio requested
+   * else returns null if the id is invalid
+   * @param {string} pid 
+   * @returns {Promise<array | null>}
+   */
+  async openPortfolio(pid) {
+    const portfolios = this.database.collection('portfolios');
+    const query = { pid: pid };
+    const portfolioResp = await portfolios.findOne(query);
+    if (portfolioResp !== null) {
+      return portfolioResp.portfolio;
+    }
+    return null
   }
 }

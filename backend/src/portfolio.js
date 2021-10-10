@@ -14,3 +14,8 @@ export const userPortfolios = async (uid, database) => {
 	const userPortfolio = await database.getPortfolios(uid);
   return userPortfolio;
 }
+
+export const openPortfolio = async (pid, database) => {
+  const portfolio = await database.openPortfolio(pid);
+  return portfolio;
+}

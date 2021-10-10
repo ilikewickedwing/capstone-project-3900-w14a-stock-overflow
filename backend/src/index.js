@@ -5,7 +5,7 @@ import swaggerUI from 'swagger-ui-express';
 import { swaggerDocs } from "./docs";
 import { authLogin, authLogout, authRegister } from "./auth";
 import { userProfile } from "./user";
-import { userPortfolios } from "./portfolio";
+import { openPortfolio, userPortfolios } from "./portfolio";
 
 // Make the server instance
 export const app = express();
@@ -240,4 +240,15 @@ app.get('/user/portfolios', async (req, res) => {
     return;
   }
   res.status(403).send({ message: 'Invalid uid' });
+})
+
+// Get endpoint for opening single portfolio
+app.get('/user/portfolios/open', async (req, res) => {
+  const { pid } = req.query;
+  const resp = await openPortfolio(pid, database);
+  if (resp !== null) {
+    res.status(200).send(resp);
+    return;
+  }
+  res.status(403).send({ message: "Invalid pid" });
 })
