@@ -43,6 +43,14 @@ database.connect();
  *       example:
  *         uid: 9ThIGIrYNeSNIVuMa2jGU
  *         username: XStockMaster64X
+  *     UserData:
+ *       type: object
+ *       properties:
+ *         username:
+ *           type: string
+ *           description: The username of the user
+ *       example:
+ *         username: XStockMaster64X
  */
 app.get('/', (req, res) => {
   res.status(200).send('This is the root page. Go to /docs for documentation.')
@@ -78,6 +86,42 @@ app.get('/user/profile', async (req, res) => {
     return;
   }
   res.status(403).send({ message: 'Invalid uid' });
+})
+
+// Get endpoint for editing user data
+/**
+ * @swagger
+ * /user/profile:
+ *   post:
+ *     tags: [User]
+ *     description: Endpoint for editing a users profile
+ *     parameters:
+ *      - name: uid
+ *        description: The uid of the user
+ *        example: 9ThIGIrYNeSNIVuMa2jGU
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: token
+ *        description: The token of the user
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: userData
+ *        description: The new data of the user. Any attributes not given will not be changed
+ *        in: body
+ *        schema:
+ *             $ref: '#/components/schemas/UserData'
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: User profile has been changed
+ *       403:
+ *         description: Invalid data given
+ */
+app.post('/user/profile', async (req, res) => {
+  // TODO
 })
 
 // Post endpoint for logging into the server
@@ -195,6 +239,11 @@ app.post('/auth/logout', async (req, res) => {
 app.post('/auth/register', async (req, res) => {
   // Get the post parameter
   const { username, password } = req.body;
+  // Make sure username and password arent empty
+  if (username.length === 0 || password.length === 0) {
+    res.status(403).send({ message: 'Cannot have empty username or password' });
+    return;
+  }
   const resp = await authRegister(username, password, database);
   // Valid so return token
   if (resp !== null) {
