@@ -3,6 +3,9 @@ import cors from 'cors';
 import { Database } from "./database";
 import swaggerUI from 'swagger-ui-express';
 import { swaggerDocs } from "./docs";
+import { authLogin, authLogout, authRegister } from "./auth";
+import { userProfile } from "./user";
+import { createPf, deletePf, openPf, userPf } from "./portfolio";
 import { authDelete, authLogin, authLogout, authRegister } from "./auth";
 import { getUserProfile, postUserProfile } from "./user";
 
@@ -42,7 +45,23 @@ export const database = new Database();
  *       example:
  *         uid: 9ThIGIrYNeSNIVuMa2jGU
  *         username: XStockMaster64X
-  *     UserData:
+ *     Stock:
+ *       type: object
+ *       properties:
+ *         name:
+ *           type: string
+ *           description: The name of the stock
+ *         buydate:
+ *           type: string
+ *           description: The buy in date of the stock
+ *         buyprice:
+ *           type: int
+ *           description: The buy in price of the stock
+ *       example:
+ *         name: AAPL
+ *         buydate: 10-10-2021
+ *         buyprice: 500
+ *     UserData:
  *       type: object
  *       properties:
  *         username:
@@ -294,4 +313,153 @@ app.delete('/auth/delete', async (req, res) => {
     return;
   }
   res.status(403).send({ mesage: 'Uid does not exist' });
+})
+
+// Post endpoint for creating a single portfolio
+/**
+ * @swagger
+ * /user/pf/create:
+ *   post:
+ *     tags: [Portfolio]
+ *     description: Endpoint for creating a single portfolio
+ *     parameters:
+ *      - name: token
+ *        description: The token of the user
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: name
+ *        description: The name of the portfolio
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Returns the portfolio id
+ *         schema:
+ *            type: object
+ *            properties:
+ *              pid:
+ *                type: string
+ *                description: The pid of the portfolio
+ *       400:
+ *         description: Invalid name or portfolio name already in use
+ *       403: 
+ *         description: Invalid token
+ */
+app.post('/user/portfolios/create', async (req, res) => {
+  const { token, name } = req.body;
+  const resp = await createPf(token, name, database);
+  if (resp == null) {
+    res.status(400).send({ message: "Invalid name or portfolio name already in use" });
+  }
+  else if (resp == false) {
+    res.status(403).send({ message: "Invalid token" });
+  }
+  res.status(200).send(resp);
+  return;
+})
+
+// Get endpoint for getting user portfolios
+/**
+ * @swagger
+ * /user/porfolios:
+ *   post:
+ *     tags: [Portfolio]
+ *     description: Endpoint for getting user portfolios
+ *     parameters:
+ *      - name: uid
+ *        description: The id of the user
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Returns the portfolios array
+ *         schema:
+ *            type: array
+ *            properties:
+ *              portfolio:
+ *                type: string
+ *                description: The pid of the portfolio
+ *       403: 
+ *         description: Invalid uid
+ */
+app.get('/user/portfolios', async (req, res) => {
+  const { uid } = req.query;
+  const resp = await userPfs(uid, database);
+  if (resp !== null) {
+    res.status(200).send(resp);
+    return;
+  }
+  res.status(403).send({ message: 'Invalid uid' });
+})
+
+// Get endpoint for opening single portfolio
+/**
+ * @swagger
+ * /user/porfolios/open:
+ *   post:
+ *     tags: [Portfolio]
+ *     description: Endpoint for opening a single portfolio
+ *     parameters:
+ *      - name: pid
+ *        description: The id of the portfolio
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Returns the portfolio
+ *         schema:
+ *            type: object
+ *            properties:
+ *              portfolioId:
+ *                type: string
+ *                description: The pid of the portfolio
+ *              name:
+ *                type: string
+ *                description: The name of the portfolio
+ *              stock:
+ *                $ref: '#/components/schemas/Stock'
+ *       403: 
+ *         description: Invalid pid
+ */
+app.get('/user/portfolios/open', async (req, res) => {
+  const { pid } = req.query;
+  const resp = await openPf(pid, database);
+  if (resp !== null) {
+    res.status(200).send(resp);
+    return;
+  }
+  res.status(403).send({ message: "Invalid pid" });
+})
+
+// Delete endpoint for deleting single portfolio
+/**
+ * @swagger
+ * /user/portfolios/delete:
+ *   delete:
+ *     tags: [Portfolio]
+ *     description: endpoint for deleting a single portfolio
+ *     parameters:
+ *      - name: pid
+ *        description: The id of the portfolio
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Successfully deleted portfolio
+ *       403:
+ *         description: Invalid pid
+ */
+app.delete('/user/portfolios/delete', async (req, res) => {
+  const { pid } = req.query;
+  const resp = await deletePf(pid, database);
+  if (resp !== null) {
+    res.status(200).send(resp);
+    return;
+  }
+  res.status(403).send({ message: "Invalid pid" });
 })
