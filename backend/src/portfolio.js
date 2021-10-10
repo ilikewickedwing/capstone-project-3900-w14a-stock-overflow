@@ -19,7 +19,7 @@ export const createPf = async (token, name, database) => {
 
   const pidResp = await database.insertPf(uid, name);
   if (pidResp !== null) {
-    return { pidResp: pid };
+    return pidResp;
   }
   return null;
 }
