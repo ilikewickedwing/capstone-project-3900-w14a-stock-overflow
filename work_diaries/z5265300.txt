@@ -22,3 +22,6 @@ For my part, I completed the storyboards and user flow part of the proposal.
 However, we faced difficulties brainstorming ideas to make the novel features more advanced. 
 
 Week 4
+Implemented a navigation bar to be used on all pages of the website.
+To be implemented: tabbing / non-tabbing of the different portfolios.
+Challenge: finding a way to implement the graph of our page.
