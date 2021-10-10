@@ -68,4 +68,16 @@ export default class API {
       })
     });
   }
+
+  authDelete(token) {
+    return fetch(`${ENDPOINT}/auth/delete`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type' : 'application/json'
+      },
+      body: JSON.stringify({
+        token: token,
+      })
+    });
+  }
 }

@@ -38,10 +38,25 @@ const COLLECTIONS = [
     Stores all the portfolios of a user in the following form:
     {
       ownerUid: string,
-      portfolios: [],
+      portfolios: [string],
     }
-  */
-  'portfolioList',
+   */
+  'userPortos',
+  /**
+    Stores all the portfolios and their stocks in the following form:
+    {
+      portfolioId: string,
+      name: string,
+      stocks: [
+        [
+          stock: string,
+          buy-in date: string,
+          buy-in price: int,
+        ]
+      ],
+    }
+   */
+  'portfolios',
 ]
 
 /**
@@ -127,6 +142,21 @@ export class Database {
       uid: uid,
       username: username,
     })
+
+    // Create a new userPorto and add a watchlist for the new user
+    const userPortos = this.database.collection('userPortos');
+    const watchlistId = nanoid();
+    await userPortos.insertOne({
+      ownerUid: uid,
+      portfolios: [watchlistId],
+    })
+    const portfolios = this.database.collection('portfolios');
+    await portfolios.insertOne({
+      portfolioId: portfolioId,
+      name: "Watchlist",
+      stocks: [],
+    })
+
     return uid;
   }
   /**
@@ -243,38 +273,35 @@ export class Database {
     return null;
   }
   async insertPortfolio(uid, name) {
-    const portfolioList = this.database.collection('portfolioList');
-    const query = { ownerUid: uid };
-    const options = {
-      // Only include the 'portfolios' field in the returned document
-      projection: { portfolios: 1 }
-    }
-    const portfolioResp = await portfolioList.findOne(query, options);
-    // If user owns no portfolios create a portfolioList with 
-    // the new portfolio inside
+    if (name == "") {
+      return null;
+  }
+    // First query for the user's userPorto
+    const userPortos = this.database.collection('userPortos');
+    const query1 = { ownerUid: uid };
+    const userPortoResp = await userPortos.findOne(query1);
+    const userPortfolios = userPortoResp.portfolios;
+
+    // Next check if the user already owns a portfolio with given name
+    const portfolios = this.database.collection('portfolios');
+    const query2 = {$and : [{portfolioId: {$in: userPortfolios}}, {name: {$ne:name}}] };
+    const portfolioResp = await portfolios.find(query2);
+
+    // If user owns no portfolios with same name then create 
+    // a new portfolio
     if (portfolioResp == null) {
-      await portfolioList.insertOne({
-        uid: uid,
-        portfolios: [
-          {
-            name: name,
-          }
-        ],
+      const portfolioId = nanoid();
+      await portfolios.insertOne({
+        portfolioId: portfolioId,
+        name: name,
+        stocks: [],
       });
+      userPortfolios.push(portfolioId);
+      await portfolios.updateOne(query1, {portfolios: userPortfolios});
+      return portfolioId;
     }
-    // Else
-    else {
-      const portfolios = portfolioResp.portfolio;
-      // if portfolio with name doesn't exists, create, else do nothing
-      if (portfolios.filter(portfolio => portfolio.name == name) !== []) {
-        portfolios.push({name: name,});
-        await portfolioList.updateOne(query, {"portfolios" : portfolios});
-      }
-      else {
-        return false;
-      }
-    }
-    return true;
+
+    return null;
   }
   /**
    * Connect to the database
@@ -317,5 +344,37 @@ export class Database {
     if (this.testmode) {
       this.mongoTestServer.stop();
     }
+  }
+
+  /**
+   * Returns the portfolios owned by the user
+   * else returns null if the id is invalid
+   * @param {string} uid
+   * @returns {Promise<array | null>}
+   */
+  async getPortfolios(uid) {
+    const portfolios = this.database.collection('userPortos');
+    const query = { uid: uid };
+    const portfolioResp = await portfolios.findOne(query);
+    if (portfolioResp !== null) {
+      return portfolioResp.portfolio;
+    }
+    return null;
+  }
+
+  /**
+   * Returns the portfolio requested
+   * else returns null if the id is invalid
+   * @param {string} pid 
+   * @returns {Promise<array | null>}
+   */
+  async openPortfolio(pid) {
+    const portfolios = this.database.collection('portfolios');
+    const query = { pid: pid };
+    const portfolioResp = await portfolios.findOne(query);
+    if (portfolioResp !== null) {
+      return portfolioResp.portfolio;
+    }
+    return null
   }
 }

@@ -5,6 +5,7 @@ import swaggerUI from 'swagger-ui-express';
 import { swaggerDocs } from "./docs";
 import { authLogin, authLogout, authRegister } from "./auth";
 import { userProfile } from "./user";
+import { createPortfolio, openPortfolio, userPortfolios } from "./portfolio";
 
 // Make the server instance
 export const app = express();
@@ -227,4 +228,40 @@ app.post('/auth/register', async (req, res) => {
 app.delete('/auth/delete', async (req, res) => {
   // Get the post parameter
   const { token } = req.body;
+})
+
+// Post endpoint for creating a single portfolio
+app.post('/user/portfolios/create', async (req, res) => {
+  const { token, name } = req.body;
+  const resp = await createPortfolio(token, name, database);
+  if (resp == null) {
+    res.status(400).send({ message: "Invalid name or portfolio name already in use" });
+  }
+  else if (resp == false) {
+    res.status(403).send({ message: "Invalid token" });
+  }
+  res.status(200).send(resp);
+  return;
+})
+
+// Get endpoint for getting user portfolios
+app.get('/user/portfolios', async (req, res) => {
+  const { uid } = req.query;
+  const resp = await userPortfolios(uid, database);
+  if (resp !== null) {
+    res.status(200).send(resp);
+    return;
+  }
+  res.status(403).send({ message: 'Invalid uid' });
+})
+
+// Get endpoint for opening single portfolio
+app.get('/user/portfolios/open', async (req, res) => {
+  const { pid } = req.query;
+  const resp = await openPortfolio(pid, database);
+  if (resp !== null) {
+    res.status(200).send(resp);
+    return;
+  }
+  res.status(403).send({ message: "Invalid pid" });
 })
