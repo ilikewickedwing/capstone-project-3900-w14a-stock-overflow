@@ -12,18 +12,27 @@ import { Database } from "./database";
  * @returns 
  */
 export const createPortfolio = async (token, name, database) => {
-
-    const uid = await database.getTokenUid(token);
-    if (uid === null) {
-      return false;
-    }
-
-    const portfolioId = await database.insertPortfolio(uid, name);
-    if (portfolioId !== null) {
-      return {portfolioId: portfolioId};
-    }
-    return null;
+  const uid = await database.getTokenUid(token);
+  if (uid === null) {
+    return false;
   }
+
+  const portfolioId = await database.insertPortfolio(uid, name);
+  if (portfolioId !== null) {
+    return {portfolioId: portfolioId};
+  }
+  return null;
+}
+
+export const deletePortfolio = async (pid, database) => {
+  const portfolio = await database.openPortfolio(pid);
+  if (portfolio == null) {
+    return false;
+  }
+  // Delete portfolio
+  await database.deletePortfolio(pid);
+  return true;
+}
 
 /**
  * Gets the portfolios for the user

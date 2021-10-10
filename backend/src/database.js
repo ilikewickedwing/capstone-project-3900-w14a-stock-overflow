@@ -170,7 +170,7 @@ export class Database {
     const users = this.database.collection('users');
     const query = { uid: uid }
     const result = await users.deleteOne(query);
-    return result.deletedCount !== 0 ;
+    return result.deletedCount !== 0;
   }
   /**
    * Returns the password for a given uid, else return null
@@ -213,7 +213,7 @@ export class Database {
     const passwords = this.database.collection('passwords');
     const query = { ownerUid: ownerUid }
     const result = await passwords.deleteOne(query);
-    return result.deletedCount !== 0 ;
+    return result.deletedCount !== 0;
   }
   /**
    * Creates a new token and adds it to the database and returns it
@@ -272,6 +272,13 @@ export class Database {
     }
     return null;
   }
+
+  /**
+   * Returns the portfolio id
+   * @param {string} uid 
+   * @param {string} name 
+   * @returns 
+   */
   async insertPortfolio(uid, name) {
     if (name == "") {
       return null;
@@ -303,10 +310,57 @@ export class Database {
 
     return null;
   }
+
+  /**
+   * Returns the portfolios owned by the user
+   * else returns null if the id is invalid
+   * @param {string} uid
+   * @returns {Promise<array | null>}
+   */
+  async getPortfolios(uid) {
+    const portfolios = this.database.collection('userPortos');
+    const query = { uid: uid };
+    const portfolioResp = await portfolios.findOne(query);
+    if (portfolioResp !== null) {
+      return portfolioResp.portfolio;
+    }
+    return null;
+  }
+
+  /**
+   * Returns the portfolio requested
+   * else returns null if the id is invalid
+   * @param {string} pid 
+   * @returns {Promise<array | null>}
+   */
+  async openPortfolio(pid) {
+    const portfolios = this.database.collection('portfolios');
+    const query = { pid: pid };
+    const portfolioResp = await portfolios.findOne(query);
+    if (portfolioResp !== null) {
+      return portfolioResp.portfolio;
+    }
+    return null
+  }
+
+
+  /**
+   * Deletes a given portfolio from the database and
+   * returns whether the portfolio was deleted or not
+   * @param {string} pid 
+   * @returns {Promise<boolean>}
+   */
+  async deletePortfolio(pid) {
+    const portfolios = this.database.collection('portfolios');
+    const query = { pid: pid };
+    const result = await portfolios.deleteOne(query);
+    return result.deletedCount !== 0 ;
+  }
+
   /**
    * Connect to the database
    */
-  async connect() {
+   async connect() {
     let uri = URI;
     if (this.testmode) {
       // Start test server in memory
@@ -344,37 +398,5 @@ export class Database {
     if (this.testmode) {
       this.mongoTestServer.stop();
     }
-  }
-
-  /**
-   * Returns the portfolios owned by the user
-   * else returns null if the id is invalid
-   * @param {string} uid
-   * @returns {Promise<array | null>}
-   */
-  async getPortfolios(uid) {
-    const portfolios = this.database.collection('userPortos');
-    const query = { uid: uid };
-    const portfolioResp = await portfolios.findOne(query);
-    if (portfolioResp !== null) {
-      return portfolioResp.portfolio;
-    }
-    return null;
-  }
-
-  /**
-   * Returns the portfolio requested
-   * else returns null if the id is invalid
-   * @param {string} pid 
-   * @returns {Promise<array | null>}
-   */
-  async openPortfolio(pid) {
-    const portfolios = this.database.collection('portfolios');
-    const query = { pid: pid };
-    const portfolioResp = await portfolios.findOne(query);
-    if (portfolioResp !== null) {
-      return portfolioResp.portfolio;
-    }
-    return null
   }
 }

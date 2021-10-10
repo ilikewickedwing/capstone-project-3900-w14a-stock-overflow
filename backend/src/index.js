@@ -365,3 +365,32 @@ app.get('/user/portfolios/open', async (req, res) => {
   }
   res.status(403).send({ message: "Invalid pid" });
 })
+
+// Delete endpoint for deleting single portfolio
+/**
+ * @swagger
+ * /user/portfolios/delete:
+ *   delete:
+ *     tags: [Portfolio]
+ *     description: endpoint for deleting a single portfolio
+ *     parameters:
+ *      - name: pid
+ *        description: The id of the portfolio
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Successfully deleted portfolio
+ *       403:
+ *         description: Invalid pid
+ */
+app.delete('/user/portfolios/delete', async (req, res) => {
+  const { pid } = req.query;
+  const resp = await deletePortfolio(pid, database);
+  if (resp !== null) {
+    res.status(200).send(resp);
+    return;
+  }
+  res.status(403).send({ message: "Invalid pid" });
+})
