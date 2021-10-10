@@ -152,7 +152,7 @@ export class Database {
     })
     const portfolios = this.database.collection('portfolios');
     await portfolios.insertOne({
-      portfolioId: portfolioId,
+      portfolioId: watchlistId,
       name: "Watchlist",
       stocks: [],
     })
