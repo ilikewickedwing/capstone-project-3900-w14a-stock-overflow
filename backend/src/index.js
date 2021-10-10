@@ -44,6 +44,22 @@ database.connect();
  *       example:
  *         uid: 9ThIGIrYNeSNIVuMa2jGU
  *         username: XStockMaster64X
+ *     Stock:
+ *       type: object
+ *       properties:
+ *         name:
+ *           type: string
+ *           description: The name of the stock
+ *         buydate:
+ *           type: string
+ *           description: The buy in date of the stock
+ *         buyprice:
+ *           type: int
+ *           description: The buy in price of the stock
+ *       example:
+ *         name: AAPL
+ *         buydate: 10-10-2021
+ *         buyprice: 500
  */
 app.get('/', (req, res) => {
   res.status(200).send('This is the root page. Go to /docs for documentation.')
@@ -231,6 +247,37 @@ app.delete('/auth/delete', async (req, res) => {
 })
 
 // Post endpoint for creating a single portfolio
+/**
+ * @swagger
+ * /user/porfolios/create:
+ *   post:
+ *     tags: [Portfolio]
+ *     description: Endpoint for creating a single portfolio
+ *     parameters:
+ *      - name: token
+ *        description: The token of the user
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: name
+ *        description: The name of the portfolio
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Returns the portfolio id
+ *         schema:
+ *            type: object
+ *            properties:
+ *              pid:
+ *                type: string
+ *                description: The pid of the portfolio
+ *       400:
+ *         description: Invalid name or portfolio name already in use
+ *       403: 
+ *         description: Invalid token
+ */
 app.post('/user/portfolios/create', async (req, res) => {
   const { token, name } = req.body;
   const resp = await createPortfolio(token, name, database);
@@ -245,6 +292,30 @@ app.post('/user/portfolios/create', async (req, res) => {
 })
 
 // Get endpoint for getting user portfolios
+/**
+ * @swagger
+ * /user/porfolios:
+ *   post:
+ *     tags: [Portfolio]
+ *     description: Endpoint for getting user portfolios
+ *     parameters:
+ *      - name: uid
+ *        description: The id of the user
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Returns the portfolios array
+ *         schema:
+ *            type: array
+ *            properties:
+ *              portfolio:
+ *                type: string
+ *                description: The pid of the portfolio
+ *       403: 
+ *         description: Invalid uid
+ */
 app.get('/user/portfolios', async (req, res) => {
   const { uid } = req.query;
   const resp = await userPortfolios(uid, database);
@@ -256,6 +327,35 @@ app.get('/user/portfolios', async (req, res) => {
 })
 
 // Get endpoint for opening single portfolio
+/**
+ * @swagger
+ * /user/porfolios/open:
+ *   post:
+ *     tags: [Portfolio]
+ *     description: Endpoint for opening a single portfolio
+ *     parameters:
+ *      - name: pid
+ *        description: The id of the portfolio
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Returns the portfolio
+ *         schema:
+ *            type: object
+ *            properties:
+ *              portfolioId:
+ *                type: string
+ *                description: The pid of the portfolio
+ *              name:
+ *                type: string
+ *                description: The name of the portfolio
+ *              stock:
+ *                $ref: '#/components/schemas/Stock'
+ *       403: 
+ *         description: Invalid pid
+ */
 app.get('/user/portfolios/open', async (req, res) => {
   const { pid } = req.query;
   const resp = await openPortfolio(pid, database);

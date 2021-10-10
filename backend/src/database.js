@@ -50,8 +50,8 @@ const COLLECTIONS = [
       stocks: [
         [
           stock: string,
-          buy-in date: string,
-          buy-in price: int,
+          buydate: string,
+          buyprice: int,
         ]
       ],
     }
