@@ -160,6 +160,21 @@ export class Database {
     return uid;
   }
   /**
+   * Updates a user object in the database and returns whether it was
+   * successful. The userdata contains all the
+   * properties to be changed in the object. Properties that are missing will
+   * not be changed
+   * @param {string} uid 
+   * @param {User} userData
+   * @returns {Promise<boolean}
+   */
+  async updateUser(uid, userData) {
+    const users = this.database.collection('users');
+    const query = { uid: uid };
+    const result = await users.updateOne(query, { $set: userData});
+    return result.modifiedCount !== 0;
+  }
+  /**
    * Given a uid, delete it from the database. Returns whether it was
    * successful or not. Note: This only deletes the user but not its password, nor
    * does it invalidate its tokens

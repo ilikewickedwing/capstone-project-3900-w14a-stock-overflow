@@ -25,8 +25,7 @@ app.use(express.json())
 app.use('/docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
 
 // Intialise database
-const database = new Database();
-database.connect();
+export const database = new Database();
 
 /**
  * @swagger
@@ -87,17 +86,23 @@ app.get('/', (req, res) => {
  *        in: body
  *        required: true
  *        type: string
+ *      - name: token
+ *        description: The token of the user
+ *        example: 9ThIGIrYNeSNIVuMa2jGU
+ *        in: body
+ *        required: true
+ *        type: string
  *     responses:
  *       200:
  *         description: Returns the user profile information
  *         schema:
  *             $ref: '#/components/schemas/User'
  *       403:
- *         description: Invalid uid
+ *         description: Invalid uid or invalid user permissions
  */
 app.get('/user/profile', async (req, res) => {
-  const { uid } = req.query;
-  const resp = await getUserProfile(uid, database);
+  const { uid, token } = req.query;
+  const resp = await getUserProfile(uid, token, database);
   if (resp !== null) {
     res.status(200).send(resp);
     return;
@@ -139,7 +144,13 @@ app.get('/user/profile', async (req, res) => {
  */
 app.post('/user/profile', async (req, res) => {
   // TODO
-  postUserProfile()
+  const { uid, token, userData } = req.body;
+  const resp = postUserProfile(uid, token, userData, database);
+  if (resp) {
+    res.status(200).send();
+    return;
+  }
+  res.status(403).send({ message: 'Invalid token or uid' });
 })
 
 // Post endpoint for logging into the server
