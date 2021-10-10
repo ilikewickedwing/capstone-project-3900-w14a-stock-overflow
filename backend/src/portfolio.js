@@ -2,7 +2,28 @@
   This file manages all portfolio specific functions
 */
 
-import { Database } from './database'
+import { Database } from "./database";
+
+/**
+ * 
+ * @param {string} token 
+ * @param {string} name 
+ * @param {Database} database 
+ * @returns 
+ */
+export const createPortfolio = async (token, name, database) => {
+
+    const uid = await database.getTokenUid(token);
+    if (uid === null) {
+      return false;
+    }
+
+    const portfolioId = await database.insertPortfolio(uid, name);
+    if (portfolioId !== null) {
+      return {portfolioId: portfolioId};
+    }
+    return null;
+  }
 
 /**
  * Gets the portfolios for the user

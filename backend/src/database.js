@@ -46,13 +46,14 @@ const COLLECTIONS = [
     Stores all the portfolios and their stocks in the following form:
     {
       portfolioId: string,
+      name: string,
       stocks: [
         [
           stock: string,
           buy-in date: string,
           buy-in price: int,
         ]
-      ]
+      ],
     }
    */
   'portfolios',
@@ -139,8 +140,23 @@ export class Database {
     const users = this.database.collection('users');
     await users.insertOne({
       uid: uid,
-      username: username
+      username: username,
     })
+
+    // Create a new userPorto and add a watchlist for the new user
+    const userPortos = this.database.collection('userPortos');
+    const watchlistId = nanoid();
+    await userPortos.insertOne({
+      ownerUid: uid,
+      portfolios: [watchlistId],
+    })
+    const portfolios = this.database.collection('portfolios');
+    await portfolios.insertOne({
+      portfolioId: watchlistId,
+      name: "Watchlist",
+      stocks: [],
+    })
+
     return uid;
   }
   /**
@@ -254,6 +270,37 @@ export class Database {
     if (tokenResp !== null) {
       return tokenResp.ownerUid;
     }
+    return null;
+  }
+  async insertPortfolio(uid, name) {
+    if (name == "") {
+      return null;
+  }
+    // First query for the user's userPorto
+    const userPortos = this.database.collection('userPortos');
+    const query1 = { ownerUid: uid };
+    const userPortoResp = await userPortos.findOne(query1);
+    const userPortfolios = userPortoResp.portfolios;
+
+    // Next check if the user already owns a portfolio with given name
+    const portfolios = this.database.collection('portfolios');
+    const query2 = {$and : [{portfolioId: {$in: userPortfolios}}, {name: {$ne:name}}] };
+    const portfolioResp = await portfolios.find(query2);
+
+    // If user owns no portfolios with same name then create 
+    // a new portfolio
+    if (portfolioResp == null) {
+      const portfolioId = nanoid();
+      await portfolios.insertOne({
+        portfolioId: portfolioId,
+        name: name,
+        stocks: [],
+      });
+      userPortfolios.push(portfolioId);
+      await portfolios.updateOne(query1, {portfolios: userPortfolios});
+      return portfolioId;
+    }
+
     return null;
   }
   /**
