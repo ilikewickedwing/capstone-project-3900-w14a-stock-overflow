@@ -10,7 +10,11 @@ import { Database } from "./database";
  * @param {Database} database
  * @returns {Promise<User | null>}
  */
-export const getUserProfile = async (uid, database) => {
+export const getUserProfile = async (uid, token, database) => {
+  const ownerUid = await database.getTokenUid(token);
+  if (ownerUid !== uid) {
+    return null;
+  }
   const userData = await database.getUser(uid);
   return userData;
 }

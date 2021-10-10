@@ -105,10 +105,10 @@ describe('Auth Delete', () => {
     expect(delResp).toBe(true);
     const userData = await d.getUser(resp.uid)
     expect(userData).toBe(null);
-    // const password = await d.getPassword(resp.uid);
-    // expect(password).toBe(null);
-    // const tokenUid = await d.getTokenUid(resp.uid);
-    // expect(tokenUid).toBe(null);
+    const password = await d.getPassword(resp.uid);
+    expect(password).toBe(null);
+    const tokenUid = await d.getTokenUid(resp.uid);
+    expect(tokenUid).toBe(null);
   })
   it('Deleting user will remove the password from the database', async () => {
     const resp = await authRegister('Ashleydsfads', 'bobiasdfdsascool', d);

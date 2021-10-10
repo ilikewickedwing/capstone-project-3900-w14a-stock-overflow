@@ -24,8 +24,7 @@ app.use(express.json())
 app.use('/docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
 
 // Intialise database
-const database = new Database();
-database.connect();
+export const database = new Database();
 
 /**
  * @swagger
@@ -70,17 +69,23 @@ app.get('/', (req, res) => {
  *        in: body
  *        required: true
  *        type: string
+ *      - name: token
+ *        description: The token of the user
+ *        example: 9ThIGIrYNeSNIVuMa2jGU
+ *        in: body
+ *        required: true
+ *        type: string
  *     responses:
  *       200:
  *         description: Returns the user profile information
  *         schema:
  *             $ref: '#/components/schemas/User'
  *       403:
- *         description: Invalid uid
+ *         description: Invalid uid or invalid user permissions
  */
 app.get('/user/profile', async (req, res) => {
-  const { uid } = req.query;
-  const resp = await getUserProfile(uid, database);
+  const { uid, token } = req.query;
+  const resp = await getUserProfile(uid, token, database);
   if (resp !== null) {
     res.status(200).send(resp);
     return;
