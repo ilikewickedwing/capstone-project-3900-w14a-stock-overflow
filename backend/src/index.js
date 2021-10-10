@@ -5,7 +5,7 @@ import swaggerUI from 'swagger-ui-express';
 import { swaggerDocs } from "./docs";
 import { authLogin, authLogout, authRegister } from "./auth";
 import { userProfile } from "./user";
-import { createPortfolio, openPortfolio, userPortfolios } from "./portfolio";
+import { createPf, deletePf, openPf, userPf } from "./portfolio";
 
 // Make the server instance
 export const app = express();
@@ -249,7 +249,7 @@ app.delete('/auth/delete', async (req, res) => {
 // Post endpoint for creating a single portfolio
 /**
  * @swagger
- * /user/porfolios/create:
+ * /user/pf/create:
  *   post:
  *     tags: [Portfolio]
  *     description: Endpoint for creating a single portfolio
@@ -280,7 +280,7 @@ app.delete('/auth/delete', async (req, res) => {
  */
 app.post('/user/portfolios/create', async (req, res) => {
   const { token, name } = req.body;
-  const resp = await createPortfolio(token, name, database);
+  const resp = await createPf(token, name, database);
   if (resp == null) {
     res.status(400).send({ message: "Invalid name or portfolio name already in use" });
   }
@@ -318,7 +318,7 @@ app.post('/user/portfolios/create', async (req, res) => {
  */
 app.get('/user/portfolios', async (req, res) => {
   const { uid } = req.query;
-  const resp = await userPortfolios(uid, database);
+  const resp = await userPfs(uid, database);
   if (resp !== null) {
     res.status(200).send(resp);
     return;
@@ -358,7 +358,7 @@ app.get('/user/portfolios', async (req, res) => {
  */
 app.get('/user/portfolios/open', async (req, res) => {
   const { pid } = req.query;
-  const resp = await openPortfolio(pid, database);
+  const resp = await openPf(pid, database);
   if (resp !== null) {
     res.status(200).send(resp);
     return;
@@ -387,7 +387,7 @@ app.get('/user/portfolios/open', async (req, res) => {
  */
 app.delete('/user/portfolios/delete', async (req, res) => {
   const { pid } = req.query;
-  const resp = await deletePortfolio(pid, database);
+  const resp = await deletePf(pid, database);
   if (resp !== null) {
     res.status(200).send(resp);
     return;
