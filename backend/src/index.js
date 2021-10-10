@@ -3,8 +3,6 @@ import cors from 'cors';
 import { Database } from "./database";
 import swaggerUI from 'swagger-ui-express';
 import { swaggerDocs } from "./docs";
-import { authLogin, authLogout, authRegister } from "./auth";
-import { userProfile } from "./user";
 import { createPf, deletePf, openPf, userPf } from "./portfolio";
 import { authDelete, authLogin, authLogout, authRegister } from "./auth";
 import { getUserProfile, postUserProfile } from "./user";

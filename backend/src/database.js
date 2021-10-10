@@ -290,25 +290,25 @@ export class Database {
     const userPfs = userPortoResp.pfs;
 
     // Next check if the user already owns a portfolio with given name
-    const pfs = this.database.collection('portfolios');/*
-    const query2 = {$and : [{pid: {$in: userPfs}}, {name: {$ne:name}}] };
+    const pfs = this.database.collection('portfolios');
+    const query2 = {$and : [{pid: {$in: userPfs}}, {name: name}] };
     const pfResp = await pfs.findOne(query2);
 
     // If user owns no portfolios with same name then create 
     // a new portfolio
     if (pfResp !== null) {
       return null;
-    }**/
+    }
 
-    const pid = nanoid();
+    const Pid = nanoid();
     await pfs.insertOne({
-      pid: pid,
+      pid: Pid,
       name: name,
       stocks: [],
     });
-    userPfs.push(pid);
-    await pfs.updateOne(query1, {pfs: userPfs});
-    return pid;
+    userPfs.push(Pid);
+    await pfs.updateOne(query1, {$set: {pfs: userPfs}});
+    return Pid;
   }
 
   /**
@@ -318,11 +318,11 @@ export class Database {
    * @returns {Promise<array | null>}
    */
   async getPfs(uid) {
-    const pfs = this.database.collection('userPortos');
+    const portos = this.database.collection('userPortos');
     const query = { uid: uid };
-    const pfResp = await pfs.findOne(query);
+    const pfResp = await portos.findOne(query);
     if (pfResp !== null) {
-      return pfResp.pf;
+      return pfResp.pfs;
     }
     return null;
   }
@@ -338,7 +338,7 @@ export class Database {
     const query = { pid: pid };
     const pfResp = await pfs.findOne(query);
     if (pfResp !== null) {
-      return pfResp.pf;
+      return pfResp;
     }
     return null
   }

@@ -18,9 +18,7 @@ describe('Porfolio create', () => {
   })
   it('Creating a new portfolio returns a pid', async () => {
     const resp = await createPf(token, 'myPf', d);
-    expect(resp).toMatchObject({
-      pid: expect.any(String),
-    })
+    expect(resp).not.toBe(null);
   })
   it('Cannot create a new portfolio with a name that already exists', async () => {
     const resp = await createPf(token, 'myPf', d);
@@ -28,13 +26,17 @@ describe('Porfolio create', () => {
   })
   it('Creating a new portfolio returns a valid portfolio id', async () => {
     const resp = await createPf(token, 'myPf2', d);
-    const pid = await d.getPfs(resp.pid);
-    expect(pid).not.toBe(null);
+    const pf = await d.openPf(resp);
+    expect(pf).toMatchObject({
+      pid: expect.any(String)
+    })
   })
   it('Creating a new portfolio returns a valid portfolio name', async () => {
     const resp = await createPf(token, 'myPf3', d);
-    const name = await d.getPfs(resp.pid);
-    expect(name).toBe('myPf3');
+    const pf = await d.openPf(resp);
+    expect(pf).toMatchObject({
+      name: 'myPf3'
+    })
   })
 
   afterAll(async () => {
