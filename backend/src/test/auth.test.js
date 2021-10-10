@@ -1,7 +1,5 @@
 import { authDelete, authLogin, authLogout, authRegister } from "../auth";
 import { Database } from "../database";
-import request from 'supertest';
-import { app } from '../index';
 
 describe('Auth register', () => {
   const d = new Database(true);
@@ -35,15 +33,6 @@ describe('Auth register', () => {
     await d.disconnect();
   })
 })
-
-// describe('Auth Endpoint Test', () => {
-//   it('200 on new user', async () => {
-//     const response = await request(app).post('/auth/register').send({
-//       username: 'Ashley',
-//       password: 'password'
-//     });
-//   })
-// })
 
 describe('Auth Logout', () => {
   const d = new Database(true);

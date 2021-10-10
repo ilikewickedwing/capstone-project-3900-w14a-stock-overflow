@@ -372,11 +372,11 @@ export class Database {
     this.client = new MongoClient(uri);
     // Connect to server
     try {
-      // console.log('Connecting to MongoDB database...');
+      console.log('Connecting to MongoDB database...');
       await this.client.connect();
-      // console.log('Successfully connected to MongoDB database');
+      console.log('Successfully connected to MongoDB database');
     } catch (err) {
-      // console.error('Unable to connect to MongoDb database');
+      console.error('Unable to connect to MongoDb database');
     }
     // Initialise database
     this.database = this.client.db(DATABASENAME);
@@ -386,7 +386,6 @@ export class Database {
       cursor.close();
       if (!hasNext) {
         this.database.createCollection(collection);
-        // console.log(`Created collection ${collection}`);
       }
     }
   }

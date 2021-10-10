@@ -6,6 +6,8 @@ import { swaggerDocs } from "./docs";
 import { authLogin, authLogout, authRegister } from "./auth";
 import { userProfile } from "./user";
 import { createPf, deletePf, openPf, userPf } from "./portfolio";
+import { authDelete, authLogin, authLogout, authRegister } from "./auth";
+import { getUserProfile, postUserProfile } from "./user";
 
 // Make the server instance
 export const app = express();
@@ -60,6 +62,14 @@ database.connect();
  *         name: AAPL
  *         buydate: 10-10-2021
  *         buyprice: 500
+ *     UserData:
+ *       type: object
+ *       properties:
+ *         username:
+ *           type: string
+ *           description: The username of the user
+ *       example:
+ *         username: XStockMaster64X
  */
 app.get('/', (req, res) => {
   res.status(200).send('This is the root page. Go to /docs for documentation.')
@@ -89,12 +99,49 @@ app.get('/', (req, res) => {
  */
 app.get('/user/profile', async (req, res) => {
   const { uid } = req.query;
-  const resp = await userProfile(uid, database);
+  const resp = await getUserProfile(uid, database);
   if (resp !== null) {
     res.status(200).send(resp);
     return;
   }
   res.status(403).send({ message: 'Invalid uid' });
+})
+
+// Get endpoint for editing user data
+/**
+ * @swagger
+ * /user/profile:
+ *   post:
+ *     tags: [User]
+ *     description: Endpoint for editing a users profile
+ *     parameters:
+ *      - name: uid
+ *        description: The uid of the user
+ *        example: 9ThIGIrYNeSNIVuMa2jGU
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: token
+ *        description: The token of the user
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: userData
+ *        description: The new data of the user. Any attributes not given will not be changed
+ *        in: body
+ *        schema:
+ *             $ref: '#/components/schemas/UserData'
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: User profile has been changed
+ *       403:
+ *         description: Invalid data given
+ */
+app.post('/user/profile', async (req, res) => {
+  // TODO
+  postUserProfile()
 })
 
 // Post endpoint for logging into the server
@@ -212,6 +259,11 @@ app.post('/auth/logout', async (req, res) => {
 app.post('/auth/register', async (req, res) => {
   // Get the post parameter
   const { username, password } = req.body;
+  // Make sure username and password arent empty
+  if (username.length === 0 || password.length === 0) {
+    res.status(403).send({ message: 'Cannot have empty username or password' });
+    return;
+  }
   const resp = await authRegister(username, password, database);
   // Valid so return token
   if (resp !== null) {
@@ -244,6 +296,12 @@ app.post('/auth/register', async (req, res) => {
 app.delete('/auth/delete', async (req, res) => {
   // Get the post parameter
   const { token } = req.body;
+  const resp = await authDelete(token, database);
+  if (resp) {
+    res.status(200).send();
+    return;
+  }
+  res.status(403).send({ mesage: 'Uid does not exist' });
 })
 
 // Post endpoint for creating a single portfolio
