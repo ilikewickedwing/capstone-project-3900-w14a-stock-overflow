@@ -3,8 +3,8 @@ import cors from 'cors';
 import { Database } from "./database";
 import swaggerUI from 'swagger-ui-express';
 import { swaggerDocs } from "./docs";
-import { authLogin, authLogout, authRegister } from "./auth";
-import { userProfile } from "./user";
+import { authDelete, authLogin, authLogout, authRegister } from "./auth";
+import { getUserProfile, postUserProfile } from "./user";
 
 // Make the server instance
 export const app = express();
@@ -80,7 +80,7 @@ app.get('/', (req, res) => {
  */
 app.get('/user/profile', async (req, res) => {
   const { uid } = req.query;
-  const resp = await userProfile(uid, database);
+  const resp = await getUserProfile(uid, database);
   if (resp !== null) {
     res.status(200).send(resp);
     return;
@@ -122,6 +122,7 @@ app.get('/user/profile', async (req, res) => {
  */
 app.post('/user/profile', async (req, res) => {
   // TODO
+  postUserProfile()
 })
 
 // Post endpoint for logging into the server
@@ -276,4 +277,10 @@ app.post('/auth/register', async (req, res) => {
 app.delete('/auth/delete', async (req, res) => {
   // Get the post parameter
   const { token } = req.body;
+  const resp = await authDelete(token, database);
+  if (resp) {
+    res.status(200).send();
+    return;
+  }
+  res.status(403).send({ mesage: 'Uid does not exist' });
 })
