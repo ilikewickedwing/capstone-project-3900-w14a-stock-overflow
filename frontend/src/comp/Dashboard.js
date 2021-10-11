@@ -73,19 +73,19 @@ export default function Dashboard() {
     }
   }
 
-  // const refreshPortfolios = async () => {
-  //   api.get('user/portfolios',{
-  //     body: JSON.stringify({
-  //       token,
-  //     })
-  //   })
-  //     .then((response) => {
-  //       const newArray = [];
-  //     })
-  //     .catch((err) => {
-  //       alert(err); 
-  //     })
-  // }
+  const refreshPortfolios = async () => {
+    api.get('user/portfolios',{
+      body: JSON.stringify({
+        token,
+      })
+    })
+      .then((response) => {
+        console.log(response);
+      })
+      .catch((err) => {
+        alert(err); 
+      })
+  }
 
   return (
     <Box sx={{ flexGrow: 1 }}>

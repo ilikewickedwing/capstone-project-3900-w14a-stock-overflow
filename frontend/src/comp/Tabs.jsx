@@ -29,6 +29,27 @@ const Tabs = () => {
     const open = Boolean(anchorEl);
     const id = open ? 'simple-popover': undefined;
 
+    // TODO for richard to tell me how its formatted
+    const refreshPortfolios = async () => {
+        api.post('user/portfolios',{
+          body: JSON.stringify({
+            token,
+          })
+        })
+          .then((response) => {
+            const newList = [];
+            // append to new list of tabs 
+            // response.forEach((element) => {
+            //     console.log(element);
+            // })
+            const reader = response.body.getReader(); 
+            console.log(response);
+          })
+          .catch((err) => {
+            alert(err); 
+          })
+      }
+
     const submitNewPort = async(e) => {
         console.log(token);
         api.post('user/pf/create',{
@@ -40,9 +61,9 @@ const Tabs = () => {
           .then (() =>{
             alert('New portfolio named:'+name+ ' was created');
           })
-          // .then (() => {
-          //   refreshPortfolios();
-          // })
+          .then (() => {
+            refreshPortfolios();
+          })
           .catch ((err)=> {
             alert(err);
           })
