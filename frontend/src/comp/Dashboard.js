@@ -56,6 +56,7 @@ const useStyles = makeStyles({
 export default function Dashboard() {
   const api = React.useContext(ApiContext);
   let history = useHistory(); 
+  const token = localStorage.getItem('token');
 
   const classes = useStyles();
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -63,7 +64,6 @@ export default function Dashboard() {
 
   // handle logout
   const onLogOut = async () => {
-    const token = localStorage.getItem('token');
     const resp = await api.authLogout(token);
     if (resp.status === 403) alert('Invalid token');
     if (resp.status === 200) {
@@ -76,7 +76,6 @@ export default function Dashboard() {
 
   // handle delete user
   const onDeleteUser = async () => {
-    const token = localStorage.getItem('token');
     console.log(token);
 
     const resp = await api.authDelete(token);
@@ -99,11 +98,21 @@ export default function Dashboard() {
   const open = Boolean(anchorEl);
   const id = open ? 'simple-popover': undefined;
 
-  // TODO
-  const submitNewPort = (e) => {
+  const submitNewPort = async(e) => {
+    console.log(token);
+    api.post('user/pf/create',{
+      body:JSON.stringify({
+        token,
+        name,
+      }),
+    })
+      .then (() =>{
+        alert('New portfolio named:'+name+ ' was created');
+      })
+      .catch ((err)=> {
+        alert(err);
+      })
     e.preventDefault();
-
-    // implement an api post request 
     return null;
   }
 
