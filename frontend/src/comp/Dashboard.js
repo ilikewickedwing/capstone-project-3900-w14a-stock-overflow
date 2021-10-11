@@ -104,6 +104,8 @@ export default function Dashboard() {
     e.preventDefault();
 
     // implement an api post request 
+    alert('New portfolio named:'+name+ ' was created');
+    // refresh the page and append the new tab to dashboard 
     return null;
   }
 
