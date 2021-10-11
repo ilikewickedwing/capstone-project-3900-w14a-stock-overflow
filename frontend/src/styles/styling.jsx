@@ -55,3 +55,7 @@ export const LogoutButton = styled(Button)`
         margin:1%;
     }
 `;
+
+export const TabBar = styled.div`
+    margin: 1%;
+`;

@@ -1,7 +1,6 @@
 import React from 'react'; 
 import { useHistory } from 'react-router';
 import {Link} from 'react-router-dom';
-import Button from '@mui/material/Button';
 import { ApiContext } from '../api';
 import ExitToAppRoundedIcon from '@material-ui/icons/ExitToAppRounded';
 import {NavBar, Logo, LogoutButton } from '../styles/styling';

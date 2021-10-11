@@ -95,4 +95,16 @@ export default class API {
       },
     });
     }
+
+  get(path, options){
+    return fetch(`${ENDPOINT}/${path}`,{
+      ...options,
+      method: 'GET',
+      headers: {
+        accept: 'application/json',
+        'Content-Type': 'application/json',
+        Authorization: getToken(),
+      },
+    });
+    }
 }
