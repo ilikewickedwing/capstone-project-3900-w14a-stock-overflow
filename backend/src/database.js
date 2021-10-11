@@ -420,13 +420,30 @@ export class Database {
   /**
    * Deletes a given portfolio from the database and
    * returns whether the portfolio was deleted or not
+   * @param {string} uid
    * @param {string} pid 
    * @returns {Promise<boolean>}
    */
-  async deletePf(pid) {
+  async deletePf(uid, pid) {
     const pfs = this.database.collection('portfolios');
-    const query = { pid: pid };
-    const result = await pfs.deleteOne(query);
+    const query1 = { pid: pid };
+    const result = await pfs.deleteOne(query1);
+
+    const userPortos = this.database.collection('userPortos');
+    const query2 = { ownerUid: uid };
+    const userPortoResp = await userPortos.findOne(query2);
+    const userPfs = userPortoResp.pfs;
+
+    var i = 0;
+    while (i < userPfs.length) {
+      if (userPfs[i].pid == pid) {
+        userPfs.splice(i, 1);
+        break;
+      }
+      i++;
+    }
+    await userPortos.updateOne( query2, { $set : { pfs: userPfs } } );
+
     return result.deletedCount !== 0 ;
   }
 
