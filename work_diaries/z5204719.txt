@@ -9,3 +9,6 @@ The core functionalities were chosen, and some novelties were also decided. I wa
 
 Week 3
 We finished the project proposal, assigned tasks to sprints and to members as well. We then started working on sprint 1.
+
+Week 4
+I worked on the backend and started implementing portfolio functionality. Working with Jono, we managed to figure out how to add portfolios, get their information, and delete them. However, we can't do duplicate checking yet.

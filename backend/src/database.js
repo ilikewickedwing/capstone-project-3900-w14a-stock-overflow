@@ -34,6 +34,29 @@ const COLLECTIONS = [
     }
   */
   'tokens',
+  /**
+    Stores all the portfolios of a user in the following form:
+    {
+      ownerUid: string,
+      pfs: [string],
+    }
+   */
+  'userPortos',
+  /**
+    Stores all the portfolios and their stocks in the following form:
+    {
+      pid: string,
+      name: string,
+      stocks: [
+        [
+          stock: string,
+          buydate: string,
+          buyprice: int,
+        ]
+      ],
+    }
+   */
+  'portfolios',
 ]
 
 /**
@@ -117,8 +140,23 @@ export class Database {
     const users = this.database.collection('users');
     await users.insertOne({
       uid: uid,
-      username: username
+      username: username,
     })
+
+    // Create a new userPorto and add a watchlist for the new user
+    const userPortos = this.database.collection('userPortos');
+    const watchlistId = nanoid();
+    await userPortos.insertOne({
+      ownerUid: uid,
+      pfs: [watchlistId],
+    })
+    const pfs = this.database.collection('portfolios');
+    await pfs.insertOne({
+      pid: watchlistId,
+      name: "Watchlist",
+      stocks: [],
+    })
+
     return uid;
   }
   /**
@@ -147,7 +185,7 @@ export class Database {
     const users = this.database.collection('users');
     const query = { uid: uid }
     const result = await users.deleteOne(query);
-    return result.deletedCount !== 0 ;
+    return result.deletedCount !== 0;
   }
   /**
    * Returns the password for a given uid, else return null
@@ -190,7 +228,7 @@ export class Database {
     const passwords = this.database.collection('passwords');
     const query = { ownerUid: ownerUid }
     const result = await passwords.deleteOne(query);
-    return result.deletedCount !== 0 ;
+    return result.deletedCount !== 0;
   }
   /**
    * Creates a new token and adds it to the database and returns it
@@ -249,10 +287,95 @@ export class Database {
     }
     return null;
   }
+
+  /**
+   * Returns the portfolio id
+   * @param {string} uid 
+   * @param {string} name 
+   * @returns 
+   */
+  async insertPf(uid, name) {
+    if (name == "") {
+      return null;
+  }
+    // First query for the user's userPorto
+    const userPortos = this.database.collection('userPortos');
+    const query1 = { ownerUid: uid };
+    const userPortoResp = await userPortos.findOne(query1);
+    const userPfs = userPortoResp.pfs;
+
+    // Next check if the user already owns a portfolio with given name
+    const pfs = this.database.collection('portfolios');
+    const query2 = {$and : [{pid: {$in: userPfs}}, {name: name}] };
+    const pfResp = await pfs.findOne(query2);
+
+    // If user owns no portfolios with same name then create 
+    // a new portfolio
+    if (pfResp !== null) {
+      return null;
+    }
+
+    const Pid = nanoid();
+    await pfs.insertOne({
+      pid: Pid,
+      name: name,
+      stocks: [],
+    });
+    userPfs.push(Pid);
+    await pfs.updateOne(query1, {$set: {pfs: userPfs}});
+    return Pid;
+  }
+
+  /**
+   * Returns the portfolios owned by the user
+   * else returns null if the id is invalid
+   * @param {string} uid
+   * @returns {Promise<array | null>}
+   */
+  async getPfs(uid) {
+    const portos = this.database.collection('userPortos');
+    const query = { uid: uid };
+    const pfResp = await portos.findOne(query);
+    if (pfResp !== null) {
+      return pfResp.pfs;
+    }
+    return null;
+  }
+
+  /**
+   * Returns the portfolio requested
+   * else returns null if the id is invalid
+   * @param {string} pid 
+   * @returns {Promise<array | null>}
+   */
+  async openPf(pid) {
+    const pfs = this.database.collection('portfolios');
+    const query = { pid: pid };
+    const pfResp = await pfs.findOne(query);
+    if (pfResp !== null) {
+      return pfResp;
+    }
+    return null
+  }
+
+
+  /**
+   * Deletes a given portfolio from the database and
+   * returns whether the portfolio was deleted or not
+   * @param {string} pid 
+   * @returns {Promise<boolean>}
+   */
+  async deletePf(pid) {
+    const pfs = this.database.collection('portfolios');
+    const query = { pid: pid };
+    const result = await pfs.deleteOne(query);
+    return result.deletedCount !== 0 ;
+  }
+
   /**
    * Connect to the database
    */
-  async connect() {
+   async connect() {
     let uri = URI;
     if (this.testmode) {
       // Start test server in memory
