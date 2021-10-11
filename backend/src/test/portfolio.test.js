@@ -159,13 +159,29 @@ describe('Porfolio delete', () => {
   it('Check for portfolio in database', async () => {
     const delResp = await deletePf(token, myPid, d);
     expect(delResp).toBe(true);
-    const pid = await openPf(myPid, d);
-    expect(pid).toBe(null);
+    const pf = await openPf(myPid, d);
+    expect(pf).toBe(null);
   })
   it('Check for portfolio in users portfolios', async () => {
     const resp = await userPfs(token, d);
     const myArray = [{ name: 'myPf', pid: myPid }];
     expect(resp).toEqual(expect.not.arrayContaining(myArray));
+  })
+  it('Add and delete new portfolio', async () => {
+    const create = await createPf(token, 'myPf', d);
+    const myArray = [{ name: 'myPf', pid: create }];
+    var Pfs = await userPfs(token, d);
+    expect(Pfs).toEqual(expect.arrayContaining(myArray));
+    var myPid1 = await getPid(token, 'myPf', d);
+    expect(myPid1).toBe(create);
+    const delResp = await deletePf(token, create, d);
+    expect(delResp).toBe(true);
+    const pf = await openPf(create, d);
+    expect(pf).toBe(null);
+    myPid1 = await getPid(token, 'myPf', d);
+    expect(myPid1).toBe(null);
+    Pfs = await userPfs(token, d);
+    expect(Pfs).toEqual(expect.not.arrayContaining(myArray));
   })
 
   afterAll(async () => {

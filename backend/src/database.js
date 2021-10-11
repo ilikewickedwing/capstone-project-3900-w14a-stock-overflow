@@ -315,23 +315,12 @@ export class Database {
     const userPfs = userPortoResp.pfs;
     const pfs = this.database.collection('portfolios');
 
-    var i = 0;
-    var pfResp = null;
-
-    while (i < userPfs.length) {
-      const pid = userPfs[i].pid;
-      const query2 = { $and: [ { pid: pid }, { name: name } ] };
-      pfResp = await pfs.findOne(query2);
-      if (pfResp !== null) {
-        break;
-      }
-      i++;
-    }
-
     // If user owns no portfolios with same name then create 
     // a new portfolio
-    if (pfResp !== null) {
-      return null;
+    for (let i = 0; i < userPfs.length; i++) {
+      if (userPfs[i].name == name) {
+        return null;
+      }
     }
 
     const Pid = nanoid();
@@ -378,26 +367,14 @@ export class Database {
     const query1 = { ownerUid: uid };
     const userPortoResp = await userPortos.findOne(query1);
     const userPfs = userPortoResp.pfs;
-    const pfs = this.database.collection('portfolios');
 
-    var i = 0;
-    var pfResp = null;
-
-    while (i < userPfs.length) {
-      const pid = userPfs[i].pid;
-      const query2 = { $and: [ { pid: pid }, { name: name } ] };
-      pfResp = await pfs.findOne(query2);
-      if (pfResp !== null) {
-        break;
+    for (let i = 0; i < userPfs.length; i++) {
+      if (userPfs[i].name == name) {
+        return userPfs[i].pid;
       }
-      i++;
     }
 
-    if (pfResp == null) {
-      return null;
-    }
-
-    return pfResp.pid;
+    return null;
   }
 
   /**
@@ -442,7 +419,7 @@ export class Database {
       }
       i++;
     }
-    await userPortos.updateOne( query2, { $set : { pfs: userPfs } } );
+    await userPortos.updateOne( query2, { $set: { pfs: userPfs } } );
 
     return result.deletedCount !== 0 ;
   }
