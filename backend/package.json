@@ -5,11 +5,12 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "start": "nodemon --experimental-specifier-resolution=node --exec babel-node src/start.js $PORT",
+    "start": "nodemon --experimental-specifier-resolution=node src/start.js $PORT",
     "test": "jest --watchAll --verbose --silent"
   },
   "dependencies": {
     "cors": "^2.8.5",
+    "crypto": "^1.0.1",
     "express": "^4.17.1",
     "mongodb": "^4.1.2",
     "mongodb-memory-server": "^7.4.2",
