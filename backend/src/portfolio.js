@@ -26,6 +26,11 @@ export const createPf = async (token, name, database) => {
 
 /**
  * Gets the portfolios for the user
+ * Returns portfolio as object in form:
+ * {
+ *   pid: string,
+ *   name: string,
+ * }
  * @param {string} token
  * @param {Database} database
  * @returns {Promise<Pf>}
@@ -41,7 +46,7 @@ export const userPfs = async (token, database) => {
 }
 
 /**
- * Gets the id of a portfolio given uid and name
+ * Gets the id of a portfolio given token and name
  * @param {string} token
  * @param {string} name 
  * @param {Database} database 

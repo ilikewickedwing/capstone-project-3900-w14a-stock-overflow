@@ -66,18 +66,20 @@ describe('Portfolio get', () => {
   it('Check watchlist exists upon user creation', async () => {
     const resp = await userPfs(token, d);
     wpid = await getPid(token, "Watchlist", d);
-    const myArray = [wpid];
+    const myArray = [{ name: "Watchlist", pid: wpid }];
     expect(resp).toEqual(expect.arrayContaining(myArray));
   })
   it('Add portfolio to user portfolios', async () => {
     pid1 = await createPf(token, 'myPf', d);
-    const myArray = [wpid, pid1];
+    const myArray = [{ name: "Watchlist", pid: wpid }, 
+    { name: "myPf", pid: pid1 }];
     const resp = await userPfs(token, d);
     expect(resp).toEqual(expect.arrayContaining(myArray));
   })
   it('Add second portfolio to user portfolios', async () => {
     const pid2 = await createPf(token, 'myPf2', d);
-    const myArray = [wpid, pid1, pid2];
+    const myArray =  [{ name: "Watchlist", pid: wpid }, 
+      { name: "myPf", pid: pid1 }, { name: "myPf2", pid: pid2 }];
     const resp = await userPfs(token, d);
     expect(resp).toEqual(expect.arrayContaining(myArray));
   })
@@ -102,7 +104,7 @@ describe('Portfolio open', () => {
     uid = rego.uid;
     token = rego.token;
     myPid = await createPf(token, 'myPf', d);
-    const myArray = [myPid];
+    const myArray = [{ name: 'myPf', pid: myPid }];
     const resp = await userPfs(token, d);
     expect(resp).toEqual(expect.arrayContaining(myArray));
   })
