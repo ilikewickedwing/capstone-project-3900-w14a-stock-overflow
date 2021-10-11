@@ -315,23 +315,12 @@ export class Database {
     const userPfs = userPortoResp.pfs;
     const pfs = this.database.collection('portfolios');
 
-    var i = 0;
-    var pfResp = null;
-
-    while (i < userPfs.length) {
-      const pid = userPfs[i].pid;
-      const query2 = { $and: [ { pid: pid }, { name: name } ] };
-      pfResp = await pfs.findOne(query2);
-      if (pfResp !== null) {
-        break;
-      }
-      i++;
-    }
-
     // If user owns no portfolios with same name then create 
     // a new portfolio
-    if (pfResp !== null) {
-      return null;
+    for (let i = 0; i < userPfs.length; i++) {
+      if (userPfs[i].name == name) {
+        return null;
+      }
     }
 
     const Pid = nanoid();
@@ -378,26 +367,14 @@ export class Database {
     const query1 = { ownerUid: uid };
     const userPortoResp = await userPortos.findOne(query1);
     const userPfs = userPortoResp.pfs;
-    const pfs = this.database.collection('portfolios');
 
-    var i = 0;
-    var pfResp = null;
-
-    while (i < userPfs.length) {
-      const pid = userPfs[i].pid;
-      const query2 = { $and: [ { pid: pid }, { name: name } ] };
-      pfResp = await pfs.findOne(query2);
-      if (pfResp !== null) {
-        break;
+    for (let i = 0; i < userPfs.length; i++) {
+      if (userPfs[i].name == name) {
+        return userPfs[i].pid;
       }
-      i++;
     }
 
-    if (pfResp == null) {
-      return null;
-    }
-
-    return pfResp.pid;
+    return null;
   }
 
   /**
@@ -420,13 +397,30 @@ export class Database {
   /**
    * Deletes a given portfolio from the database and
    * returns whether the portfolio was deleted or not
+   * @param {string} uid
    * @param {string} pid 
    * @returns {Promise<boolean>}
    */
-  async deletePf(pid) {
+  async deletePf(uid, pid) {
     const pfs = this.database.collection('portfolios');
-    const query = { pid: pid };
-    const result = await pfs.deleteOne(query);
+    const query1 = { pid: pid };
+    const result = await pfs.deleteOne(query1);
+
+    const userPortos = this.database.collection('userPortos');
+    const query2 = { ownerUid: uid };
+    const userPortoResp = await userPortos.findOne(query2);
+    const userPfs = userPortoResp.pfs;
+
+    var i = 0;
+    while (i < userPfs.length) {
+      if (userPfs[i].pid == pid) {
+        userPfs.splice(i, 1);
+        break;
+      }
+      i++;
+    }
+    await userPortos.updateOne( query2, { $set: { pfs: userPfs } } );
+
     return result.deletedCount !== 0 ;
   }
 

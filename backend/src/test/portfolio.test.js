@@ -141,14 +141,47 @@ describe('Porfolio delete', () => {
     await d.connect();
   })
 
-  it('Create and delete portfolio', async () => {
+  var uid = null;
+  var token = null;
+  var wPid = null;
+  var myPid = null;
+
+  it('Create new user and add portfolio', async () => {
     const rego = await authRegister('Ashley', 'strongpassword', d);
-    const token = rego.token;
-    const resp = await createPf(token, 'myPf', d);
-    const delResp = await deletePf(resp, d);
+    uid = rego.uid;
+    token = rego.token;
+    wPid = await getPid(token, "Watchlist", d);
+    myPid = await createPf(token, 'myPf', d);
+    const myArray = [{ name: "Watchlist", pid: wPid }, { name: 'myPf', pid: myPid }];
+    const resp = await userPfs(token, d);
+    expect(resp).toEqual(expect.arrayContaining(myArray));
+  })
+  it('Check for portfolio in database', async () => {
+    const delResp = await deletePf(token, myPid, d);
     expect(delResp).toBe(true);
-    const pid = await openPf(resp, d);
-    expect(pid).toBe(null);
+    const pf = await openPf(myPid, d);
+    expect(pf).toBe(null);
+  })
+  it('Check for portfolio in users portfolios', async () => {
+    const resp = await userPfs(token, d);
+    const myArray = [{ name: 'myPf', pid: myPid }];
+    expect(resp).toEqual(expect.not.arrayContaining(myArray));
+  })
+  it('Add and delete new portfolio', async () => {
+    const create = await createPf(token, 'myPf', d);
+    const myArray = [{ name: 'myPf', pid: create }];
+    var Pfs = await userPfs(token, d);
+    expect(Pfs).toEqual(expect.arrayContaining(myArray));
+    var myPid1 = await getPid(token, 'myPf', d);
+    expect(myPid1).toBe(create);
+    const delResp = await deletePf(token, create, d);
+    expect(delResp).toBe(true);
+    const pf = await openPf(create, d);
+    expect(pf).toBe(null);
+    myPid1 = await getPid(token, 'myPf', d);
+    expect(myPid1).toBe(null);
+    Pfs = await userPfs(token, d);
+    expect(Pfs).toEqual(expect.not.arrayContaining(myArray));
   })
 
   afterAll(async () => {
