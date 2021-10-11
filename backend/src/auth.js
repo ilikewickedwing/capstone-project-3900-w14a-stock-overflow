@@ -3,6 +3,18 @@
 */
 
 import { Database } from "./database";
+import { createHash } from "crypto";
+
+const SECRETKEY = 'StocksRcOOL';
+
+/**
+ * Encrypts a given password
+ * @param {string} password 
+ * @returns {string}
+ */
+export const encryptPassword = (password) => {
+  return createHash('sha256', SECRETKEY).update(password).digest('hex');
+}
 
 /**
  * Authenticates a login and returns token and uid on success otherwise return null
@@ -18,7 +30,7 @@ export const authLogin = async (username, password, database) => {
   }
   // Check if password matches
   const realPassword = await database.getPassword(uid);
-  if (password !== realPassword) {
+  if (encryptPassword(password) !== realPassword) {
     return null;
   }
   // Create a new token
@@ -53,7 +65,7 @@ export const authRegister = async (username, password, database) => {
     return null;
   }
   const uid = await database.insertUser(username);
-  await database.insertPassword(uid, password);
+  await database.insertPassword(uid, encryptPassword(password));
   const token = await database.insertToken(uid);
   return {
     uid: uid,

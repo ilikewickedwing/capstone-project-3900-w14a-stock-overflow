@@ -1,11 +1,9 @@
 import * as React from 'react';
 // MUI5 for navabr
-import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
-import Toolbar from '@mui/material/Toolbar';
-import IconButton from '@mui/material/IconButton';
 import Button from '@mui/material/Button';
 import MenuIcon from '@mui/icons-material/Menu';
+import Popover from '@mui/material/Popover';
 
 import { useHistory } from 'react-router';
 import { ApiContext } from '../api';
@@ -20,6 +18,9 @@ import { Grid } from '@material-ui/core';
 import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
+
+import {TabButton, CreatePortContent, CreatePortField} from '../styles/styling'; 
+import Navigation from './Navigation';
 
 // adjust container height to change how many cards are displayed on the right column. hacky solution
 const useStyles = makeStyles({
@@ -55,12 +56,14 @@ const useStyles = makeStyles({
 export default function Dashboard() {
   const api = React.useContext(ApiContext);
   let history = useHistory(); 
+  const token = localStorage.getItem('token');
 
   const classes = useStyles();
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [name, setName] = React.useState('');
 
   // handle logout
   const onLogOut = async () => {
-    const token = localStorage.getItem('token');
     const resp = await api.authLogout(token);
     if (resp.status === 403) alert('Invalid token');
     if (resp.status === 200) {
@@ -73,7 +76,6 @@ export default function Dashboard() {
 
   // handle delete user
   const onDeleteUser = async () => {
-    const token = localStorage.getItem('token');
     console.log(token);
 
     const resp = await api.authDelete(token);
@@ -86,37 +88,49 @@ export default function Dashboard() {
     }
   }
 
+  //handle popover open and close
+  const handleCreatePort = (event) => {
+    setAnchorEl(event.currentTarget);
+  }
+  const handleClose = () => {
+    setAnchorEl(null);  
+  }
+  const open = Boolean(anchorEl);
+  const id = open ? 'simple-popover': undefined;
+
+  const submitNewPort = async(e) => {
+    console.log(token);
+    api.post('user/pf/create',{
+      body:JSON.stringify({
+        token,
+        name,
+      }),
+    })
+      .then (() =>{
+        alert('New portfolio named:'+name+ ' was created');
+      })
+      .catch ((err)=> {
+        alert(err);
+      })
+    e.preventDefault();
+    return null;
+  }
+
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="static">
-        <Toolbar>
-          <IconButton
-            size="large"
-            edge="start"
-            color="inherit"
-            aria-label="menu"
-            sx={{ mr: 2 }}
-          >
-          <MenuIcon />
-          </IconButton>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Stock Overflow
-          </Typography>
-          
-          <Button color="inherit" onClick={onLogOut}>Logout</Button>
-          <Button color="inherit" onClick={onDeleteUser}>Delete Account</Button>
-          <Button color="inherit">Edit Profile</Button>
-        </Toolbar>
-      </AppBar>
+      <Navigation />
       <br/>
-
       <Grid spacing={4} className={classes.container} container>
         <Grid xs={9} item>
           
           <Card className={classes.root}>
             <CardContent>
+            <TabButton >Dashboard</TabButton>
+            <TabButton id="createPortButton" onClick={handleCreatePort}>
+              Add New Portfolio
+            </TabButton>
               <Typography className={classes.title} color="textSecondary" gutterBottom>
-                Word of the Day Word of the DayWord of the DayWord of the
+                Word of the Day Word of the DayWord of the DayWord of 
                 Word of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of the ord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWoord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWoord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWoord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWoord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWoord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWoord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWoord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWoord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWoord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWoord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWoord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWoord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWord of the Day Word of the DayWord of the DayWord of theWo
               </Typography>
               
@@ -211,8 +225,37 @@ export default function Dashboard() {
           </Grid>
         </Grid>
       </Grid>
+      <Popover
+        id={id}
+        open={open}
+        anchorEl={anchorEl}
+        onClose={handleClose}
+        anchorOrigin={{
+          vertical:'bottom',
+          horizontal:'left',
+        }}
+        transformOrigin={{
+          vertical:'top',
+          horizontal:'center',
+        }}
+      >
+        <CreatePortContent>
+          <form autoComplete="off" onSubmit={submitNewPort}>
+            <CreatePortField
+              required
+              fullWidth
+              id="createPortButton"
+              label="Enter New Portfolio Name"
+              onChange={(e)=> {setName(e.target.value);}}
+            />
+            <br />
+            <Button type="button" onClick={handleClose}>Cancel</Button>
+            <Button type="submit">Create Portfolio</Button>
+          </form>
+        </CreatePortContent>
+      </Popover>
     </Box>
 
-    
+  
   );
 }

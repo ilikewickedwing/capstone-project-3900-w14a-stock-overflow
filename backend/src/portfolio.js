@@ -19,9 +19,52 @@ export const createPf = async (token, name, database) => {
 
   const pidResp = await database.insertPf(uid, name);
   if (pidResp !== null) {
-    return { pidResp: pid };
+    return pidResp;
   }
   return null;
+}
+
+/**
+ * Gets the portfolios for the user
+ * Returns portfolio as object in form:
+ * {
+ *   pid: string,
+ *   name: string,
+ * }
+ * @param {string} token
+ * @param {Database} database
+ * @returns {Promise<Pf>}
+ */
+export const userPfs = async (token, database) => {
+  const uid = await database.getTokenUid(token);
+  if (uid === null) {
+    return false;
+  }
+  
+	const userPf = await database.getPfs(uid);
+  return userPf;
+}
+
+/**
+ * Gets the id of a portfolio given token and name
+ * @param {string} token
+ * @param {string} name 
+ * @param {Database} database 
+ * @returns {Promise<string | null>}
+ */
+export const getPid = async (token, name, database) => {
+  const uid = await database.getTokenUid(token);
+  if (uid === null) {
+    return false;
+  }
+
+  const pid = await database.getPid(uid, name);
+  return pid;
+}
+
+export const openPf = async (pid, database) => {
+  const Pf = await database.openPf(pid);
+  return Pf;
 }
 
 export const deletePf = async (pid, database) => {
@@ -32,20 +75,4 @@ export const deletePf = async (pid, database) => {
   // Delete portfolio
   await database.deletePf(pid);
   return true;
-}
-
-/**
- * Gets the portfolios for the user
- * @param {string} uid
- * @param {Database} database
- * @returns {Promise<Pf>}
- */
-export const userPfs = async (uid, database) => {
-	const userPf = await database.getPfs(uid);
-  return userPf;
-}
-
-export const openPf = async (pid, database) => {
-  const Pf = await database.openPf(pid);
-  return Pf;
 }

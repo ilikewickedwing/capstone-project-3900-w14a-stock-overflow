@@ -38,7 +38,12 @@ const COLLECTIONS = [
     Stores all the portfolios of a user in the following form:
     {
       ownerUid: string,
-      pfs: [string],
+      pfs: [
+        {
+          pid: string,
+          name: string,
+        }
+      ],
     }
    */
   'userPortos',
@@ -48,11 +53,11 @@ const COLLECTIONS = [
       pid: string,
       name: string,
       stocks: [
-        [
+        {
           stock: string,
-          buydate: string,
+          buydate: date,
           buyprice: int,
-        ]
+        }
       ],
     }
    */
@@ -148,7 +153,12 @@ export class Database {
     const watchlistId = nanoid();
     await userPortos.insertOne({
       ownerUid: uid,
-      pfs: [watchlistId],
+      pfs: [
+        {
+          pid: watchlistId,
+          name: "Watchlist",
+        }
+      ],
     })
     const pfs = this.database.collection('portfolios');
     await pfs.insertOne({
@@ -158,6 +168,21 @@ export class Database {
     })
 
     return uid;
+  }
+  /**
+   * Updates a user object in the database and returns whether it was
+   * successful. The userdata contains all the
+   * properties to be changed in the object. Properties that are missing will
+   * not be changed
+   * @param {string} uid 
+   * @param {User} userData
+   * @returns {Promise<boolean}
+   */
+  async updateUser(uid, userData) {
+    const users = this.database.collection('users');
+    const query = { uid: uid };
+    const result = await users.updateOne(query, { $set: userData});
+    return result.modifiedCount !== 0;
   }
   /**
    * Given a uid, delete it from the database. Returns whether it was
@@ -277,38 +302,47 @@ export class Database {
    * Returns the portfolio id
    * @param {string} uid 
    * @param {string} name 
-   * @returns 
+   * @returns {Promise<string | null>}
    */
   async insertPf(uid, name) {
     if (name == "") {
       return null;
-  }
+    }
     // First query for the user's userPorto
     const userPortos = this.database.collection('userPortos');
     const query1 = { ownerUid: uid };
     const userPortoResp = await userPortos.findOne(query1);
     const userPfs = userPortoResp.pfs;
+    const pfs = this.database.collection('portfolios');
 
-    // Next check if the user already owns a portfolio with given name
-    const pfs = this.database.collection('portfolios');/*
-    const query2 = {$and : [{pid: {$in: userPfs}}, {name: {$ne:name}}] };
-    const pfResp = await pfs.findOne(query2);
+    var i = 0;
+    var pfResp = null;
+
+    while (i < userPfs.length) {
+      const pid = userPfs[i].pid;
+      const query2 = { $and: [ { pid: pid }, { name: name } ] };
+      pfResp = await pfs.findOne(query2);
+      if (pfResp !== null) {
+        break;
+      }
+      i++;
+    }
 
     // If user owns no portfolios with same name then create 
     // a new portfolio
     if (pfResp !== null) {
       return null;
-    }**/
+    }
 
-    const pid = nanoid();
+    const Pid = nanoid();
     await pfs.insertOne({
-      pid: pid,
+      pid: Pid,
       name: name,
       stocks: [],
     });
-    userPfs.push(pid);
-    await pfs.updateOne(query1, {pfs: userPfs});
-    return pid;
+    userPfs.push({ pid: Pid, name: name });
+    await userPortos.updateOne( query1, { $set : { pfs: userPfs } } );
+    return Pid;
   }
 
   /**
@@ -318,13 +352,52 @@ export class Database {
    * @returns {Promise<array | null>}
    */
   async getPfs(uid) {
-    const pfs = this.database.collection('userPortos');
-    const query = { uid: uid };
-    const pfResp = await pfs.findOne(query);
-    if (pfResp !== null) {
-      return pfResp.pf;
+    const userPortos = this.database.collection('userPortos');
+    const query = { ownerUid: uid };
+    const userPortoResp = await userPortos.findOne(query);
+    const userPfs = userPortoResp.pfs;
+    if (userPfs !== null) {
+      return userPfs;
     }
     return null;
+  }
+
+  /**
+   * Returns the id of the portfolio given the name
+   * else returns null if the user or name are invalid or portfolio doesn't exist
+   * @param {string} uid 
+   * @param {string} name 
+   * @returns {Promise<string | null>}
+   */
+  async getPid(uid, name) {
+    if (name == "") {
+      return null;
+    }
+
+    const userPortos = this.database.collection('userPortos');
+    const query1 = { ownerUid: uid };
+    const userPortoResp = await userPortos.findOne(query1);
+    const userPfs = userPortoResp.pfs;
+    const pfs = this.database.collection('portfolios');
+
+    var i = 0;
+    var pfResp = null;
+
+    while (i < userPfs.length) {
+      const pid = userPfs[i].pid;
+      const query2 = { $and: [ { pid: pid }, { name: name } ] };
+      pfResp = await pfs.findOne(query2);
+      if (pfResp !== null) {
+        break;
+      }
+      i++;
+    }
+
+    if (pfResp == null) {
+      return null;
+    }
+
+    return pfResp.pid;
   }
 
   /**
@@ -338,7 +411,7 @@ export class Database {
     const query = { pid: pid };
     const pfResp = await pfs.findOne(query);
     if (pfResp !== null) {
-      return pfResp.pf;
+      return pfResp;
     }
     return null
   }
