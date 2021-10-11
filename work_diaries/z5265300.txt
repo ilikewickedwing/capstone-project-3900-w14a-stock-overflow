@@ -10,3 +10,18 @@ I was assigned as scrum master and jira page was created. We each individually c
 We will delegate sections of the proposal and discuss further implementations for the next session that we attend.
 
 Week 2
+Group discussed the functionality of our stock app. We delegated sections for each member to draft in preparation for our next tutorial (since its the last
+tutorial before proprosal submission date). Created the repo for github. 
+Non-technical obstacles: team does not have a lot of knowledge on stocks in general; need to do more research on this part.
+Pending application name and finalisation of user stories to put in jira scrums. Draft of the proposal to be completed by the end of this week.
+Plans for next week: starting the first sprint.
+
+Week 3
+We started our weekly meetings with standups, to discuss the progress of our proposal. We finished our proposal on the sunday.
+For my part, I completed the storyboards and user flow part of the proposal. 
+However, we faced difficulties brainstorming ideas to make the novel features more advanced. 
+
+Week 4
+Implemented a navigation bar to be used on all pages of the website.
+To be implemented: tabbing / non-tabbing of the different portfolios.
+Challenge: finding a way to implement the graph of our page.

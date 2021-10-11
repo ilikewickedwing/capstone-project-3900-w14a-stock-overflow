@@ -3,9 +3,9 @@ import cors from 'cors';
 import { Database } from "./database";
 import swaggerUI from 'swagger-ui-express';
 import { swaggerDocs } from "./docs";
-import { authLogin, authLogout, authRegister } from "./auth";
-import { userProfile } from "./user";
-import { createPortfolio, openPortfolio, userPortfolios } from "./portfolio";
+import { createPf, deletePf, openPf, userPfs } from "./portfolio";
+import { authDelete, authLogin, authLogout, authRegister } from "./auth";
+import { getUserProfile, postUserProfile } from "./user";
 
 // Make the server instance
 export const app = express();
@@ -25,8 +25,7 @@ app.use(express.json())
 app.use('/docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
 
 // Intialise database
-const database = new Database();
-database.connect();
+export const database = new Database();
 
 /**
  * @swagger
@@ -43,6 +42,30 @@ database.connect();
  *           description: The username of the user
  *       example:
  *         uid: 9ThIGIrYNeSNIVuMa2jGU
+ *         username: XStockMaster64X
+ *     Stock:
+ *       type: object
+ *       properties:
+ *         name:
+ *           type: string
+ *           description: The name of the stock
+ *         buydate:
+ *           type: string
+ *           description: The buy in date of the stock
+ *         buyprice:
+ *           type: int
+ *           description: The buy in price of the stock
+ *       example:
+ *         name: AAPL
+ *         buydate: 10-10-2021
+ *         buyprice: 500
+ *     UserData:
+ *       type: object
+ *       properties:
+ *         username:
+ *           type: string
+ *           description: The username of the user
+ *       example:
  *         username: XStockMaster64X
  */
 app.get('/', (req, res) => {
@@ -63,22 +86,71 @@ app.get('/', (req, res) => {
  *        in: body
  *        required: true
  *        type: string
+ *      - name: token
+ *        description: The token of the user
+ *        example: 9ThIGIrYNeSNIVuMa2jGU
+ *        in: body
+ *        required: true
+ *        type: string
  *     responses:
  *       200:
  *         description: Returns the user profile information
  *         schema:
  *             $ref: '#/components/schemas/User'
  *       403:
- *         description: Invalid uid
+ *         description: Invalid uid or invalid user permissions
  */
 app.get('/user/profile', async (req, res) => {
-  const { uid } = req.query;
-  const resp = await userProfile(uid, database);
+  const { uid, token } = req.query;
+  const resp = await getUserProfile(uid, token, database);
   if (resp !== null) {
     res.status(200).send(resp);
     return;
   }
   res.status(403).send({ message: 'Invalid uid' });
+})
+
+// Get endpoint for editing user data
+/**
+ * @swagger
+ * /user/profile:
+ *   post:
+ *     tags: [User]
+ *     description: Endpoint for editing a users profile
+ *     parameters:
+ *      - name: uid
+ *        description: The uid of the user
+ *        example: 9ThIGIrYNeSNIVuMa2jGU
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: token
+ *        description: The token of the user
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: userData
+ *        description: The new data of the user. Any attributes not given will not be changed
+ *        in: body
+ *        schema:
+ *             $ref: '#/components/schemas/UserData'
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: User profile has been changed
+ *       403:
+ *         description: Invalid data given
+ */
+app.post('/user/profile', async (req, res) => {
+  // TODO
+  const { uid, token, userData } = req.body;
+  const resp = postUserProfile(uid, token, userData, database);
+  if (resp) {
+    res.status(200).send();
+    return;
+  }
+  res.status(403).send({ message: 'Invalid token or uid' });
 })
 
 // Post endpoint for logging into the server
@@ -196,6 +268,11 @@ app.post('/auth/logout', async (req, res) => {
 app.post('/auth/register', async (req, res) => {
   // Get the post parameter
   const { username, password } = req.body;
+  // Make sure username and password arent empty
+  if (username.length === 0 || password.length === 0) {
+    res.status(403).send({ message: 'Cannot have empty username or password' });
+    return;
+  }
   const resp = await authRegister(username, password, database);
   // Valid so return token
   if (resp !== null) {
@@ -228,12 +305,49 @@ app.post('/auth/register', async (req, res) => {
 app.delete('/auth/delete', async (req, res) => {
   // Get the post parameter
   const { token } = req.body;
+  const resp = await authDelete(token, database);
+  if (resp) {
+    res.status(200).send();
+    return;
+  }
+  res.status(403).send({ mesage: 'Uid does not exist' });
 })
 
 // Post endpoint for creating a single portfolio
+/**
+ * @swagger
+ * /user/pf/create:
+ *   post:
+ *     tags: [Portfolio]
+ *     description: Endpoint for creating a single portfolio
+ *     parameters:
+ *      - name: token
+ *        description: The token of the user
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: name
+ *        description: The name of the portfolio
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Returns the portfolio id
+ *         schema:
+ *            type: object
+ *            properties:
+ *              pid:
+ *                type: string
+ *                description: The pid of the portfolio
+ *       400:
+ *         description: Invalid name or portfolio name already in use
+ *       403: 
+ *         description: Invalid token
+ */
 app.post('/user/portfolios/create', async (req, res) => {
   const { token, name } = req.body;
-  const resp = await createPortfolio(token, name, database);
+  const resp = await createPf(token, name, database);
   if (resp == null) {
     res.status(400).send({ message: "Invalid name or portfolio name already in use" });
   }
@@ -245,9 +359,33 @@ app.post('/user/portfolios/create', async (req, res) => {
 })
 
 // Get endpoint for getting user portfolios
+/**
+ * @swagger
+ * /user/porfolios:
+ *   post:
+ *     tags: [Portfolio]
+ *     description: Endpoint for getting user portfolios
+ *     parameters:
+ *      - name: uid
+ *        description: The id of the user
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Returns the portfolios array
+ *         schema:
+ *            type: array
+ *            properties:
+ *              portfolio:
+ *                type: string
+ *                description: The pid of the portfolio
+ *       403: 
+ *         description: Invalid uid
+ */
 app.get('/user/portfolios', async (req, res) => {
   const { uid } = req.query;
-  const resp = await userPortfolios(uid, database);
+  const resp = await userPfs(uid, database);
   if (resp !== null) {
     res.status(200).send(resp);
     return;
@@ -256,9 +394,67 @@ app.get('/user/portfolios', async (req, res) => {
 })
 
 // Get endpoint for opening single portfolio
+/**
+ * @swagger
+ * /user/porfolios/open:
+ *   post:
+ *     tags: [Portfolio]
+ *     description: Endpoint for opening a single portfolio
+ *     parameters:
+ *      - name: pid
+ *        description: The id of the portfolio
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Returns the portfolio
+ *         schema:
+ *            type: object
+ *            properties:
+ *              portfolioId:
+ *                type: string
+ *                description: The pid of the portfolio
+ *              name:
+ *                type: string
+ *                description: The name of the portfolio
+ *              stock:
+ *                $ref: '#/components/schemas/Stock'
+ *       403: 
+ *         description: Invalid pid
+ */
 app.get('/user/portfolios/open', async (req, res) => {
   const { pid } = req.query;
-  const resp = await openPortfolio(pid, database);
+  const resp = await openPf(pid, database);
+  if (resp !== null) {
+    res.status(200).send(resp);
+    return;
+  }
+  res.status(403).send({ message: "Invalid pid" });
+})
+
+// Delete endpoint for deleting single portfolio
+/**
+ * @swagger
+ * /user/portfolios/delete:
+ *   delete:
+ *     tags: [Portfolio]
+ *     description: endpoint for deleting a single portfolio
+ *     parameters:
+ *      - name: pid
+ *        description: The id of the portfolio
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Successfully deleted portfolio
+ *       403:
+ *         description: Invalid pid
+ */
+app.delete('/user/portfolios/delete', async (req, res) => {
+  const { pid } = req.query;
+  const resp = await deletePf(pid, database);
   if (resp !== null) {
     res.status(200).send(resp);
     return;

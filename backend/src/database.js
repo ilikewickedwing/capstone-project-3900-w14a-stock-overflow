@@ -38,20 +38,20 @@ const COLLECTIONS = [
     Stores all the portfolios of a user in the following form:
     {
       ownerUid: string,
-      portfolios: [string],
+      pfs: [string],
     }
    */
   'userPortos',
   /**
     Stores all the portfolios and their stocks in the following form:
     {
-      portfolioId: string,
+      pid: string,
       name: string,
       stocks: [
         [
           stock: string,
-          buy-in date: string,
-          buy-in price: int,
+          buydate: string,
+          buyprice: int,
         ]
       ],
     }
@@ -148,16 +148,31 @@ export class Database {
     const watchlistId = nanoid();
     await userPortos.insertOne({
       ownerUid: uid,
-      portfolios: [watchlistId],
+      pfs: [watchlistId],
     })
-    const portfolios = this.database.collection('portfolios');
-    await portfolios.insertOne({
-      portfolioId: watchlistId,
+    const pfs = this.database.collection('portfolios');
+    await pfs.insertOne({
+      pid: watchlistId,
       name: "Watchlist",
       stocks: [],
     })
 
     return uid;
+  }
+  /**
+   * Updates a user object in the database and returns whether it was
+   * successful. The userdata contains all the
+   * properties to be changed in the object. Properties that are missing will
+   * not be changed
+   * @param {string} uid 
+   * @param {User} userData
+   * @returns {Promise<boolean}
+   */
+  async updateUser(uid, userData) {
+    const users = this.database.collection('users');
+    const query = { uid: uid };
+    const result = await users.updateOne(query, { $set: userData});
+    return result.modifiedCount !== 0;
   }
   /**
    * Given a uid, delete it from the database. Returns whether it was
@@ -170,7 +185,7 @@ export class Database {
     const users = this.database.collection('users');
     const query = { uid: uid }
     const result = await users.deleteOne(query);
-    return result.deletedCount !== 0 ;
+    return result.deletedCount !== 0;
   }
   /**
    * Returns the password for a given uid, else return null
@@ -213,7 +228,7 @@ export class Database {
     const passwords = this.database.collection('passwords');
     const query = { ownerUid: ownerUid }
     const result = await passwords.deleteOne(query);
-    return result.deletedCount !== 0 ;
+    return result.deletedCount !== 0;
   }
   /**
    * Creates a new token and adds it to the database and returns it
@@ -272,7 +287,14 @@ export class Database {
     }
     return null;
   }
-  async insertPortfolio(uid, name) {
+
+  /**
+   * Returns the portfolio id
+   * @param {string} uid 
+   * @param {string} name 
+   * @returns 
+   */
+  async insertPf(uid, name) {
     if (name == "") {
       return null;
   }
@@ -280,33 +302,80 @@ export class Database {
     const userPortos = this.database.collection('userPortos');
     const query1 = { ownerUid: uid };
     const userPortoResp = await userPortos.findOne(query1);
-    const userPortfolios = userPortoResp.portfolios;
+    const userPfs = userPortoResp.pfs;
 
     // Next check if the user already owns a portfolio with given name
-    const portfolios = this.database.collection('portfolios');
-    const query2 = {$and : [{portfolioId: {$in: userPortfolios}}, {name: {$ne:name}}] };
-    const portfolioResp = await portfolios.find(query2);
+    const pfs = this.database.collection('portfolios');
+    const query2 = {$and : [{pid: {$in: userPfs}}, {name: name}] };
+    const pfResp = await pfs.findOne(query2);
 
     // If user owns no portfolios with same name then create 
     // a new portfolio
-    if (portfolioResp == null) {
-      const portfolioId = nanoid();
-      await portfolios.insertOne({
-        portfolioId: portfolioId,
-        name: name,
-        stocks: [],
-      });
-      userPortfolios.push(portfolioId);
-      await portfolios.updateOne(query1, {portfolios: userPortfolios});
-      return portfolioId;
+    if (pfResp !== null) {
+      return null;
     }
 
+    const Pid = nanoid();
+    await pfs.insertOne({
+      pid: Pid,
+      name: name,
+      stocks: [],
+    });
+    userPfs.push(Pid);
+    await pfs.updateOne(query1, {$set: {pfs: userPfs}});
+    return Pid;
+  }
+
+  /**
+   * Returns the portfolios owned by the user
+   * else returns null if the id is invalid
+   * @param {string} uid
+   * @returns {Promise<array | null>}
+   */
+  async getPfs(uid) {
+    const portos = this.database.collection('userPortos');
+    const query = { uid: uid };
+    const pfResp = await portos.findOne(query);
+    if (pfResp !== null) {
+      return pfResp.pfs;
+    }
     return null;
   }
+
+  /**
+   * Returns the portfolio requested
+   * else returns null if the id is invalid
+   * @param {string} pid 
+   * @returns {Promise<array | null>}
+   */
+  async openPf(pid) {
+    const pfs = this.database.collection('portfolios');
+    const query = { pid: pid };
+    const pfResp = await pfs.findOne(query);
+    if (pfResp !== null) {
+      return pfResp;
+    }
+    return null
+  }
+
+
+  /**
+   * Deletes a given portfolio from the database and
+   * returns whether the portfolio was deleted or not
+   * @param {string} pid 
+   * @returns {Promise<boolean>}
+   */
+  async deletePf(pid) {
+    const pfs = this.database.collection('portfolios');
+    const query = { pid: pid };
+    const result = await pfs.deleteOne(query);
+    return result.deletedCount !== 0 ;
+  }
+
   /**
    * Connect to the database
    */
-  async connect() {
+   async connect() {
     let uri = URI;
     if (this.testmode) {
       // Start test server in memory
@@ -318,11 +387,11 @@ export class Database {
     this.client = new MongoClient(uri);
     // Connect to server
     try {
-      // console.log('Connecting to MongoDB database...');
+      console.log('Connecting to MongoDB database...');
       await this.client.connect();
-      // console.log('Successfully connected to MongoDB database');
+      console.log('Successfully connected to MongoDB database');
     } catch (err) {
-      // console.error('Unable to connect to MongoDb database');
+      console.error('Unable to connect to MongoDb database');
     }
     // Initialise database
     this.database = this.client.db(DATABASENAME);
@@ -332,7 +401,6 @@ export class Database {
       cursor.close();
       if (!hasNext) {
         this.database.createCollection(collection);
-        // console.log(`Created collection ${collection}`);
       }
     }
   }
@@ -344,37 +412,5 @@ export class Database {
     if (this.testmode) {
       this.mongoTestServer.stop();
     }
-  }
-
-  /**
-   * Returns the portfolios owned by the user
-   * else returns null if the id is invalid
-   * @param {string} uid
-   * @returns {Promise<array | null>}
-   */
-  async getPortfolios(uid) {
-    const portfolios = this.database.collection('userPortos');
-    const query = { uid: uid };
-    const portfolioResp = await portfolios.findOne(query);
-    if (portfolioResp !== null) {
-      return portfolioResp.portfolio;
-    }
-    return null;
-  }
-
-  /**
-   * Returns the portfolio requested
-   * else returns null if the id is invalid
-   * @param {string} pid 
-   * @returns {Promise<array | null>}
-   */
-  async openPortfolio(pid) {
-    const portfolios = this.database.collection('portfolios');
-    const query = { pid: pid };
-    const portfolioResp = await portfolios.findOne(query);
-    if (portfolioResp !== null) {
-      return portfolioResp.portfolio;
-    }
-    return null
   }
 }
