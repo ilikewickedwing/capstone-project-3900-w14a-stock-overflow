@@ -1,5 +1,5 @@
 import { authRegister } from "../auth";
-import { createPf, deletePf, userPfs, openPf } from "../portfolio";
+import { createPf, deletePf, userPfs, openPf, getPid } from "../portfolio";
 import { Database } from "../database";
 import request from 'supertest';
 import { app } from "../index";
@@ -27,14 +27,14 @@ describe('Porfolio create', () => {
   })
   it('Creating a new portfolio returns a valid portfolio id', async () => {
     const resp = await createPf(token, 'myPf2', d);
-    const pf = await d.openPf(resp);
+    const pf = await openPf(resp, d);
     expect(pf).toMatchObject({
       pid: expect.any(String)
     })
   })
   it('Creating a new portfolio returns a valid portfolio name', async () => {
     const resp = await createPf(token, 'myPf3', d);
-    const pf = await d.openPf(resp);
+    const pf = await openPf(resp, d);
     expect(pf).toMatchObject({
       name: 'myPf3'
     })
@@ -53,30 +53,83 @@ describe('Portfolio get', () => {
 
   var uid = null;
   var token = null;
+  var wpid = null;
   var pid1 = null;
 
   it('Create new user and check portfolios', async () => {
     const rego = await authRegister('Ashley', 'strongpassword', d);
     uid = rego.uid;
     token = rego.token;
-    const resp = await d.getPfs(uid);
+    const resp = await userPfs(token, d);
     expect(resp).not.toBe(null);
   })
   it('Check watchlist exists upon user creation', async () => {
-    const resp = await d.getPfs(uid);
-    expect(resp).toEqual(expect.any(Array));
+    const resp = await userPfs(token, d);
+    wpid = await getPid(token, "Watchlist", d);
+    const myArray = [wpid];
+    expect(resp).toEqual(expect.arrayContaining(myArray));
   })
   it('Add portfolio to user portfolios', async () => {
     pid1 = await createPf(token, 'myPf', d);
-    const myArray = [pid1];
-    const resp = await d.getPfs(uid);
+    const myArray = [wpid, pid1];
+    const resp = await userPfs(token, d);
     expect(resp).toEqual(expect.arrayContaining(myArray));
   })
   it('Add second portfolio to user portfolios', async () => {
     const pid2 = await createPf(token, 'myPf2', d);
-    const myArray = [pid1, pid2];
-    const resp = await d.getPfs(uid);
+    const myArray = [wpid, pid1, pid2];
+    const resp = await userPfs(token, d);
     expect(resp).toEqual(expect.arrayContaining(myArray));
+  })
+
+  afterAll(async () => {
+    await d.disconnect();
+  })
+})
+
+describe('Portfolio open', () => {
+  const d = new Database(true);
+  beforeAll(async () => {
+    await d.connect();
+  })
+
+  var uid = null;
+  var token = null;
+  var myPid = null;
+
+  it('Create new user and add portfolio', async () => {
+    const rego = await authRegister('Ashley', 'strongpassword', d);
+    uid = rego.uid;
+    token = rego.token;
+    myPid = await createPf(token, 'myPf', d);
+    const myArray = [myPid];
+    const resp = await userPfs(token, d);
+    expect(resp).toEqual(expect.arrayContaining(myArray));
+  })
+  it('Get pid for portfolio', async () => {
+    const pid = await getPid(token, 'myPf', d);
+    expect(pid).toBe(myPid);
+  })
+  it('Open portfolio', async () => {
+    const resp = await openPf(myPid, d);
+    expect(resp).toMatchObject({
+      name: "myPf",
+      pid: myPid,
+      stocks: []
+    })
+  })
+  it('Create new portfolio and open', async () => {
+    const newPid = await createPf(token, 'myPf2', d);
+    const resp = await openPf(newPid, d);
+    expect(resp).toMatchObject({
+      name: "myPf2",
+      pid: newPid,
+      stocks: []
+    })
+  })
+
+  afterAll(async () => {
+    await d.disconnect();
   })
 })
 
@@ -86,7 +139,7 @@ describe('Porfolio delete', () => {
     await d.connect();
   })
 
-  it('Delete portfolio', async () => {
+  it('Create and delete portfolio', async () => {
     const rego = await authRegister('Ashley', 'strongpassword', d);
     const token = rego.token;
     const resp = await createPf(token, 'myPf', d);

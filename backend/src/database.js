@@ -306,7 +306,7 @@ export class Database {
 
     // Next check if the user already owns a portfolio with given name
     const pfs = this.database.collection('portfolios');
-    const query2 = { $and : [ { pid: { $in: userPfs } }, { name: name } ] };
+    const query2 = { $and: [ { pid: { $in: userPfs } }, { name: name } ] };
     const pfResp = await pfs.findOne(query2);
 
     // If user owns no portfolios with same name then create 
@@ -341,6 +341,34 @@ export class Database {
       return userPfs;
     }
     return null;
+  }
+
+  /**
+   * Returns the id of the portfolio given the name
+   * else returns null if the user or name are invalid or portfolio doesn't exist
+   * @param {string} uid 
+   * @param {string} name 
+   * @returns {Promise<string | null>}
+   */
+  async getPid(uid, name) {
+    if (name == "") {
+      return null;
+    }
+
+    const userPortos = this.database.collection('userPortos');
+    const query1 = { ownerUid: uid };
+    const userPortoResp = await userPortos.findOne(query1);
+    const userPfs = userPortoResp.pfs;
+
+    const pfs = this.database.collection('portfolios');
+    const query2 = { $and: [ { pid: { $in: userPfs } }, { name: name } ] };
+    const pfResp = await pfs.findOne(query2);
+
+    if (pfResp == null) {
+      return null;
+    }
+
+    return pfResp.pid;
   }
 
   /**
