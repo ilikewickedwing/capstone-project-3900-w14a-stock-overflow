@@ -4,6 +4,8 @@ const ENDPOINT = 'http://localhost:5050'
 
 export const ApiContext = createContext();
 
+const getToken = () => (`Bearer ${localStorage.getItem('token')}`);
+
 /**
  * Wrapper class to make API calls
  */
@@ -16,6 +18,7 @@ export default class API {
   userProfile(uid) {
     return fetch(`${ENDPOINT}/user/profile?uid=${uid}`)
   }
+
   /**
    * Calls the login endpoint
    * @param {string} username 
@@ -80,4 +83,16 @@ export default class API {
       })
     });
   }
+
+  post(path, options){
+    return fetch(`${ENDPOINT}/${path}`,{
+      ...options,
+      method: 'POST',
+      headers: {
+        accept: 'application/json',
+        'Content-Type': 'application/json',
+        Authorization: getToken(),
+      },
+    });
+    }
 }
