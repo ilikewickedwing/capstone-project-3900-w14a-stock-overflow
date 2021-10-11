@@ -58,17 +58,6 @@ export default function Dashboard() {
   const classes = useStyles();
   const [tabs, setTabs] = React.useState([]);
 
-  // handle logout
-  const onLogOut = async () => {
-    const resp = await api.authLogout(token);
-    if (resp.status === 403) alert('Invalid token');
-    if (resp.status === 200) {
-        alert('Token has been invalidated');
-        history.push('/');
-    } else {
-        alert(`Server returned unexpected status code of ${resp.status}`);
-    }
-  }
 
   // handle delete user
   const onDeleteUser = async () => {
