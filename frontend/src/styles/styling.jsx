@@ -59,3 +59,7 @@ export const LogoutButton = styled(Button)`
 export const TabBar = styled.div`
     margin: 1%;
 `;
+
+export const ConfirmCancel = styled(FlexRows)`
+    justify-content: space-between; 
+`;

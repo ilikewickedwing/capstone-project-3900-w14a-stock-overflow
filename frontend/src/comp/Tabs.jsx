@@ -14,6 +14,7 @@ const Tabs = () => {
 
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [name, setName] = React.useState('');
+    const [tabs, setTabs] = React.useState([]); 
 
     // handle dashboard button
     const gotoDash = () => {
@@ -82,34 +83,34 @@ const Tabs = () => {
             </TabButton>
 
             <Popover
-        id={id}
-        open={open}
-        anchorEl={anchorEl}
-        onClose={handleClose}
-        anchorOrigin={{
-          vertical:'bottom',
-          horizontal:'left',
-        }}
-        transformOrigin={{
-          vertical:'top',
-          horizontal:'center',
-        }}
-      >
-        <CreatePortContent>
-          <form autoComplete="off" onSubmit={submitNewPort}>
-            <CreatePortField
-              required
-              fullWidth
-              id="createPortButton"
-              label="Enter New Portfolio Name"
-              onChange={(e)=> {setName(e.target.value);}}
-            />
-            <br />
-            <Button type="button" onClick={handleClose}>Cancel</Button>
-            <Button type="submit">Create Portfolio</Button>
-          </form>
-        </CreatePortContent>
-      </Popover>
+                id={id}
+                open={open}
+                anchorEl={anchorEl}
+                onClose={handleClose}
+                anchorOrigin={{
+                vertical:'bottom',
+                horizontal:'left',
+                }}
+                transformOrigin={{
+                vertical:'top',
+                horizontal:'center',
+                }}
+            >
+                <CreatePortContent>
+                <form autoComplete="off" onSubmit={submitNewPort}>
+                    <CreatePortField
+                    required
+                    fullWidth
+                    id="createPortButton"
+                    label="Enter New Portfolio Name"
+                    onChange={(e)=> {setName(e.target.value);}}
+                    />
+                    <br />
+                    <Button type="button" onClick={handleClose}>Cancel</Button>
+                    <Button type="submit">Create Portfolio</Button>
+                </form>
+                </CreatePortContent>
+            </Popover>
         </TabBar>
     );
 };

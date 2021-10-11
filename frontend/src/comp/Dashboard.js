@@ -56,8 +56,6 @@ export default function Dashboard() {
   const token = localStorage.getItem('token');
 
   const classes = useStyles();
-  const [tabs, setTabs] = React.useState([]);
-
 
   // handle delete user
   const onDeleteUser = async () => {
@@ -71,20 +69,6 @@ export default function Dashboard() {
     } else {
         alert(`Server returned unexpected status code of ${resp.status}`);
     }
-  }
-
-  const refreshPortfolios = async () => {
-    api.get('user/portfolios',{
-      body: JSON.stringify({
-        token,
-      })
-    })
-      .then((response) => {
-        console.log(response);
-      })
-      .catch((err) => {
-        alert(err); 
-      })
   }
 
   return (
