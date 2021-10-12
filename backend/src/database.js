@@ -405,17 +405,15 @@ export class Database {
     // If name already exists, return null
     for (let i = 0; i < userPfs.length; i++) {
       if (userPfs[i].name == name) {
-        return false;
+        return null;
       }
     }
 
-    var i = 0;
-    while (i < userPfs.length) {
+    for (let i = 0; i < userPfs.length; i++) {
       if (userPfs[i].pid == pid) {
         userPfs.splice(i, 1);
         break;
       }
-      i++;
     }
 
     userPfs.push({ pid: pid, name: name });

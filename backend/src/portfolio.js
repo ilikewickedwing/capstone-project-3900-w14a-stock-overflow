@@ -93,16 +93,27 @@ export const openPf = async (pid, database) => {
  * @returns 
  */
 export const editPf = async (token, pid, name, database) => {
-  if (name == '') return 2;
+  if (name == 'Watchlist') {
+    return 5;
+  }
+
+  if (name == '') {
+    return 2;
+  }
 
   const uid = await database.getTokenUid(token);
-  if (uid === null) return 3;
+  if (uid === null) {
+    return 3;
+  }
 
   const Pf = await database.openPf(pid);
-  if (Pf == null) return 4;
+  if (Pf == null) {
+    return 4;
+  }
 
   const update = await database.editPf(uid, pid, name);
-  return update;
+  if (update) return 1;
+  else return 0;
 }
 
 /**
