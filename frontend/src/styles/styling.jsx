@@ -1,12 +1,17 @@
 import styled from 'styled-components';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
+import TableCell from "@mui/material/TableCell";
 
 export const FlexRows = styled.div`
     display:flex;
     flex-direction: row;
 `;
 
+export const FlexColumns = styled.div`
+    display:flex;
+    flex-direction: column;
+`;
 export const NavBar = styled(FlexRows)`
     justify-content: space-between;
     padding: 0 5%;
@@ -62,4 +67,39 @@ export const TabBar = styled.div`
 
 export const ConfirmCancel = styled(FlexRows)`
     justify-content: space-between; 
+`;
+
+export const LeftBody= styled.div`
+    flex: 2;
+    border: 3px solid black;
+    border-radius: 15px;
+    padding: 2%;
+    margin: 1%;
+`;
+
+export const RightBody= styled(FlexColumns)`
+    flex: 1;
+    border: 3px solid red;
+    justify-content: space-around;
+    margin:1%; 
+    padding: 2%;
+    border-radius: 15px;
+`;
+
+export const PfBody = styled(FlexRows)`
+    width: 100%; 
+    flex:1;
+`;
+
+export const RightCard = styled.div`
+    height: 20%;
+    border 3px solid green;
+    border-radius: 15px;
+    padding: 2%;
+`;
+
+export const PageBody = styled(FlexColumns)`
+    border 3px solid purple;
+    height:100vh;
+    width: 100%;
 `;
