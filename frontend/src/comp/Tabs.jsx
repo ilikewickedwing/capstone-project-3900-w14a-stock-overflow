@@ -32,7 +32,7 @@ const Tabs = () => {
 
     // TODO for richard to tell me how its formatted
     const refreshPortfolios = async () => {
-        api.post('user/portfolios',{
+        api.post('user/portfolios/open',{
           body: JSON.stringify({
             token,
           })
@@ -43,13 +43,23 @@ const Tabs = () => {
             // response.forEach((element) => {
             //     console.log(element);
             // })
-            const reader = response.body.getReader(); 
             console.log(response);
           })
           .catch((err) => {
             alert(err); 
           })
       }
+
+    // const submitNewPort = async () => {
+    //   api.userPf(token)
+    //     .then ((e)=> {
+    //       console.log(e);
+    //       alert("succesfull");
+    //     })
+    //     .catch((err) => {
+    //       alert(err);
+    //     })
+    // }
 
     const submitNewPort = async(e) => {
         console.log(token);
@@ -59,7 +69,8 @@ const Tabs = () => {
             name,
           }),
         })
-          .then (() =>{
+          .then ((e) =>{
+            console.log();
             alert('New portfolio named:'+name+ ' was created');
           })
           .then (() => {

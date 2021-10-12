@@ -5,42 +5,9 @@ import { ApiContext } from '../api';
 
 import { PfBody, LeftBody, RightBody, RightCard, PageBody} from '../styles/styling';
 
-// MUI4 for the rest
-import { makeStyles } from '@material-ui/core/styles';
-
 import Navigation from './Navigation';
 import Tabs from './Tabs';
 
-// adjust container height to change how many cards are displayed on the right column. hacky solution
-const useStyles = makeStyles({
-  box: {
-    height: "100%",
-    width: "100%"
-  },
-  container: {
-    height: "800px"
-  },
-  innerContainer: {
-    height: "100%"
-  },
-  item: {
-    flex: "auto"
-  },
-  root: {
-    minWidth: 275,
-  },
-  bullet: {
-    display: 'inline-block',
-    margin: '0 2px',
-    transform: 'scale(0.8)',
-  },
-  title: {
-    fontSize: 14,
-  },
-  pos: {
-    marginBottom: 12,
-  },
-});
 
 export default function Dashboard() {
   const api = React.useContext(ApiContext);
