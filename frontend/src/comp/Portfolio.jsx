@@ -4,8 +4,10 @@ import { ApiContext } from '../api';
 import Navigation from './Navigation'; 
 import Tabs from './Tabs'; 
 import Popover from '@mui/material/Popover';
-import {CreatePortField, CreatePortContent, ConfirmCancel} from '../styles/styling';
+import {CreatePortField, CreatePortContent, ConfirmCancel,
+        PfBody, LeftBody, RightBody, RightCard, PageBody, FlexRows} from '../styles/styling';
 import Button from '@mui/material/Button';
+import PfTable from './PfTable';
 
 const Portfolio= () => {
     const api = React.useContext(ApiContext);
@@ -51,22 +53,40 @@ const Portfolio= () => {
         e.preventDefault();
     }
 
+
     return (
-        <div>
+        <PageBody>
             <Navigation />
             <Tabs />
             <h1> PORTFOLIO PAGE: Display page name here </h1> 
-            <Button> 
-                Add New Stock
-            </Button>    
-            <Button id="renamePf" onClick={handlePfRename}> 
-                Rename Portfolio
-            </Button>
-            <Button color="secondary" onClick={handleDelete}>
-                Delete Portfolio
-            </Button>
-            <p> print the list of stocks in this  </p>
-
+            <FlexRows>
+              <Button id="renamePf" onClick={handlePfRename}> 
+                  Rename Portfolio
+              </Button>
+              <Button color="secondary" onClick={handleDelete}>
+                  Delete Portfolio
+              </Button>
+            </FlexRows> 
+            <PfBody>
+              <LeftBody>Left Body
+                <p> print the list of stocks in this  </p>
+                <PfTable />
+              <Button> 
+                  Add New Stock
+              </Button>    
+              </LeftBody>
+              <RightBody> Right Body: contains the 3 side cards 
+                <RightCard>
+                  First card
+                </RightCard>
+                <RightCard>
+                  2nd card
+                </RightCard>
+                <RightCard>
+                  3rd
+                </RightCard>
+              </RightBody>
+            </PfBody>
             <Popover
                 id={id}
                 open={open}
@@ -98,7 +118,7 @@ const Portfolio= () => {
                 </form>
                 </CreatePortContent>
             </Popover>
-        </div>
+        </PageBody>
     );
 };
 
