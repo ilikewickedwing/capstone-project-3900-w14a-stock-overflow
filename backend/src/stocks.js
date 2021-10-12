@@ -4,7 +4,9 @@
 
 import { Database } from "./database.js";
 import axios from "axios";
-const apikey = "demo";
+import { Alphavantage } from "./alphavantage.js";
+
+export const alphavantage = new Alphavantage();
 
 /**
  * Gets a list of active stocks
@@ -13,24 +15,8 @@ const apikey = "demo";
  * 
  */
 export const getAllStocks = async () => {
-    const stocks = [];
-
-    // Fetching the list of active stocks
-    const request = await axios.get(`https://www.alphavantage.co/query?function=LISTING_STATUS&apikey=${apikey}`);
-    let result = await request.data;  // Converting result into text
-    result = result.split('\n');        // Splitting every entry
-
-    // Going through every entry
-    result.forEach(stock => {
-        const info = stock.split(',');
-        if (info[3] == "Stock") {   // only add to list if the entry is a stock and not a fund
-            stocks.push({
-                symbol: info[0],
-                name: info[1],
-            })
-        }
-    });
-    return stocks;
+    const resp = await alphavantage.getAllStocks();
+    return resp;
 }
 
 /**
@@ -91,9 +77,7 @@ export const modifyStock = async (token, pid, stock, price, amount, option, data
 }
 
 export const checkStock = async (stock) => {
-    const resp = await axios.get(`https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${stock}&apikey=WP9NF0YE83L4FABK`);
-    if (resp.data['Error Message']) {
-        return false;
-    }
-    return true;
+    const stocks = await alphavantage.getAllStocks();
+    const filteredStocks = stocks.filter(o => o.symbol === stock);
+    return filteredStocks.length !== 0;
 }

@@ -1,4 +1,5 @@
-
+import axios from "axios";
+const apikey = "demo";
 
 export class Alphavantage {
   constructor() {
@@ -6,21 +7,25 @@ export class Alphavantage {
     this.cachedStocks = null;
     // How long in millisecond before calling get all stocks again
     const pollingInterval = 60000;
-    this.intervalObj = setInterval(this._getAllStocks.bind(this), pollingInterval);
+    this.intervalObj = setInterval(() => {this._getAllStocks()}, pollingInterval);
   }
   
   async getAllStocks() {
     // Return cached stocks if available
-    if (this.cacheStocks !== null) {
+    if (this.cachedStocks !== null) {
+      console.log("returning cache")
       return this.cachedStocks;
     }
+    console.log("fetching cache");
     // Else cache doesnt exist so fetch it
     const resp = await this._getAllStocks();
     return resp;
   }
   
   // This makes the actual call to alpha vantage
+  // Dont call this directly
   async _getAllStocks() {
+    const stocks = [];
     // Fetching the list of active stocks
     const request = await axios.get(`https://www.alphavantage.co/query?function=LISTING_STATUS&apikey=${apikey}`);
     let result = await request.data;  // Converting result into text
