@@ -182,7 +182,10 @@ describe('Portfolio get endpoint test', () => {
   })
   it('200 on valid portfolio deletion and subsequent retrieval', async () => {
     const pid = await getPid(token, "myPf", database);
-    const del = await request(app).delete(`/user/portfolios/delete?token=${token}&pid=${pid}`).send();
+    const del = await request(app).delete(`/user/portfolios/delete`).send({
+      token: token,
+      pid: pid
+    });    
     expect(del.statusCode).toBe(200);
     const resp = await request(app).get(`/user/portfolios?token=${token}`).send()
     expect(resp.statusCode).toBe(200);
@@ -544,7 +547,7 @@ describe('Porfolio delete', () => {
   })
   it('Check for portfolio in database', async () => {
     const delResp = await deletePf(token, myPid, d);
-    expect(delResp).toBe(true);
+    expect(delResp).toBe(1);
     const pf = await openPf(myPid, d);
     expect(pf).toBe(null);
   })
@@ -562,7 +565,7 @@ describe('Porfolio delete', () => {
     let myPid1 = await getPid(token, 'myPf', d);
     expect(myPid1).toBe(create);
     const delResp = await deletePf(token, create, d);
-    expect(delResp).toBe(true);
+    expect(delResp).toBe(1);
     const pf = await openPf(create, d);
     expect(pf).toBe(null);
     myPid1 = await getPid(token, 'myPf', d);
@@ -576,3 +579,74 @@ describe('Porfolio delete', () => {
   })
 })
 
+describe('Portfolio delete endpoint test', () => {
+  beforeAll(async () => {
+    await database.connect();
+  })
+
+  let token = null;
+
+  it('200 on valid portfolio deletion', async () => {
+    const rego = await authRegister('Ashley', 'strongpassword', database);
+    token = rego.token;
+    const create = await request(app).post(`/user/portfolios/create`).send({
+      token: token,
+      name: 'myPf'
+    })
+    expect(create.statusCode).toBe(200);
+    expect(create.body).toMatchObject({
+      pid: expect.any(String)
+    });
+    const pid = await getPid(token, "myPf", database);
+    const resp = await request(app).delete(`/user/portfolios/delete`).send({
+      token: token,
+      pid: pid
+    });
+    expect(resp.statusCode).toBe(200);
+    const resp1 = await request(app).get(`/user/portfolios/open?pid=${pid}`).send()
+    expect(resp1.statusCode).toBe(403);
+  })
+  it('400 on invalid pid', async () => {
+    const create = await request(app).post(`/user/portfolios/create`).send({
+      token: token,
+      name: 'myPf'
+    })
+    expect(create.statusCode).toBe(200);
+    expect(create.body).toMatchObject({
+      pid: expect.any(String)
+    });
+    const resp = await request(app).delete(`/user/portfolios/delete`).send({
+      token: token,
+      pid: 'fakepid'
+    });    
+    expect(resp.statusCode).toBe(400);
+  })
+  it('401 on invalid token', async () => {
+    const create = await request(app).post(`/user/portfolios/create`).send({
+      token: token,
+      name: 'myPf2'
+    })
+    expect(create.statusCode).toBe(200);
+    expect(create.body).toMatchObject({
+      pid: expect.any(String)
+    });
+    const pid = await getPid(token, "myPf", database);
+    const resp = await request(app).delete(`/user/portfolios/delete`).send({
+      token: 'faketoken',
+      pid: pid
+    });    
+    expect(resp.statusCode).toBe(401);
+  })
+  it('403 on invalid watchlist deletion', async () => {
+    const pid = await getPid(token, "Watchlist", database);
+    const resp = await request(app).delete(`/user/portfolios/delete`).send({
+      token: token,
+      pid: pid
+    });    
+    expect(resp.statusCode).toBe(403);
+  })
+
+  afterAll(async() => {
+    await database.disconnect();
+  })
+})

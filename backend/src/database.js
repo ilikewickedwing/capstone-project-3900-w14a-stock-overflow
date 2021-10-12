@@ -455,7 +455,8 @@ export class Database {
     }
     await userPortos.updateOne( query2, { $set: { pfs: userPfs } } );
 
-    return result.deletedCount !== 0;
+    if (result.deletedCount !== 0) return 1;
+    else return 0;
   }
 
   /**
