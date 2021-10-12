@@ -4,6 +4,7 @@ import Dashboard from "./comp/Dashboard";
 import API, { ApiContext } from "./api";
 import SignUp from "./comp/SignUp";
 import Portfolio from "./comp/Portfolio";
+import Profile from "./comp/Profile";
 
 function App() {
   const api = new API();
@@ -24,6 +25,9 @@ function App() {
             </Route>
             <Route path="/portfolio">
               <Portfolio/>
+            </Route>
+            <Route path="/profile">
+              <Profile/>
             </Route>
           </Switch>  
         </div>
