@@ -36,7 +36,7 @@ describe('Get User profile endpoint test', () => {
     expect(response.statusCode).toBe(200);
     expect(response.body.username).toBe('Ashley');
   })
-  it('404 on invalid uid', async () => {
+  it('403 on invalid uid', async () => {
     const resp = await authRegister('Ashleay', 'strongpassword', database);
     const response = await request(app).get(`/user/profile?uid=fakeuid&token=${resp.token}`).send();
     expect(response.statusCode).toBe(403);
