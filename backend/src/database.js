@@ -322,7 +322,7 @@ export class Database {
       stocks: [],
     });
     userPfs.push(Pid);
-    await pfs.updateOne(query1, {$set: {pfs: userPfs}});
+    await userPortos.updateOne(query1, {$set: {pfs: userPfs}});
     return Pid;
   }
 
@@ -374,9 +374,11 @@ export class Database {
 
   /**
    * 
-   * @param {*} uid 
-   * @param {*} name 
-   * @returns 
+   * @param {string} pid 
+   * @param {string} stock 
+   * @param {float} price 
+   * @param {int} amount 
+   * @returns {Promise <boolean>}
    */
   async addStocks(pid, stock, price, amount) {
     // Find the corresponding portfolio for the given pid
@@ -386,7 +388,7 @@ export class Database {
 
     // If portfolio does not exist
     if (pfResp !== null) {
-      return null;
+      return false;
     }
 
     const stockList = pfResp.stocks; // The stock list inside the portfolio
@@ -402,13 +404,13 @@ export class Database {
     }
 
     
-    if (stkIndex != -1) {       // If the stock is already in the list
+    if (stkIndex != -1) { // If the stock is already in the list
       let cost = stockList[sstkIndex].avgPrice * stockList[stkIndex].quantity;
       cost += price * amount;
       stockList[stkIndex].quantity += amount;
       stockList[stkIndex].avgPrice = cost / stockList[stkIndex].quantity;
     }
-    else {                      // If the stock is not in the list
+    else { // Else if the stock is not in the list
       stockList.push({
         stock: stock,
         avgPrice: price,
@@ -421,6 +423,13 @@ export class Database {
     return true;
   }
 
+  /**
+   * 
+   * @param {string} pid 
+   * @param {string} stock 
+   * @param {int} amount 
+   * @returns {Promise <boolean>}
+   */
   async sellStocks(pid, stock, amount) {
     // Find the corresponding portfolio for the given pid
     const pfs = this.database.collection('portfolios');
@@ -429,7 +438,7 @@ export class Database {
 
     // If portfolio does not exist
     if (pfResp !== null) {
-      return null;
+      return false;
     }
 
     const stockList = pfResp.stocks; // The stock list in the portfolio
@@ -444,15 +453,44 @@ export class Database {
     }
 
     if (stkIndex != -1) { // If stock is in the portfolio
-      stockList[stkIndex].quantity -= amount;
+      if (stockList[stkIndex].quantity - amount < 0) {
+        return false;
+      }
+      else {
+        stockList[stkIndex].quantity -= amount;
+        if (stockList[stkIndex].quantity == 0) {
+          stockList.splice(stkIndex, 1);
+        }
+      }
     }
-    else {                // If stock does not exist in portfolio
-      return null;
+    else {  // If stock does not exist in portfolio
+      return false;
     }
 
     // Updating database
     await pfs.updateOne(query, {$set: {stocks: stockList}});
     return true;
+  }
+
+  async getStock(pid, stock) {
+    // Find the corresponding portfolio for the given pid
+    const pfs = this.database.collection('portfolios');
+    const query = {pid: pid};
+    const pfResp = await pfs.findOne(query);
+    
+    if (pfResp == null) {
+      return null;
+    }
+
+    const stockList = pfResp.stocks; // The stock list inside the portfolio
+
+    // Trying to find the stock in stockList
+    stockList.forEach(element => {
+      if (element.stock == stock) {
+        return element;
+      }
+    });
+    return null;
   }
 
   /**

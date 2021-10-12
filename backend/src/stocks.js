@@ -2,15 +2,15 @@
   This file manages all stocks specific functions
 */
 
-// import { Database } from "./database";
+import { Database } from "./database";
 import fetch from "node-fetch";
-import { database } from ".";
 const apikey = "demo";
 
 /**
  * Gets a list of active stocks
- * @returns A list of stocks with their symbol and name
- * Return type is : [{symbol: String, name: String}]
+ * @returns {Promise <[{symbol: String, name: String}]>}
+ * A list of stocks with their symbol and name
+ * 
  */
 export const getAllStocks = async () => {
     const stocks = [];
@@ -40,9 +40,13 @@ export const getAllStocks = async () => {
  * @param {string} stock 
  * @param {float} price 
  * @param {int} amount 
- * @returns 
+ * @param {Database} database
+ * @returns {Promise <boolean>}
  */
 export const addStock = async (token, pid, stock, price, amount, database) => {
+    if (!await checkStock(stock)) {
+        return false;
+    }
     // Finding corresponding user for the given token
     const uid = await database.getTokenUid(token);
     if (uid === null) {
@@ -53,7 +57,7 @@ export const addStock = async (token, pid, stock, price, amount, database) => {
     if (resp !== null) {
         return resp;
     }
-    return null;
+    return false;
 }
 
 /**
@@ -63,10 +67,14 @@ export const addStock = async (token, pid, stock, price, amount, database) => {
  * @param {string} stock 
  * @param {float} price 
  * @param {int} amount 
- * @param {int} option 0 = sell, 1 = add
- * @returns 
+ * @param {int} option 0 = sell, anything else = buy
+ * @param {Database} database
+ * @returns {Promise <boolean>}
  */
 export const modifyStock = async (token, pid, stock, price, amount, option, database) => {
+    if (!await checkStock(stock)) {
+        return false;
+    }
     // Finding corresponding user for the given token
     const uid = await database.getTokenUid(token);
     if (uid === null) {
@@ -82,5 +90,13 @@ export const modifyStock = async (token, pid, stock, price, amount, option, data
     if (resp !== null) {
         return resp;
     }
-    return null;
+    return false;
+}
+
+export const checkStock = async (stock) => {
+    const activeStocks = await getAllStocks();
+    if (activeStocks.filter(element => element.name == stock) != []){
+        return true;
+    }
+    return false;
 }
