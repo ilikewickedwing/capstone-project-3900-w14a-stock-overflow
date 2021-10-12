@@ -38,7 +38,12 @@ const COLLECTIONS = [
     Stores all the portfolios of a user in the following form:
     {
       ownerUid: string,
-      pfs: [string],
+      pfs: [
+        {
+          pid: string,
+          name: string,
+        }
+      ],
     }
    */
   'userPortos',
@@ -148,7 +153,12 @@ export class Database {
     const watchlistId = nanoid();
     await userPortos.insertOne({
       ownerUid: uid,
-      pfs: [watchlistId],
+      pfs: [
+        {
+          pid: watchlistId,
+          name: "Watchlist",
+        }
+      ],
     })
     const pfs = this.database.collection('portfolios');
     await pfs.insertOne({
@@ -292,27 +302,25 @@ export class Database {
    * Returns the portfolio id
    * @param {string} uid 
    * @param {string} name 
-   * @returns 
+   * @returns {Promise<string | null>}
    */
   async insertPf(uid, name) {
     if (name == "") {
       return null;
-  }
+    }
     // First query for the user's userPorto
     const userPortos = this.database.collection('userPortos');
     const query1 = { ownerUid: uid };
     const userPortoResp = await userPortos.findOne(query1);
     const userPfs = userPortoResp.pfs;
-
-    // Next check if the user already owns a portfolio with given name
     const pfs = this.database.collection('portfolios');
-    const query2 = {$and : [{pid: {$in: userPfs}}, {name: name}] };
-    const pfResp = await pfs.findOne(query2);
 
     // If user owns no portfolios with same name then create 
     // a new portfolio
-    if (pfResp !== null) {
-      return null;
+    for (let i = 0; i < userPfs.length; i++) {
+      if (userPfs[i].name == name) {
+        return null;
+      }
     }
 
     const Pid = nanoid();
@@ -321,8 +329,8 @@ export class Database {
       name: name,
       stocks: [],
     });
-    userPfs.push(Pid);
-    await userPortos.updateOne(query1, {$set: {pfs: userPfs}});
+    userPfs.push({ pid: Pid, name: name });
+    await userPortos.updateOne( query1, { $set : { pfs: userPfs } } );
     return Pid;
   }
 
@@ -333,12 +341,39 @@ export class Database {
    * @returns {Promise<array | null>}
    */
   async getPfs(uid) {
-    const portos = this.database.collection('userPortos');
-    const query = { uid: uid };
-    const pfResp = await portos.findOne(query);
-    if (pfResp !== null) {
-      return pfResp.pfs;
+    const userPortos = this.database.collection('userPortos');
+    const query = { ownerUid: uid };
+    const userPortoResp = await userPortos.findOne(query);
+    const userPfs = userPortoResp.pfs;
+    if (userPfs !== null) {
+      return userPfs;
     }
+    return null;
+  }
+
+  /**
+   * Returns the id of the portfolio given the name
+   * else returns null if the user or name are invalid or portfolio doesn't exist
+   * @param {string} uid 
+   * @param {string} name 
+   * @returns {Promise<string | null>}
+   */
+  async getPid(uid, name) {
+    if (name == "") {
+      return null;
+    }
+
+    const userPortos = this.database.collection('userPortos');
+    const query1 = { ownerUid: uid };
+    const userPortoResp = await userPortos.findOne(query1);
+    const userPfs = userPortoResp.pfs;
+
+    for (let i = 0; i < userPfs.length; i++) {
+      if (userPfs[i].name == name) {
+        return userPfs[i].pid;
+      }
+    }
+
     return null;
   }
 
@@ -358,18 +393,62 @@ export class Database {
     return null
   }
 
+  async editPf(uid, pid, name) {
+    // Change the name in the database
+    const pfs = this.database.collection('portfolios');
+    const query1 = { pid: pid };
+    const result = await pfs.updateOne(query1, { $set: { name: name } });
+
+    // Change the name in user portfolio list
+    const userPortos = this.database.collection('userPortos');
+    const query2 = { ownerUid: uid };
+    const userPortoResp = await userPortos.findOne(query2);
+    const userPfs = userPortoResp.pfs;
+
+    var i = 0;
+    while (i < userPfs.length) {
+      if (userPfs[i].pid == pid) {
+        userPfs.splice(i, 1);
+        break;
+      }
+      i++;
+    }
+
+    userPfs.push({ pid: pid, name: name });
+    await userPortos.updateOne(query2, { $set: { pfs: userPfs } });
+
+    return result.modifiedCount !== 0;
+  }
+
 
   /**
    * Deletes a given portfolio from the database and
    * returns whether the portfolio was deleted or not
+   * @param {string} uid
    * @param {string} pid 
    * @returns {Promise<boolean>}
    */
-  async deletePf(pid) {
+  async deletePf(uid, pid) {
     const pfs = this.database.collection('portfolios');
-    const query = { pid: pid };
-    const result = await pfs.deleteOne(query);
-    return result.deletedCount !== 0 ;
+    const query1 = { pid: pid };
+    const result = await pfs.deleteOne(query1);
+
+    const userPortos = this.database.collection('userPortos');
+    const query2 = { ownerUid: uid };
+    const userPortoResp = await userPortos.findOne(query2);
+    const userPfs = userPortoResp.pfs;
+
+    var i = 0;
+    while (i < userPfs.length) {
+      if (userPfs[i].pid == pid) {
+        userPfs.splice(i, 1);
+        break;
+      }
+      i++;
+    }
+    await userPortos.updateOne( query2, { $set: { pfs: userPfs } } );
+
+    return result.deletedCount !== 0;
   }
 
   /**
@@ -477,7 +556,7 @@ export class Database {
     const pfs = this.database.collection('portfolios');
     const query = {pid: pid};
     const pfResp = await pfs.findOne(query);
-    
+
     if (pfResp == null) {
       return null;
     }
