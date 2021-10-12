@@ -637,13 +637,9 @@ app.post('/user/stocks/add', async (req, res) => {
  *       401:
  *         description: Invalid token
  *       403:
- *         description: Invalid stock
- *       403:
- *         description: Quantity too high
+ *         description: Invalid stock or Quantity too high
  *       404:
- *         description: Portfolio not found
- *       404:
- *         description: Stock not in portfolio
+ *         description: Stock not in portfolio or Portfolio not found
  */
 app.put('/user/stocks/edit', async (req, res) => {
   const { token, pid, stock, price, amount, option } = req.body;
