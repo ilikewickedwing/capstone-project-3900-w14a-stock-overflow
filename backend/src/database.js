@@ -1,3 +1,4 @@
+import e from "express";
 import { MongoClient } from "mongodb";
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import { nanoid } from 'nanoid';
@@ -55,8 +56,8 @@ const COLLECTIONS = [
       stocks: [
         {
           stock: string,
-          buydate: date,
-          buyprice: int,
+          avgPrice: float,
+          quantity: int,
         }
       ],
     }
@@ -456,6 +457,127 @@ export class Database {
   }
 
   /**
+   * 
+   * @param {string} pid 
+   * @param {string} stock 
+   * @param {float} price 
+   * @param {int} amount 
+   * @returns {Promise <boolean>}
+   */
+  async addStocks(pid, stock, price, amount) {
+    // Find the corresponding portfolio for the given pid
+    const pfs = this.database.collection('portfolios');
+    const query = {pid: pid};
+    const pfResp = await pfs.findOne(query);
+
+    // If portfolio does not exist
+    if (pfResp == null) {
+      return 3;
+    }
+
+    const stockList = pfResp.stocks; // The stock list inside the portfolio
+
+    // Trying to find the index of the stock if it already exists
+    // in stock list
+    let stkIndex = -1;
+    for (let i = 0; i < stockList.length; i++) {
+      if (stockList[i].stock == stock) {
+        stkIndex = i;
+        break;
+      }
+    }
+
+    
+    if (stkIndex != -1) { // If the stock is already in the list
+      let cost = stockList[stkIndex].avgPrice * stockList[stkIndex].quantity;
+      cost += price * amount;
+      stockList[stkIndex].quantity += amount;
+      stockList[stkIndex].avgPrice = cost / stockList[stkIndex].quantity;
+    }
+    else { // Else if the stock is not in the list
+      stockList.push({
+        stock: stock,
+        avgPrice: price,
+        quantity: amount,
+      })
+    }
+
+    // Updating database
+    await pfs.updateOne(query, { $set: { stocks: stockList } } );
+    return true;
+  }
+
+  /**
+   * 
+   * @param {string} pid 
+   * @param {string} stock 
+   * @param {int} amount 
+   * @returns {Promise <boolean>}
+   */
+  async sellStocks(pid, stock, amount) {
+    // Find the corresponding portfolio for the given pid
+    const pfs = this.database.collection('portfolios');
+    const query = {pid: pid};
+    const pfResp = await pfs.findOne(query);
+
+    // If portfolio does not exist
+    if (pfResp == null) {
+      return 3;
+    }
+
+    const stockList = pfResp.stocks; // The stock list in the portfolio
+
+    // Finding the index of the stock in the stock list
+    let stkIndex = -1;
+    for (let i = 0; i < stockList.length; i++) {
+      if (stockList[i].stock == stock) {
+        stkIndex = i;
+        break;
+      }
+    }
+
+    if (stkIndex != -1) { // If stock is in the portfolio
+      if (stockList[stkIndex].quantity - amount < 0) {
+        return 4;
+      }
+      else {
+        stockList[stkIndex].quantity -= amount;
+        if (stockList[stkIndex].quantity == 0) {
+          stockList.splice(stkIndex, 1);
+        }
+      }
+    }
+    else {  // If stock does not exist in portfolio
+      return 5;
+    }
+
+    // Updating database
+    await pfs.updateOne(query, {$set: {stocks: stockList}});
+    return true;
+  }
+
+  async getStock(pid, stock) {
+    // Find the corresponding portfolio for the given pid
+    const pfs = this.database.collection('portfolios');
+    const query = {pid: pid};
+    const pfResp = await pfs.findOne(query);
+
+    if (pfResp == null) {
+      return null;
+    }
+    const stockList = pfResp.stocks; // The stock list inside the portfolio
+
+    // Trying to find the stock in stockList
+    for (let index = 0; index < stockList.length; index++) {
+      const element = stockList[index];
+      if (element.stock == stock) {
+        return element;
+      }
+    }
+    return null;
+  }
+
+  /**
    * Connect to the database
    */
    async connect() {
@@ -483,7 +605,7 @@ export class Database {
       const hasNext = await cursor.hasNext();
       cursor.close();
       if (!hasNext) {
-        this.database.createCollection(collection);
+        await this.database.createCollection(collection);
       }
     }
   }
