@@ -1,5 +1,5 @@
 import React from 'react'; 
-import { useHistory } from 'react-router';
+import { useHistory, useLocation } from 'react-router-dom';
 import { ApiContext } from '../api';
 import Navigation from './Navigation'; 
 import Tabs from './Tabs'; 
@@ -18,58 +18,100 @@ const Portfolio= () => {
     // popover code 
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [name, setName] = React.useState('');
-          //handle popover open and close
+    const [changedName, editName ] = React.useState('');
+    const [isWatchlist, setIsWatchlist] = React.useState(0); 
+
     const handlePfRename = (event) => {
         setAnchorEl(event.currentTarget);
     }
     const handleClose = () => {
         setAnchorEl(null);  
     }
+
+    function useQuery() {
+      return new URLSearchParams(useLocation().search);
+    }
+    const pid = useQuery().get('pid');
+
+
+    const loadPf = async () => {
+      api.get(`user/portfolios/open?pid=${pid}`,{})
+        .then((response) => {
+          response.json().then((e) => {
+            setName(e.name);
+            if (e.name === "Watchlist"){
+              setIsWatchlist(1);
+            } else {setIsWatchlist(0)}
+          })
+        })
+        .catch((err) => {
+          alert(err); 
+        })
+    }
+
+
     const open = Boolean(anchorEl);
     const id = open ? 'simple-popover': undefined;
 
     //TODO IMPLEMENT TO DELETE THE PAGE 
     const submitPfRename = async(e) => {
-        api.post('user/pf/',{
+        console.log(JSON.stringify({
+          token,
+          pid,
+          changedName,
+        }));
+        api.post('user/portfolios/edit',{
           body:JSON.stringify({
             token,
-            name,
+            pid,
+            changedName,
           }),
         })
-          .then (() =>{
-            alert('Portfolio renamed to: ' + name);
+          .then ((e) =>{
+            e.json().then((e) => {
+              console.log(e);
+            })
           })
-          .then (() => {
-            // refresh the page 
-          })
-          .catch ((err)=> {
+          .then (() =>handleClose())
+          // .then (() =>{
+          //   alert('Portfolio renamed to: ' + changedName);
+          // })
+          .catch ((err)=> alert(err))
+        e.preventDefault();
+      }
+    
+    // TODO: handle delete portfolio
+    const handleDelete = async(e) => {
+        api.delete(`user/portfolios/delete?token=${token}&pid=${pid}`,{})
+          .then(()=> alert('delete successful'))
+          .then(()=> history.push('/dashboard'))
+          .catch((err) => {
             alert(err);
           })
         e.preventDefault();
-      }
-
-    // TODO: handle delete portfolio
-    const handleDelete = async(e) => {
-
-        e.preventDefault();
     }
 
+    React.useEffect(() => loadPf(),[]);
 
     return (
         <PageBody>
             <Navigation />
             <Tabs />
-            <h1> PORTFOLIO PAGE: Display page name here </h1> 
+            <h1> PORTFOLIO PAGE: {name}</h1> 
             <FlexRows>
-              <Button id="renamePf" onClick={handlePfRename}> 
-                  Rename Portfolio
-              </Button>
-              <Button color="secondary" onClick={handleDelete}>
-                  Delete Portfolio
-              </Button>
             </FlexRows> 
             <PfBody>
-              <LeftBody>Left Body
+              <LeftBody>
+                {isWatchlist === 0 &&
+                  <div style={{textAlign: 'right', width:'100%'}}>
+                    <Button id="renamePf" onClick={handlePfRename}> 
+                        Rename Portfolio
+                    </Button>
+                    <Button color="secondary" onClick={handleDelete}>
+                        Delete Portfolio
+                    </Button>
+                  </div>
+                }
                 <p> print the list of stocks in this  </p>
                 <PfTable />
               < AddStock />
@@ -104,7 +146,7 @@ const Portfolio= () => {
                     fullWidth
                     id="renamePf"
                     label="Enter New Portfolio Name"
-                    onChange={(e)=> {setName(e.target.value);}}
+                    onChange={(e)=> {editName(e.target.value);}}
                     />
                     <br />
                     <ConfirmCancel>
