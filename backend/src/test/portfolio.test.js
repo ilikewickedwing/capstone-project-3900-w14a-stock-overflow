@@ -1,5 +1,5 @@
 import { authRegister } from "../auth";
-import { createPf, deletePf, userPfs, openPf, getPid } from "../portfolio";
+import { createPf, deletePf, userPfs, openPf, getPid, editPf } from "../portfolio";
 import { Database } from "../database";
 import request from 'supertest';
 import { app } from "../index";
@@ -127,7 +127,68 @@ describe('Portfolio open', () => {
       name: "myPf2",
       pid: newPid,
       stocks: []
-    })
+    });
+  })
+
+  afterAll(async () => {
+    await d.disconnect();
+  })
+})
+
+describe('Portfolio edit', () => {
+  const d = new Database(true);
+  beforeAll(async () => {
+    await d.connect();
+  })
+
+  var uid = null;
+  var token = null;
+  var wPid = null;
+  var myPid = null;
+
+  it('Create new user and add portfolio', async () => {
+    const rego = await authRegister('Ashley', 'strongpassword', d);
+    uid = rego.uid;
+    token = rego.token;
+    wPid = await getPid(token, "Watchlist", d);
+    myPid = await createPf(token, 'myPf', d);
+    const myArray = [{ name: "Watchlist", pid: wPid }, { name: "myPf", pid: myPid }];
+    const resp = await userPfs(token, d);
+    expect(resp).toEqual(expect.arrayContaining(myArray));
+  })
+  it('Edit portfolio', async () => {
+    const resp = await editPf(token, myPid, 'updatedPf', d);
+    expect(resp).not.toBe(null);
+  })
+  it('Edited portfolio name shows up in database', async () => {
+    const resp = await openPf(myPid, d);
+    expect(resp).toMatchObject({
+      name: "updatedPf",
+      pid: myPid,
+      stocks: []
+    });
+  })
+  it('Edited portfolio name shows up in user portfolios', async () => {
+    const resp = await userPfs(token, d);
+    const myArray = [{ name: "Watchlist", pid: wPid }, { name: "updatedPf", pid: myPid }];
+    expect(resp).toEqual(expect.arrayContaining(myArray));
+  })
+  it('Create new portfolio and confirm edit', async () => {
+    const newPid = await createPf(token, 'myPf', d);
+    const myArray1 = [{ name: "myPf", pid: newPid }];
+    const uPfs = await userPfs(token, d);
+    expect(uPfs).toEqual(expect.arrayContaining(myArray1));
+    const edit = await editPf(token, newPid, 'updatedPf2', d);
+    expect(edit).not.toBe(null);
+    const dbPf = await openPf(newPid, d);
+    expect(dbPf).toMatchObject({
+      name: "updatedPf2",
+      pid: newPid,
+      stocks: []
+    });
+    const nuPfs = await userPfs(token, d);
+    const myArray2 = [{ name: "updatedPf2", pid: newPid }];
+    expect(nuPfs).toEqual(expect.arrayContaining(myArray2));
   })
 
   afterAll(async () => {
