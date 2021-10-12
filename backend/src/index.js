@@ -151,18 +151,20 @@ app.get('/user/profile', async (req, res) => {
  *     responses:
  *       200:
  *         description: User profile has been changed
+ *       400:
+ *         description: Invalid token or username already exists
  *       403:
- *         description: Invalid data given
+ *         description: Incorrect priveleges or invalid uid
  */
 app.post('/user/profile', async (req, res) => {
   // TODO
   const { uid, token, userData } = req.body;
-  const resp = postUserProfile(uid, token, userData, database);
-  if (resp) {
-    res.status(200).send();
-    return;
-  }
-  res.status(403).send({ message: 'Invalid token or uid' });
+  await postUserProfile(uid, token, userData, database, res);
+  // if (resp) {
+  //   res.status(200).send();
+  //   return;
+  // }
+  // res.status(403).send({ message: 'Invalid token or uid' });
 })
 
 // Post endpoint for logging into the server
@@ -359,9 +361,11 @@ app.post('/user/portfolios/create', async (req, res) => {
   const resp = await createPf(token, name, database);
   if (resp == null) {
     res.status(400).send({ message: "Invalid name or portfolio name already in use" });
+    return;
   }
   else if (resp == false) {
     res.status(403).send({ message: "Invalid token" });
+    return;
   }
   res.status(200).send(resp);
   return;
