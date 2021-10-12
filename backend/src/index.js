@@ -526,8 +526,9 @@ app.delete('/user/portfolios/delete', async (req, res) => {
     res.status(400).send({ message: "Invalid pid" });
   } else if (resp == 3) {
     res.status(400).send({ message: "Can not delete watchlist" });
+  } else {
+    res.status(403).send({ message: "Invalid pid" });
   }
-  res.status(403).send({ message: "Invalid pid" });
 })
 
 // Post endpoint for adding a stock to a portfolio
