@@ -52,17 +52,17 @@ describe('Add stock', () => {
   })
   it('Adding invalid stock', async () => {
     const resp = await addStock(token, pid, 'Jono', 1.00 , 5, d);
-    expect(resp).toBe(false);
+    expect(resp).toBe(2);
     const stock = await d.getStock(pid, 'Jono');
     expect(stock).toBe(null);
   })
   it('Invalid token', async () => {
     const resp = await addStock('yep', pid, 'IBM', 1.00 , 5, d);
-    expect(resp).toBe(false);
+    expect(resp).toBe(1);
   })
   it('Invalid pid', async () => {
     const resp = await addStock(token, 'pid', 'IBM', 1.00 , 5, d);
-    expect(resp).toBe(false);
+    expect(resp).toBe(3);
   })
 
   afterAll(async () => {
@@ -107,7 +107,7 @@ describe('Modify stock', () => {
   })
   it('Selling more stock than owned', async () => {
     const resp = await modifyStock(token, pid, 'IBM', 1, 555, 0, d);
-    expect(resp).toBe(false);
+    expect(resp).toBe(4);
     const stock = await d.getStock(pid, 'IBM');
     expect(stock).toMatchObject({
         stock: 'IBM',
@@ -117,7 +117,7 @@ describe('Modify stock', () => {
   })
   it('Invalid stock', async () => {
     const resp = await modifyStock(token, pid, 'Jono', 1, 2, 0, d);
-    expect(resp).toBe(false);
+    expect(resp).toBe(2);
   })
   it('Selling whole stock', async () => {
     const resp = await modifyStock(token, pid, 'IBM', 1, 2, 0, d);
@@ -125,13 +125,17 @@ describe('Modify stock', () => {
     const stock = await d.getStock(pid, 'IBM');
     expect(stock).toBe(null);
   })
+  it('Stock is valid but not in portfolio', async () => {
+    const resp = await modifyStock(token, pid, 'IBM', 1, 2, 0, d);
+    expect(resp).toBe(5);
+  })
   it('Invalid token', async () => {
     const resp = await modifyStock('token', pid, 'IBM', 1, 2, 0, d);
-    expect(resp).toBe(false);
+    expect(resp).toBe(1);
   })
   it('Invalid pid', async () => {
     const resp = await modifyStock(token, 'pid', 'IBM', 1, 2, 0, d);
-    expect(resp).toBe(false);
+    expect(resp).toBe(3);
   })
 
   afterAll(async () => {

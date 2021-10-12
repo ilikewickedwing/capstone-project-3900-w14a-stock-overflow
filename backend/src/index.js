@@ -513,7 +513,7 @@ app.delete('/user/portfolios/delete', async (req, res) => {
 /**
  * @swagger
  * /user/stocks/add:
- *   delete:
+ *   post:
  *     tags: [Stocks]
  *     description: endpoint for adding a stock to a portfolio
  *     parameters:
@@ -541,7 +541,7 @@ app.delete('/user/portfolios/delete', async (req, res) => {
  *        description: The number of stocks to be added
  *        in: body
  *        required: true
- *        type: string
+ *        type: int
  *     responses:
  *       200:
  *         description: Successfully added stock
@@ -567,16 +567,16 @@ app.post('/user/stocks/add', async (req, res) => {
   return;
 })
 
-// Put endpoint for deleting single portfolio
+// Put endpoint for adding or removing stocks
 /**
  * @swagger
- * /user/portfolios/delete:
- *   delete:
- *     tags: [Portfolio]
- *     description: endpoint for deleting a single portfolio
+ * /user/stocks/edit:
+ *   put:
+ *     tags: [Stock]
+ *     description: endpoint for adding or removing stocks
  *     parameters:
- *      - name: pid
- *        description: The id of the portfolio
+ *      - name: token
+ *        description: User's token
  *        in: body
  *        required: true
  *        type: string
@@ -585,27 +585,26 @@ app.post('/user/stocks/add', async (req, res) => {
  *        in: body
  *        required: true
  *        type: string
- *      - name: pid
- *        description: The id of the portfolio
+ *      - name: stock
+ *        description: The symbol/stock that is to be added
  *        in: body
  *        required: true
  *        type: string
- *      - name: pid
- *        description: The id of the portfolio
+ *      - name: price
+ *        description: The price of each individual stock
  *        in: body
  *        required: true
- *        type: string
- *      - name: pid
- *        description: The id of the portfolio
+ *        type: float
+ *      - name: amount
+ *        description: The number of stocks to be added
  *        in: body
  *        required: true
- *        type: string
- *      - name: pid
- *        description: The id of the portfolio
+ *        type: int
+ *      - name: option
+ *        description: 0 = sell, else buy
  *        in: body
  *        required: true
- *        type: string
- * 
+ *        type: int
  *     responses:
  *       200:
  *         description: Successfully deleted portfolio
@@ -643,7 +642,7 @@ app.put('/user/stocks/edit', async (req, res) => {
 /**
  * @swagger
  * /user/stocks/all:
- *   delete:
+ *   get:
  *     tags: [Stocks]
  *     description: endpoint for getting every active stock
  *     parameters:
