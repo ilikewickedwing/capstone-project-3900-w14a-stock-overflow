@@ -55,7 +55,12 @@ const Portfolio= () => {
 
     //TODO IMPLEMENT TO DELETE THE PAGE 
     const submitPfRename = async(e) => {
-        api.post('/user/portfolios/edit',{
+        console.log(JSON.stringify({
+          token,
+          pid,
+          changedName,
+        }));
+        api.post('user/portfolios/edit',{
           body:JSON.stringify({
             token,
             pid,
@@ -67,15 +72,11 @@ const Portfolio= () => {
               console.log(e);
             })
           })
-          .then (() =>{
-            handleClose();
-          })
-          .then (() =>{
-            alert('Portfolio renamed to: ' + changedName);
-          })
-          .catch ((err)=> {
-            alert(err);
-          })
+          .then (() =>handleClose())
+          // .then (() =>{
+          //   alert('Portfolio renamed to: ' + changedName);
+          // })
+          .catch ((err)=> alert(err))
         e.preventDefault();
       }
     
