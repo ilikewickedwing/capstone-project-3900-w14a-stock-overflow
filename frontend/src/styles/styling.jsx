@@ -80,7 +80,6 @@ export const LeftBody= styled.div`
 export const RightBody= styled(FlexColumns)`
     flex: 1;
     border: 3px solid red;
-    justify-content: space-around;
     margin:1%; 
     padding: 2%;
     border-radius: 15px;
@@ -96,10 +95,17 @@ export const RightCard = styled.div`
     border 3px solid green;
     border-radius: 15px;
     padding: 2%;
+    margin: 1%; 
 `;
 
 export const PageBody = styled(FlexColumns)`
     border 3px solid purple;
     height:100vh;
     width: 100%;
+`;
+
+export const TextInput = styled(TextField)`
+ &&{
+     margin: 0.5%; 
+ }
 `;

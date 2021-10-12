@@ -8,6 +8,7 @@ import {CreatePortField, CreatePortContent, ConfirmCancel,
         PfBody, LeftBody, RightBody, RightCard, PageBody, FlexRows} from '../styles/styling';
 import Button from '@mui/material/Button';
 import PfTable from './PfTable';
+import AddStock from './AddStock';
 
 const Portfolio= () => {
     const api = React.useContext(ApiContext);
@@ -71,19 +72,14 @@ const Portfolio= () => {
               <LeftBody>Left Body
                 <p> print the list of stocks in this  </p>
                 <PfTable />
-              <Button> 
-                  Add New Stock
-              </Button>    
+              < AddStock />
               </LeftBody>
-              <RightBody> Right Body: contains the 3 side cards 
+              <RightBody>
                 <RightCard>
-                  First card
+                  <h3 style={{textAlign:'center'}}>Daily Estimated Earnings</h3>
                 </RightCard>
                 <RightCard>
                   2nd card
-                </RightCard>
-                <RightCard>
-                  3rd
                 </RightCard>
               </RightBody>
             </PfBody>

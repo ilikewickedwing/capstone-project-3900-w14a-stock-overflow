@@ -47,48 +47,12 @@ describe('Get User profile endpoint test', () => {
   })
 })
 
-describe('Post User profile', () => {
-  const d = new Database(true);
-  // Run this before all the tests
-  beforeAll(async () => {
-    await d.connect();
-  })
-  it('Username will be changed', async () => {
-    const resp = await authRegister('Ashley', 'strongpassword', d);
-    await postUserProfile(resp.uid, resp.token, {
-      username: 'Bob'
-    }, d);
-    const profileResp = await getUserProfile(resp.uid, resp.token, d);
-    expect(profileResp.username).toBe('Bob');
-  })
-  it('Empty object will not change anything', async () => {
-    const resp = await authRegister('Ashley2', 'strongpassword', d);
-    await postUserProfile(resp.uid, resp.token, {}, d);
-    const profileResp = await getUserProfile(resp.uid, resp.token, d);
-    expect(profileResp.username).toBe('Ashley2');
-  })
-  it('Invalid uid will not change anything', async () => {
-    const resp = await authRegister('Ashley3', 'strongpassword', d);
-    const postresp = await postUserProfile('myuid', resp.token, {}, d);
-    expect(postresp).toBe(false);
-  })
-  it('Invalid token will not change anything', async () => {
-    const resp = await authRegister('Ashley4', 'strongpassword', d);
-    const postresp = await postUserProfile(resp.uid, 'faketoken', {}, d);
-    expect(postresp).toBe(false);
-  })
-  // Close the database after all tests
-  afterAll(async () => {
-    await d.disconnect();
-  })
-})
-
 describe('Post User profile endpoint test', () => {
   beforeAll(async () => {
     await database.connect();
   })
   it('200 on valid data change', async () => {
-    const resp = await authRegister('Ashley', 'strongpassword', database);
+    const resp = await authRegister('BAshley', 'strongpassword', database);
     const response = await request(app).post(`/user/profile`).send({
       uid: resp.uid,
       token: resp.token,
@@ -100,6 +64,52 @@ describe('Post User profile endpoint test', () => {
     // Expect profile to be changed
     const profileResp = await getUserProfile(resp.uid, resp.token, database);
     expect(profileResp.username).toBe('Bob');
+  })
+  it('401 on invalid token', async () => {
+    const resp = await authRegister('Ashley1', 'strongpassword', database);
+    const response = await request(app).post(`/user/profile`).send({
+      uid: resp.uid,
+      token: 'bad token',
+      userData: {
+        username: 'Bob'
+      }
+    });
+    expect(response.statusCode).toBe(401);
+  })
+  it('403 on invalid privileges', async () => {
+    const resp = await authRegister('Ashley2', 'strongpassword', database);
+    const resp2 = await authRegister('Ashley3', 'strongpassword', database);
+    const response = await request(app).post(`/user/profile`).send({
+      uid: resp.uid,
+      token: resp2.token,
+      userData: {
+        username: 'Bob'
+      }
+    });
+    expect(response.statusCode).toBe(403);
+  })
+  it('403 on invalid uid', async () => {
+    const resp = await authRegister('Ashley4', 'strongpassword', database);
+    const response = await request(app).post(`/user/profile`).send({
+      uid: 'fake uid',
+      token: resp.token,
+      userData: {
+        username: 'Bob'
+      }
+    });
+    expect(response.statusCode).toBe(403);
+  })
+  it('400 on username that already exists', async () => {
+    const resp = await authRegister('Ashley5', 'strongpassword', database);
+    const resp2 = await authRegister('Ashley6', 'strongpassword', database);
+    const response = await request(app).post(`/user/profile`).send({
+      uid: resp.uid,
+      token: resp.token,
+      userData: {
+        username: 'Ashley6'
+      }
+    });
+    expect(response.statusCode).toBe(400);
   })
   // Close the database after all tests
   afterAll(async () => {
