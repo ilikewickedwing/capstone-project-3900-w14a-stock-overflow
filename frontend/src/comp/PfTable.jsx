@@ -17,6 +17,7 @@ import Checkbox from "@mui/material/Checkbox";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 
 import { visuallyHidden } from "@mui/utils";
 
@@ -71,32 +72,26 @@ function stableSort(array, comparator) {
 const headCells = [
   {
     id: "code",
-    numeric: false,
     label: "Code"
   },
   {
     id: "name",
-    numeric: false,
     label: "Name"
   },
   {
     id: "avgPrice",
-    numeric: true,
     label: "Average Price"
   },
   {
     id: "profitLoss",
-    numeric: true,
     label: "Profit/ Loss "
   },
   {
     id: "units",
-    numeric: true,
     label: "Units"
   },
   {
     id: "value",
-    numeric: true,
     label: "Value"
   }
 ];
@@ -131,7 +126,7 @@ function EnhancedTableHead(props) {
         {headCells.map((headCell) => (
           <TableCell
             key={headCell.id}
-            align={headCell.numeric ? "right" : "left"}
+            align='center'
             padding={headCell.disablePadding ? "none" : "normal"}
             sortDirection={orderBy === headCell.id ? order : false}
           >
@@ -199,18 +194,20 @@ const EnhancedTableToolbar = (props) => {
           Insert Portfolio name
         </Typography>
       )}
-      {numSelected > 0 ? (
+      {numSelected === 1 &&
+        <Tooltip title="Edit">
+          <IconButton>
+            <EditIcon /> 
+          </IconButton>
+        </Tooltip>
+      }
+      {numSelected > 0 &&
         <Tooltip title="Delete">
           <IconButton>
             <DeleteIcon />
           </IconButton>
         </Tooltip>
-      ) : (
-        <Tooltip title="Filter list">
-          <IconButton>
-          </IconButton>
-        </Tooltip>
-      )}
+      }
     </Toolbar>
   );
 };
@@ -331,11 +328,11 @@ export default function PfTable() {
                       >
                         {row.code}
                       </TableCell>
-                      <TableCell >{row.name}</TableCell>
-                      <TableCell >{row.avgPrice}</TableCell>
-                      <TableCell >{row.profitLoss}</TableCell>
-                      <TableCell >{row.units}</TableCell>
-                      <TableCell >{row.value}</TableCell>
+                      <TableCell align="center" >{row.name}</TableCell>
+                      <TableCell align="center" >{row.avgPrice}</TableCell>
+                      <TableCell align="center" >{row.profitLoss}</TableCell>
+                      <TableCell align="center" >{row.units}</TableCell>
+                      <TableCell align="center" >{row.value}</TableCell>
                     </TableRow>
                   );
                 })}
