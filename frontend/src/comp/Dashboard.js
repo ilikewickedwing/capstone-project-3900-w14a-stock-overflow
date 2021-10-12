@@ -6,7 +6,6 @@ import Navigation from './Navigation';
 import Tabs from './Tabs';
 
 export default function Dashboard() {
-
   return (
     <PageBody>
       <Navigation />
