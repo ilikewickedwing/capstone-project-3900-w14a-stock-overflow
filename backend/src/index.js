@@ -360,14 +360,14 @@ app.post('/user/portfolios/create', async (req, res) => {
   const { token, name } = req.body;
   const resp = await createPf(token, name, database);
   if (resp == null) {
-    res.status(400).send({ message: "Invalid name or portfolio name already in use" });
+    res.status(400).send({ message: "Portfolio name already in use" });
     return;
-  }
-  else if (resp == false) {
-    res.status(403).send({ message: "Invalid token" });
+  } else if (resp == false) {
+    res.status(401).send({ message: "Invalid token" });
     return;
-  }
-  res.status(200).send(resp);
+  } else if (resp == 1) {
+    res.status(400).send({ message: "Invalid portfolio name" });
+  } else res.status(200).send(resp);
   return;
 })
 
@@ -398,11 +398,13 @@ app.post('/user/portfolios/create', async (req, res) => {
 app.get('/user/portfolios', async (req, res) => {
   const { token } = req.query;
   const resp = await userPfs(token, database);
-  if (resp !== null) {
+  if (resp == 1) {
+    res.status(401).send({ message: "Invalid token" });
+  } else if (resp == 2) {
+    res.status(404).send({ message: "Portfolios not found" });
+  } else { 
     res.status(200).send(resp);
-    return;
   }
-  res.status(403).send({ message: 'Invalid uid' });
 })
 
 // Get endpoint for opening single portfolio
@@ -471,17 +473,25 @@ app.get('/user/portfolios/open', async (req, res) => {
  *     responses:
  *       200:
  *         description: Portfolio has been changed
+ *       400:
+ *         description: Invalid name or pid
  *       403: 
- *         description: Invalid data given
+ *         description: Invalid token
  */
 app.post('/user/portfolios/edit', async (req, res) => {
   const { token, pid, name } = req.body;
   const resp = editPf(token, pid, name, database);
   if (resp) {
     res.status(200).send();
-    return;
+  } else if (!resp) {
+    res.status(400).send({ message: "Name already in use" });
+  } else if (resp == 2) {
+    res.status(400).send({ message: "Invalid name" });
+  } else if (resp == 3) {
+    res.status(401).send({ message: "Invalid token" });
+  } else if (resp == 4) {
+    res.status(400).send({ message: "Invalid pid" });
   }
-  res.status(403).send({ message: 'Invalid token or pid or name' });
 })
 
 // Delete endpoint for deleting single portfolio
@@ -500,15 +510,22 @@ app.post('/user/portfolios/edit', async (req, res) => {
  *     responses:
  *       200:
  *         description: Successfully deleted portfolio
+ *       400:
+ *         description: Invalid pid or attempted watchlist deletion
  *       403:
- *         description: Invalid pid
+ *         description: Invalid token
  */
 app.delete('/user/portfolios/delete', async (req, res) => {
   const { token, pid } = req.query;
   const resp = await deletePf(token, pid, database);
-  if (resp !== null) {
+  if (resp) {
     res.status(200).send(resp);
-    return;
+  } else if (resp == 1) {
+    res.status(401).send({ message: "Invalid token" });
+  } else if (resp == 2) {
+    res.status(400).send({ message: "Invalid pid" });
+  } else if (resp == 3) {
+    res.status(400).send({ message: "Can not delete watchlist" });
   }
   res.status(403).send({ message: "Invalid pid" });
 })
