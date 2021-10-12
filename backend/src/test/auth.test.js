@@ -1,5 +1,7 @@
 import { authDelete, authLogin, authLogout, authRegister } from "../auth";
 import { Database } from "../database";
+import request from 'supertest';
+import { app, database } from '../index';
 
 describe('Auth register', () => {
   const d = new Database(true);
@@ -132,5 +134,30 @@ describe('Auth Delete', () => {
   // Close the database after all tests
   afterAll(async () => {
     await d.disconnect();
+  })
+})
+
+describe('Auth Delete Endpoint tests', () => {
+  beforeAll(async () => {
+    await database.connect();
+  })
+  it('200 on deleting user', async () => {
+    const resp = await authRegister('Ashley', 'strongpassword', database);
+    const response = await request(app).delete(`/auth/delete`).send({
+      token: resp.token
+    });
+    expect(response.statusCode).toBe(200);
+    const hasname = await database.getUser(resp.uid);
+    expect(hasname).toBe(null);
+  })
+  it('403 on invalid uid', async () => {
+    const response = await request(app).delete(`/auth/delete`).send({
+      token: 'fake token'
+    });
+    expect(response.statusCode).toBe(403);
+  })
+  // Close the database after all tests
+  afterAll(async () => {
+    await database.disconnect();
   })
 })
