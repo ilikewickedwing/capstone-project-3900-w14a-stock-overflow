@@ -480,7 +480,7 @@ app.get('/user/portfolios/open', async (req, res) => {
  */
 app.post('/user/portfolios/edit', async (req, res) => {
   const { token, pid, name } = req.body;
-  const resp = editPf(token, pid, name, database);
+  const resp =  await editPf(token, pid, name, database);
   if (resp == -1) {
     res.status(400).send({ message: "Name already in use" });
   } else if (resp == 2) {
