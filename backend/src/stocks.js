@@ -47,18 +47,15 @@ export const addStock = async (token, pid, stock, price, amount, database) => {
     // Finding corresponding user for the given token
     const uid = await database.getTokenUid(token);
     if (uid === null) {
-        return false;
+        return 1;
     }
 
     if (!await checkStock(stock)) {
-        return false;
+        return 2;
     }
 
     const resp = await database.addStocks(pid, stock, price, amount);
-    if (resp !== null) {
-        return resp;
-    }
-    return false;
+    return resp;
 }
 
 /**
@@ -76,11 +73,11 @@ export const modifyStock = async (token, pid, stock, price, amount, option, data
     // Finding corresponding user for the given token
     const uid = await database.getTokenUid(token);
     if (uid === null) {
-        return false;
+        return 1;
     }
 
     if (!await checkStock(stock)) {
-        return false;
+        return 2;
     }
     
     let resp = null;
@@ -90,10 +87,7 @@ export const modifyStock = async (token, pid, stock, price, amount, option, data
     else {
         resp = await database.sellStocks(pid, stock, amount)
     }
-    if (resp !== null) {
-        return resp;
-    }
-    return false;
+    return resp;
 }
 
 export const checkStock = async (stock) => {

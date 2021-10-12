@@ -468,7 +468,7 @@ export class Database {
 
     // If portfolio does not exist
     if (pfResp == null) {
-      return false;
+      return 3;
     }
 
     const stockList = pfResp.stocks; // The stock list inside the portfolio
@@ -518,7 +518,7 @@ export class Database {
 
     // If portfolio does not exist
     if (pfResp == null) {
-      return false;
+      return 3;
     }
 
     const stockList = pfResp.stocks; // The stock list in the portfolio
@@ -534,7 +534,7 @@ export class Database {
 
     if (stkIndex != -1) { // If stock is in the portfolio
       if (stockList[stkIndex].quantity - amount < 0) {
-        return false;
+        return 4;
       }
       else {
         stockList[stkIndex].quantity -= amount;
@@ -544,7 +544,7 @@ export class Database {
       }
     }
     else {  // If stock does not exist in portfolio
-      return false;
+      return 5;
     }
 
     // Updating database

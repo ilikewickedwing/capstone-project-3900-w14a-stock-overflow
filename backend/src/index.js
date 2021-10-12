@@ -509,30 +509,155 @@ app.delete('/user/portfolios/delete', async (req, res) => {
   res.status(403).send({ message: "Invalid pid" });
 })
 
+// Post endpoint for adding a stock to a portfolio
+/**
+ * @swagger
+ * /user/stocks/add:
+ *   delete:
+ *     tags: [Stocks]
+ *     description: endpoint for adding a stock to a portfolio
+ *     parameters:
+ *      - name: token
+ *        description: User's token
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: pid
+ *        description: The id of the portfolio
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: stock
+ *        description: The symbol/stock that is to be added
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: price
+ *        description: The price of each individual stock
+ *        in: body
+ *        required: true
+ *        type: float
+ *      - name: amount
+ *        description: The number of stocks to be added
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Successfully added stock
+ *       401:
+ *         description: Invalid token
+ *       403:
+ *         description: Invalid pid
+ *       404:
+ *         description: Portfolio not found
+ */
 app.post('/user/stocks/add', async (req, res) => {
   const { token, pid, stock, price, amount } = req.body;
   const resp = await addStock(token, pid, stock, price, amount, database);
-  if (resp == false) {
-    res.status(403).send({ message: "Invalid input" });
+  if (resp == 1) {
+    res.status(401).send({ message: "Invalid token" });
+  } else if (resp == 2) {
+    res.status(403).send({ message: "Invalid stock" });
+  } else if (resp == 3) {
+    res.status(404).send({ message: "Portfolio not found" });
+  } else {
+    res.status(200).send(resp);
   }
-  res.status(200).send(resp);
   return;
 })
 
+// Put endpoint for deleting single portfolio
+/**
+ * @swagger
+ * /user/portfolios/delete:
+ *   delete:
+ *     tags: [Portfolio]
+ *     description: endpoint for deleting a single portfolio
+ *     parameters:
+ *      - name: pid
+ *        description: The id of the portfolio
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: pid
+ *        description: The id of the portfolio
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: pid
+ *        description: The id of the portfolio
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: pid
+ *        description: The id of the portfolio
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: pid
+ *        description: The id of the portfolio
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: pid
+ *        description: The id of the portfolio
+ *        in: body
+ *        required: true
+ *        type: string
+ * 
+ *     responses:
+ *       200:
+ *         description: Successfully deleted portfolio
+ *       401:
+ *         description: Invalid token
+ *       403:
+ *         description: Invalid stock
+ *       403:
+ *         description: Quantity too high
+ *       404:
+ *         description: Portfolio not found
+ *       404:
+ *         description: Stock not in portfolio
+ */
 app.put('/user/stocks/edit', async (req, res) => {
   const { token, pid, stock, price, amount, option } = req.body;
   const resp = await modifyStock(token, pid, stock, price, amount, option, database);
-  if (resp == false) {
-    res.status(403).send({ message: "Invalid input" });
+  if (resp == 1) {
+    res.status(401).send({ message: "Invalid token" });
+  } else if (resp == 2) {
+    res.status(403).send({ message: "Invalid stock" });
+  } else if (resp == 3) {
+    res.status(404).send({ message: "Portfolio not found" });
+  } else if (resp == 4) {
+    res.status(403).send({ message: "Quantity to sell too high" });
+  } else if (resp == 5) {
+    res.status(404).send({ message: "Stock is not in portfolio" });
+  } else {
+    res.status(200).send(resp);
   }
-  res.status(200).send(resp);
   return;
 })
 
+// Get endpoint for getting every active stock
+/**
+ * @swagger
+ * /user/stocks/all:
+ *   delete:
+ *     tags: [Stocks]
+ *     description: endpoint for getting every active stock
+ *     parameters:
+ *     responses:
+ *       200:
+ *         description: Successfully returned every active stock
+ *       502:
+ *         description: Could not connect to API
+ */
 app.get('/user/stocks/all', async (req, res) => {
   const resp = await getAllStocks();
   if (resp == null) {
-    res.status(403).send({ message: "Could not connect to API" });
+    res.status(502).send({ message: "Could not connect to API" });
+    return;
   }
   res.status(200).send(resp);
   return;
