@@ -43,6 +43,18 @@ export const database = new Database();
  *       example:
  *         uid: 9ThIGIrYNeSNIVuMa2jGU
  *         username: XStockMaster64X
+ *     Portfolio:
+ *       type: object
+ *       properties:
+ *         pid:
+ *           type: string
+ *           description: The pid of the portfolio
+ *         name:
+ *           type: string
+ *           description: The name of the portfolio
+ *       example:
+ *         pid: r6UeE86Z4dbYnMhqeJLD
+ *         name: myPortfolio
  *     Stock:
  *       type: object
  *       properties:
@@ -50,7 +62,7 @@ export const database = new Database();
  *           type: string
  *           description: The name of the stock
  *         buydate:
- *           type: string
+ *           type: date
  *           description: The buy in date of the stock
  *         buyprice:
  *           type: int
@@ -316,7 +328,7 @@ app.delete('/auth/delete', async (req, res) => {
 // Post endpoint for creating a single portfolio
 /**
  * @swagger
- * /user/pf/create:
+ * /user/portfolios/create:
  *   post:
  *     tags: [Portfolio]
  *     description: Endpoint for creating a single portfolio
@@ -333,13 +345,10 @@ app.delete('/auth/delete', async (req, res) => {
  *        type: string
  *     responses:
  *       200:
- *         description: Returns the portfolio id
+ *         description: Returns the portfolio id and name
  *         schema:
  *            type: object
- *            properties:
- *              pid:
- *                type: string
- *                description: The pid of the portfolio
+ *            $ref: '#/components/schemas/Portfolio'
  *       400:
  *         description: Invalid name or portfolio name already in use
  *       403: 
@@ -361,13 +370,13 @@ app.post('/user/portfolios/create', async (req, res) => {
 // Get endpoint for getting user portfolios
 /**
  * @swagger
- * /user/porfolios:
- *   post:
+ * /user/portfolios:
+ *   get:
  *     tags: [Portfolio]
  *     description: Endpoint for getting user portfolios
  *     parameters:
- *      - name: uid
- *        description: The id of the user
+ *      - name: token
+ *        description: The token of the user
  *        in: body
  *        required: true
  *        type: string
@@ -378,14 +387,13 @@ app.post('/user/portfolios/create', async (req, res) => {
  *            type: array
  *            properties:
  *              portfolio:
- *                type: string
- *                description: The pid of the portfolio
+ *                $ref: '#/components/schemas/Portfolio'
  *       403: 
  *         description: Invalid uid
  */
 app.get('/user/portfolios', async (req, res) => {
-  const { uid } = req.query;
-  const resp = await userPfs(uid, database);
+  const { token } = req.query;
+  const resp = await userPfs(token, database);
   if (resp !== null) {
     res.status(200).send(resp);
     return;
@@ -396,8 +404,8 @@ app.get('/user/portfolios', async (req, res) => {
 // Get endpoint for opening single portfolio
 /**
  * @swagger
- * /user/porfolios/open:
- *   post:
+ * /user/portfolios/open:
+ *   get:
  *     tags: [Portfolio]
  *     description: Endpoint for opening a single portfolio
  *     parameters:
@@ -436,6 +444,45 @@ app.get('/user/portfolios/open', async (req, res) => {
 // Delete endpoint for deleting single portfolio
 /**
  * @swagger
+ * /user/portfolios/edit:
+ *   post:
+ *     tags: [Portfolio]
+ *     description: endpoint for editing a single portfolio
+ *     parameters:
+ *      - name: token
+ *        description: The token of the user
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: pid
+ *        description: The id of the portfolio
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: name
+ *        description: The name of the portfolio
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Portfolio has been changed
+ *       403: 
+ *         description: Invalid data given
+ */
+app.post('/user/portfolios/edit', async (req, res) => {
+  const { token, pid, name } = req.body;
+  const resp = editPf(token, pid, name, database);
+  if (resp) {
+    res.status(200).send();
+    return;
+  }
+  res.status(403).send({ message: 'Invalid token or pid or name' });
+})
+
+// Delete endpoint for deleting single portfolio
+/**
+ * @swagger
  * /user/portfolios/delete:
  *   delete:
  *     tags: [Portfolio]
@@ -453,8 +500,8 @@ app.get('/user/portfolios/open', async (req, res) => {
  *         description: Invalid pid
  */
 app.delete('/user/portfolios/delete', async (req, res) => {
-  const { pid } = req.query;
-  const resp = await deletePf(pid, database);
+  const { token, pid } = req.query;
+  const resp = await deletePf(token, pid, database);
   if (resp !== null) {
     res.status(200).send(resp);
     return;

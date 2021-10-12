@@ -15,7 +15,7 @@ import { Database } from "./database";
  * @param {string} token 
  * @param {string} name 
  * @param {Database} database 
- * @returns {Promise<array | null>}
+ * @returns {Promise<Pfs | null>}
  */
 export const createPf = async (token, name, database) => {
   const uid = await database.getTokenUid(token);
@@ -39,7 +39,7 @@ export const createPf = async (token, name, database) => {
  * }
  * @param {string} token
  * @param {Database} database
- * @returns {Promise<Pf>}
+ * @returns {Promise<Pfs>}
  */
 export const userPfs = async (token, database) => {
   const uid = await database.getTokenUid(token);
@@ -80,6 +80,15 @@ export const openPf = async (pid, database) => {
   return Pf;
 }
 
+/**
+ * Allows the user to edit the portfolio name
+ * Returns null if portfolio does not exist
+ * @param {string} token 
+ * @param {string} pid 
+ * @param {string} name 
+ * @param {Database} database 
+ * @returns 
+ */
 export const editPf = async (token, pid, name, database) => {
   const uid = await database.getTokenUid(token);
   if (uid === null) {
