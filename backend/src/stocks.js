@@ -3,7 +3,8 @@
 */
 
 import { Database } from "./database";
-import fetch from "node-fetch";
+import fetch from "axios";
+import {jest} from '@jest/globals';
 const apikey = "demo";
 
 /**
@@ -17,6 +18,9 @@ export const getAllStocks = async () => {
 
     // Fetching the list of active stocks
     const request = await fetch(`https://www.alphavantage.co/query?function=LISTING_STATUS&apikey=${apikey}`);
+    if (!requestok) {
+        return null;
+    }
     let result = await request.text();  // Converting result into text
     result = result.split('\n');        // Splitting every entry
 
@@ -44,12 +48,13 @@ export const getAllStocks = async () => {
  * @returns {Promise <boolean>}
  */
 export const addStock = async (token, pid, stock, price, amount, database) => {
-    if (!await checkStock(stock)) {
-        return false;
-    }
     // Finding corresponding user for the given token
     const uid = await database.getTokenUid(token);
     if (uid === null) {
+        return false;
+    }
+
+    if (!await checkStock(stock)) {
         return false;
     }
 
@@ -72,14 +77,16 @@ export const addStock = async (token, pid, stock, price, amount, database) => {
  * @returns {Promise <boolean>}
  */
 export const modifyStock = async (token, pid, stock, price, amount, option, database) => {
-    if (!await checkStock(stock)) {
-        return false;
-    }
     // Finding corresponding user for the given token
     const uid = await database.getTokenUid(token);
     if (uid === null) {
         return false;
     }
+
+    if (!await checkStock(stock)) {
+        return false;
+    }
+    
     const resp = null;
     if (option) {
         resp = await database.addStocks(pid, stock, price, amount);

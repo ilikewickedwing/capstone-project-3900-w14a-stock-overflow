@@ -461,3 +461,32 @@ app.delete('/user/portfolios/delete', async (req, res) => {
   }
   res.status(403).send({ message: "Invalid pid" });
 })
+
+app.post('/user/stocks/add', async (req, res) => {
+  const { token, pid, stock, price, amount } = req.body;
+  const resp = await addStock(token, pid, stock, price, amount, database);
+  if (resp == false) {
+    res.status(403).send({ message: "Invalid input" });
+  }
+  res.status(200).send(resp);
+  return;
+})
+
+app.put('/user/stocks/edit', async (req, res) => {
+  const { token, pid, stock, price, amount, option } = req.body;
+  const resp = await modifyStock(token, pid, stock, price, amount, option, database);
+  if (resp == false) {
+    res.status(403).send({ message: "Invalid input" });
+  }
+  res.status(200).send(resp);
+  return;
+})
+
+app.get('/user/stocks/all', async (req, res) => {
+  const resp = await getAllStocks();
+  if (resp == null) {
+    res.status(403).send({ message: "Could not connect to API" });
+  }
+  res.status(200).send(resp);
+  return;
+})

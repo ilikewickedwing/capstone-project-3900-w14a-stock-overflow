@@ -86,40 +86,55 @@ describe('Modify stock', () => {
     const rego = await authRegister('Ashley', 'strongpassword', d);
     token = rego.token;
     pid = await createPf(token, 'myPf', d);
+    await addStock(token, pid, 'IBM', 1.00, 2, d);
   })
   it('Adding to existing stock', async () => {
-    const resp = await addStock(token, pid, 'IBM', 1.00, 2, d);
+    const resp = await modifyStock(token, pid, 'IBM', .5, 2, 1, d);
     expect(resp).toBe(true);
     const stock = await d.getStock(pid, 'IBM');
     expect(stock).toMatchObject({
       stock: 'IBM',
-      avgPrice: 1.00,
-      quantity: 2,
+      avgPrice: .75,
+      quantity: 4,
     })
   })
   it('Selling part of a stock', async () => {
-    const resp = await addStock(token, pid, 'Jono', 1.00 , 5, d);
+    const resp = await modifyStock(token, pid, 'IBM', .5, 2, 0, d);
+    expect(resp).toBe(true);
+    const stock = await d.getStock(pid, 'IBM');
+    expect(stock).toMatchObject({
+        stock: 'IBM',
+        avgPrice: .75,
+        quantity: 2,
+      })
+  })
+  it('Selling more stock than owned', async () => {
+    const resp = await modifyStock(token, pid, 'IBM', 1, 555, 0, d);
     expect(resp).toBe(false);
-    const stock = await d.getStock(pid, 'Jono');
-    expect(stock).toBe(null);
+    const stock = await d.getStock(pid, 'IBM');
+    expect(stock).toMatchObject({
+        stock: 'IBM',
+        avgPrice: .75,
+        quantity: 2,
+      })
+  })
+  it('Invalid stock', async () => {
+    const resp = await modifyStock(token, pid, 'Jono', 1, 2, 0, d);
+    expect(resp).toBe(false);
   })
   it('Selling whole stock', async () => {
-    const resp = await addStock(token, pid, 'Jono', 1.00 , 5, d);
-    expect(resp).toBe(false);
-    const stock = await d.getStock(pid, 'Jono');
+    const resp = await modifyStock(token, pid, 'IBM', 1, 2, 0, d);
+    expect(resp).toBe(true);
+    const stock = await d.getStock(pid, 'IBM');
     expect(stock).toBe(null);
   })
   it('Invalid token', async () => {
-    const resp = await addStock('yep', pid, 'IBM', 1.00 , 5, d);
+    const resp = await modifyStock('token', pid, 'IBM', 1, 2, 0, d);
     expect(resp).toBe(false);
-    const stock = await d.getStock(pid, 'IBM');
-    expect(stock).toBe(null);
   })
   it('Invalid pid', async () => {
-    const resp = await addStock(token, 'pid', 'IBM', 1.00 , 5, d);
+    const resp = await modifyStock(token, 'pid', 'IBM', 1, 2, 0, d);
     expect(resp).toBe(false);
-    const stock = await d.getStock(pid, 'IBM');
-    expect(stock).toBe(null);
   })
 
   afterAll(async () => {
