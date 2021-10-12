@@ -80,6 +80,16 @@ export const openPf = async (pid, database) => {
   return Pf;
 }
 
+export const editPf = async (token, pid, name, database) => {
+  const uid = await database.getTokenUid(token);
+  if (uid === null) {
+    return false;
+  }
+
+  const update = await database.editPf(uid, pid, name);
+  return update;
+}
+
 /**
  * Deletes portfolio from database
  * @param {string} pid 
