@@ -107,4 +107,16 @@ export default class API {
       },
     });
     }
+
+  delete(path, options){
+    return fetch(`${ENDPOINT}/${path}`, {
+      ...options,
+      method: 'DELETE',
+      headers: {
+        accept: 'application/json',
+        'Content-Type': 'application/json',
+        Authorization: getToken(),
+      },
+    });
+  }
 }
