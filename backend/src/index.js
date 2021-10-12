@@ -360,14 +360,14 @@ app.post('/user/portfolios/create', async (req, res) => {
   const { token, name } = req.body;
   const resp = await createPf(token, name, database);
   if (resp == null) {
-    res.status(400).send({ message: "Invalid name or portfolio name already in use" });
+    res.status(400).send({ message: "Portfolio name already in use" });
     return;
-  }
-  else if (resp == false) {
-    res.status(403).send({ message: "Invalid token" });
+  } else if (resp == false) {
+    res.status(401).send({ message: "Invalid token" });
     return;
-  }
-  res.status(200).send(resp);
+  } else if (resp == 1) {
+    res.status(400).send({ message: "Invalid portfolio name" });
+  } else res.status(200).send(resp);
   return;
 })
 
@@ -398,11 +398,13 @@ app.post('/user/portfolios/create', async (req, res) => {
 app.get('/user/portfolios', async (req, res) => {
   const { token } = req.query;
   const resp = await userPfs(token, database);
-  if (resp !== null) {
+  if (resp == 1) {
+    res.status(401).send({ message: "Invalid token" });
+  } else if (resp == 2) {
+    res.status(404).send({ message: "Portfolios not found" });
+  } else { 
     res.status(200).send(resp);
-    return;
   }
-  res.status(403).send({ message: 'Invalid uid' });
 })
 
 // Get endpoint for opening single portfolio
@@ -471,17 +473,25 @@ app.get('/user/portfolios/open', async (req, res) => {
  *     responses:
  *       200:
  *         description: Portfolio has been changed
+ *       400:
+ *         description: Invalid name or pid
  *       403: 
- *         description: Invalid data given
+ *         description: Invalid token
  */
 app.post('/user/portfolios/edit', async (req, res) => {
   const { token, pid, name } = req.body;
   const resp = editPf(token, pid, name, database);
   if (resp) {
     res.status(200).send();
-    return;
+  } else if (!resp) {
+    res.status(400).send({ message: "Name already in use" });
+  } else if (resp == 2) {
+    res.status(400).send({ message: "Invalid name" });
+  } else if (resp == 3) {
+    res.status(401).send({ message: "Invalid token" });
+  } else if (resp == 4) {
+    res.status(400).send({ message: "Invalid pid" });
   }
-  res.status(403).send({ message: 'Invalid token or pid or name' });
 })
 
 // Delete endpoint for deleting single portfolio
@@ -500,15 +510,176 @@ app.post('/user/portfolios/edit', async (req, res) => {
  *     responses:
  *       200:
  *         description: Successfully deleted portfolio
+ *       400:
+ *         description: Invalid pid or attempted watchlist deletion
  *       403:
- *         description: Invalid pid
+ *         description: Invalid token
  */
 app.delete('/user/portfolios/delete', async (req, res) => {
   const { token, pid } = req.query;
   const resp = await deletePf(token, pid, database);
-  if (resp !== null) {
+  if (resp) {
     res.status(200).send(resp);
+  } else if (resp == 1) {
+    res.status(401).send({ message: "Invalid token" });
+  } else if (resp == 2) {
+    res.status(400).send({ message: "Invalid pid" });
+  } else if (resp == 3) {
+    res.status(400).send({ message: "Can not delete watchlist" });
+  } else {
+    res.status(403).send({ message: "Invalid pid" });
+  }
+})
+
+// Post endpoint for adding a stock to a portfolio
+/**
+ * @swagger
+ * /user/stocks/add:
+ *   post:
+ *     tags: [Stocks]
+ *     description: endpoint for adding a stock to a portfolio
+ *     parameters:
+ *      - name: token
+ *        description: User's token
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: pid
+ *        description: The id of the portfolio
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: stock
+ *        description: The symbol/stock that is to be added
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: price
+ *        description: The price of each individual stock
+ *        in: body
+ *        required: true
+ *        type: float
+ *      - name: amount
+ *        description: The number of stocks to be added
+ *        in: body
+ *        required: true
+ *        type: int
+ *     responses:
+ *       200:
+ *         description: Successfully added stock
+ *       401:
+ *         description: Invalid token
+ *       403:
+ *         description: Invalid pid
+ *       404:
+ *         description: Portfolio not found
+ */
+app.post('/user/stocks/add', async (req, res) => {
+  const { token, pid, stock, price, amount } = req.body;
+  const resp = await addStock(token, pid, stock, price, amount, database);
+  if (resp == 1) {
+    res.status(401).send({ message: "Invalid token" });
+  } else if (resp == 2) {
+    res.status(403).send({ message: "Invalid stock" });
+  } else if (resp == 3) {
+    res.status(404).send({ message: "Portfolio not found" });
+  } else {
+    res.status(200).send(resp);
+  }
+  return;
+})
+
+// Put endpoint for adding or removing stocks
+/**
+ * @swagger
+ * /user/stocks/edit:
+ *   put:
+ *     tags: [Stock]
+ *     description: endpoint for adding or removing stocks
+ *     parameters:
+ *      - name: token
+ *        description: User's token
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: pid
+ *        description: The id of the portfolio
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: stock
+ *        description: The symbol/stock that is to be added
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: price
+ *        description: The price of each individual stock
+ *        in: body
+ *        required: true
+ *        type: float
+ *      - name: amount
+ *        description: The number of stocks to be added
+ *        in: body
+ *        required: true
+ *        type: int
+ *      - name: option
+ *        description: 0 = sell, else buy
+ *        in: body
+ *        required: true
+ *        type: int
+ *     responses:
+ *       200:
+ *         description: Successfully deleted portfolio
+ *       401:
+ *         description: Invalid token
+ *       403:
+ *         description: Invalid stock
+ *       403:
+ *         description: Quantity too high
+ *       404:
+ *         description: Portfolio not found
+ *       404:
+ *         description: Stock not in portfolio
+ */
+app.put('/user/stocks/edit', async (req, res) => {
+  const { token, pid, stock, price, amount, option } = req.body;
+  const resp = await modifyStock(token, pid, stock, price, amount, option, database);
+  if (resp == 1) {
+    res.status(401).send({ message: "Invalid token" });
+  } else if (resp == 2) {
+    res.status(403).send({ message: "Invalid stock" });
+  } else if (resp == 3) {
+    res.status(404).send({ message: "Portfolio not found" });
+  } else if (resp == 4) {
+    res.status(403).send({ message: "Quantity to sell too high" });
+  } else if (resp == 5) {
+    res.status(404).send({ message: "Stock is not in portfolio" });
+  } else {
+    res.status(200).send(resp);
+  }
+  return;
+})
+
+// Get endpoint for getting every active stock
+/**
+ * @swagger
+ * /user/stocks/all:
+ *   get:
+ *     tags: [Stocks]
+ *     description: endpoint for getting every active stock
+ *     parameters:
+ *     responses:
+ *       200:
+ *         description: Successfully returned every active stock
+ *       502:
+ *         description: Could not connect to API
+ */
+app.get('/user/stocks/all', async (req, res) => {
+  const resp = await getAllStocks();
+  if (resp == null) {
+    res.status(502).send({ message: "Could not connect to API" });
     return;
   }
-  res.status(403).send({ message: "Invalid pid" });
+  res.status(200).send(resp);
+  return;
 })

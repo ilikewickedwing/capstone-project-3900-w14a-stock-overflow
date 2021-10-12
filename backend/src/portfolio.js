@@ -18,6 +18,10 @@ import { Database } from "./database";
  * @returns {Promise<Pfs | null>}
  */
 export const createPf = async (token, name, database) => {
+  if (name == "") {
+    return 1;
+  }
+
   const uid = await database.getTokenUid(token);
   if (uid === null) {
     return false;
@@ -33,20 +37,18 @@ export const createPf = async (token, name, database) => {
 
 /**
  * Gets the portfolios for the user
- * Returns portfolio as object in form:
+ * Returns portfolio as array with object in form:
  * {
  *   pid: string,
  *   name: string,
  * }
  * @param {string} token
  * @param {Database} database
- * @returns {Promise<Pfs>}
+ * @returns {Promise<array>}
  */
 export const userPfs = async (token, database) => {
   const uid = await database.getTokenUid(token);
-  if (uid === null) {
-    return false;
-  }
+  if (uid === null) return 1;
   
 	const userPf = await database.getPfs(uid);
   return userPf;
@@ -91,10 +93,13 @@ export const openPf = async (pid, database) => {
  * @returns 
  */
 export const editPf = async (token, pid, name, database) => {
+  if (name == '') return 2;
+
   const uid = await database.getTokenUid(token);
-  if (uid === null) {
-    return false;
-  }
+  if (uid === null) return 3;
+
+  const Pf = await database.openPf(pid);
+  if (Pf == null) return 4;
 
   const update = await database.editPf(uid, pid, name);
   return update;
@@ -109,12 +114,14 @@ export const editPf = async (token, pid, name, database) => {
 export const deletePf = async (token, pid, database) => {
   const uid = await database.getTokenUid(token);
   if (uid === null) {
-    return false;
+    return 1;
   }
 
   const Pf = await database.openPf(pid);
   if (Pf == null) {
-    return false;
+    return 2;
+  } else if (Pf.name == "Watchlist") {
+    return 3;
   }
   // Delete portfolio
   await database.deletePf(uid, pid);
