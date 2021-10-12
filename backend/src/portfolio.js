@@ -120,16 +120,16 @@ export const editPf = async (token, pid, name, database) => {
 export const deletePf = async (token, pid, database) => {
   const uid = await database.getTokenUid(token);
   if (uid === null) {
-    return 1;
+    return 2;
   }
 
   const Pf = await database.openPf(pid);
   if (Pf == null) {
-    return 2;
-  } else if (Pf.name == "Watchlist") {
     return 3;
+  } else if (Pf.name == "Watchlist") {
+    return 4;
   }
   // Delete portfolio
-  await database.deletePf(uid, pid);
-  return true;
+  const del = await database.deletePf(uid, pid);
+  return del;
 }

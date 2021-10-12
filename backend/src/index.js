@@ -520,16 +520,18 @@ app.post('/user/portfolios/edit', async (req, res) => {
  *         description: Invalid token or watchlist deletion attempted
  */
 app.delete('/user/portfolios/delete', async (req, res) => {
-  const { token, pid } = req.query;
+  const { token, pid } = req.body;
   const resp = await deletePf(token, pid, database);
-  if (resp) {
-    res.status(200).send(resp);
-  } else if (resp == 1) {
-    res.status(401).send({ message: "Invalid token" });
+  if (resp == 1) {
+    res.status(200).send();
   } else if (resp == 2) {
-    res.status(400).send({ message: "Invalid pid" });
+    res.status(401).send({ message: "Invalid token" });
   } else if (resp == 3) {
+    res.status(400).send({ message: "Invalid pid" });
+  } else if (resp == 4) {
     res.status(403).send({ message: "Can not delete watchlist" });
+  } else if (resp == 0) {
+    res.status(500).send({ message: "Portfolio not deleted" });
   }
 })
 
