@@ -2,9 +2,8 @@
   This file manages all stocks specific functions
 */
 
-import { Database } from "./database";
-import fetch from "axios";
-import {jest} from '@jest/globals';
+import { Database } from "./database.js";
+import axios from "axios";
 const apikey = "demo";
 
 /**
@@ -17,11 +16,8 @@ export const getAllStocks = async () => {
     const stocks = [];
 
     // Fetching the list of active stocks
-    const request = await fetch(`https://www.alphavantage.co/query?function=LISTING_STATUS&apikey=${apikey}`);
-    if (!requestok) {
-        return null;
-    }
-    let result = await request.text();  // Converting result into text
+    const request = await axios.get(`https://www.alphavantage.co/query?function=LISTING_STATUS&apikey=${apikey}`);
+    let result = await request.data;  // Converting result into text
     result = result.split('\n');        // Splitting every entry
 
     // Going through every entry
@@ -87,7 +83,7 @@ export const modifyStock = async (token, pid, stock, price, amount, option, data
         return false;
     }
     
-    const resp = null;
+    let resp = null;
     if (option) {
         resp = await database.addStocks(pid, stock, price, amount);
     }
@@ -101,9 +97,9 @@ export const modifyStock = async (token, pid, stock, price, amount, option, data
 }
 
 export const checkStock = async (stock) => {
-    const activeStocks = await getAllStocks();
-    if (activeStocks.filter(element => element.name == stock) != []){
-        return true;
+    const resp = await axios.get(`https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${stock}&apikey=WP9NF0YE83L4FABK`);
+    if (resp.data['Error Message']) {
+        return false;
     }
-    return false;
+    return true;
 }

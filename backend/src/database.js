@@ -1,3 +1,4 @@
+import e from "express";
 import { MongoClient } from "mongodb";
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import { nanoid } from 'nanoid';
@@ -466,7 +467,7 @@ export class Database {
     const pfResp = await pfs.findOne(query);
 
     // If portfolio does not exist
-    if (pfResp !== null) {
+    if (pfResp == null) {
       return false;
     }
 
@@ -484,7 +485,7 @@ export class Database {
 
     
     if (stkIndex != -1) { // If the stock is already in the list
-      let cost = stockList[sstkIndex].avgPrice * stockList[stkIndex].quantity;
+      let cost = stockList[stkIndex].avgPrice * stockList[stkIndex].quantity;
       cost += price * amount;
       stockList[stkIndex].quantity += amount;
       stockList[stkIndex].avgPrice = cost / stockList[stkIndex].quantity;
@@ -498,7 +499,7 @@ export class Database {
     }
 
     // Updating database
-    await pfs.updateOne(query, {$set: {stocks: stockList}});
+    await pfs.updateOne(query, { $set: { stocks: stockList } } );
     return true;
   }
 
@@ -516,7 +517,7 @@ export class Database {
     const pfResp = await pfs.findOne(query);
 
     // If portfolio does not exist
-    if (pfResp !== null) {
+    if (pfResp == null) {
       return false;
     }
 
@@ -560,15 +561,15 @@ export class Database {
     if (pfResp == null) {
       return null;
     }
-
     const stockList = pfResp.stocks; // The stock list inside the portfolio
 
     // Trying to find the stock in stockList
-    stockList.forEach(element => {
+    for (let index = 0; index < stockList.length; index++) {
+      const element = stockList[index];
       if (element.stock == stock) {
         return element;
       }
-    });
+    }
     return null;
   }
 

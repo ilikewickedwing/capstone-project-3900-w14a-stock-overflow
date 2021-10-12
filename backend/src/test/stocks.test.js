@@ -12,11 +12,11 @@ describe('Check stock', () => {
   })
 
   it('Checking valid stock', async () => {
-    const resp = await checkStock("IBM");
+    const resp = await checkStock('AAP');
     expect(resp).toBe(true);
   })
   it('Checking invalid stock', async () => {
-    const resp = await checkStock("Jono");
+    const resp = await checkStock('Jono');
     expect(resp).toBe(false);
   })
 
@@ -38,6 +38,7 @@ describe('Add stock', () => {
     const rego = await authRegister('Ashley', 'strongpassword', d);
     token = rego.token;
     pid = await createPf(token, 'myPf', d);
+    expect(pid).not.toBe(null);
   })
   it('Adding valid stock', async () => {
     const resp = await addStock(token, pid, 'IBM', 1.00, 2, d);
@@ -58,14 +59,10 @@ describe('Add stock', () => {
   it('Invalid token', async () => {
     const resp = await addStock('yep', pid, 'IBM', 1.00 , 5, d);
     expect(resp).toBe(false);
-    const stock = await d.getStock(pid, 'IBM');
-    expect(stock).toBe(null);
   })
   it('Invalid pid', async () => {
     const resp = await addStock(token, 'pid', 'IBM', 1.00 , 5, d);
     expect(resp).toBe(false);
-    const stock = await d.getStock(pid, 'IBM');
-    expect(stock).toBe(null);
   })
 
   afterAll(async () => {
