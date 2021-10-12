@@ -361,9 +361,11 @@ app.post('/user/portfolios/create', async (req, res) => {
   const resp = await createPf(token, name, database);
   if (resp == null) {
     res.status(400).send({ message: "Invalid name or portfolio name already in use" });
+    return;
   }
   else if (resp == false) {
     res.status(403).send({ message: "Invalid token" });
+    return;
   }
   res.status(200).send(resp);
   return;
