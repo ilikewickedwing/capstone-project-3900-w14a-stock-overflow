@@ -601,7 +601,7 @@ export class Database {
       const hasNext = await cursor.hasNext();
       cursor.close();
       if (!hasNext) {
-        this.database.createCollection(collection);
+        await this.database.createCollection(collection);
       }
     }
   }
