@@ -403,26 +403,28 @@ export class Database {
     const userPortoResp = await userPortos.findOne(query2);
     const userPfs = userPortoResp.pfs;
 
-    // If name already exists, return null
+    // If name already exists, return -1
     for (let i = 0; i < userPfs.length; i++) {
       if (userPfs[i].name == name) {
-        return false;
+        return -1;
       }
     }
 
-    var i = 0;
-    while (i < userPfs.length) {
+    for (let i = 0; i < userPfs.length; i++) {
       if (userPfs[i].pid == pid) {
+        if (userPfs[i].name == 'Watchlist') {
+          return 5;
+        }
         userPfs.splice(i, 1);
         break;
       }
-      i++;
     }
 
     userPfs.push({ pid: pid, name: name });
     await userPortos.updateOne(query2, { $set: { pfs: userPfs } });
-
-    return result.modifiedCount !== 0;
+ 
+    if (result.modifiedCount !== 0) return 1;
+    else return 0;
   }
 
 
@@ -592,9 +594,9 @@ export class Database {
     this.client = new MongoClient(uri);
     // Connect to server
     try {
-      console.log('Connecting to MongoDB database...');
+      // console.log('Connecting to MongoDB database...');
       await this.client.connect();
-      console.log('Successfully connected to MongoDB database');
+      // console.log('Successfully connected to MongoDB database');
     } catch (err) {
       console.error('Unable to connect to MongoDb database');
     }

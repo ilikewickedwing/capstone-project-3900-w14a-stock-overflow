@@ -3,7 +3,7 @@ import cors from 'cors';
 import { Database } from "./database";
 import swaggerUI from 'swagger-ui-express';
 import { swaggerDocs } from "./docs";
-import { createPf, deletePf, openPf, userPfs } from "./portfolio";
+import { createPf, deletePf, openPf, userPfs, editPf } from "./portfolio";
 import { authDelete, authLogin, authLogout, authRegister } from "./auth";
 import { getUserProfile, postUserProfile } from "./user";
 
@@ -476,14 +476,12 @@ app.get('/user/portfolios/open', async (req, res) => {
  *       400:
  *         description: Invalid name or pid
  *       403: 
- *         description: Invalid token
+ *         description: Invalid token, or watchlist edit attempted
  */
 app.post('/user/portfolios/edit', async (req, res) => {
   const { token, pid, name } = req.body;
-  const resp = editPf(token, pid, name, database);
-  if (resp) {
-    res.status(200).send();
-  } else if (!resp) {
+  const resp =  await editPf(token, pid, name, database);
+  if (resp == -1) {
     res.status(400).send({ message: "Name already in use" });
   } else if (resp == 2) {
     res.status(400).send({ message: "Invalid name" });
@@ -491,6 +489,12 @@ app.post('/user/portfolios/edit', async (req, res) => {
     res.status(401).send({ message: "Invalid token" });
   } else if (resp == 4) {
     res.status(400).send({ message: "Invalid pid" });
+  } else if (resp == 5) {
+    res.status(403).send({ message: "Can not edit watchlist" });
+  } else if (resp == 1) {
+    res.status(200).send();
+  } else {
+    res.status(404).send();
   }
 })
 
@@ -511,9 +515,9 @@ app.post('/user/portfolios/edit', async (req, res) => {
  *       200:
  *         description: Successfully deleted portfolio
  *       400:
- *         description: Invalid pid or attempted watchlist deletion
+ *         description: Invalid pid 
  *       403:
- *         description: Invalid token
+ *         description: Invalid token or watchlist deletion attempted
  */
 app.delete('/user/portfolios/delete', async (req, res) => {
   const { token, pid } = req.query;
@@ -525,9 +529,7 @@ app.delete('/user/portfolios/delete', async (req, res) => {
   } else if (resp == 2) {
     res.status(400).send({ message: "Invalid pid" });
   } else if (resp == 3) {
-    res.status(400).send({ message: "Can not delete watchlist" });
-  } else {
-    res.status(403).send({ message: "Invalid pid" });
+    res.status(403).send({ message: "Can not delete watchlist" });
   }
 })
 
