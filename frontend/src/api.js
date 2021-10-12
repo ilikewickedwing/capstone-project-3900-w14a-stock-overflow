@@ -94,7 +94,7 @@ export default class API {
         Authorization: getToken(),
       },
     });
-    }
+  }
 
   get(path, options){
     return fetch(`${ENDPOINT}/${path}`,{
@@ -106,7 +106,7 @@ export default class API {
         Authorization: getToken(),
       },
     });
-    }
+  }
 
   delete(path, options){
     return fetch(`${ENDPOINT}/${path}`, {
