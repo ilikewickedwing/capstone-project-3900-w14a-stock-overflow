@@ -403,15 +403,18 @@ export class Database {
     const userPortoResp = await userPortos.findOne(query2);
     const userPfs = userPortoResp.pfs;
 
-    // If name already exists, return null
+    // If name already exists, return -1
     for (let i = 0; i < userPfs.length; i++) {
       if (userPfs[i].name == name) {
-        return null;
+        return -1;
       }
     }
 
     for (let i = 0; i < userPfs.length; i++) {
       if (userPfs[i].pid == pid) {
+        if (userPfs[i].name == 'Watchlist') {
+          return 5;
+        }
         userPfs.splice(i, 1);
         break;
       }

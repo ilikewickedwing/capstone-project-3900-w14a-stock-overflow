@@ -322,6 +322,7 @@ describe('Portfolio edit', () => {
   it('Edit portfolio', async () => {
     const resp = await editPf(token, myPid, 'updatedPf', d);
     expect(resp).not.toBe(null);
+    expect(resp).toBe(1);
   })
   it('Edited portfolio name shows up in database', async () => {
     const resp = await openPf(myPid, d);
@@ -344,6 +345,7 @@ describe('Portfolio edit', () => {
     expect(uPfs).toEqual(expect.arrayContaining(myArray1));
     const edit = await editPf(token, newPid, 'updatedPf2', d);
     expect(edit).not.toBe(null);
+    expect(edit).toBe(1);
     const dbPf = await openPf(newPid, d);
     expect(dbPf).toMatchObject({
       name: "updatedPf2",
@@ -354,170 +356,195 @@ describe('Portfolio edit', () => {
     const myArray2 = [{ name: "updatedPf2", pid: newPid }];
     expect(nuPfs).toEqual(expect.arrayContaining(myArray2));
   })
+  it('Can not edit with name that is already in use', async () => {
+    const getpid = await createPf(token, 'myPf', d);
+    const newPid = getpid.pid;
+    const myArray = [{ name: "myPf", pid: newPid }];
+    const uPfs1 = await userPfs(token, d);
+    expect(uPfs1).toEqual(expect.arrayContaining(myArray));
+    const edit = await editPf(token, newPid, 'updatedPf', d);
+    expect(edit).toBe(-1);
+  })
+  it('Can not edit with invalid name', async () => {
+    const edit = await editPf(token, myPid, '', d);
+    expect(edit).toBe(2);
+  })
+  it('Can not edit watchlist', async () => {
+    const edit = await editPf(token, wPid, "updatedPf3", d);
+    expect(edit).toBe(5);
+  })
+  it('Can not edit with invalid token', async () => {
+    const edit = await editPf("faketoken", myPid, "updatedPf3", d);
+    expect(edit).toBe(3);
+  })
+  it('Can not edit with invalid pid', async () => {
+    const edit = await editPf(token, "fakepid", 'updatedPf3', d);
+    expect(edit).toBe(4);
+  })
 
   afterAll(async () => {
     await d.disconnect();
   })
 })
 
-describe('Portfolio edit endpoint test', () => {
-  beforeAll(async () => {
-    await database.connect();
-  })
+// describe('Portfolio edit endpoint test', () => {
+//   beforeAll(async () => {
+//     await database.connect();
+//   })
 
-  var token = null;
+//   var token = null;
 
-  it('200 on valid portfolio edit', async () => {
-    const rego = await authRegister('Ashley', 'strongpassword', database);
-    token = rego.token;
-    const create = await request(app).post(`/user/portfolios/create`).send({
-      token: token,
-      name: 'myPf'
-    })
-    expect(create.statusCode).toBe(200);
-    expect(create.body).toMatchObject({
-      pid: expect.any(String)
-    });
-    const pid = await getPid(token, "myPf", database);
-    const resp = await request(app).post(`/user/portfolios/edit`).send({
-      token: token,
-      pid: pid,
-      name: 'updatedPf'
-    })
-    expect(resp.statusCode).toBe(200);
-    const pid1 = await getPid(token, "updatedPf", database);
-    // expect(pid1).toBe(pid);
-    const pid2 = await getPid(token, 'myPf', database);
-    // expect(pid2).toBe(null);
-    const resp1 = await request(app).get(`/user/portfolios/open?pid=${pid}`).send()
-    expect(resp1.statusCode).toBe(200);
-    expect(resp1.body).toMatchObject({
-      name: "updatedPf",
-      pid: pid,
-      stocks: []
-    })
-  })
-  /**it('400 on name already being used', async () => {
-    const resp3 = await request(app).get(`/user/portfolios?token=${token}`).send()
-    expect(resp3.statusCode).toBe(200);
-    expect(resp3.body[0]).toMatchObject({ 
-      name: "Watchlist",
-      pid: expect.any(String),
-    });
-    expect(resp3.body[1]).toMatchObject({
-      name: "updatedPf",
-      pid: expect.any(String),
-    })
-    const create = await request(app).post(`/user/portfolios/create`).send({
-      token: token,
-      name: 'myPf'
-    })
-    expect(create.statusCode).toBe(200);
-    expect(create.body).toMatchObject({
-      pid: expect.any(String)
-    });
-    const resp4 = await request(app).get(`/user/portfolios?token=${token}`).send()
-    expect(resp4.statusCode).toBe(200);
-    expect(resp4.body[0]).toMatchObject({ 
-      name: "Watchlist",
-      pid: expect.any(String),
-    });
-    expect(resp4.body[1]).toMatchObject({
-      name: "updatedPf",
-      pid: expect.any(String),
-    })
-    expect(resp4.body[2]).toMatchObject({
-      name: "myPf",
-      pid: expect.any(String),
-    })
-    const pid = await getPid(token, "myPf", database);
-    const resp = await request(app).post(`/user/portfolios/edit`).send({
-      token: token,
-      pid: pid,
-      name: 'updatedPf'
-    })
+//   it('200 on valid portfolio edit', async () => {
+//     const rego = await authRegister('Ashley', 'strongpassword', database);
+//     token = rego.token;
+//     const create = await request(app).post(`/user/portfolios/create`).send({
+//       token: token,
+//       name: 'myPf'
+//     })
+//     expect(create.statusCode).toBe(200);
+//     expect(create.body).toMatchObject({
+//       pid: expect.any(String)
+//     });
+//     const pid = await getPid(token, "myPf", database);
+//     const resp = await request(app).post(`/user/portfolios/edit`).send({
+//       token: token,
+//       pid: pid,
+//       name: 'updatedPf'
+//     })
+//     expect(resp.statusCode).toBe(200);
+//     const pid1 = await getPid(token, "updatedPf", database);
+//     // expect(pid1).toBe(pid);
+//     const pid2 = await getPid(token, 'myPf', database);
+//     // expect(pid2).toBe(null);
+//     const resp1 = await request(app).get(`/user/portfolios/open?pid=${pid}`).send()
+//     expect(resp1.statusCode).toBe(200);
+//     expect(resp1.body).toMatchObject({
+//       name: "updatedPf",
+//       pid: pid,
+//       stocks: []
+//     })
+//   })
+//   /**it('400 on name already being used', async () => {
+//     const resp3 = await request(app).get(`/user/portfolios?token=${token}`).send()
+//     expect(resp3.statusCode).toBe(200);
+//     expect(resp3.body[0]).toMatchObject({ 
+//       name: "Watchlist",
+//       pid: expect.any(String),
+//     });
+//     expect(resp3.body[1]).toMatchObject({
+//       name: "updatedPf",
+//       pid: expect.any(String),
+//     })
+//     const create = await request(app).post(`/user/portfolios/create`).send({
+//       token: token,
+//       name: 'myPf'
+//     })
+//     expect(create.statusCode).toBe(200);
+//     expect(create.body).toMatchObject({
+//       pid: expect.any(String)
+//     });
+//     const resp4 = await request(app).get(`/user/portfolios?token=${token}`).send()
+//     expect(resp4.statusCode).toBe(200);
+//     expect(resp4.body[0]).toMatchObject({ 
+//       name: "Watchlist",
+//       pid: expect.any(String),
+//     });
+//     expect(resp4.body[1]).toMatchObject({
+//       name: "updatedPf",
+//       pid: expect.any(String),
+//     })
+//     expect(resp4.body[2]).toMatchObject({
+//       name: "myPf",
+//       pid: expect.any(String),
+//     })
+//     const pid = await getPid(token, "myPf", database);
+//     const resp = await request(app).post(`/user/portfolios/edit`).send({
+//       token: token,
+//       pid: pid,
+//       name: 'updatedPf'
+//     })
 
-    const resp5 = await request(app).get(`/user/portfolios?token=${token}`).send()
-    expect(resp5.statusCode).toBe(200);
-    expect(resp5.body[0]).toMatchObject({ 
-      name: "Watchlist",
-      pid: expect.any(String),
-    });
-    expect(resp5.body[1]).toMatchObject({
-      name: "updatedPf",
-      pid: expect.any(String),
-    })
-    expect(resp5.body[2]).toMatchObject({
-      name: "myPf",
-      pid: expect.any(String),
-    })
+//     const resp5 = await request(app).get(`/user/portfolios?token=${token}`).send()
+//     expect(resp5.statusCode).toBe(200);
+//     expect(resp5.body[0]).toMatchObject({ 
+//       name: "Watchlist",
+//       pid: expect.any(String),
+//     });
+//     expect(resp5.body[1]).toMatchObject({
+//       name: "updatedPf",
+//       pid: expect.any(String),
+//     })
+//     expect(resp5.body[2]).toMatchObject({
+//       name: "myPf",
+//       pid: expect.any(String),
+//     })
 
-    expect(resp.statusCode).toBe(400);
-    expect(resp.body.message).toBe("Name already in use");
-  })*/
-  it('400 on invalid name provided', async () => {
-    const create = await request(app).post(`/user/portfolios/create`).send({
-      token: token,
-      name: 'myPf1'
-    })
-    expect(create.statusCode).toBe(200);
-    expect(create.body).toMatchObject({
-      pid: expect.any(String)
-    });
+//     expect(resp.statusCode).toBe(400);
+//     expect(resp.body.message).toBe("Name already in use");
+//   })*/
+//   it('400 on invalid name provided', async () => {
+//     const create = await request(app).post(`/user/portfolios/create`).send({
+//       token: token,
+//       name: 'myPf1'
+//     })
+//     expect(create.statusCode).toBe(200);
+//     expect(create.body).toMatchObject({
+//       pid: expect.any(String)
+//     });
 
-    const pid = await getPid(token, "myPf1", database);
-    const resp = await request(app).post(`/user/portfolios/edit`).send({
-      token: token,
-      pid: pid,
-      name: ''
-    })
-    expect(resp.statusCode).toBe(400);
-    expect(resp.body.message).toBe("Invalid name");
-  })
-  it('400 on invalid pid', async () => {
-    const resp = await request(app).post(`/user/portfolios/edit`).send({
-      token: token,
-      pid: "fakepid",
-      name: 'My name'
-    })
-    expect(resp.statusCode).toBe(400);
-    expect(resp.body.message).toBe("Invalid pid");
-  })
-  it('401 on invalid token', async () => {
-    const create = await request(app).post(`/user/portfolios/create`).send({
-      token: token,
-      name: 'myPf2'
-    })
-    expect(create.statusCode).toBe(200);
-    expect(create.body).toMatchObject({
-      pid: expect.any(String)
-    });
+//     const pid = await getPid(token, "myPf1", database);
+//     const resp = await request(app).post(`/user/portfolios/edit`).send({
+//       token: token,
+//       pid: pid,
+//       name: ''
+//     })
+//     expect(resp.statusCode).toBe(400);
+//     expect(resp.body.message).toBe("Invalid name");
+//   })
+//   it('400 on invalid pid', async () => {
+//     const resp = await request(app).post(`/user/portfolios/edit`).send({
+//       token: token,
+//       pid: "fakepid",
+//       name: 'My name'
+//     })
+//     expect(resp.statusCode).toBe(400);
+//     expect(resp.body.message).toBe("Invalid pid");
+//   })
+//   it('401 on invalid token', async () => {
+//     const create = await request(app).post(`/user/portfolios/create`).send({
+//       token: token,
+//       name: 'myPf2'
+//     })
+//     expect(create.statusCode).toBe(200);
+//     expect(create.body).toMatchObject({
+//       pid: expect.any(String)
+//     });
 
-    const pid = await getPid(token, "myPf2", database);
+//     const pid = await getPid(token, "myPf2", database);
 
-    const resp = await request(app).post(`/user/portfolios/edit`).send({
-      token: "faketoken",
-      pid: pid,
-      name: 'My name'
-    })
-    expect(resp.statusCode).toBe(400);
-    expect(resp.body.message).toBe("Invalid pid");
-  })
-  it('403 on invalid watchlist edit', async () => {
-    const pid = await getPid(token, "Watchlist", database);
-    const resp = await request(app).post(`/user/portfolios/edit`).send({
-      token: token,
-      pid: pid,
-      name: 'My name'
-    })
-    expect(resp.statusCode).toBe(403);
-    expect(resp.body.message).toBe("Can not edit watchlist");
-  })
+//     const resp = await request(app).post(`/user/portfolios/edit`).send({
+//       token: "faketoken",
+//       pid: pid,
+//       name: 'My name'
+//     })
+//     expect(resp.statusCode).toBe(400);
+//     expect(resp.body.message).toBe("Invalid pid");
+//   })
+//   it('403 on invalid watchlist edit', async () => {
+//     const pid = await getPid(token, "Watchlist", database);
+//     const resp = await request(app).post(`/user/portfolios/edit`).send({
+//       token: token,
+//       pid: pid,
+//       name: 'My name'
+//     })
+//     expect(resp.statusCode).toBe(403);
+//     expect(resp.body.message).toBe("Can not edit watchlist");
+//   })
 
-  afterAll(async() => {
-    await database.disconnect();
-  })
-})
+//   afterAll(async() => {
+//     await database.disconnect();
+//   })
+// })
 
 describe('Porfolio delete', () => {
 	const d = new Database(true);
