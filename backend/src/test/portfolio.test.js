@@ -70,6 +70,7 @@ describe('Portfolio create endpoint test', () => {
       name: ''
     })
     expect(resp.statusCode).toBe(400);
+    expect(resp.body.message).toBe("Invalid portfolio name");
   })
   it('400 on invalid portfolio name ie. duplicate', async () => {
     const resp = await request(app).post(`/user/portfolios/create`).send({
@@ -77,13 +78,14 @@ describe('Portfolio create endpoint test', () => {
       name: 'myPf'
     })
     expect(resp.statusCode).toBe(400);
+    expect(resp.body.message).toBe("Portfolio name already in use");
   })
-  it('403 on invalid token', async () => {
+  it('401 on invalid token', async () => {
     const resp = await request(app).post(`/user/portfolios/create`).send({
       token: "faketoken",
       name: 'myPf'
     })
-    expect(resp.statusCode).toBe(403);
+    expect(resp.statusCode).toBe(401);
   })
 
   afterAll(async() => {
@@ -108,6 +110,10 @@ describe('Portfolio get', () => {
     token = rego.token;
     const resp = await userPfs(token, d);
     expect(resp).not.toBe(null);
+    expect(resp[0]).toMatchObject({ 
+      name: "Watchlist",
+      pid: expect.any(String),
+    });
   })
   it('Check watchlist exists upon user creation', async () => {
     const resp = await userPfs(token, d);
@@ -134,6 +140,65 @@ describe('Portfolio get', () => {
 
   afterAll(async () => {
     await d.disconnect();
+  })
+})
+
+describe('Portfolio get endpoint test', () => {
+  beforeAll(async () => {
+    await database.connect();
+  })
+
+  var token = null;
+
+  it('200 on valid portfolio retrieval', async () => {
+    const rego = await authRegister('Ashley', 'strongpassword', database);
+    token = rego.token;
+    const resp = await request(app).get(`/user/portfolios?token=${token}`).send()
+    expect(resp.statusCode).toBe(200);
+    expect(resp.body[0]).toMatchObject({ 
+      name: "Watchlist",
+      pid: expect.any(String),
+    });
+  })
+  it('200 on valid portfolio creation and subsequent retrieval', async () => {
+    const create = await request(app).post(`/user/portfolios/create`).send({
+      token: token,
+      name: 'myPf'
+    })
+    expect(create.statusCode).toBe(200);
+    expect(create.body).toMatchObject({
+      pid: expect.any(String)
+    });
+    const resp = await request(app).get(`/user/portfolios?token=${token}`).send()
+    expect(resp.statusCode).toBe(200);
+    expect(resp.body[0]).toMatchObject({ 
+      name: "Watchlist",
+      pid: expect.any(String),
+    });
+    expect(resp.body[1]).toMatchObject({
+      name: "myPf",
+      pid: expect.any(String),
+    })
+  })
+  it('200 on valid portfolio deletion and subsequent retrieval', async () => {
+    const pid = await getPid(token, "myPf", database);
+    const del = await request(app).delete(`/user/portfolios/delete?token=${token}&pid=${pid}`).send();
+    expect(del.statusCode).toBe(200);
+    const resp = await request(app).get(`/user/portfolios?token=${token}`).send()
+    expect(resp.statusCode).toBe(200);
+    expect(resp.body[0]).toMatchObject({ 
+      name: "Watchlist",
+      pid: expect.any(String),
+    });
+    expect(resp.body[1]).toBe(undefined);
+  })
+  it('401 on invalid token', async () => {
+    const resp = await request(app).get(`/user/portfolios?token=faketoken`).send()
+    expect(resp.statusCode).toBe(401);
+  })
+
+  afterAll(async() => {
+    await database.disconnect();
   })
 })
 
@@ -182,6 +247,56 @@ describe('Portfolio open', () => {
 
   afterAll(async () => {
     await d.disconnect();
+  })
+})
+
+describe('Portfolio open endpoint test', () => {
+  beforeAll(async () => {
+    await database.connect();
+  })
+
+  var token = null;
+
+  it('200 on valid watchlist open', async () => {
+    const rego = await authRegister('Ashley', 'strongpassword', database);
+    token = rego.token;
+    const pid = await getPid(token, "Watchlist", database);
+    const resp = await request(app).get(`/user/portfolios/open?pid=${pid}`).send()
+    expect(resp.statusCode).toBe(200);
+    expect(resp.body).toMatchObject({ 
+      name: "Watchlist",
+      pid: pid,
+      stocks: []
+    });
+  })
+  it('200 on valid portfolio creation and subsequent retrieval', async () => {
+    const create = await request(app).post(`/user/portfolios/create`).send({
+      token: token,
+      name: 'myPf'
+    })
+    expect(create.statusCode).toBe(200);
+    expect(create.body).toMatchObject({
+      pid: expect.any(String)
+    });
+    const pid = await getPid(token, "myPf", database);
+    const resp = await request(app).get(`/user/portfolios/open?pid=${pid}`).send()
+    expect(resp.statusCode).toBe(200);
+    expect(resp.body).toMatchObject({
+      name: "myPf",
+      pid: pid,
+      stocks: []
+    })
+  })
+  it('403 on invalid pid', async () => {
+    const pid = await getPid(token, "myPf", database);
+    const del = await request(app).delete(`/user/portfolios/delete?token=${token}&pid=${pid}`).send();
+    expect(del.statusCode).toBe(200);
+    const resp = await request(app).get(`/user/portfolios/open?pid=${pid}`).send()
+    expect(resp.statusCode).toBe(403);
+  })
+
+  afterAll(async() => {
+    await database.disconnect();
   })
 })
 

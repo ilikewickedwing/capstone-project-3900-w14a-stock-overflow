@@ -305,9 +305,6 @@ export class Database {
    * @returns {Promise<string | null>}
    */
   async insertPf(uid, name) {
-    if (name == "") {
-      return null;
-    }
     // First query for the user's userPorto
     const userPortos = this.database.collection('userPortos');
     const query1 = { ownerUid: uid };
@@ -348,7 +345,7 @@ export class Database {
     if (userPfs !== null) {
       return userPfs;
     }
-    return null;
+    return 2;
   }
 
   /**
@@ -404,6 +401,13 @@ export class Database {
     const query2 = { ownerUid: uid };
     const userPortoResp = await userPortos.findOne(query2);
     const userPfs = userPortoResp.pfs;
+
+    // If name already exists, return null
+    for (let i = 0; i < userPfs.length; i++) {
+      if (userPfs[i].name == name) {
+        return false;
+      }
+    }
 
     var i = 0;
     while (i < userPfs.length) {
