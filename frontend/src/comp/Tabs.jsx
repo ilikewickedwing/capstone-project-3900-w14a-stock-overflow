@@ -64,10 +64,10 @@ const Tabs = () => {
           .then ((e) => {
             console.log(e);
             handleClose();
-            e.json().then((e) => {
-              console.log(e.pid);
-              history.push(`/portfolio?pid=${e.pid}`);
-            })
+              e.json().then((e) => {
+                console.log(e.pid);
+                history.push(`/portfolio?pid=${e.pid}`);
+              })
           })
           .catch ((err)=> {
             alert(err);
