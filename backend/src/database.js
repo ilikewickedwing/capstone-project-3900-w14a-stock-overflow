@@ -393,6 +393,33 @@ export class Database {
     return null
   }
 
+  async editPf(uid, pid, name) {
+    // Change the name in the database
+    const pfs = this.database.collection('portfolios');
+    const query1 = { pid: pid };
+    const result = await pfs.updateOne(query1, { $set: { name: name } });
+
+    // Change the name in user portfolio list
+    const userPortos = this.database.collection('userPortos');
+    const query2 = { ownerUid: uid };
+    const userPortoResp = await userPortos.findOne(query2);
+    const userPfs = userPortoResp.pfs;
+
+    var i = 0;
+    while (i < userPfs.length) {
+      if (userPfs[i].pid == pid) {
+        userPfs.splice(i, 1);
+        break;
+      }
+      i++;
+    }
+
+    userPfs.push({ pid: pid, name: name });
+    await userPortos.updateOne(query2, { $set: { pfs: userPfs } });
+
+    return result.modifiedCount !== 0;
+  }
+
 
   /**
    * Deletes a given portfolio from the database and
@@ -421,7 +448,7 @@ export class Database {
     }
     await userPortos.updateOne( query2, { $set: { pfs: userPfs } } );
 
-    return result.deletedCount !== 0 ;
+    return result.deletedCount !== 0;
   }
 
   /**
