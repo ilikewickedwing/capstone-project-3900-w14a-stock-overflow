@@ -37,7 +37,8 @@ describe('Add stock', () => {
   it('Create new user and portfolio', async () => {
     const rego = await authRegister('Ashley', 'strongpassword', d);
     token = rego.token;
-    pid = await createPf(token, 'myPf', d);
+    const getPid = await createPf(token, 'myPf', d);
+    pid = getPid.pid;
     expect(pid).not.toBe(null);
   })
   it('Adding valid stock', async () => {
@@ -82,7 +83,8 @@ describe('Modify stock', () => {
   it('Create new user and portfolio and adding a stock', async () => {
     const rego = await authRegister('Ashley', 'strongpassword', d);
     token = rego.token;
-    pid = await createPf(token, 'myPf', d);
+    const getPid = await createPf(token, 'myPf', d);
+    pid = getPid.pid;
     await addStock(token, pid, 'IBM', 1.00, 2, d);
   })
   it('Adding to existing stock', async () => {
