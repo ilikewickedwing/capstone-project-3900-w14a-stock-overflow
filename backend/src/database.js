@@ -401,14 +401,14 @@ export class Database {
     const query2 = { ownerUid: uid };
     const userPortoResp = await userPortos.findOne(query2);
     const userPfs = userPortoResp.pfs;
-    
+
     // If name already exists, return -1
     for (let i = 0; i < userPfs.length; i++) {
       if (userPfs[i].name == name) {
         return -1;
       }
     }
-    
+
     for (let i = 0; i < userPfs.length; i++) {
       if (userPfs[i].pid == pid) {
         if (userPfs[i].name == 'Watchlist') {
@@ -464,10 +464,10 @@ export class Database {
    * @param {string} pid 
    * @param {string} stock 
    * @param {float} price 
-   * @param {int} amount 
+   * @param {int} quantity 
    * @returns {Promise <boolean>}
    */
-  async addStocks(pid, stock, price, amount) {
+  async addStocks(pid, stock, price, quantity) {
     // Find the corresponding portfolio for the given pid
     const pfs = this.database.collection('portfolios');
     const query = {pid: pid};
@@ -493,31 +493,31 @@ export class Database {
     
     if (stkIndex != -1) { // If the stock is already in the list
       let cost = stockList[stkIndex].avgPrice * stockList[stkIndex].quantity;
-      cost += price * amount;
-      stockList[stkIndex].quantity += amount;
+      cost += price * quantity;
+      stockList[stkIndex].quantity += quantity;
       stockList[stkIndex].avgPrice = cost / stockList[stkIndex].quantity;
     }
     else { // Else if the stock is not in the list
       stockList.push({
         stock: stock,
         avgPrice: price,
-        quantity: amount,
+        quantity: quantity,
       })
     }
 
     // Updating database
     await pfs.updateOne(query, { $set: { stocks: stockList } } );
-    return true;
+    return -1;
   }
 
   /**
    * 
    * @param {string} pid 
    * @param {string} stock 
-   * @param {int} amount 
+   * @param {int} quantity 
    * @returns {Promise <boolean>}
    */
-  async sellStocks(pid, stock, amount) {
+  async sellStocks(pid, stock, quantity) {
     // Find the corresponding portfolio for the given pid
     const pfs = this.database.collection('portfolios');
     const query = {pid: pid};
@@ -540,11 +540,11 @@ export class Database {
     }
 
     if (stkIndex != -1) { // If stock is in the portfolio
-      if (stockList[stkIndex].quantity - amount < 0) {
+      if (stockList[stkIndex].quantity - quantity < 0) {
         return 4;
       }
       else {
-        stockList[stkIndex].quantity -= amount;
+        stockList[stkIndex].quantity -= quantity;
         if (stockList[stkIndex].quantity == 0) {
           stockList.splice(stkIndex, 1);
         }
@@ -556,7 +556,7 @@ export class Database {
 
     // Updating database
     await pfs.updateOne(query, {$set: {stocks: stockList}});
-    return true;
+    return -1;
   }
 
   async getStock(pid, stock) {
