@@ -5,6 +5,7 @@ import API, { ApiContext } from "./api";
 import SignUp from "./comp/SignUp";
 import Portfolio from "./comp/Portfolio";
 import Profile from "./comp/Profile";
+import './App.css';
 
 function App() {
   const api = new API();
