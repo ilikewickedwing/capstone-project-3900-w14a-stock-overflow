@@ -2,9 +2,27 @@ Week 1
 	We discussed and talked about what project we wanted to do and we ended up with the stocks project
 	Lily was designated as the scrum master
 	We decided to briefly talk about possible technologies to use and to think about what API to use
+	
 Week 2
 	I was delegated the System Archtiecture part of the proposal
 	I was responsible for thinking about the API to use for the backend
 	Mison was delegated the background part of the proposal and user stories
 	Lily was designated user sprints and technical depth
+
+Week 3
+	We met to talk about what else we need to add in the proposal and we met again on
+	Sunday 8:30pm to add finishing touches. I did the software quality part and redid
+	the diagram
+Week 4
+	I was responsible for implementing the backend authentication system and setting
+	up the stub functions and the mongoDb database. We met again at Sunday 8:30pm to
+	checkup and see how everyone was going.
 	
+	Jono and Richard were responsible for the backend of creating portfolios and
+	Jono was responsible for Alphavantage
+	
+	Mison was responsible for the frontend for the user authentication
+	
+	Lily was responsible for the frontend of creating portfolios
+Week 5
+	We met again at Tuesday to do finishing touches before our demo
