@@ -392,13 +392,6 @@ export class Database {
   }
 
   async editPf(uid, pid, name) {
-    // If name already exists, return -1
-    for (let i = 0; i < userPfs.length; i++) {
-      if (userPfs[i].name == name) {
-        return -1;
-      }
-    }
-
     // Change the name in the database
     const pfs = this.database.collection('portfolios');
     const query1 = { pid: pid };
@@ -408,7 +401,14 @@ export class Database {
     const query2 = { ownerUid: uid };
     const userPortoResp = await userPortos.findOne(query2);
     const userPfs = userPortoResp.pfs;
-    
+
+    // If name already exists, return -1
+    for (let i = 0; i < userPfs.length; i++) {
+      if (userPfs[i].name == name) {
+        return -1;
+      }
+    }
+
     for (let i = 0; i < userPfs.length; i++) {
       if (userPfs[i].pid == pid) {
         if (userPfs[i].name == 'Watchlist') {
