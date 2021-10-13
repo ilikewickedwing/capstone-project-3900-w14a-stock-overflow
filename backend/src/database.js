@@ -395,21 +395,20 @@ export class Database {
     // Change the name in the database
     const pfs = this.database.collection('portfolios');
     const query1 = { pid: pid };
-    const result = await pfs.updateOne(query1, { $set: { name: name } });
-
+    
     // Change the name in user portfolio list
     const userPortos = this.database.collection('userPortos');
     const query2 = { ownerUid: uid };
     const userPortoResp = await userPortos.findOne(query2);
     const userPfs = userPortoResp.pfs;
-
+    
     // If name already exists, return -1
     for (let i = 0; i < userPfs.length; i++) {
       if (userPfs[i].name == name) {
         return -1;
       }
     }
-
+    
     for (let i = 0; i < userPfs.length; i++) {
       if (userPfs[i].pid == pid) {
         if (userPfs[i].name == 'Watchlist') {
@@ -419,6 +418,7 @@ export class Database {
         break;
       }
     }
+    const result = await pfs.updateOne(query1, { $set: { name: name } });
 
     userPfs.push({ pid: pid, name: name });
     await userPortos.updateOne(query2, { $set: { pfs: userPfs } });

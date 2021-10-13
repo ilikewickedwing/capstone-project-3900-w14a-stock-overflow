@@ -482,15 +482,15 @@ app.post('/user/portfolios/edit', async (req, res) => {
   const { token, pid, name } = req.body;
   const resp =  await editPf(token, pid, name, database);
   if (resp == -1) {
-    res.status(400).send({ message: "Name already in use" });
+    res.status(400).send({ error: "Name already in use" });
   } else if (resp == 2) {
-    res.status(400).send({ message: "Invalid name" });
+    res.status(400).send({ error: "Invalid name" });
   } else if (resp == 3) {
-    res.status(401).send({ message: "Invalid token" });
+    res.status(401).send({ error: "Invalid token" });
   } else if (resp == 4) {
-    res.status(400).send({ message: "Invalid pid" });
+    res.status(400).send({ error: "Invalid pid" });
   } else if (resp == 5) {
-    res.status(403).send({ message: "Can not edit watchlist" });
+    res.status(403).send({ error: "Can not edit watchlist" });
   } else if (resp == 1) {
     res.status(200).send();
   } else {
@@ -645,15 +645,15 @@ app.put('/user/stocks/edit', async (req, res) => {
   const { token, pid, stock, price, amount, option } = req.body;
   const resp = await modifyStock(token, pid, stock, price, amount, option, database);
   if (resp == 1) {
-    res.status(401).send({ message: "Invalid token" });
+    res.status(401).send({ error: "Invalid token" });
   } else if (resp == 2) {
-    res.status(403).send({ message: "Invalid stock" });
+    res.status(403).send({ error: "Invalid stock" });
   } else if (resp == 3) {
-    res.status(404).send({ message: "Portfolio not found" });
+    res.status(404).send({ error: "Portfolio not found" });
   } else if (resp == 4) {
-    res.status(403).send({ message: "Quantity to sell too high" });
+    res.status(403).send({ error: "Quantity to sell too high" });
   } else if (resp == 5) {
-    res.status(404).send({ message: "Stock is not in portfolio" });
+    res.status(404).send({ error: "Stock is not in portfolio" });
   } else {
     res.status(200).send(resp);
   }
