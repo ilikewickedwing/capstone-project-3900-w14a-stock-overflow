@@ -58,7 +58,7 @@ export default function Profile() {
   }
 
   return(
-    <Container>
+    <div>
       <NavBar>
         <Link to="/dashboard">
             <Logo>
@@ -72,6 +72,7 @@ export default function Profile() {
         </Link>
       </NavBar>
 
+      <Container>
       <Grid>
         <Paper elevation={10} style={paperStyle}>
             <Grid align='center'>
@@ -95,8 +96,9 @@ export default function Profile() {
       <Button variant="contained" color="secondary" onClick={onDeleteUser}>
         Delete account
       </Button>
+      </Container>
       
-    </Container>
+    </div>
    
   )
 }

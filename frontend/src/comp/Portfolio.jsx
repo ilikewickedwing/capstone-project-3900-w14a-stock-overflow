@@ -58,25 +58,17 @@ const Portfolio= () => {
         console.log(JSON.stringify({
           token,
           pid,
-          changedName,
+          name: changedName
         }));
         api.post('user/portfolios/edit',{
           body:JSON.stringify({
-            token,
-            pid,
-            changedName,
+            token: token,
+            pid: pid ,
+            name: changedName
           }),
         })
-          .then ((e) =>{
-            e.json().then((e) => {
-              console.log(e);
-            })
-          })
           .then (() =>handleClose())
-          // .then (() =>{
-          //   alert('Portfolio renamed to: ' + changedName);
-          // })
-          .catch ((err)=> alert(err))
+          .catch ((err)=> alert(err.body.message))
         e.preventDefault();
       }
     
@@ -91,7 +83,7 @@ const Portfolio= () => {
         e.preventDefault();
     }
 
-    React.useEffect(() => loadPf(),[]);
+    React.useEffect(() => loadPf());
 
     return (
         <PageBody>
