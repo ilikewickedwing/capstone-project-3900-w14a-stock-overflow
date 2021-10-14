@@ -5,26 +5,25 @@ import { Database } from "../database";
 import request from 'supertest';
 import { app, database } from "../index";
 
-// Commented out to avoid timeout
-// describe('Check stock', () => {
-// 	const d = new Database(true);
-//   beforeAll(async () => {
-//     await d.connect();
-//   })
+describe('Check stock', () => {
+	const d = new Database(true);
+  beforeAll(async () => {
+    await d.connect();
+  })
 
-//   it('Checking valid stock', async () => {
-//     const resp = await checkStock('AAP');
-//     expect(resp).toBe(true);
-//   })
-//   it('Checking invalid stock', async () => {
-//     const resp = await checkStock('Jono');
-//     expect(resp).toBe(false);
-//   })
+  it('Checking valid stock', async () => {
+    const resp = await checkStock('AAP');
+    expect(resp).toBe(true);
+  })
+  it('Checking invalid stock', async () => {
+    const resp = await checkStock('Jono');
+    expect(resp).toBe(false);
+  })
 
-//   afterAll(async () => {
-//     await d.disconnect();
-//   })
-// })
+  afterAll(async () => {
+    await d.disconnect();
+  })
+})
 
 describe('Add stock', () => {
 	const d = new Database(true);
