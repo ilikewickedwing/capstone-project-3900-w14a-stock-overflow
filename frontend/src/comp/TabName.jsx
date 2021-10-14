@@ -7,7 +7,7 @@ const TabName = ({
     name, pid,
 }) => {
     const history = useHistory(); 
-
+    
     return (
             <TabButton onClick={()=> {
                 history.push(`/portfolio?pid=${pid}`);

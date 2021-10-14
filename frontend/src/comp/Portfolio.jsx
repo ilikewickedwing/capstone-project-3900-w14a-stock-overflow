@@ -10,6 +10,10 @@ import Button from '@mui/material/Button';
 import PfTable from './PfTable';
 import AddStock from './AddStock';
 
+function useQuery() {
+  return new URLSearchParams(useLocation().search);
+}
+
 const Portfolio= () => {
     const api = React.useContext(ApiContext);
     const history = useHistory();
@@ -20,6 +24,8 @@ const Portfolio= () => {
     const [name, setName] = React.useState('');
     const [changedName, editName ] = React.useState('');
     const [isWatchlist, setIsWatchlist] = React.useState(0); 
+    const pid = useQuery().get('pid');
+    console.log(pid);
 
     const handlePfRename = (event) => {
         setAnchorEl(event.currentTarget);
@@ -28,16 +34,11 @@ const Portfolio= () => {
         setAnchorEl(null);  
     }
 
-    function useQuery() {
-      return new URLSearchParams(useLocation().search);
-    }
-    const pid = useQuery().get('pid');
-
-
     const loadPf = async () => {
       api.get(`user/portfolios/open?pid=${pid}`,{})
-        .then((response) => {
+      .then((response) => {
           response.json().then((e) => {
+            console.log(e.name);
             setName(e.name);
             if (e.name === "Watchlist"){
               setIsWatchlist(1);
@@ -48,7 +49,6 @@ const Portfolio= () => {
           alert(err); 
         })
     }
-
 
     const open = Boolean(anchorEl);
     const id = open ? 'simple-popover': undefined;
@@ -67,23 +67,39 @@ const Portfolio= () => {
             name: changedName
           }),
         })
+          .then ((e) => {
+            if(e.status !== 200 ){
+              e.json().then((e) => alert(e.error))
+            } else {
+              setName(changedName);
+              loadPf();
+            }
+          })
           .then (() =>handleClose())
-          .catch ((err)=> alert(err.body.message))
         e.preventDefault();
       }
-    
     // TODO: handle delete portfolio
     const handleDelete = async(e) => {
         api.delete(`user/portfolios/delete?token=${token}&pid=${pid}`,{})
-          .then(()=> alert('delete successful'))
-          .then(()=> history.push('/dashboard'))
-          .catch((err) => {
-            alert(err);
+          .then ((e) => {
+            if(e.status !== 200 ){
+              e.json().then((e) => alert(e.error))
+            }
           })
+          .then(()=> history.push('/dashboard')) 
         e.preventDefault();
     }
 
-    React.useEffect(() => loadPf());
+    // // on first load 
+    React.useEffect(() => loadPf(),[]);
+
+    // on url change 
+    React.useEffect(() =>{
+      history.listen((location) =>{
+        loadPf();
+        console.log("refreshing portfolios");
+      })
+    }, [history]);
 
     return (
         <PageBody>

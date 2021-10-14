@@ -45,10 +45,7 @@ const Tabs = () => {
             setTabs(newList);
           })
         })
-        .catch((err) => {
-          alert(err); 
-        })
-      }
+    }
       // handle dashboard button
       const gotoDash = () => {
         history.push('/dashboard');
@@ -76,7 +73,14 @@ const Tabs = () => {
         return null;
       }
 
-    React.useEffect(() => refreshPortfolios());
+    React.useEffect(() => refreshPortfolios(),[]);
+
+    React.useEffect(() =>{
+      history.listen(() =>{
+        refreshPortfolios();
+        console.log("refreshing tabs");
+      })
+    }, [history]);
 
 
 // TODO IMPLEMENT PROFILE AND DELETE ACC
