@@ -111,7 +111,7 @@ describe('Add stock endpoint test', () => {
       quantity: 2,
     })
     expect(add.statusCode).toBe(401);
-    expect(add.body.message).toBe("Invalid token");
+    expect(add.body.error).toBe("Invalid token");
   })
   it('403 on invalid stock', async () => {
     const add = await request(app).post(`/user/stocks/add`).send({
@@ -122,7 +122,7 @@ describe('Add stock endpoint test', () => {
       quantity: 2,
     })
     expect(add.statusCode).toBe(403);
-    expect(add.body.message).toBe("Invalid stock");
+    expect(add.body.error).toBe("Invalid stock");
   })
   it('403 on invalid pid', async () => {
     const add = await request(app).post(`/user/stocks/add`).send({
@@ -133,7 +133,7 @@ describe('Add stock endpoint test', () => {
       quantity: 2,
     })
     expect(add.statusCode).toBe(403);
-    expect(add.body.message).toBe("Invalid pid");
+    expect(add.body.error).toBe("Invalid pid");
   })
 
   afterAll(async () => {
@@ -262,6 +262,24 @@ describe('Modify stock endpoint test', () => {
       quantity: 4,
     })
   })
+  it('200 on valid stock selling', async () => {
+    const sell = await request(app).put(`/user/stocks/edit`).send({
+      token: token,
+      pid: pid,
+      stock: 'IBM',
+      price: .5,
+      quantity: 2,
+      option: 0,
+    })
+    expect(sell.statusCode).toBe(200);
+
+    const stock = await database.getStock(pid, 'IBM');
+    expect(stock).toMatchObject({
+      stock: 'IBM',
+      avgPrice: .75,
+      quantity: 2,
+    })
+  })
   it('401 on invalid token', async () => {
     const add = await request(app).put(`/user/stocks/edit`).send({
       token: 'faketoken',
@@ -272,7 +290,7 @@ describe('Modify stock endpoint test', () => {
       option: 1,
     })
     expect(add.statusCode).toBe(401);
-    expect(add.body.message).toBe("Invalid token");
+    expect(add.body.error).toBe("Invalid token");
   })
   it('403 on invalid stock', async () => {
     const add = await request(app).put(`/user/stocks/edit`).send({
@@ -284,7 +302,7 @@ describe('Modify stock endpoint test', () => {
       option: 1,
     })
     expect(add.statusCode).toBe(403);
-    expect(add.body.message).toBe("Invalid stock");
+    expect(add.body.error).toBe("Invalid stock");
   })
   it('403 on invalid pid', async () => {
     const add = await request(app).put(`/user/stocks/edit`).send({
@@ -296,7 +314,44 @@ describe('Modify stock endpoint test', () => {
       option: 1,
     })
     expect(add.statusCode).toBe(403);
-    expect(add.body.message).toBe("Invalid pid");
+    expect(add.body.error).toBe("Invalid pid");
+  })
+  it('403 on invalid selling quantity', async () => {
+    const mod = await request(app).put(`/user/stocks/edit`).send({
+      token: token,
+      pid: pid,
+      stock: 'IBM',
+      price: 1.00,
+      quantity: 155,
+      option: 0,
+    })
+    expect(mod.statusCode).toBe(403);
+    expect(mod.body.error).toBe("Quantity to sell too high");
+  })
+  it('200 on selling entire stock', async() => {
+    const mod = await request(app).put(`/user/stocks/edit`).send({
+      token: token,
+      pid: pid,
+      stock: 'IBM',
+      price: 1.00,
+      quantity: 2.00,
+      option: 0,
+    })
+    expect(mod.statusCode).toBe(200);
+    const stock = await database.getStock(pid, 'IBM');
+    expect(stock).toBe(null);
+  })
+  it('404 on valid stock not in portfolio', async() => {
+    const mod = await request(app).put(`/user/stocks/edit`).send({
+      token: token,
+      pid: pid,
+      stock: 'IBM',
+      price: 1.00,
+      quantity: 2,
+      option: 0,
+    })
+    expect(mod.statusCode).toBe(404);
+    expect(mod.body.error).toBe("Stock is not in portfolio");
   })
 
   afterAll(async () => {
