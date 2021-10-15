@@ -17,6 +17,7 @@ describe('Porfolio create', () => {
     const rego = await authRegister('Ashley', 'strongpassword', d);
     token = rego.token;
   })
+  
   it('Creating a new portfolio returns a pid', async () => {
     const resp = await createPf(token, 'myPf', d);
     expect(resp).not.toBe(null);

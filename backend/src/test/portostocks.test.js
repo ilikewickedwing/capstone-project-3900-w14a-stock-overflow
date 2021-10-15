@@ -467,7 +467,7 @@ describe('Editing stocks doesn\'t affect portfolios', () => {
 })
 
 describe('Adding stocks to watchlist', () => {
-
+  
 })
 
 describe('Stress testing of portfolio and stocks', () => {

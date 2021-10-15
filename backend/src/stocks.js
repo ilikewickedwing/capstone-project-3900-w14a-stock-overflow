@@ -40,8 +40,17 @@ export const addStock = async (token, pid, stock, price, quantity, database) => 
         return 2;
     }
 
-    const resp = await database.addStocks(pid, stock, price, quantity);
-    return resp;
+    if (database.openPf(pid).name !== 'Watchlist') {
+        if (!Number.isInteger(quantity) || quantity <= 0) {
+            return 4;
+        } else if (isNaN(price) || price <= 0) {
+            return 5;
+        } else {
+            return await database.addStocks(pid, stock, price, quantity);
+        }
+    } else {
+        return await database.addStocks(pid, stock, price, quantity);
+    }
 }
 
 /**
@@ -64,6 +73,14 @@ export const modifyStock = async (token, pid, stock, price, quantity, option, da
 
     if (!await checkStock(stock)) {
         return 2;
+    }
+
+    if (!Number.isInteger(quantity) || quantity <= 0) {
+        return 6;
+    } 
+    
+    if (isNaN(price) || price <= 0) {
+        return 7;
     }
     
     let resp = null;
