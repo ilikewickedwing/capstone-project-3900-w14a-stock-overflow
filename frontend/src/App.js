@@ -6,6 +6,7 @@ import SignUp from "./comp/SignUp";
 import Portfolio from "./comp/Portfolio";
 import Profile from "./comp/Profile";
 import './App.css';
+import StocksGraph from "./graph/StocksGraph";
 
 function App() {
   const api = new API();
@@ -29,6 +30,9 @@ function App() {
             </Route>
             <Route path="/profile">
               <Profile/>
+            </Route>
+            <Route path="/stocks">
+              <StocksGraph/>
             </Route>
           </Switch>  
         </div>

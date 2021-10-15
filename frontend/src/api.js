@@ -84,6 +84,10 @@ export default class API {
     });
   }
 
+  stockTimeSeries(companySymbol) {
+    return fetch('https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=IBM&interval=5min&apikey=demo');
+  }
+
   post(path, options){
     return fetch(`${ENDPOINT}/${path}`,{
       ...options,
