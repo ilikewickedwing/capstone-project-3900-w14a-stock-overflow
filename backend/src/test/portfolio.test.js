@@ -70,7 +70,7 @@ describe('Portfolio create endpoint test', () => {
       name: ''
     })
     expect(resp.statusCode).toBe(400);
-    expect(resp.body.message).toBe("Invalid portfolio name");
+    expect(resp.body.error).toBe("Invalid portfolio name");
   })
   it('400 on invalid portfolio name ie. duplicate', async () => {
     const resp = await request(app).post(`/user/portfolios/create`).send({
@@ -78,7 +78,7 @@ describe('Portfolio create endpoint test', () => {
       name: 'myPf'
     })
     expect(resp.statusCode).toBe(400);
-    expect(resp.body.message).toBe("Portfolio name already in use");
+    expect(resp.body.error).toBe("Portfolio name already in use");
   })
   it('401 on invalid token', async () => {
     const resp = await request(app).post(`/user/portfolios/create`).send({
@@ -457,7 +457,7 @@ describe('Portfolio edit endpoint test', () => {
       name: 'name'
     })
     expect(resp.statusCode).toBe(400);
-    expect(resp.body.message).toBe("Name already in use");
+    expect(resp.body.error).toBe("Name already in use");
   })
   it('400 on invalid name provided', async () => {
     const create = await request(app).post(`/user/portfolios/create`).send({
@@ -476,7 +476,7 @@ describe('Portfolio edit endpoint test', () => {
       name: ''
     })
     expect(resp.statusCode).toBe(400);
-    expect(resp.body.message).toBe("Invalid name");
+    expect(resp.body.error).toBe("Invalid name");
   })
   it('400 on invalid pid', async () => {
     const resp = await request(app).post(`/user/portfolios/edit`).send({
@@ -485,7 +485,7 @@ describe('Portfolio edit endpoint test', () => {
       name: 'My name'
     })
     expect(resp.statusCode).toBe(400);
-    expect(resp.body.message).toBe("Invalid pid");
+    expect(resp.body.error).toBe("Invalid pid");
   })
   it('401 on invalid token', async () => {
     const create = await request(app).post(`/user/portfolios/create`).send({
@@ -505,7 +505,7 @@ describe('Portfolio edit endpoint test', () => {
       name: 'My name'
     })
     expect(resp.statusCode).toBe(401);
-    expect(resp.body.message).toBe("Invalid token");
+    expect(resp.body.error).toBe("Invalid token");
   })
   it('403 on invalid watchlist edit', async () => {
     const pid = await getPid(token, "Watchlist", database);
@@ -515,7 +515,7 @@ describe('Portfolio edit endpoint test', () => {
       name: 'My name'
     })
     expect(resp.statusCode).toBe(403);
-    expect(resp.body.message).toBe("Can not edit watchlist");
+    expect(resp.body.error).toBe("Can not edit watchlist");
   })
 
   afterAll(async() => {
