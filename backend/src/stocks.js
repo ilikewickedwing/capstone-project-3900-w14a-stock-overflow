@@ -25,11 +25,11 @@ export const getAllStocks = async () => {
  * @param {string} pid 
  * @param {string} stock 
  * @param {float} price 
- * @param {int} amount 
+ * @param {int} quantity 
  * @param {Database} database
  * @returns {Promise <boolean>}
  */
-export const addStock = async (token, pid, stock, price, amount, database) => {
+export const addStock = async (token, pid, stock, price, quantity, database) => {
     // Finding corresponding user for the given token
     const uid = await database.getTokenUid(token);
     if (uid === null) {
@@ -40,7 +40,7 @@ export const addStock = async (token, pid, stock, price, amount, database) => {
         return 2;
     }
 
-    const resp = await database.addStocks(pid, stock, price, amount);
+    const resp = await database.addStocks(pid, stock, price, quantity);
     return resp;
 }
 
@@ -50,12 +50,12 @@ export const addStock = async (token, pid, stock, price, amount, database) => {
  * @param {string} pid 
  * @param {string} stock 
  * @param {float} price 
- * @param {int} amount 
+ * @param {int} quantity 
  * @param {int} option 0 = sell, anything else = buy
  * @param {Database} database
  * @returns {Promise <boolean>}
  */
-export const modifyStock = async (token, pid, stock, price, amount, option, database) => {
+export const modifyStock = async (token, pid, stock, price, quantity, option, database) => {
     // Finding corresponding user for the given token
     const uid = await database.getTokenUid(token);
     if (uid === null) {
@@ -68,10 +68,10 @@ export const modifyStock = async (token, pid, stock, price, amount, option, data
     
     let resp = null;
     if (option) {
-        resp = await database.addStocks(pid, stock, price, amount);
+        resp = await database.addStocks(pid, stock, price, quantity);
     }
     else {
-        resp = await database.sellStocks(pid, stock, amount)
+        resp = await database.sellStocks(pid, stock, quantity)
     }
     return resp;
 }

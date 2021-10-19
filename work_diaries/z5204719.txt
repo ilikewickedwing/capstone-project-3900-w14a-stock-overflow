@@ -12,3 +12,6 @@ We finished the project proposal, assigned tasks to sprints and to members as we
 
 Week 4
 I worked on the backend and started implementing portfolio functionality. Working with Jono, we managed to figure out how to add portfolios, get their information, and delete them. However, we can't do duplicate checking yet.
+
+Week 5
+Finalised the backend functions of the portfolio, including create, get, open, edit and delete.

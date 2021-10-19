@@ -17,3 +17,18 @@ Discussion on user stories, epics.
 Setting up github classroom.
 Discussion on system design.
 Using React for front-end and MaterialUI for UI components
+
+Week 4:
+
+Started working on developing the log in log out page
+finshed log in log out page
+Spoke with Ashley and worked on the backend
+Made a template for Dashboard
+
+Week 5:
+
+Finshed working on dashboard 
+Started wokrking on Sign up page
+Fixed bugs on Sing up page
+Started working on Edit user name
+Finsehd working on Edit user name 
