@@ -1,5 +1,5 @@
 import Login from "./comp/Login";
-import {BrowserRouter as Router, Route, Switch} from 'react-router-dom'; 
+import {BrowserRouter, Route, Switch} from 'react-router-dom'; 
 import Dashboard from "./comp/Dashboard";
 import API, { ApiContext } from "./api";
 import SignUp from "./comp/SignUp";
@@ -12,27 +12,17 @@ function App() {
 
   return (
     <ApiContext.Provider value={api}>
-      <Router>
+      <BrowserRouter>
         <div className="App">
           <Switch>
-            <Route exact path="/">
-              <Login/>
-            </Route>
-            <Route path="/signup">
-              <SignUp/>
-            </Route>
-            <Route path="/dashboard">
-              <Dashboard/>
-            </Route>
-            <Route path="/portfolio">
-              <Portfolio/>
-            </Route>
-            <Route path="/profile">
-              <Profile/>
-            </Route>
+            <Route exact path="/" component={Login} />
+            <Route path="/signup" component={SignUp} />
+            <Route path="/dashboard" component={Dashboard} />
+            <Route path="/portfolio/:pid" component={Portfolio} />
+            <Route path="/profile" component={Profile} />
           </Switch>  
         </div>
-      </Router>
+      </BrowserRouter>
     </ApiContext.Provider>
   );
 }
