@@ -31,3 +31,10 @@ Week 5
 - Presented our milestone this week
 - implemented the connection between front and backen
 - todo: fix bugs in loading stuff and names popping out of nowhere
+
+Week 6
+- refactored frontend code 
+- fixed refreshing bug with the tabs and rename not changing (from week 5) 
+- todo: finish sprint 1 before mid week 7 so we can start on sprint 2 
+
+Week 7
