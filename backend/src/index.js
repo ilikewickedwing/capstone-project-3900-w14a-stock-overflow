@@ -597,7 +597,7 @@ app.post('/user/stocks/add', async (req, res) => {
  * @swagger
  * /user/stocks/edit:
  *   put:
- *     tags: [Stock]
+ *     tags: [Stocks]
  *     description: endpoint for adding or removing stocks
  *     parameters:
  *      - name: token
@@ -681,4 +681,22 @@ app.get('/user/stocks/all', async (req, res) => {
   }
   res.status(200).send();
   return;
+})
+
+// Get endpoint for getting a specific stocks's data from alphavantage
+/**
+ * @swagger
+ * /stocks:
+ *   get:
+ *     tags: [AlphaVantage]
+ *     description: endpoint for a specific stock's data from alphavantage
+ *     parameters:
+ *     responses:
+ *       200:
+ *         description: Return data exactly as given from alphavantage
+ *       502:
+ *         description: Could not connect to API
+ */
+app.get('/stocks', async (req, res) => {
+
 })

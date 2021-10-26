@@ -1,7 +1,9 @@
 import React, { useContext, useEffect, useState } from "react"
 import PropTypes from "prop-types";
-import { LineChart, Line, CartesianGrid, XAxis, YAxis, Legend } from "recharts";
+import { LineChart, Line, XAxis, YAxis, Legend } from "recharts";
 import { ApiContext } from "../api";
+import { useParams } from "react-router";
+import { FormControl, InputLabel, MenuItem, Select } from "@material-ui/core";
 
 const compareTime = (time1, time2) => {
   const t1 = Date.parse(time1);
@@ -35,16 +37,20 @@ const transformData = (data) => {
 }
 
 const StocksGraph = (props) => {
+  const { companyId } = useParams();
   const [ data, setData ] = useState([]);
+  const [ timeOptions, setTimeOptions ] = useState("1d");
   const api = useContext(ApiContext);
   const wrapperStyle = {
-    backgroundColor: "black"
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
   }
   useEffect(() => {
-    api.stockTimeSeries('IBM')
+    api.stockTimeSeries(companyId)
       .then(r => r.json())
       .then(r => setData(transformData(r)))
-  }, [api])
+  }, [api, companyId])
   return (
     <div style={wrapperStyle}>
       <LineChart
@@ -60,6 +66,20 @@ const StocksGraph = (props) => {
         <Line type="monotone" stroke="yellow" dataKey="close" dot={false}/>
         <Legend/>
       </LineChart>
+      <InputLabel>Time</InputLabel>
+      <Select
+        value={timeOptions}
+        label="Time"
+        onChange={e => setTimeOptions(e.target.value)}
+      >
+        <MenuItem value={"1d"}>1 day</MenuItem>
+        <MenuItem value={"5d"}>5 days</MenuItem>
+        <MenuItem value={"1m"}>1 month</MenuItem>
+        <MenuItem value={"6m"}>6 month</MenuItem>
+        <MenuItem value={"1y"}>1 year</MenuItem>
+        <MenuItem value={"5y"}>5 years</MenuItem>
+        <MenuItem value={"10y"}>10 years</MenuItem>
+      </Select>
     </div>
   )
 }

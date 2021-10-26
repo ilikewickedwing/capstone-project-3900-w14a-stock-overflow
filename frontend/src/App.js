@@ -16,9 +16,6 @@ function App() {
       <Router>
         <div className="App">
           <Switch>
-            <Route exact path="/">
-              <Login/>
-            </Route>
             <Route path="/signup">
               <SignUp/>
             </Route>
@@ -31,8 +28,11 @@ function App() {
             <Route path="/profile">
               <Profile/>
             </Route>
-            <Route path="/stocks">
+            <Route path="/stocks/:companyId">
               <StocksGraph/>
+            </Route>
+            <Route path="/">
+              <Login/>
             </Route>
           </Switch>  
         </div>
