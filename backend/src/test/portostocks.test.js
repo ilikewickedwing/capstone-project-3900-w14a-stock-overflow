@@ -467,7 +467,128 @@ describe('Editing stocks doesn\'t affect portfolios', () => {
 })
 
 describe('Adding stocks to watchlist', () => {
-  
+  const d = new Database(true);
+  beforeAll(async () => {
+    await d.connect();
+  })
+
+  let token = null;
+  let pid = null;
+  let pfArray = null;
+  let stArray = null;
+
+  it('Register user and check watchlist', async () => {
+    const rego = await authRegister('Ashley', 'strongpassword', d);
+    token = rego.token;
+    pid = await getPid(token, 'Watchlist', d);
+    expect(pid).not.toBe(null);
+    pfArray = [{ name: 'Watchlist', pid: pid}];
+    const pfs = await userPfs(token, d);
+    expect(pfs).toEqual(expect.arrayContaining(pfArray));
+    const pf = await openPf(pid, d);
+    expect(pf).toMatchObject({
+      pid: pid,
+      name: 'Watchlist',
+      stocks: []
+    })
+  })
+  it('Add first stock to watchlist', async () => {
+    const add = await addStock(token, pid, 'AAPL', null, null, d);
+    expect(add).toBe(-1);
+    const check = await d.getStock(pid, 'AAPL');
+    expect(check).toMatchObject({
+      stock: 'AAPL',
+      avgPrice: null,
+      quantity: null
+    })
+    const pfs = await userPfs(token, d);
+    pfArray = [{ name: 'Watchlist', pid: pid }];
+    expect(pfs).toEqual(expect.arrayContaining(pfArray));
+    const stocks = await openPf(pid, d);
+    stArray = [
+      {
+        stock: 'AAPL',
+        avgPrice: null,
+        quantity: null
+      }
+    ]
+    expect(stocks).toMatchObject({
+      pid: pid,
+      name: 'Watchlist',
+      stocks: expect.arrayContaining(stArray)
+    })
+  })
+  it('Add all stocks to watchlist', async () => {
+    const add1 = await addStock(token, pid, 'AMZN', null, null, d);
+    expect(add1).toBe(-1);
+    const check1 = await d.getStock(pid, 'AMZN');
+    expect(check1).toMatchObject({
+      stock: 'AMZN',
+      avgPrice: null,
+      quantity: null,
+    })
+    const add2 = await addStock(token, pid, 'IBM', null, null, d);
+    expect(add2).toBe(-1);
+    const check2 = await d.getStock(pid, 'IBM');
+    expect(check2).toMatchObject({
+      stock: 'IBM',
+      avgPrice: null,
+      quantity: null
+    })
+    const pfs = await userPfs(token, d);
+    expect(pfs).toEqual(expect.arrayContaining(pfArray));
+    const stocks = await openPf(pid, d);
+    stArray = [
+      {
+        stock: 'AAPL',
+        avgPrice: null,
+        quantity: null,
+      },
+      { 
+        stock: 'AMZN',
+        avgPrice: null,
+        quantity: null,
+      },
+      {
+        stock: 'IBM',
+        avgPrice: null,
+        quantity: null
+      }
+    ]
+    expect(stocks).toMatchObject({
+      pid: pid,
+      name: 'Watchlist',
+      stocks: expect.arrayContaining(stArray)
+    })
+  })
+  it('Remove first stock from watchlist', async () => {
+    const rem = await modifyStock(token, pid, 'AAPL', null, null, 0, d);
+    expect(rem).toBe(-1);
+    const pf = await openPf(pid, d);
+    stArray.splice(0, 1);
+    expect(pf).toMatchObject({
+      pid: pid,
+      name: 'Watchlist',
+      stocks: expect.arrayContaining(stArray)
+    })
+  })
+  it('Remove all stocks from watchlist', async () => {
+    const rem1 = await modifyStock(token, pid, 'AMZN', null, null, 0, d);
+    expect(rem1).toBe(-1);
+    const rem2 = await modifyStock(token, pid, 'IBM', null, null, 0, d);
+    expect(rem2).toBe(-1);
+    const pf = await openPf(pid, d);
+    stArray.splice(0, 2);
+    expect(pf).toMatchObject({
+      pid: pid,
+      name: 'Watchlist',
+      stocks: expect.arrayContaining(stArray)
+    })
+  })
+
+  afterAll(async () => {
+    await d.disconnect();
+  })
 })
 
 describe('Stress testing of portfolio and stocks', () => {

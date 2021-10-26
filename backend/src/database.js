@@ -492,12 +492,13 @@ export class Database {
 
     
     if (stkIndex != -1) { // If the stock is already in the list
-      let cost = stockList[stkIndex].avgPrice * stockList[stkIndex].quantity;
-      cost += price * quantity;
-      stockList[stkIndex].quantity += quantity;
-      stockList[stkIndex].avgPrice = cost / stockList[stkIndex].quantity;
-    }
-    else { // Else if the stock is not in the list
+      if (quantity != null) {
+        let cost = stockList[stkIndex].avgPrice * stockList[stkIndex].quantity;
+        cost += price * quantity;
+        stockList[stkIndex].quantity += quantity;
+        stockList[stkIndex].avgPrice = cost / stockList[stkIndex].quantity;
+      }
+    } else { // Else if the stock is not in the list
       stockList.push({
         stock: stock,
         avgPrice: price,
@@ -540,17 +541,20 @@ export class Database {
     }
 
     if (stkIndex != -1) { // If stock is in the portfolio
-      if (stockList[stkIndex].quantity - quantity < 0) {
-        return 4;
-      }
-      else {
-        stockList[stkIndex].quantity -= quantity;
-        if (stockList[stkIndex].quantity == 0) {
-          stockList.splice(stkIndex, 1);
+      if (pfResp.name !== 'Watchlist') {
+          if (stockList[stkIndex].quantity - quantity < 0) {
+          return 4;
         }
+        else {
+          stockList[stkIndex].quantity -= quantity;
+          if (stockList[stkIndex].quantity == 0) {
+            stockList.splice(stkIndex, 1);
+          }
+        }
+      } else {
+        stockList.splice(stkIndex, 1);
       }
-    }
-    else {  // If stock does not exist in portfolio
+    } else {  // If stock does not exist in portfolio
       return 5;
     }
 
