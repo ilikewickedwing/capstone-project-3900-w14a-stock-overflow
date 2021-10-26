@@ -5,83 +5,51 @@ import {TabBar, TabButton, CreatePortField, CreatePortContent} from '../styles/s
 import Popover from '@mui/material/Popover';
 import Button from '@mui/material/Button';
 import TabName from './TabName';
+import axios from "axios";
 
+import { apiBaseUrl } from './const';
 
 
 const Tabs = () => {
-    const api = React.useContext(ApiContext);
-    const history = useHistory();
-    const token = localStorage.getItem('token');
+  const api = React.useContext(ApiContext);
+  const history = useHistory();
+  const token = localStorage.getItem('token');
 
-    const [anchorEl, setAnchorEl] = React.useState(null);
-    const [name, setName] = React.useState('');
-    const [tabs, setTabs] = React.useState([]); 
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [name, setName] = React.useState('');
+  const [portfolios, setPortfolios] = React.useState([]);
 
-    //handle popover open and close
-    const handleCreatePort = (event) => {
-      setAnchorEl(event.currentTarget);
-    }
-    const handleClose = () => {
-      setAnchorEl(null);  
-    }
-    const open = Boolean(anchorEl);
-    const id = open ? 'simple-popover': undefined;
-    
-    const refreshPortfolios = async () => {
-      api.get(`user/portfolios?token=${token}`,{})
-      .then((response) => {
-        const newList = [];
-        // append to new list of tabs 
-        // response.forEach((element) => {
-          //     console.log(element);
-          // })
-          response.json().then((e) => {
-            e.forEach((obj)=> {
-              newList.push({
-                name: obj.name, 
-                pid: obj.pid
-              });
-            });
-            setTabs(newList);
-          })
-        })
-    }
-      // handle dashboard button
-      const gotoDash = () => {
-        history.push('/dashboard');
-      }
+  React.useEffect(() => {      
+    const fetchPortfolios = async () => {
+      const request = await axios.get(`${apiBaseUrl}/user/portfolios?token=${token}`);
+      setPortfolios(request.data);
+    };
+    fetchPortfolios();
+  }, []);
+  
+  //handle popover open and close
+  const handleCreatePort = (event) => {
+    setAnchorEl(event.currentTarget);
+  }
+  const handleClose = () => {
+    setAnchorEl(null);  
+  }
+  const open = Boolean(anchorEl);
+  const id = open ? 'simple-popover': undefined;
+
+  // handle dashboard button
+  const gotoDash = () => {
+    history.push('/dashboard');
+  }
       
-      const submitNewPort = async(e) => {
-        api.post('user/portfolios/create',{
-          body:JSON.stringify({
-            token,
-            name,
-          }),
-        })
-          .then ((e) => {
-            console.log(e);
-            handleClose();
-              e.json().then((e) => {
-                console.log(e.pid);
-                history.push(`/portfolio?pid=${e.pid}`);
-              })
-          })
-          .catch ((err)=> {
-            alert(err);
-          })
-        e.preventDefault();
-        return null;
-      }
+  const submitNewPort = async (e) => {
+    e.preventDefault();      
+    const request = await axios.post(`${apiBaseUrl}/user/portfolios/create`, {token, name});
+    const newPid = request.data;
 
-    React.useEffect(() => refreshPortfolios(),[]);
-
-    React.useEffect(() =>{
-      history.listen(() =>{
-        refreshPortfolios();
-        console.log("refreshing tabs");
-      })
-    }, [history]);
-
+    console.log(newPid);
+    handleClose();
+  }
 
 // TODO IMPLEMENT PROFILE AND DELETE ACC
     return (
@@ -89,12 +57,12 @@ const Tabs = () => {
             <TabButton onClick={gotoDash}>
                 Dashboard
             </TabButton>
-            {
-              tabs.map((a) => 
+            { portfolios &&
+              portfolios.map((a) => 
                 <TabName
-                  key={a.name}
-                  name={a.name}
-                  pid={a.pid}
+                  key={a?.name}
+                  name={a?.name}
+                  pid={a?.pid}
                 />
               )
             }
