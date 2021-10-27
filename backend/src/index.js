@@ -62,16 +62,16 @@ export const database = new Database();
  *         name:
  *           type: string
  *           description: The name of the stock
- *         buydate:
- *           type: date
- *           description: The buy in date of the stock
- *         buyprice:
+ *         avgPrice:
  *           type: int
  *           description: The buy in price of the stock
+ *         quantity:
+ *           type: int
+ *           description: The amount bought of the stock
  *       example:
  *         name: AAPL
- *         buydate: 10-10-2021
- *         buyprice: 500
+ *         avgPrice: 500
+ *         quantity: 20
  *     UserData:
  *       type: object
  *       properties:
