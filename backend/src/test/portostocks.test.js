@@ -466,8 +466,305 @@ describe('Editing stocks doesn\'t affect portfolios', () => {
   })
 })
 
-describe('Adding stocks to watchlist', () => {
+describe('Portfolio and stocks endpoint test', () => {
+  beforeAll(async () => {
+    await database.connect();
+  })
 
+  let token = null;
+  let pid1 = null;
+  let pid2 = null;
+  let pid3 = null;
+  let pfArray = null;
+  let stArray = null;
+
+  it('200 on first valid portfolio creation', async () => {
+    const rego = await authRegister('Ashley', 'strongpassword', database);
+    token = rego.token;
+    const resp = await request(app).post(`/user/portfolios/create`).send({
+      token: token,
+      name: 'myPf'
+    })
+    expect(resp.statusCode).toBe(200);
+    expect(resp.body).toMatchObject({
+      pid: expect.any(String)
+    })
+    pid1 = resp.body.pid;
+    pfArray = [{ name: 'myPf', pid: pid1 }];
+    const userPfs = await request(app).get(`/user/portfolios?token=${token}`).send()
+    expect(userPfs.statusCode).toBe(200);
+    expect(userPfs.body).toEqual(expect.arrayContaining(pfArray));
+  })
+  it('200 on first valid stock addition', async () => {
+    const add = await request(app).post(`/user/stocks/add`).send({
+      token: token,
+      pid: pid1,
+      stock: 'IBM',
+      price: 1.00,
+      quantity: 2,
+    })
+    expect(add.statusCode).toBe(200);
+
+    const get = await userPfs(token, database);
+    const pfArray = [{ name: "myPf", pid: pid1 }];
+    expect(get).toEqual(expect.arrayContaining(pfArray));
+    const stArray = [{
+      stock: 'IBM',
+      avgPrice: 1.00,
+      quantity: 2,
+    }]
+    const pf = await openPf(pid1, database);
+    expect(pf).toMatchObject({
+      pid: pid1,
+      name: 'myPf',
+      stocks: expect.arrayContaining(stArray),
+    })
+  })
+  it('200 on subsequent valid stock additions', async () => {
+    const add1 = await request(app).post(`/user/stocks/add`).send({
+      token: token,
+      pid: pid1,
+      stock: 'AAPL',
+      price: 2.00,
+      quantity: 2,
+    })
+    expect(add1.statusCode).toBe(200);
+
+    const add2 = await request(app).post(`/user/stocks/add`).send({
+      token: token,
+      pid: pid1,
+      stock: 'AMZN',
+      price: 3.00,
+      quantity: 1,
+    })
+    expect(add2.statusCode).toBe(200);
+
+    stArray = [
+      {
+        stock: 'IBM',
+        avgPrice: 1.00,
+        quantity: 2
+      },
+      {
+        stock: 'AAPL',
+        avgPrice: 2.00,
+        quantity: 2
+      },
+      {
+        stock: 'AMZN',
+        avgPrice: 3.00,
+        quantity: 1
+      }
+    ]
+    const pf = await openPf(pid1, database);
+    expect(pf).toMatchObject({
+      pid: pid1,
+      name: 'myPf',
+      stocks: expect.arrayContaining(stArray)
+    })
+  })
+  it('200 on first valid stock sale', async () => {
+    const sell = await request(app).put(`/user/stocks/edit`).send({
+      token: token,
+      pid: pid1,
+      stock: 'IBM',
+      price: 1.00,
+      quantity: 2,
+      option: 0,
+    })
+    expect(sell.statusCode).toBe(200);
+
+    stArray.splice(0, 1);
+    
+    const pf = await openPf(pid1, database);
+    expect(pf).toMatchObject({
+      pid: pid1,
+      name: 'myPf',
+      stocks: expect.arrayContaining(stArray)
+    })
+  })
+  it('200 on subsequent valid stock sales', async () => {
+    const sell1 = await request(app).put(`/user/stocks/edit`).send({
+      token: token,
+      pid: pid1,
+      stock: 'AAPL',
+      price: 2.00,
+      quantity: 2,
+      option: 0
+    })
+    expect(sell1.statusCode).toBe(200);
+    const sell2 = await request(app).put(`/user/stocks/edit`).send({
+      token: token,
+      pid: pid1,
+      stock: 'AMZN',
+      price: 3.00,
+      quantity: 1,
+      option: 0
+    })
+    expect(sell2.statusCode).toBe(200);
+
+    stArray.splice(0, 2);
+
+    const pf = await openPf(pid1, database);
+    expect(pf).toMatchObject({
+      pid: pid1,
+      name: 'myPf',
+      stocks: expect.arrayContaining(stArray)
+    })
+  })
+  it('200 on subsequent valid portfolio creations', async () => {
+    const resp1 = await request(app).post(`/user/portfolios/create`).send({
+      token: token,
+      name: 'myPf2'
+    })
+    expect(resp1.statusCode).toBe(200);
+    expect(resp1.body).toMatchObject({
+      pid: expect.any(String)
+    })
+    pid2 = resp1.body.pid;
+    const resp2 = await request(app).post(`/user/portfolios/create`).send({
+      token: token,
+      name: 'myPf3'
+    })
+    expect(resp2.statusCode).toBe(200);
+    expect(resp2.body).toMatchObject({
+      pid: expect.any(String)
+    })
+    pid3 = resp2.body.pid;
+    pfArray.push({ name: 'myPf2', pid: pid2 }, { name: 'myPf3', pid: pid3 });
+    const userPfs = await request(app).get(`/user/portfolios?token=${token}`).send()
+    expect(userPfs.statusCode).toBe(200);
+    expect(userPfs.body).toEqual(expect.arrayContaining(pfArray));
+  })
+
+  afterAll(async() => {
+    await database.disconnect();
+  })
+})
+
+describe('Adding stocks to watchlist', () => {
+  const d = new Database(true);
+  beforeAll(async () => {
+    await d.connect();
+  })
+
+  let token = null;
+  let pid = null;
+  let pfArray = null;
+  let stArray = null;
+
+  it('Register user and check watchlist', async () => {
+    const rego = await authRegister('Ashley', 'strongpassword', d);
+    token = rego.token;
+    pid = await getPid(token, 'Watchlist', d);
+    expect(pid).not.toBe(null);
+    pfArray = [{ name: 'Watchlist', pid: pid}];
+    const pfs = await userPfs(token, d);
+    expect(pfs).toEqual(expect.arrayContaining(pfArray));
+    const pf = await openPf(pid, d);
+    expect(pf).toMatchObject({
+      pid: pid,
+      name: 'Watchlist',
+      stocks: []
+    })
+  })
+  it('Add first stock to watchlist', async () => {
+    const add = await addStock(token, pid, 'AAPL', null, null, d);
+    expect(add).toBe(-1);
+    const check = await d.getStock(pid, 'AAPL');
+    expect(check).toMatchObject({
+      stock: 'AAPL',
+      avgPrice: null,
+      quantity: null
+    })
+    const pfs = await userPfs(token, d);
+    pfArray = [{ name: 'Watchlist', pid: pid }];
+    expect(pfs).toEqual(expect.arrayContaining(pfArray));
+    const stocks = await openPf(pid, d);
+    stArray = [
+      {
+        stock: 'AAPL',
+        avgPrice: null,
+        quantity: null
+      }
+    ]
+    expect(stocks).toMatchObject({
+      pid: pid,
+      name: 'Watchlist',
+      stocks: expect.arrayContaining(stArray)
+    })
+  })
+  it('Add all stocks to watchlist', async () => {
+    const add1 = await addStock(token, pid, 'AMZN', null, null, d);
+    expect(add1).toBe(-1);
+    const check1 = await d.getStock(pid, 'AMZN');
+    expect(check1).toMatchObject({
+      stock: 'AMZN',
+      avgPrice: null,
+      quantity: null,
+    })
+    const add2 = await addStock(token, pid, 'IBM', null, null, d);
+    expect(add2).toBe(-1);
+    const check2 = await d.getStock(pid, 'IBM');
+    expect(check2).toMatchObject({
+      stock: 'IBM',
+      avgPrice: null,
+      quantity: null
+    })
+    const pfs = await userPfs(token, d);
+    expect(pfs).toEqual(expect.arrayContaining(pfArray));
+    const stocks = await openPf(pid, d);
+    stArray = [
+      {
+        stock: 'AAPL',
+        avgPrice: null,
+        quantity: null,
+      },
+      { 
+        stock: 'AMZN',
+        avgPrice: null,
+        quantity: null,
+      },
+      {
+        stock: 'IBM',
+        avgPrice: null,
+        quantity: null
+      }
+    ]
+    expect(stocks).toMatchObject({
+      pid: pid,
+      name: 'Watchlist',
+      stocks: expect.arrayContaining(stArray)
+    })
+  })
+  it('Remove first stock from watchlist', async () => {
+    const rem = await modifyStock(token, pid, 'AAPL', null, null, 0, d);
+    expect(rem).toBe(-1);
+    const pf = await openPf(pid, d);
+    stArray.splice(0, 1);
+    expect(pf).toMatchObject({
+      pid: pid,
+      name: 'Watchlist',
+      stocks: expect.arrayContaining(stArray)
+    })
+  })
+  it('Remove all stocks from watchlist', async () => {
+    const rem1 = await modifyStock(token, pid, 'AMZN', null, null, 0, d);
+    expect(rem1).toBe(-1);
+    const rem2 = await modifyStock(token, pid, 'IBM', null, null, 0, d);
+    expect(rem2).toBe(-1);
+    const pf = await openPf(pid, d);
+    stArray.splice(0, 2);
+    expect(pf).toMatchObject({
+      pid: pid,
+      name: 'Watchlist',
+      stocks: expect.arrayContaining(stArray)
+    })
+  })
+
+  afterAll(async () => {
+    await d.disconnect();
+  })
 })
 
 describe('Stress testing of portfolio and stocks', () => {

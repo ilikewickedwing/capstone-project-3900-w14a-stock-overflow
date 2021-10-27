@@ -40,8 +40,21 @@ export const addStock = async (token, pid, stock, price, quantity, database) => 
         return 2;
     }
 
-    const resp = await database.addStocks(pid, stock, price, quantity);
-    return resp;
+    // Check for watchlist
+    const get = await database.openPf(pid);
+    const name = get.name;
+
+    if (name !== 'Watchlist') {
+        if (!Number.isInteger(quantity) || quantity <= 0) {
+            return 4;
+        } else if (isNaN(price) || price <= 0) {
+            return 5;
+        } else {
+            return await database.addStocks(pid, stock, price, quantity);
+        }
+    } else {
+        return await database.addStocks(pid, stock, null, null);
+    }
 }
 
 /**
@@ -65,6 +78,20 @@ export const modifyStock = async (token, pid, stock, price, quantity, option, da
     if (!await checkStock(stock)) {
         return 2;
     }
+
+    // Check for watchlist
+    const get = await database.openPf(pid);
+    const name = get.name;
+
+    if (name !== 'Watchlist') {    
+        if (!Number.isInteger(quantity) || quantity <= 0) {
+            return 6;
+        } 
+        
+        if (isNaN(price) || price <= 0) {
+            return 7;
+        }
+    }
     
     let resp = null;
     if (option) {
@@ -80,4 +107,10 @@ export const checkStock = async (stock) => {
     const stocks = await alphavantage.getAllStocks();
     const filteredStocks = stocks.filter(o => o.symbol === stock);
     return filteredStocks.length !== 0;
+}
+
+export const getStock = async (stock) => {
+    const stocks = await alphavantage.getAllStocks();
+    const filteredStocks = stocks.filter(o => o.symbol === stock);
+    return filteredStocks;
 }
