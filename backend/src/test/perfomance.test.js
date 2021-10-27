@@ -26,6 +26,14 @@ describe('Create and delete', () => {
   it('Get stock', async () => {
 	const resp = await getStock('IBM');
   console.log(resp);
+  console.log(resp.info.daily);
+  console.log(resp.info.weekly);
+  console.log(resp.info.price);
+  console.log(resp.info.info);
+  //console.log(resp.info.daily['Meta Data']);
+  // for(let i = 0; i < resp.info.daily.'Meta Data'.length(); i++) {
+
+  // }
   })
 //   it('Add first stock to portfolio', async () => {
 //     const add = await addStock(token, pid1, 'IBM', 1, 2, d);

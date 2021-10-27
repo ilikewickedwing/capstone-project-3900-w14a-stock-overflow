@@ -109,8 +109,12 @@ export const checkStock = async (stock) => {
     return filteredStocks.length !== 0;
 }
 
+export const getStockInfo = async (stock) => {
+    const stocks = await getStock(stock);
+    return stocks.info.info;
+}
+
 export const getStock = async (stock) => {
-    const stocks = await alphavantage.getAllStocks();
-    const filteredStocks = stocks.filter(o => o.symbol === stock);
-    return filteredStocks;
+    const stocks = await alphavantage.getStock(stock);
+    return stocks;
 }
