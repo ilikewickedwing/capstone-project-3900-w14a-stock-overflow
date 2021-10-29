@@ -133,3 +133,21 @@ export const deletePf = async (token, pid, database) => {
   const del = await database.deletePf(uid, pid);
   return del;
 }
+
+export const calcPf = async (token, pid, database) => {
+  const uid = await database.getTokenUid(token);
+  if (uid == null) {
+    return -2;
+  }
+
+  const Pf = await database.openPf(pid);
+  if (Pf == null) {
+    return -3;
+  } else if (Pf.name == "Watchlist") {
+    return -4;
+  }
+
+  let perf = null;
+  // implement calculation of performance
+  return perf;
+}
