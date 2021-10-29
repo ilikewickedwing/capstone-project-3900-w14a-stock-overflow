@@ -62,16 +62,16 @@ export const database = new Database();
  *         name:
  *           type: string
  *           description: The name of the stock
- *         buydate:
- *           type: date
- *           description: The buy in date of the stock
- *         buyprice:
+ *         avgPrice:
  *           type: int
  *           description: The buy in price of the stock
+ *         quantity:
+ *           type: int
+ *           description: The amount bought of the stock
  *       example:
  *         name: AAPL
- *         buydate: 10-10-2021
- *         buyprice: 500
+ *         avgPrice: 500
+ *         quantity: 20
  *     UserData:
  *       type: object
  *       properties:
@@ -572,6 +572,8 @@ app.delete('/user/portfolios/delete', async (req, res) => {
  *     responses:
  *       200:
  *         description: Successfully added stock
+ *       400:
+ *         description: Invalid quantity or price
  *       401:
  *         description: Invalid token
  *       403:
@@ -586,6 +588,10 @@ app.post('/user/stocks/add', async (req, res) => {
     res.status(403).send({ error: "Invalid stock" });
   } else if (resp == 3) {
     res.status(403).send({ error: "Invalid pid" });
+  } else if (resp == 4) {
+    res.status(400).send({ error: "Must include valid quantity purchased" });
+  } else if (resp == 5) {
+    res.status(400).send({ error: "Must include valid price purchased at" });
   } else {
     res.status(200).send();
   }
@@ -655,6 +661,10 @@ app.put('/user/stocks/edit', async (req, res) => {
     res.status(403).send({ error: "Quantity to sell too high" });
   } else if (resp == 5) {
     res.status(404).send({ error: "Stock is not in portfolio" });
+  } else if (resp == 6) {
+    res.status(400).send({ error: "Must include valid quantity purchased" });
+  } else if (resp == 7) {
+    res.status(400).send({ error: "Must include valid price purchased at" });
   }
   return;
 })
