@@ -13,10 +13,8 @@ export class Alphavantage {
   async getAllStocks() {
     // Return cached stocks if available
     if (this.cachedStocks !== null) {
-      console.log("returning cache")
       return this.cachedStocks;
     }
-    console.log("fetching cache");
     // Else cache doesnt exist so fetch it
     const resp = await this._getAllStocks();
     return resp;
@@ -45,6 +43,11 @@ export class Alphavantage {
     this.cachedStocks = stocks;
     return stocks;
   }
+
+  async _getStockTimeSeries() {
+
+  }
+  
   // Call this when deleting this object to remove all time intervals
   // to prevent a memory leak
   destroy() {
