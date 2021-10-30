@@ -14,7 +14,8 @@ import {
   RightBody, 
   RightCard, 
   PageBody, 
-  FlexRows
+  FlexRows,
+  FlexColumns
 } from '../styles/styling';
 import Button from '@mui/material/Button';
 import PfTable from './PfTable';
@@ -33,6 +34,7 @@ const Portfolio = () => {
   const [changedName, editName ] = React.useState('');
   const [isWatchlist, setIsWatchlist] = React.useState(0);
   const [portfolios, setPortfolios] = React.useState([]); 
+  const [isChanged, setChanged ] = React.useState(0);
 
   const open = Boolean(anchorEl);
   const id = open ? 'simple-popover': undefined;
@@ -56,36 +58,32 @@ const Portfolio = () => {
     }
   }; 
 
-  //TODO IMPLEMENT TO DELETE THE PAGE 
   const submitPfRename = async (e) => {
     e.preventDefault();
     try {
       setName(changedName);
       await axios.post(`${apiBaseUrl}/user/portfolios/edit`, {token, pid, name: changedName});
       setAnchorEl(null);
-      // reload the page to refresh the tab
-      window.location.reload(false);
+      setChanged(isChanged + 1);
     } catch (e) {
       alert(e.error);
     }
   }
 
-  // TODO: handle delete portfolio
   const handleDelete = async (e) => {
     e.preventDefault();
-    api.delete(`user/portfolios/delete?token=${token}&pid=${pid}`,{})
-      .then ((e) => {
-        if(e.status !== 200 ){
-          e.json().then((e) => alert(e.error))
-        }
-      })
-      .then(()=> history.push('/dashboard')) 
+    try {
+      await axios.delete(`${apiBaseUrl}/user/portfolios/delete`,{data: {token, pid}});
+      history.push('/dashboard');
+    } catch (e) {
+      alert(e);
+    }
   }
 
   return (
       <PageBody>
           <Navigation />
-          <Tabs />
+          <Tabs isChanged={isChanged}/>
           <h1> PORTFOLIO PAGE: {name}</h1> 
           <FlexRows>
           </FlexRows> 
