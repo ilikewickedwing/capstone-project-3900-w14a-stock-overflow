@@ -1,6 +1,6 @@
 import { authRegister } from "../auth";
 import { createPf, deletePf, userPfs, openPf, getPid, editPf } from "../portfolio";
-import { checkStock, addStock, modifyStock, getStock } from "../stocks";
+import { checkStock, addStock, modifyStock, getStock, getStockDaily, getStockWeekly, getStockPrice, getStockInfo } from "../stocks";
 import { Database } from "../database";
 import request from 'supertest';
 import { app, database } from "../index";
@@ -24,12 +24,23 @@ describe('Create and delete', () => {
     pid1 = create.pid;
   })
   it('Get stock', async () => {
-	const resp = await getStock('IBM');
-  console.log(resp);
-  console.log(resp.info.daily);
-  console.log(resp.info.weekly);
-  console.log(resp.info.price);
-  console.log(resp.info.info);
+	const resp = await getStock('IBM', 0);
+  // console.log(resp);
+  const daily = await getStockDaily('IBM');
+  const weekly = await getStockWeekly('IBM');
+  const price = await getStockPrice('IBM');
+  const info = await getStockInfo('IBM');
+
+  expect(resp).toMatchObject({
+    symbol: 'IBM',
+    data: {
+      daily: expect.objectContaining(daily),
+      weekly: expect.objectContaining(weekly),
+      price: expect.objectContaining(price),
+      info: expect.objectContaining(info),
+    },
+    time: expect.any(Date),
+  })
   //console.log(resp.info.daily['Meta Data']);
   // for(let i = 0; i < resp.info.daily.'Meta Data'.length(); i++) {
 
