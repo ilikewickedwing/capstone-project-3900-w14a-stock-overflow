@@ -5,7 +5,7 @@ import { Database } from "../database";
 import request from 'supertest';
 import { app, database } from "../index";
 
-/* describe('Create and delete', () => {
+describe('Create and delete', () => {
 	const d = new Database(true);
   beforeAll(async () => {
     await d.connect();
@@ -173,9 +173,9 @@ import { app, database } from "../index";
   afterAll(async () => {
     await d.disconnect();
   })
-}) */
+})
 
-/* describe('Editing portfolio doesn\'t affect stocks', () => {
+describe('Editing portfolio doesn\'t affect stocks', () => {
   const d = new Database(true);
   beforeAll(async () => {
     await d.connect();
@@ -276,9 +276,9 @@ import { app, database } from "../index";
   afterAll(async () => {
     await d.disconnect();
   })
-}) */
+})
 
-/* describe('Editing stocks doesn\'t affect portfolios', () => {
+describe('Editing stocks doesn\'t affect portfolios', () => {
   const d = new Database(true);
   beforeAll(async () => {
     await d.connect();
@@ -516,7 +516,7 @@ import { app, database } from "../index";
   afterAll(async () => {
     await d.disconnect();
   })
-}) */
+})
 
 describe('Portfolio and stocks endpoint test', () => {
   beforeAll(async () => {
@@ -558,7 +558,7 @@ describe('Portfolio and stocks endpoint test', () => {
     expect(add.statusCode).toBe(200);
 
     const get = await userPfs(token, database);
-    const pfArray = [{ name: "myPf", pid: pid1 }];
+    const pfArray = [{ name: 'myPf', pid: pid1 }];
     expect(get).toEqual(expect.arrayContaining(pfArray));
     const stArray = [{
       stock: 'IBM',
@@ -570,6 +570,10 @@ describe('Portfolio and stocks endpoint test', () => {
       pid: pid1,
       name: 'myPf',
       stocks: expect.arrayContaining(stArray),
+      value: { 
+        spent: 2,
+        sold: 0
+      }
     })
   })
   it('200 on subsequent valid stock additions', async () => {
@@ -612,7 +616,11 @@ describe('Portfolio and stocks endpoint test', () => {
     expect(pf).toMatchObject({
       pid: pid1,
       name: 'myPf',
-      stocks: expect.arrayContaining(stArray)
+      stocks: expect.arrayContaining(stArray),
+      value: { 
+        spent: 9,
+        sold: 0
+      }
     })
   })
   it('200 on first valid stock sale', async () => {
@@ -632,7 +640,11 @@ describe('Portfolio and stocks endpoint test', () => {
     expect(pf).toMatchObject({
       pid: pid1,
       name: 'myPf',
-      stocks: expect.arrayContaining(stArray)
+      stocks: expect.arrayContaining(stArray),
+      value: { 
+        spent: 9,
+        sold: 2
+      }
     })
   })
   it('200 on subsequent valid stock sales', async () => {
@@ -661,7 +673,11 @@ describe('Portfolio and stocks endpoint test', () => {
     expect(pf).toMatchObject({
       pid: pid1,
       name: 'myPf',
-      stocks: expect.arrayContaining(stArray)
+      stocks: expect.arrayContaining(stArray),
+      value: { 
+        spent: 9,
+        sold: 9
+      }
     })
   })
   it('200 on subsequent valid portfolio creations', async () => {
@@ -694,7 +710,7 @@ describe('Portfolio and stocks endpoint test', () => {
   })
 })
 
-/* describe('Adding stocks to watchlist', () => {
+describe('Adding stocks to watchlist', () => {
   const d = new Database(true);
   beforeAll(async () => {
     await d.connect();
@@ -821,4 +837,4 @@ describe('Portfolio and stocks endpoint test', () => {
 
 describe('Stress testing of portfolio and stocks', () => {
 
-}) */
+})
