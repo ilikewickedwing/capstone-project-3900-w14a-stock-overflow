@@ -86,11 +86,11 @@ export class Alphavantage {
     const time = new Date();
     const obj = {
       symbol: 'IBM',
-      info: {
-        daily: await dailyRequest.data,
-        weekly: await weeklyRequest.data,
-        price: await priceRequest.data,
-        info: await infoRequest.data,
+      data: {
+        daily: dailyRequest.data,
+        weekly: weeklyRequest.data,
+        price: priceRequest.data,
+        info: infoRequest.data,
       },
       time: time
     }
