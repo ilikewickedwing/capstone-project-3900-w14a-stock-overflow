@@ -1,6 +1,7 @@
 import axios from "axios";
 let apikey = 'NJGHG3ZAKLAELM3E';
 let keys = ['59SO8FIM49NYQS21','WP9NFOYE83L4FABK','5TZVKFQR250ZAQZ4','FLKB7SQBXHGISR7I'];
+let useCounter = 0;
 
 export class Alphavantage {
   constructor() {
@@ -96,6 +97,7 @@ export class Alphavantage {
 
   async _callApi(type, stock) {
     const request = await axios.get(`https://www.alphavantage.co/query?function=${type}&symbol=${stock}&apikey=${apikey}`);
+    useCounter++;
     if (useCounter === 5) {
       keys.push(apikey);
       apikey = keys.shift();
