@@ -54,10 +54,9 @@ const Tabs = ({isChanged}) => {
     e.preventDefault();      
     const request = await axios.post(`${apiBaseUrl}/user/portfolios/create`, {token, name});
     const newPid = request.data;
-
-    console.log(newPid);
     fetchPortfolios();
     handleClose();
+    history.push(`/portfolio/${newPid.pid}`);
   }
 
 // TODO IMPLEMENT PROFILE AND DELETE ACC

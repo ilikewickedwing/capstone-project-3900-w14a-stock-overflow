@@ -38,3 +38,5 @@ Week 6
 - todo: finish sprint 1 before mid week 7 so we can start on sprint 2 
 
 Week 7
+- refactored more frontend code/ fixed bug issues with the delete portfolio function
+- implemented code for the search bar of the page (located in Navigation.jsx)
