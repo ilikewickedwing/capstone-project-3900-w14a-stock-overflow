@@ -1,18 +1,22 @@
 Week 1
-
 Group formed. Discussed with group which project to develop(Stock Portfolio Management System)
 and figured out which language to use. Thought of 8 additional functionality that could be used in our project
 to be shared with group in week 2.
 
 Week 2
-
 I got assigned writing the user stories and acceptance criteria for the proposal and started writing
 those.
 
 Week 3
-
 Finished writing the user stories and acceptance criteria and also helped with formatting the proposal.
 
 Week 4
-
 Worked on adding portfolios with Richard and also wrote adding stocks and modifying stocks.
+
+Week 5
+Did research on API and implemented it into our project and wrote some stocks functions.
+
+Week 6
+Flex week.
+
+Week 7
