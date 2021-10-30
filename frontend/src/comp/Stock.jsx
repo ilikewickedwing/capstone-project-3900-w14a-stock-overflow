@@ -4,22 +4,15 @@ import { ApiContext } from '../api';
 import axios from "axios";
 import Navigation from './Navigation'; 
 import Tabs from './Tabs'; 
-import Popover from '@mui/material/Popover';
+
 import {
-  CreatePortField, 
-  CreatePortContent, 
-  ConfirmCancel,
   PfBody, 
   LeftBody, 
   RightBody, 
   RightCard, 
   PageBody, 
   FlexRows,
-  FlexColumns
 } from '../styles/styling';
-import Button from '@mui/material/Button';
-import PfTable from './PfTable';
-import AddStock from './AddStock';
 import { apiBaseUrl } from './const';
 
 const Stock = () => {
@@ -30,6 +23,18 @@ const Stock = () => {
 
   const [name, setName] = React.useState('');
 
+  React.useEffect(() =>{
+      loadStockInfo();
+  },[]);
+
+  const loadStockInfo = async () => {
+      try {
+
+      } catch (e) {
+          alert(e);
+      }
+  }
+
   return (
       <PageBody>
           <Navigation />
@@ -39,9 +44,6 @@ const Stock = () => {
           </FlexRows> 
           <PfBody>
             <LeftBody>
-        
-              <PfTable />
-            < AddStock />
             </LeftBody>
             <RightBody>
               <RightCard>

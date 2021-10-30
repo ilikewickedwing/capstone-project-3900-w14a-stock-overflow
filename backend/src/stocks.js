@@ -42,6 +42,7 @@ export const addStock = async (token, pid, stock, price, quantity, database) => 
 
   // Check for watchlist
   const get = await database.openPf(pid);
+  if (get == null) return 3;
   const name = get.name;
 
   if (name !== 'Watchlist') {
@@ -81,6 +82,7 @@ export const modifyStock = async (token, pid, stock, price, quantity, option, da
 
   // Check for watchlist
   const get = await database.openPf(pid);
+  if (get == null) return 3;
   const name = get.name;
 
   if (name !== 'Watchlist') {    
@@ -98,7 +100,7 @@ export const modifyStock = async (token, pid, stock, price, quantity, option, da
     resp = await database.addStocks(pid, stock, price, quantity);
   }
   else {
-    resp = await database.sellStocks(pid, stock, quantity)
+    resp = await database.sellStocks(pid, stock, price, quantity);
   }
   return resp;
 }
@@ -116,6 +118,9 @@ export const checkStock = async (stock) => {
  * @returns {Promise <Object>}
  */
 export const getStock = async (stock, param) => {
+  // const check = await checkStock(stock);
+  // if (!check) return null;
+
   const stocks = await alphavantage.getStock(stock);
   if (param == 1) return stocks[0].data.daily;
   else if (param == 2) return stocks[0].data.weekly;

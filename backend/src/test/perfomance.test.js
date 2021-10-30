@@ -5,176 +5,68 @@ import { Database } from "../database";
 import request from 'supertest';
 import { app, database } from "../index";
 
-describe('Create and delete', () => {
-	const d = new Database(true);
+// describe('Retrieve stock information', () => {
+// 	const d = new Database(true);
+//   beforeAll(async () => {
+//     await d.connect();
+//   })
+
+//   it('Get stock', async () => {
+// 	const resp = await getStock('IBM', 0);
+//   const daily = await getStockDaily('IBM');
+//   const weekly = await getStockWeekly('IBM');
+//   const price = await getStockPrice('IBM');
+//   const info = await getStockInfo('IBM');
+
+//   expect(resp).toMatchObject({
+//     symbol: 'IBM',
+//     data: {
+//       daily: expect.objectContaining(daily),
+//       weekly: expect.objectContaining(weekly),
+//       price: expect.objectContaining(price),
+//       info: expect.objectContaining(info),
+//     },
+//     time: expect.any(Date),
+//   })
+//   //console.log(resp.info.daily['Meta Data']);
+//   // for(let i = 0; i < resp.info.daily.'Meta Data'.length(); i++) {
+
+//   // }
+//   })
+//   afterAll(async () => {
+//     await d.disconnect();
+//   })
+// })
+
+describe('Retrieve stock info endpoint test', () => {
   beforeAll(async () => {
-    await d.connect();
+    await database.connect();
   })
 
-  let token = null;
-  let pid1 = null;
-
-  it('Register user and create first portfolio', async () => {
-    const rego = await authRegister('Ashley', 'strongpassword', d);
-    token = rego.token;
-    const create = await createPf(token, 'pf1', d);
-    expect(create).toMatchObject({
-      pid: expect.any(String),
+  it('200 on successful get stock', async () => {
+    console.log('200 on successful get stock');
+    const resp = await request(app).get(`/stocks/info?stock=IBM`).send();
+    expect(resp.statusCode).toBe(200);
+    expect(resp.body).toMatchObject({
+      symbol: 'IBM',
+      data: {
+        daily: expect.anything(),
+        weekly: expect.anything(),
+        price: expect.anything(),
+        info: expect.anything()
+      },
+      time: expect.any(String),
     })
-    pid1 = create.pid;
   })
-  it('Get stock', async () => {
-	const resp = await getStock('IBM', 0);
-  // console.log(resp);
-  const daily = await getStockDaily('IBM');
-  const weekly = await getStockWeekly('IBM');
-  const price = await getStockPrice('IBM');
-  const info = await getStockInfo('IBM');
-
-  expect(resp).toMatchObject({
-    symbol: 'IBM',
-    data: {
-      daily: expect.objectContaining(daily),
-      weekly: expect.objectContaining(weekly),
-      price: expect.objectContaining(price),
-      info: expect.objectContaining(info),
-    },
-    time: expect.any(Date),
+  it('403 on invalid stock', async () => {
+    console.log('403 on invalid stock');
+    const resp = await request(app).get(`/stocks/info?stock=fakestock`).send();
+    expect(resp.statusCode).toBe(403);
+    expect(resp.body.error).toBe("Invalid stock");
   })
-  //console.log(resp.info.daily['Meta Data']);
-  // for(let i = 0; i < resp.info.daily.'Meta Data'.length(); i++) {
 
-  // }
-  })
-//   it('Add first stock to portfolio', async () => {
-//     const add = await addStock(token, pid1, 'IBM', 1, 2, d);
-//     expect(add).toBe(-1);
-//     const check = await d.getStock(pid1, 'IBM');
-//     expect(check).toMatchObject({
-//       stock: 'IBM',
-//       avgPrice: 1.00,
-//       quantity: 2
-//     })
-//   })
-//   it('Check portfolio details', async () => {
-//     const get = await userPfs(token, d);
-//     const pfArray = [{ name: "pf1", pid: pid1 }];
-//     expect(get).toEqual(expect.arrayContaining(pfArray));
-//     const stArray = [{
-//       stock: 'IBM',
-//       avgPrice: 1.00,
-//       quantity: 2,
-//     }]
-//     const pf = await openPf(pid1, d);
-//     expect(pf).toMatchObject({
-//       pid: pid1,
-//       name: 'pf1',
-//       stocks: expect.arrayContaining(stArray),
-//     })
-//   })
-//   it('Add multiple stocks to portfolio', async () => {
-//     const add1 = await addStock(token, pid1, 'AAPL', 2, 2, d);
-//     expect(add1).toBe(-1);
-//     const check1 = await d.getStock(pid1, 'AAPL');
-//     expect(check1).toMatchObject({
-//       stock: 'AAPL',
-//       avgPrice: 2.00,
-//       quantity: 2
-//     })
-//     const add2 = await addStock(token, pid1, 'AMZN', 3, 1, d);
-//     expect(add2).toBe(-1);
-//     const check2 = await d.getStock(pid1, 'AMZN');
-//     expect(check2).toMatchObject({
-//       stock: 'AMZN',
-//       avgPrice: 3.00,
-//       quantity: 1
-//     })
-//     const stArray = [
-//       {
-//         stock: 'IBM',
-//         avgPrice: 1.00,
-//         quantity: 2
-//       },
-//       {
-//         stock: 'AAPL',
-//         avgPrice: 2.00,
-//         quantity: 2
-//       },
-//       {
-//         stock: 'AMZN',
-//         avgPrice: 3.00,
-//         quantity: 1
-//       }
-//     ]
-//     const pf = await openPf(pid1, d);
-//     expect(pf).toMatchObject({
-//       pid: pid1,
-//       name: 'pf1',
-//       stocks: expect.arrayContaining(stArray),
-//     })
-//   })
-//   it('Remove first stock from portfolio', async () => {
-//     const sell = await modifyStock(token, pid1, 'IBM', 2, 2, 0, d);
-//     expect(sell).toBe(-1);
-//     const check = await d.getStock(pid1, 'IBM');
-//     expect(check).toBe(null);
-//     const stArray1 = [
-//       {
-//         stock: 'IBM',
-//         avgPrice: 1.00,
-//         quantity: 2
-//       }
-//     ]
-//     const stArray2 = [
-//       {
-//         stock: 'AAPL',
-//         avgPrice: 2.00,
-//         quantity: 2
-//       },
-//       {
-//         stock: 'AMZN',
-//         avgPrice: 3.00,
-//         quantity: 1
-//       }
-//     ]
-//     const pf = await openPf(pid1, d);
-//     expect(pf).toMatchObject({
-//       pid: pid1,
-//       name: 'pf1',
-//       stocks: expect.not.arrayContaining(stArray1)
-//     })
-//     expect(pf).toMatchObject({
-//       pid: pid1,
-//       name: 'pf1',
-//       stocks: expect.arrayContaining(stArray2)
-//     })
-//   })
-//   it('Remove all stocks from portfolio', async () => {
-//     const sell1 = await modifyStock(token, pid1, 'AAPL', 2, 2, 0, d);
-//     expect(sell1).toBe(-1);
-//     const check1 = await d.getStock(pid1, 'AAPL');
-//     expect(check1).toBe(null);
-//     const sell2 = await modifyStock(token, pid1, 'AMZN', 3, 1, 0, d);
-//     expect(sell2).toBe(-1);
-//     const check2 = await d.getStock(pid1, 'AMZN');
-//     expect(check2).toBe(null);
-//     const pf = await openPf(pid1, d);
-//     expect(pf).toMatchObject({
-//       pid: pid1,
-//       name: 'pf1',
-//       stocks: []
-//     })
-//   })
-//   it('Delete portfolio', async () => {
-//     const del = await deletePf(token, pid1, d);
-//     expect(del).toBe(1);
-//     const pfs = await userPfs(token, d);
-//     const pfArray = [{ name: 'pf1', pid: pid1 }];
-//     expect(pfs).toEqual(expect.not.arrayContaining(pfArray));
-//   })
-
-  afterAll(async () => {
-    await d.disconnect();
+  afterAll(async() => {
+    await database.disconnect();
   })
 })
 
