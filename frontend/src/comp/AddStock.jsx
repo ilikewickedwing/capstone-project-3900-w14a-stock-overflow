@@ -23,7 +23,6 @@ const AddStock = () => {
 
     const searchBar = async(e) =>{
         e.preventDefault(); 
-        setSearch(e.target.value);
         request.get({
             url: url,
             json: true,
@@ -71,10 +70,10 @@ const AddStock = () => {
           <u>  + Add New Stock </u> 
         </ExpansionPanelSummary>
         <ExpansionPanelDetails>
-        <form onSubmit={checkSuccess}>
-            <TextInput required id="search" variant="outlined" label="Search Stock" onChange={searchBar}/>
+        <form onSubmit={searchBar}>
+            <TextInput required id="search" variant="outlined" label="Search Stock" onChange={e => setSearch(e.target.value)}/>
             {queryRes.map((a) => 
-                <p>{a.code} {a.name} </p>
+                <p key={a.code}>{a?.code} {a?.name} </p>
             )}
         </form> 
         
