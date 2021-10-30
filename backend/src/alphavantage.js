@@ -1,7 +1,6 @@
 import axios from "axios";
 let apikey = 'NJGHG3ZAKLAELM3E';
-let useCounter = 0;
-let keys = ['59SO8FIM49NYQS21','WP9NFOYE83L4FABK'];
+let keys = ['59SO8FIM49NYQS21','WP9NFOYE83L4FABK','5TZVKFQR250ZAQZ4','FLKB7SQBXHGISR7I'];
 
 export class Alphavantage {
   constructor() {
@@ -62,7 +61,7 @@ export class Alphavantage {
     }
     if (search.length !== 0 && time - search[0].time < 600000) {
       // console.log("returning cached stock");
-      return search;
+      return search[0];
     }
 
     console.log("fetching cache");
@@ -96,7 +95,6 @@ export class Alphavantage {
 
   async _callApi(type, stock) {
     const request = await axios.get(`https://www.alphavantage.co/query?function=${type}&symbol=${stock}&apikey=${apikey}`);
-    useCounter++;
     if (useCounter === 5) {
       keys.push(apikey);
       apikey = keys.shift();
