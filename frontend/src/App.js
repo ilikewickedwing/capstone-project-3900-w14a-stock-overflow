@@ -5,6 +5,7 @@ import API, { ApiContext } from "./api";
 import SignUp from "./comp/SignUp";
 import Portfolio from "./comp/Portfolio";
 import Profile from "./comp/Profile";
+import Stock from "./comp/Stock";
 import './App.css';
 import { StocksPage } from "./graph/StocksPage";
 
@@ -22,6 +23,7 @@ function App() {
             <Route path="/dashboard" component={Dashboard} />
             <Route path="/portfolio/:pid" component={Portfolio} />
             <Route path="/profile" component={Profile} />
+            <Route path="/stock/:stockCode" component={Stock} />
           </Switch>  
         </div>
       </BrowserRouter>

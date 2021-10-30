@@ -10,7 +10,7 @@ import axios from "axios";
 import { apiBaseUrl } from './const';
 
 
-const Tabs = () => {
+const Tabs = ({isChanged}) => {
   const api = React.useContext(ApiContext);
   const history = useHistory();
   const token = localStorage.getItem('token');
@@ -19,15 +19,23 @@ const Tabs = () => {
   const [name, setName] = React.useState('');
   const [portfolios, setPortfolios] = React.useState([]);
 
+
+  const fetchPortfolios = async () => {
+    const request = await axios.get(`${apiBaseUrl}/user/portfolios?token=${token}`);
+    setPortfolios(request.data);
+  };
+
+  // fetch the tabs on load 
   React.useEffect(() => {      
-    const fetchPortfolios = async () => {
-      const request = await axios.get(`${apiBaseUrl}/user/portfolios?token=${token}`);
-      setPortfolios(request.data);
-    };
     fetchPortfolios();
   }, []);
+
+  // refresh the tabs on every changed name
+  React.useEffect(() =>{
+    fetchPortfolios();
+  },[isChanged])
   
-  //handle popover open and close
+  // handle popover open and close
   const handleCreatePort = (event) => {
     setAnchorEl(event.currentTarget);
   }
@@ -46,9 +54,9 @@ const Tabs = () => {
     e.preventDefault();      
     const request = await axios.post(`${apiBaseUrl}/user/portfolios/create`, {token, name});
     const newPid = request.data;
-
-    console.log(newPid);
+    fetchPortfolios();
     handleClose();
+    history.push(`/portfolio/${newPid.pid}`);
   }
 
 // TODO IMPLEMENT PROFILE AND DELETE ACC

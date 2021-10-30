@@ -50,6 +50,7 @@ export class Alphavantage {
 
   async getStock(stock) {
     console.log(this.infoCache);
+    console.log("stock requested is " + stock);
     // Search for stock in cache
     const search = this.infoCache.filter(o => o.symbol === stock);
     const time = Date.now();
@@ -72,8 +73,6 @@ export class Alphavantage {
   async _getStock(stock) {
     const dailyRequest = await axios.get(`https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${stock}&apikey=${apikey}`);
     const weeklyRequest = await axios.get(`https://www.alphavantage.co/query?function=TIME_SERIES_WEEKLY&symbol=${stock}&apikey=${apikey}`);
-
-
     const priceRequest = await axios.get(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${stock}&apikey=${apikey}`);     
     const infoRequest = await axios.get(`https://www.alphavantage.co/query?function=OVERVIEW&symbol=${stock}&apikey=${apikey}`); 
     
@@ -82,11 +81,11 @@ export class Alphavantage {
     const time = new Date();
     const obj = {
       symbol: 'IBM',
-      info: {
-        daily: await dailyRequest.data,
-        weekly: await weeklyRequest.data,
-        price: await priceRequest.data,
-        info: await infoRequest.data,
+      data: {
+        daily: dailyRequest.data,
+        weekly: weeklyRequest.data,
+        price: priceRequest.data,
+        info: infoRequest.data,
       },
       time: time
     }

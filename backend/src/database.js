@@ -60,6 +60,10 @@ const COLLECTIONS = [
           quantity: int,
         }
       ],
+      value: {
+        spent: float,
+        sold: float,
+      }
     }
    */
   'portfolios',
@@ -166,6 +170,10 @@ export class Database {
       pid: watchlistId,
       name: "Watchlist",
       stocks: [],
+      value: {
+        spent: null,
+        sold: null
+      }
     })
 
     return uid;
@@ -326,6 +334,10 @@ export class Database {
       pid: Pid,
       name: name,
       stocks: [],
+      value: {
+        spent: 0,
+        sold: 0
+      }
     });
     userPfs.push({ pid: Pid, name: name });
     await userPortos.updateOne( query1, { $set : { pfs: userPfs } } );

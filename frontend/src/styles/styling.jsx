@@ -108,3 +108,11 @@ export const TextInput = styled(TextField)`
      margin: 0.5%; 
  }
 `;
+
+
+export const StockQueryButton= styled.button`
+ &&{
+     width: 60%;
+     text-align: center;
+ }
+`;
