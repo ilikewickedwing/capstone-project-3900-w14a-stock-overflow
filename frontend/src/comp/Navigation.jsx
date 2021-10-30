@@ -90,7 +90,7 @@ const Navigation = () => {
                 <StockQuery
                     key={a.code}
                     stockCode={a.code}
-                    stockName={a.Name}
+                    stockName={a.name}
                 />
             )}
             <FlexRows style={{padding:"1%"}}>
