@@ -116,6 +116,9 @@ export const checkStock = async (stock) => {
  * @returns {Promise <Object>}
  */
 export const getStock = async (stock, param) => {
+  // const check = await checkStock(stock);
+  // if (!check) return null;
+
   const stocks = await alphavantage.getStock(stock);
   if (param == 1) return stocks[0].data.daily;
   else if (param == 2) return stocks[0].data.weekly;
