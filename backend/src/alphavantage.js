@@ -1,5 +1,7 @@
 import axios from "axios";
-const apikey = "demo";
+let apikey = 'WP9NFOYE83L4FABK';
+let useCounter = 0;
+let keys = ['59SO8FIM49NYQS21','NJGHG3ZAKLAELM3E'];
 
 export class Alphavantage {
   constructor() {
@@ -27,8 +29,8 @@ export class Alphavantage {
   async _getAllStocks() {
     const stocks = [];
     // Fetching the list of active stocks
-    const request = await axios.get(`https://www.alphavantage.co/query?function=LISTING_STATUS&apikey=${apikey}`);
-    let result = await request.data;  // Converting result into text
+    let result = await this._callApi("LISTING_STATUS","");  // Converting result into text
+
     result = result.split('\n');        // Splitting every entry
 
     // Going through every entry
@@ -68,23 +70,18 @@ export class Alphavantage {
   }
 
   async _getStock(stock) {
-    const dailyRequest = await axios.get(`https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${stock}&apikey=${apikey}`);
-    const weeklyRequest = await axios.get(`https://www.alphavantage.co/query?function=TIME_SERIES_WEEKLY&symbol=${stock}&apikey=${apikey}`);
-
-
-    const priceRequest = await axios.get(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${stock}&apikey=${apikey}`);     
-    const infoRequest = await axios.get(`https://www.alphavantage.co/query?function=OVERVIEW&symbol=${stock}&apikey=${apikey}`); 
-    
     //console.log(await dailyRequest.data);
 
     const time = new Date();
     const obj = {
-      symbol: 'IBM',
+      symbol: stock,
       data: {
-        daily: dailyRequest.data,
-        weekly: weeklyRequest.data,
-        price: priceRequest.data,
-        info: infoRequest.data,
+        intraday: await this._callApi('TIME_SERIES_INTRADAY', stock),
+        daily: await this._callApi('TIME_SERIES_DAILY_ADJUSTED', stock),
+        weekly: await this._callApi('TIME_SERIES_WEEKLY_ADJUSTED', stock),
+        monthly: await this._callApi('TIME_SERIES_MONTHLY_ADJUSTED', stock),
+        price: await this._callApi('GLOBAL_QUOTE', stock),
+        info: await this._callApi('OVERVIEW', stock),
       },
       time: time
     }
@@ -92,6 +89,16 @@ export class Alphavantage {
     this.infoCache.push(obj);
 
     return obj;
+  }
+
+  async _callApi(type, stock) {
+    const request = await axios.get(`https://www.alphavantage.co/query?function=${type}&symbol=${stock}&apikey=${apikey}`);
+    if (useCounter++ === 5) {
+      keys.push(apikey);
+      apikey = keys.shift();
+      useCounter = 0;
+    }
+    return await request.data;
   }
 
   checkStock(check, against) {
