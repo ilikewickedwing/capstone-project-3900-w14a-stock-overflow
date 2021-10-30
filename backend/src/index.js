@@ -731,14 +731,22 @@ app.get('/stocks/all', async (req, res) => {
  *         description: Could not connect to API
  */
  app.get('/stocks/info', async (req, res) => {
-  const { stock } = req.query;
+  const { stock, param } = req.query;
   const check = await checkStock(stock);
   if (!check) {
     res.status(403).send({ error: "Invalid stock" });
     return;
   }
 
-  const resp = await getStock(stock, 0);
+  // PLEASE USE THESE PARAMS
+  // if (param == 1) url = 'TIME_SERIES_INTRADAY' + '&interval=1min';
+  //   else if (param == 2) url = 'TIME_SERIES_DAILY_ADJUSTED';
+  //   else if (param == 3) url = 'TIME_SERIES_WEEKLY_ADJUSTED';
+  //   else if (param == 4) url = 'TIME_SERIES_MONTHLY_ADJUSTED';
+  //   else if (param == 5) url = 'GLOBAL_QUOTE';
+  //   else if (param == 6) url = 'OVERVIEW';
+
+  const resp = await getStock(stock, param);
   if (resp == null) {
     res.status(502).send({ error: "Could not connect to API" });
     return;
