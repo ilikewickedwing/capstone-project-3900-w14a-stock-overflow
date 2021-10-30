@@ -1,5 +1,5 @@
 import axios from "axios";
-const apikey = "demo";
+const apikey = "E23ORO62TPLB096R";
 
 export class Alphavantage {
   constructor() {
@@ -61,7 +61,7 @@ export class Alphavantage {
     }
     if (search.length !== 0 && time - search[0].time < 600000) {
       console.log("returning cached stock");
-      return search;
+      return search[0];
     }
 
     console.log("fetching cache");
@@ -90,6 +90,7 @@ export class Alphavantage {
       time: time
     }
     
+    console.log(obj);
     this.infoCache.push(obj);
 
     return obj;
