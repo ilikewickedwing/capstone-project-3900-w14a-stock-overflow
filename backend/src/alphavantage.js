@@ -1,6 +1,7 @@
 import axios from "axios";
-let apikey = 'E23ORO62TPLB096R';
-let keys = [];
+let apikey = 'NJGHG3ZAKLAELM3E';
+let keys = ['59SO8FIM49NYQS21','WP9NFOYE83L4FABK','5TZVKFQR250ZAQZ4','FLKB7SQBXHGISR7I', 'E23ORO62TPLB096R'];
+let useCounter = 0;
 
 export class Alphavantage {
   constructor() {
