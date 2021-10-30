@@ -46,12 +46,6 @@ export class Alphavantage {
     return stocks;
   }
 
-<<<<<<< HEAD
-  async _getStockTimeSeries() {
-
-  }
-  
-=======
   async getStock(stock) {
     console.log(this.infoCache);
     // Search for stock in cache
@@ -104,7 +98,6 @@ export class Alphavantage {
     return check == against;
   }
 
->>>>>>> 877ce665340cd1c50825fda22d26a1e88cad6999
   // Call this when deleting this object to remove all time intervals
   // to prevent a memory leak
   destroy() {
