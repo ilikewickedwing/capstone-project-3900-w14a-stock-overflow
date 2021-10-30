@@ -3,10 +3,10 @@ import cors from 'cors';
 import { Database } from "./database";
 import swaggerUI from 'swagger-ui-express';
 import { swaggerDocs } from "./docs";
-import { createPf, deletePf, openPf, userPfs, editPf } from "./portfolio";
+import { createPf, deletePf, openPf, userPfs, editPf, calcPf } from "./portfolio";
 import { authDelete, authLogin, authLogout, authRegister } from "./auth";
 import { getUserProfile, postUserProfile } from "./user";
-import { addStock, modifyStock, getAllStocks } from "./stocks";
+import { addStock, modifyStock, getAllStocks, checkStock, getStock } from "./stocks";
 
 // Make the server instance
 export const app = express();
@@ -448,6 +448,22 @@ app.get('/user/portfolios/open', async (req, res) => {
   res.status(403).send({ error: "Invalid pid" });
 })
 
+app.get('/user/portfolios/calculate', async (req, res) => {
+  const { token, pid } = req.query;
+  const resp = await calcPf(token, pid, database);
+  if (resp == -2) {
+    res.status(401).send({ error: "Invalid token" });
+  } else if (resp == -3) {
+    res.status(403).send({ error: "Invalid pid" });
+  } else if (resp == -4) {
+    res.status(403).send({ error: "Can not perform for watchlist "});
+  } else {
+    res.status(200).send(resp);
+  }
+
+  return;
+})
+
 // Delete endpoint for deleting single portfolio
 /**
  * @swagger
@@ -672,7 +688,7 @@ app.put('/user/stocks/edit', async (req, res) => {
 // Get endpoint for getting every active stock
 /**
  * @swagger
- * /user/stocks/all:
+ * /stocks/all:
  *   get:
  *     tags: [Stocks]
  *     description: endpoint for getting every active stock
@@ -683,12 +699,51 @@ app.put('/user/stocks/edit', async (req, res) => {
  *       502:
  *         description: Could not connect to API
  */
-app.get('/user/stocks/all', async (req, res) => {
+app.get('/stocks/all', async (req, res) => {
   const resp = await getAllStocks();
   if (resp == null) {
     res.status(502).send({ error: "Could not connect to API" });
     return;
   }
-  res.status(200).send();
+  res.status(200).send(resp);
+  return;
+})
+
+// Get endpoint for searching for stock info
+/**
+ * @swagger
+ * /stocks/info:
+ *   get:
+ *     tags: [Stocks]
+ *     description: endpoint for getting individual stock information
+ *     parameters:
+ *      - name: stock
+ *        description: The symbol of the stock
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Successfully returned information for single stock
+ *       403:
+ *         description: Invalid stock
+ *       502:
+ *         description: Could not connect to API
+ */
+ app.get('/stocks/info', async (req, res) => {
+  const { stock } = req.query;
+  const check = await checkStock(stock);
+  if (!check) {
+    res.status(403).send({ error: "Invalid stock" });
+    return;
+  }
+
+  const resp = await getStock(stock, 0);
+  if (resp == null) {
+    res.status(502).send({ error: "Could not connect to API" });
+    return;
+  }
+
+  res.status(200).send(resp[0]);
   return;
 })
