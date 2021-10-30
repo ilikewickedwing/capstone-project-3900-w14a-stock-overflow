@@ -122,6 +122,7 @@ export const getStock = async (stock, param) => {
   // if (!check) return null;
 
   const stocks = await alphavantage.getStock(stock);
+  console.log(stocks);
   if (param == 1) return stocks[0].data.daily;
   else if (param == 2) return stocks[0].data.weekly;
   else if (param == 3) return stocks[0].data.price;

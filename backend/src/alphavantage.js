@@ -87,6 +87,7 @@ export class Alphavantage {
       },
       time: time
     }
+    
     console.log(obj);
     this.infoCache.push(obj);
 
