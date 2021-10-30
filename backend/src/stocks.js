@@ -184,7 +184,7 @@ export const getStockWeekly = async (stock) => {
  *    '02. open'
  *    '03. high'
  *    '04. low'
- *    '05. close'
+ *    '05. price'
  *    '06. volume'
  *    '07. latest trading day'
  *    '08. previous close'

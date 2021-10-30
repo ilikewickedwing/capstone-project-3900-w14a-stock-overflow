@@ -5,6 +5,7 @@ import { Database } from "../database";
 import request from 'supertest';
 import { app, database } from "../index";
 
+
 // describe('Retrieve stock information', () => {
 // 	const d = new Database(true);
 //   beforeAll(async () => {
@@ -39,6 +40,7 @@ import { app, database } from "../index";
 // })
 
 describe('Retrieve stock info endpoint test', () => {
+  jest.setTimeout(30000);
   beforeAll(async () => {
     await database.connect();
   })
@@ -50,8 +52,10 @@ describe('Retrieve stock info endpoint test', () => {
     expect(resp.body).toMatchObject({
       symbol: 'IBM',
       data: {
+        intraday: expect.anything(),
         daily: expect.anything(),
         weekly: expect.anything(),
+        monthly: expect.anything(),
         price: expect.anything(),
         info: expect.anything()
       },

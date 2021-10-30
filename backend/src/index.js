@@ -744,6 +744,6 @@ app.get('/stocks/all', async (req, res) => {
     return;
   }
 
-  res.status(200).send(resp[0]);
+  res.status(200).send(resp);
   return;
 })
