@@ -6,7 +6,7 @@ import SignUp from "./comp/SignUp";
 import Portfolio from "./comp/Portfolio";
 import Profile from "./comp/Profile";
 import './App.css';
-import StocksGraph from "./graph/StocksGraph";
+import { StocksPage } from "./graph/StocksPage";
 
 function App() {
   const api = new API();
@@ -16,7 +16,7 @@ function App() {
       <BrowserRouter>
         <div className="App">
           <Switch>
-            <Route path="/stocks/:companyId" component={StocksGraph}/>
+            <Route path="/stocks/:companyId" component={StocksPage}/>
             <Route exact path="/" component={Login} />
             <Route path="/signup" component={SignUp} />
             <Route path="/dashboard" component={Dashboard} />
