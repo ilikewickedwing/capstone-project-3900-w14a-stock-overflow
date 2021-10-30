@@ -23,6 +23,18 @@ const Stock = () => {
 
   const [name, setName] = React.useState('');
 
+  React.useEffect(() =>{
+      loadStockInfo();
+  },[]);
+
+  const loadStockInfo = async () => {
+      try {
+
+      } catch (e) {
+          alert(e);
+      }
+  }
+
   return (
       <PageBody>
           <Navigation />
