@@ -491,6 +491,8 @@ export class Database {
     }
 
     const stockList = pfResp.stocks; // The stock list inside the portfolio
+    const pfValue = pfResp.value; // The value object inside the portfolio
+
 
     // Trying to find the index of the stock if it already exists
     // in stock list
@@ -504,12 +506,10 @@ export class Database {
 
     
     if (stkIndex != -1) { // If the stock is already in the list
-      if (quantity != null) {
-        let cost = stockList[stkIndex].avgPrice * stockList[stkIndex].quantity;
-        cost += price * quantity;
-        stockList[stkIndex].quantity += quantity;
-        stockList[stkIndex].avgPrice = cost / stockList[stkIndex].quantity;
-      }
+      let cost = stockList[stkIndex].avgPrice * stockList[stkIndex].quantity;
+      cost += price * quantity;
+      stockList[stkIndex].quantity += quantity;
+      stockList[stkIndex].avgPrice = cost / stockList[stkIndex].quantity;
     } else { // Else if the stock is not in the list
       stockList.push({
         stock: stock,
@@ -518,8 +518,10 @@ export class Database {
       })
     }
 
+    pfValue.spent += price * quantity;
+
     // Updating database
-    await pfs.updateOne(query, { $set: { stocks: stockList } } );
+    await pfs.updateOne(query, { $set: { stocks: stockList, value: pfValue } } );
     return -1;
   }
 
@@ -530,7 +532,7 @@ export class Database {
    * @param {int} quantity 
    * @returns {Promise <boolean>}
    */
-  async sellStocks(pid, stock, quantity) {
+  async sellStocks(pid, stock, price, quantity) {
     // Find the corresponding portfolio for the given pid
     const pfs = this.database.collection('portfolios');
     const query = {pid: pid};
@@ -542,6 +544,7 @@ export class Database {
     }
 
     const stockList = pfResp.stocks; // The stock list in the portfolio
+    const pfValue = pfResp.value; // The value object inside the portfolio
 
     // Finding the index of the stock in the stock list
     let stkIndex = -1;
@@ -570,8 +573,11 @@ export class Database {
       return 5;
     }
 
+    pfValue.sold += price * quantity;
+
+
     // Updating database
-    await pfs.updateOne(query, {$set: {stocks: stockList}});
+    await pfs.updateOne(query, { $set: { stocks: stockList, value: pfValue } } );
     return -1;
   }
 
