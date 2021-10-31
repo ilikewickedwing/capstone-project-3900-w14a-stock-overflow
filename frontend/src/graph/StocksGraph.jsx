@@ -82,7 +82,6 @@ export default function StocksGraph(props) {
   }
   const optionsItemStyle = { 
     minWidth: "10%",
-    boxShadow: "0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)",
     padding: "0.1rem",
     paddingTop: "0.9rem",
     borderRadius: "10px",
@@ -114,14 +113,14 @@ export default function StocksGraph(props) {
       return (
         <ResponsiveContainer width={'99%'} height={props.height}>
           <BarChart
-            margin={{ bottom: 25 }}
+            margin={{ bottom: 25, left: 25 }}
             data={transformData(dataCache[timeOptions], graphStyle === "candlestick")}
           >
             <XAxis datakey="time">
-              <Label value="Time" offset={-10} position="insideBottom" />
+              <Label value="Time Interval" offset={-10} position="insideBottom" />
             </XAxis>
             <YAxis 
-              label={{ value: 'Price (US Dollars)', angle: -90, position: 'insideLeft' }}
+              label={{ value: 'Price (US Dollars)', angle: -90, position: 'insideLeft', dx: -15 }}
               domain={['dataMin', 'dataMax']} type="number"/>
             <Tooltip content={<StocksToolTip candlestickMode={graphStyle === "candlestick"}/>}/>
             <Bar dataKey={getDataKey()} shape={renderGraphShape()}></Bar>
