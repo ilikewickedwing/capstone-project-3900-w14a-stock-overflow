@@ -1,6 +1,5 @@
 import React from 'react'; 
-import { useHistory, useLocation, useParams } from 'react-router-dom';
-import { ApiContext } from '../api';
+import { useHistory, useParams } from 'react-router-dom';
 import axios from "axios";
 import Navigation from './Navigation'; 
 import Tabs from './Tabs'; 
@@ -15,7 +14,6 @@ import {
   RightCard, 
   PageBody, 
   FlexRows,
-  FlexColumns
 } from '../styles/styling';
 import Button from '@mui/material/Button';
 import PfTable from './PfTable';
@@ -23,7 +21,6 @@ import AddStock from './AddStock';
 import { apiBaseUrl } from './const';
 
 const Portfolio = () => {
-  const api = React.useContext(ApiContext);
   const history = useHistory();
   const { pid } = useParams();
   const token = localStorage.getItem('token');
@@ -33,7 +30,6 @@ const Portfolio = () => {
   const [name, setName] = React.useState('');
   const [changedName, editName ] = React.useState('');
   const [isWatchlist, setIsWatchlist] = React.useState(0);
-  const [portfolios, setPortfolios] = React.useState([]); 
   const [isChanged, setChanged ] = React.useState(0);
 
   const open = Boolean(anchorEl);
@@ -80,6 +76,11 @@ const Portfolio = () => {
     }
   }
 
+  const handleStockLoad = async (e) => {
+    e.preventDefault();
+
+  }
+
   return (
       <PageBody>
           <Navigation />
@@ -99,9 +100,11 @@ const Portfolio = () => {
                   </Button>
                 </div>
               }
-              <p> print the list of stocks in this  </p>
               <PfTable />
-            < AddStock />
+            < AddStock 
+              token={token}
+              pid={pid}
+            />
             </LeftBody>
             <RightBody>
               <RightCard>

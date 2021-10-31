@@ -125,6 +125,13 @@ export const StockOverview = styled(FlexColumns)`
 `;
 
 export const ContentBody = styled(FlexColumns)`
- padding: 1%;
- height: 100%;
+    padding: 1%;
+    height: 100%;
+`;
+
+export const CleanButton = styled.button`
+    background: transparent;
+    box-shadow: 0px 0px 0px transparent;
+    border: 0px solid transparent;
+    text-shadow: 0px 0px 0px transparent;
 `;
