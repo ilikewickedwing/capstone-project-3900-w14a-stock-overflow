@@ -314,6 +314,17 @@ describe('We be having funsies', () => {
     const b3 = await getStock('AAPL', 6);
     const b4 = await getStock('AMZN', 1);
     const b5 = await getStock('AMZN', 2);
+    const b52 = await getStock('AMZN', 3);
+    const b51 = await getStock('AMZN', 4);
+    const b53 = await getStock('AMZN', 5);
+    const b54 = await getStock('AMZN', 6);
+    const b6 = await getStock('IBM', 1);
+    const b7 = await getStock('IBM', 2);
+    const b8 = await getStock('IBM', 3);
+    await getStock('IBM', 4);
+    await getStock('IBM', 5);
+    await getStock('IBM', 6);
+
   })
   
 
