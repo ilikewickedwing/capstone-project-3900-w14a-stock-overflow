@@ -18,7 +18,8 @@ const STATES = {
 }
 export default function StocksGraph(props) {
   const [ state, setState ] = useState(STATES.LOADING);
-  const [ data, setData ] = useState({});
+  // Map of interval to cache
+  const [ dataCache, setDataCache ] = useState({});
   const api = useContext(ApiContext);
   const [ graphStyle, setGraphStyle ] = useState("candlestick");
   const [ timeOptions, setTimeOptions ] = useState("1day");
@@ -52,13 +53,26 @@ export default function StocksGraph(props) {
           throw Error(`Invalid interval of ${interval}`);
       }
     }
-    setState(STATES.LOADING);
-    callApi(props.companyId.toUpperCase(), timeOptions)
+    const addToDataCache = (data, interval) => {
+      const dataCacheCopy = Object.assign({}, dataCache);
+      dataCacheCopy[interval] = data;
+      setDataCache(dataCacheCopy);
+    }
+    // Call from api only if needed
+    if (!(timeOptions in dataCache)) {
+      setState(STATES.LOADING);
+      callApi(props.companyId.toUpperCase(), timeOptions)
       .then(r => r.json())
       .then(r => {
         setState(STATES.RECEIVED);
-        setData(r);
+        addToDataCache(r, timeOptions);
       })
+    }
+    /**
+      NOTE: This may show a warning about not having datacache
+      in the dependency list but please leave it out. If you leave it in
+      it leads to an infinite useEffect loop - so just ignore the warning
+    */
   }, [api, props.companyId, timeOptions, graphStyle])
   const renderLoad = () => {
     if (state === STATES.LOADING) {
@@ -96,12 +110,12 @@ export default function StocksGraph(props) {
     throw Error("Invalid graph type");
   }
   const renderGraph = () => {
-    if (Object.keys(data).length > 0) {
+    if (timeOptions in dataCache) {
       return (
         <ResponsiveContainer width={'99%'} height={props.height}>
           <BarChart
             margin={{ bottom: 25 }}
-            data={transformData(data, graphStyle === "candlestick")}
+            data={transformData(dataCache[timeOptions], graphStyle === "candlestick")}
           >
             <XAxis datakey="time">
               <Label value="Time" offset={-10} position="insideBottom" />
@@ -184,7 +198,6 @@ const transformData = (data, candlestickMode = true) => {
     }
   }
   if (timeKey.length === 0) {
-    console.log(data);
     if ("Note" in data) {
       alert(data.Note);
     } else {

@@ -5,7 +5,6 @@ import { GRAPHCOLORS } from "./StocksGraph";
  * Ohlc shape
  */
 export default function Ohlc(props) {
-  console.log(props);
   const [ high, low ] = props.highLow;
   const isIncreasing = props.open < props.close;
   const xIncrem = props.width / 3;
@@ -17,21 +16,6 @@ export default function Ohlc(props) {
     return (
       <React.Fragment>
         {/* open line */}
-        {/* {isIncreasing ? (
-          <path
-            d={`
-              M ${props.x + props.width / 2}, ${props.y + props.height}
-              v ${(open - props.low) * heightRatio}
-            `}
-          />
-        ) : (
-          <path
-            d={`
-              M ${props.x + props.width / 2}, ${props.y}
-              v ${(close - props.low) * heightRatio}
-            `}
-          />
-        )} */}
         <path
             d={`
               M ${props.x}, ${props.y + (props.open - high) * heightRatio}
