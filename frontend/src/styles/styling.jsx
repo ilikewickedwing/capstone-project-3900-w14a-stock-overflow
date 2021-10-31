@@ -73,13 +73,13 @@ export const LeftBody= styled.div`
     border: 3px solid black;
     border-radius: 15px;
     padding: 2%;
-    margin: 1%;
+    margin: 1% 0%;
 `;
 
 export const RightBody= styled(FlexColumns)`
     flex: 1;
     border: 3px solid red;
-    margin:1%; 
+    margin:1%;
     padding: 2%;
     border-radius: 15px;
 `;
@@ -100,7 +100,7 @@ export const RightCard = styled.div`
 export const PageBody = styled(FlexColumns)`
     border 3px solid purple;
     height:100vh;
-    width: 100%;
+    width: 100vw;
 `;
 
 export const TextInput = styled(TextField)`
@@ -115,4 +115,16 @@ export const StockQueryButton= styled.button`
      width: 60%;
      text-align: center;
  }
+`;
+
+export const StockOverview = styled(FlexColumns)`
+    border: 1px solid pink;
+    padding: 2%;
+    border-radius: 15px;
+
+`;
+
+export const ContentBody = styled(FlexColumns)`
+ padding: 1%;
+ height: 100%;
 `;
