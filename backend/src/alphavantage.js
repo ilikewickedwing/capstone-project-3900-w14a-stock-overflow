@@ -2,6 +2,8 @@ import axios from "axios";
 let apikey = 'NJGHG3ZAKLAELM3E';
 let keys = ['FLKB7SQBXHGISR7I','59SO8FIM49NYQS21','WP9NFOYE83L4FABK','5TZVKFQR250ZAQZ4','E23ORO62TPLB096R'];
 let useCounter = 0;
+axios.defaults.headers.common['Authorization'] = 'Bearer kZDTsjtl4ZQwiTdjRFUOR4H9til8';
+axios.defaults.headers.common['Accept'] = 'application/json';
 
 export class Alphavantage {
   constructor() {
@@ -50,11 +52,11 @@ export class Alphavantage {
     return stocks;
   }
 
-  async getStock(stock, param) {
+  async getStock(type, stocks, interval, start) {
     // console.log(this.infoCache);
     // console.log("stock requested is " + stock);
     // Search for stock in cache
-    const search = this.infoCache.filter(o => (o.symbol === stock) && (o.param === param));
+    /* const search = this.infoCache.filter(o => (o.symbol === stock) && (o.param === param));
     const time = Date.now();
 
     if (search.length !== 0) {
@@ -66,31 +68,31 @@ export class Alphavantage {
       return search[0];
     }
 
-    console.log("fetching cache");
+    console.log("fetching cache"); */
     // Fetch stock and add to cache
-    const resp = await this._getStock(stock, param);
+    const resp = await this._getStock(type, stocks, interval, start);
     // console.log(resp);
     return resp;
   }
 
-  async _getStock(stock, param) {
+  async _getStock(type, stocks, interval, start) {
     //console.log(await dailyRequest.data);
 
-    let url = null;
+    // let url = null;
 
-    if (param == 1) url = 'TIME_SERIES_INTRADAY' + '&interval=1min';
-    else if (param == 2) url = 'TIME_SERIES_DAILY_ADJUSTED';
-    else if (param == 3) url = 'TIME_SERIES_WEEKLY_ADJUSTED';
-    else if (param == 4) url = 'TIME_SERIES_MONTHLY_ADJUSTED';
-    else if (param == 5) url = 'GLOBAL_QUOTE';
-    else if (param == 6) url = 'OVERVIEW';
+    // if (param == 1) url = 'TIME_SERIES_INTRADAY' + '&interval=1min';
+    // else if (param == 2) url = 'TIME_SERIES_DAILY_ADJUSTED';
+    // else if (param == 3) url = 'TIME_SERIES_WEEKLY_ADJUSTED';
+    // else if (param == 4) url = 'TIME_SERIES_MONTHLY_ADJUSTED';
+    // else if (param == 5) url = 'GLOBAL_QUOTE';
+    // else if (param == 6) url = 'OVERVIEW';
     
 
     const time = new Date();
     const obj = {
-      symbol: stock,
-      param: param,
-      data: await this._callApi(url, stock),
+      symbol: stocks,
+      param: type,
+      data: await this._callTradier(type, stocks, interval, start),
       time: time
     }
     
@@ -100,7 +102,7 @@ export class Alphavantage {
     return obj;
   }
 
-  async _callApi(type, stock) {
+  async _callAlpha(type, stock) {
 
     console.log("useCounter is " + this.useCounter);
     
@@ -112,15 +114,68 @@ export class Alphavantage {
     console.log("THE KEY IS " + apikey);
     const request = await axios.get(`https://www.alphavantage.co/query?function=${type}&symbol=${stock}&apikey=${apikey}`);
     
-    console.log(request.data.Note);
+    
+    console.log(request.data);
     // how do this work
-    // if (request.data.Note !== undefined) {
-    //   console.log("note detected, we go again");
-    //   this.useCounter = 5;
-    //   return this._callApi(type, stock);
-    // }
+    if (request.data.Note !== undefined) {
+      console.log("note detected, we go again");
+      this.useCounter = 5;
+      return this._callApi(type, stock);
+    }
     this.useCounter++;
     
+    return request.data;
+  }
+
+  /**
+   * Calls tradier api to get stock information
+   * Type params:
+   *  1. Current price of multiple stocks
+   *  2. History of one stock not intraday
+   *  3. History of one stock intraday
+   * @param {int} type 
+   * @param {string} stocks 
+   * @param {string} interval
+   *  For not intraday, options are: daily, weekly, monthly
+   *  For intraday, options are: 1min, 5min, 15min
+   * @param {string} start
+   *  For not intraday, format is string as YYYY-MM-DD
+   *  For intraday, format is string as YYYY-MM-DD HH:MM
+   * @returns {Promise <object>}
+   */
+  async _callTradier(type, stocks, interval, start) {
+    let url = null;
+    let symbols = null;
+    let symbol = null;
+
+    
+    if (type == 1) {
+      url = 'quotes';
+      symbols = stocks;
+    } else if (type == 2) {
+      url = 'history';
+      symbol = stocks;
+    } else if (type == 3) {
+      url = 'timesales';
+      symbol = stocks;
+    }
+
+    const request = await axios({
+      method: 'get',
+      url: url,
+      baseURL: 'https://sandbox.tradier.com/v1/markets/',
+      params: {
+         'symbols': symbols,
+         'symbol': symbol,
+         'interval': interval,
+         'start': start,
+         'greeks': 'false'
+      },
+    }, (error, response, body) => {
+        console.log(response.statusCode);
+        console.log(body);
+    });
+
     return request.data;
   }
 

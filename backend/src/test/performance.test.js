@@ -1,6 +1,7 @@
 import { authRegister } from "../auth";
 import { createPf, deletePf, userPfs, openPf, getPid, editPf, calcPf } from "../portfolio";
-import { checkStock, addStock, modifyStock, getStock, getStockDaily, getStockWeekly, getStockPrice, getStockInfo } from "../stocks";
+import { checkStock, addStock, modifyStock, getStock, getStockDaily, getStockWeekly, getStockPrice, getStockInfo, alphavantage } from "../stocks";
+import { Alphavantage } from "../alphavantage";
 import { Database } from "../database";
 import request from 'supertest';
 import { app, database } from "../index";
@@ -72,7 +73,7 @@ describe('Retrieve stock info endpoint test', () => {
   afterAll(async() => {
     await database.disconnect();
   })
-})
+}) */
 
 describe('Editing stocks doesn\'t affect portfolios', () => {
   const d = new Database(true);
@@ -295,7 +296,7 @@ describe('Editing stocks doesn\'t affect portfolios', () => {
   afterAll(async () => {
     await d.disconnect();
   })
-}) */
+})
 
 describe('We be having funsies', () => {
   const d = new Database(true);
@@ -306,24 +307,12 @@ describe('We be having funsies', () => {
   jest.setTimeout(100000);
 
   it('Calling a bunch of stocks', async () => {
-    const a = await getStock('AAPL', 1);
-    const b = await getStock('AAPL', 2);
-    const c = await getStock('AAPL', 3);
-    const d1 = await getStock('AAPL', 4);
-    const b2 = await getStock('AAPL', 5);
-    const b3 = await getStock('AAPL', 6);
-    const b4 = await getStock('AMZN', 1);
-    const b5 = await getStock('AMZN', 2);
-    const b52 = await getStock('AMZN', 3);
-    const b51 = await getStock('AMZN', 4);
-    const b53 = await getStock('AMZN', 5);
-    const b54 = await getStock('AMZN', 6);
-    const b6 = await getStock('IBM', 1);
-    const b7 = await getStock('IBM', 2);
-    const b8 = await getStock('IBM', 3);
-    await getStock('IBM', 4);
-    await getStock('IBM', 5);
-    await getStock('IBM', 6);
+    // const a = await getStock('a', 1);
+    // const a = await alphavantage._callTradier(1,'AAPL,AMZN,IBM');
+    // console.log(a.quotes.quote);
+
+    const b = await alphavantage._callTradier(3, 'AAPL', '15min', '2021-10-29 00:00');
+    // console.log(b.series);
 
   })
   

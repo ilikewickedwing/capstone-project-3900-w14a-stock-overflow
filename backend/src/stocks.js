@@ -36,9 +36,9 @@ export const addStock = async (token, pid, stock, price, quantity, database) => 
     return 1;
   }
 
-  if (!await checkStock(stock)) {
+  /* if (!await checkStock(stock)) {
     return 2;
-  }
+  } */
 
   // Check for watchlist
   const get = await database.openPf(pid);
@@ -117,13 +117,13 @@ export const checkStock = async (stock) => {
  * @param {int} param
  * @returns {Promise <Object>}
  */
-export const getStock = async (stock, param) => {
+export const getStock = async (type, stocks, interval, start) => {
   // const check = await checkStock(stock);
   // if (!check) return null;
 
-  const stocks = await alphavantage.getStock(stock, param);
+  const resp = await alphavantage.getStock(type, stocks, interval, start);
   // console.log(stocks);
-  return stocks;
+  return resp;
 }
 
 /**
@@ -190,9 +190,9 @@ export const getStockWeekly = async (stock) => {
  * @param {string} stock 
  * @returns {Promise <Object>}
  */
-export const getStockPrice = async (stock) => {
-  const stocks = await getStock(stock, 5);
-  return stocks;
+export const getStockPrice = async (type, stocks) => {
+  const resp = await getStock(type, stocks, null, null);
+  return resp;
 }
 
 /**
