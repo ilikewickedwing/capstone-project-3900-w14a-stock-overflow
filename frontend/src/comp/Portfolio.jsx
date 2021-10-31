@@ -21,6 +21,7 @@ import Button from '@mui/material/Button';
 import PfTable from './PfTable';
 import AddStock from './AddStock';
 import { apiBaseUrl } from './const';
+import StockRow from './StockRow';
 
 const Portfolio = () => {
   const api = React.useContext(ApiContext);
@@ -35,13 +36,31 @@ const Portfolio = () => {
   const [isWatchlist, setIsWatchlist] = React.useState(0);
   const [portfolios, setPortfolios] = React.useState([]); 
   const [isChanged, setChanged ] = React.useState(0);
+  const [stockArray, setStockArray ] = React.useState([]);
 
   const open = Boolean(anchorEl);
   const id = open ? 'simple-popover': undefined;
 
+  // {
+  //   stock: 'AAPL',
+  //   avgPrice: 45,
+  //   quantity: 3,
+  // },
+  // { 
+  //   stock: 'AMZN',
+  //   avgPrice: 1,
+  //   quantity: 5,
+  // },
+  // {
+  //   stock: 'IBM',
+  //   avgPrice: 3,
+  //   quantity: 5
+  // }
+
   // on first load 
   React.useEffect(() => {   
     loadPorfolioData();
+    getWatchlist()
   },[pid]);
   
   const loadPorfolioData = async () => {
@@ -79,6 +98,24 @@ const Portfolio = () => {
       alert(e);
     }
   }
+  let array = [];
+  const getWatchlist = async () => {
+    const token = localStorage.getItem('token');
+    // get pid for the watchlist
+    const res = await axios.get(`${apiBaseUrl}/user/portfolios/getPid`, {
+      params: {
+        token: token,
+        name: 'Watchlist'
+      }
+    })
+    const pid = res.data;
+    const request = await axios.get(`${apiBaseUrl}/user/portfolios/open?pid=${pid}`);
+    //const porfolioData = request.data;
+    //setName(porfolioData.name);
+    
+    array = request.data['stocks'];
+    console.log(stockArray);
+  }
 
   return (
       <PageBody>
@@ -99,9 +136,15 @@ const Portfolio = () => {
                   </Button>
                 </div>
               }
-              <p> print the list of stocks in this  </p>
-              <PfTable />
-            < AddStock />
+              <p> Stock List: </p>
+              {/* print out all the stocks in Watchlist portfolio */}
+              {
+                stockArray.map(item => {
+                  return <StockRow key={item.stock} data={item}/>
+                })
+              }
+              
+            <AddStock />
             </LeftBody>
             <RightBody>
               <RightCard>
