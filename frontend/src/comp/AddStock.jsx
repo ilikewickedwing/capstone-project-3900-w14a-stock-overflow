@@ -103,9 +103,9 @@ const AddStock = ({token, pid}) => {
         />
         <form>
 
-           <TextField required variant="standard" label="price"
+           <TextField type="text" required variant="standard" label="price"
             onChange={e => setPrice(e.target.value)}/>
-           <TextField required variant="standard" label="quantity"
+           <TextField type="text" required variant="standard" label="quantity"
             onChange={e => setQuantity(e.target.value)}/>
             <Button type='submit' onClick={handleAddStock}>
                 Add Stock
