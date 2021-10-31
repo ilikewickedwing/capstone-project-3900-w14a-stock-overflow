@@ -8,7 +8,7 @@ export function StocksPage (props) {
   }
   return (
     <div style={wrapperStyle}>
-      <StocksGraph companyId={companyId}/>
+      <StocksGraph companyId={companyId} height={300}/>
     </div>
   )
 }
