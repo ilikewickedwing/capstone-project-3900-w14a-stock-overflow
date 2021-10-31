@@ -11,7 +11,8 @@ import {
   RightBody, 
   RightCard, 
   PageBody, 
-  FlexRows,
+  StockOverview,
+  ContentBody
 } from '../styles/styling';
 import { apiBaseUrl } from './const';
 
@@ -39,9 +40,17 @@ const Stock = () => {
       <PageBody>
           <Navigation />
           <Tabs />
-          <h1> STOCK PAGE: {name}</h1> 
-          <FlexRows>
-          </FlexRows> 
+          <ContentBody>
+          <h3>StockCode:StockName</h3>
+          <h4>$price -3%(live %) (day change %) </h4> 
+          <StockOverview >
+          STOCK PAGE: {name}
+          previous close: 
+          day range: 
+          year range: 
+          market cap: 
+
+          </ StockOverview >
           <PfBody>
             <LeftBody>
             </LeftBody>
@@ -54,6 +63,7 @@ const Stock = () => {
               </RightCard>
             </RightBody>
           </PfBody>
+          </ContentBody>
       </PageBody>
   );
 };
