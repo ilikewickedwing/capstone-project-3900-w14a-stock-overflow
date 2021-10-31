@@ -1,50 +1,112 @@
 import React, { useContext, useEffect, useState } from "react"
 import PropTypes from "prop-types";
-import { BarChart, Bar, XAxis, YAxis, Legend } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Legend, Tooltip, Label, ResponsiveContainer } from "recharts";
 import { ApiContext } from "../api";
-import { InputLabel, MenuItem, Select } from "@material-ui/core";
+import { CircularProgress, InputLabel, MenuItem, Select } from "@material-ui/core";
 
+
+const STATES = {
+  LOADING: 0,
+  RECEIVED: 1,
+  ERROR: 2,
+}
 export default function StocksGraph(props) {
+  const [ state, setState ] = useState(STATES.LOADING);
   const [ data, setData ] = useState([]);
   const api = useContext(ApiContext);
-  const [ timeOptions, setTimeOptions ] = useState("1d");
+  const [ timeOptions, setTimeOptions ] = useState("1day");
   const wrapperStyle = {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
+    position: "relative",
   }
   // make api call for time series
   useEffect(() => {
-    api.stockTimeSeries(props.companyId)
+    const callApi = (company, interval) => {
+      switch (interval) {
+        case "1min":
+          return api.stockTimeSeriesIntraday(company, interval);
+        case "5min":
+          return api.stockTimeSeriesIntraday(company, interval);
+        case "15min":
+          return api.stockTimeSeriesIntraday(company, interval);
+        case "30min":
+          return api.stockTimeSeriesIntraday(company, interval);
+        case "60min":
+          return api.stockTimeSeriesIntraday(company, interval);
+        case "1day":
+          return api.stockTimeSeriesDaily(company);
+        case "1week":
+          return api.stockTimeSeriesWeekly(company);
+        case "1month":
+          return api.stockTimeSeriesMonthly(company);
+        default:
+          throw Error(`Invalid interval of ${interval}`);
+      }
+    }
+    setState(STATES.LOADING);
+    callApi(props.companyId.toUpperCase(), timeOptions)
       .then(r => r.json())
-      .then(r => setData(transformData(r)))
-  }, [api, props.companyId])
+      .then(r => {
+        setState(STATES.RECEIVED);
+        setData(transformData(r));
+      })
+  }, [api, props.companyId, timeOptions])
+  const renderLoad = () => {
+    if (state === STATES.LOADING) {
+      return (<LoadingScreen/>)
+    }
+    return null;
+  }
+  const optionsItemStyle = { 
+    minWidth: "10%",
+    boxShadow: "0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)",
+    padding: "0.7rem",
+    borderRadius: "10px",
+    display: "flex",
+    justifyContent: "center",
+  }
   return (
     <div style={wrapperStyle}>
-      <BarChart
-        width={1000}
-        height={600}
-        data={data}
-      >
-        <XAxis datakey="time"/>
-        <YAxis domain={['dataMin', 'dataMax']} type="number"/>
-        <Bar dataKey='openCloseData' shape={<CandleStick/>}></Bar>
-        <Legend/>
-      </BarChart>
-      <InputLabel>Time</InputLabel>
-      <Select
-        value={timeOptions}
-        label="Time"
-        onChange={e => setTimeOptions(e.target.value)}
-      >
-        <MenuItem value={"1d"}>1 day</MenuItem>
-        <MenuItem value={"5d"}>5 days</MenuItem>
-        <MenuItem value={"1m"}>1 month</MenuItem>
-        <MenuItem value={"6m"}>6 month</MenuItem>
-        <MenuItem value={"1y"}>1 year</MenuItem>
-        <MenuItem value={"5y"}>5 years</MenuItem>
-        <MenuItem value={"10y"}>10 years</MenuItem>
-      </Select>
+      <div style={{ width: "100%", display: "flex", flexDirection: "row", justifyContent: "flex-start", marginBottom: '1rem' }}>
+        <div style={optionsItemStyle}>
+          <div>
+            <InputLabel>Interval</InputLabel>
+            <Select
+              style = {{ marginBottom: '10px' }}
+              value={timeOptions}
+              label="Time"
+              onChange={e => setTimeOptions(e.target.value)}
+            >
+              <MenuItem value={"1min"}>1 min</MenuItem>
+              <MenuItem value={"5min"}>5 min</MenuItem>
+              <MenuItem value={"15min"}>15 min</MenuItem>
+              <MenuItem value={"30min"}>30 min</MenuItem>
+              <MenuItem value={"60min"}>1 hour</MenuItem>
+              <MenuItem value={"1day"}>1 day</MenuItem>
+              <MenuItem value={"1week"}>1 week</MenuItem>
+              <MenuItem value={"1month"}>1 month</MenuItem>
+            </Select>
+          </div>
+        </div>
+      </div>
+      { renderLoad() }
+      <ResponsiveContainer width={'99%'} height={300}>
+        <BarChart
+          margin={{ bottom: 25 }}
+          data={data}
+        >
+          <XAxis datakey="time">
+            <Label value="Time" offset={-10} position="insideBottom" />
+          </XAxis>
+          <YAxis 
+            label={{ value: 'Price (US Dollars)', angle: -90, position: 'insideLeft' }}
+            domain={['dataMin', 'dataMax']} type="number"/>
+          <Tooltip content={<StocksToolTip/>}/>
+          <Bar dataKey='openCloseData' shape={<CandleStick/>}></Bar>
+        </BarChart>
+      </ResponsiveContainer>
     </div>
   )
 }
@@ -66,7 +128,21 @@ const compareTime = (time1, time2) => {
  * @returns 
  */
 const transformData = (data) => {
-  const timeSeriesData = data["Time Series (5min)"];
+  // Find the name of the key
+  let timeKey = '';
+  for (const dataKey of Object.keys(data)) {
+    if (dataKey.includes("Time Series")) {
+      timeKey = dataKey;
+      break;
+    }
+  }
+  if (timeKey.length === 0) {
+    console.log(data);
+    alert(`Received ${data}`);
+    return [];
+  }
+  // Get the data and parse it
+  const timeSeriesData = data[timeKey];
   const parsedData = [];
   for (const timeKey of Object.keys(timeSeriesData)) {
     const objData = timeSeriesData[timeKey];
@@ -80,6 +156,8 @@ const transformData = (data) => {
       low: Number(objData["3. low"]),
       volume: Number(objData["5. volume"]),
     }
+    // Sort it into an array as it is returned as
+    // an object
     let i = 0;
     for (; i < parsedData.length; i++) {
       if (compareTime(timeKey, parsedData[i].time)) {
@@ -105,7 +183,7 @@ function CandleStick(props) {
   const isIncreasing = open < close;
   const drawTopBottomLines = () => {
     const heightRatio = Math.abs(props.height / (open - close));
-    if (Number.isNaN(heightRatio)) {
+    if (Number.isNaN(heightRatio) || !Number.isFinite(heightRatio)) {
       return null;
     }
     return (
@@ -161,4 +239,45 @@ function CandleStick(props) {
       { drawTopBottomLines() }
     </g>
   );
+}
+
+function StocksToolTip (props) {
+  if (props.active && props.payload && props.payload.length > 0) {
+    const dataPoint = props.payload[0].payload;
+    const tooltipStyle = {
+      backgroundColor: "#ffffff",
+      padding: "0.5rem",
+      borderRadius: "10px",
+      boxShadow: "0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)",
+    }
+    return (
+      <div style={tooltipStyle}>
+        <div style={{ fontSize: '20px', fontWeight: '600' }} >{dataPoint.time}</div>
+        <div>High: {dataPoint.high}</div>
+        <div>Low: {dataPoint.low}</div>
+        <div>Open: {dataPoint.openCloseData[0]}</div>
+        <div>Close: {dataPoint.openCloseData[1]}</div>
+        <div>Volume: {dataPoint.volume}</div>
+      </div>
+    ) 
+  }
+  return null;
+}
+
+function LoadingScreen() {
+  const loadingStyle = {
+    position: "absolute",
+    opacity: "0.8",
+    zIndex: '999',
+    backgroundColor: "#000000",
+    width: "100%",
+    height: "100%",
+    display: "grid",
+    placeItems: "center",
+  }
+  return (
+    <div style={loadingStyle}>
+      <CircularProgress style={{ opacity: "1" }}/>
+    </div>
+  )
 }

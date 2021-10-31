@@ -84,10 +84,26 @@ export default class API {
     });
   }
 
-  stockTimeSeries(companySymbol) {
-    return fetch('https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=IBM&interval=5min&apikey=demo');
+  stockTimeSeriesIntraday(companySymbol, interval) {
+    const URL = 'https://www.alphavantage.co/query';
+    return fetch(`${URL}?function=TIME_SERIES_INTRADAY&symbol=${companySymbol}&interval=${interval}&apikey=demo`);
   }
-
+  
+  stockTimeSeriesDaily(companySymbol) {
+    const URL = 'https://www.alphavantage.co/query';
+    return fetch(`${URL}?function=TIME_SERIES_DAILY&symbol=${companySymbol}&apikey=demo`);
+  }
+  
+  stockTimeSeriesWeekly(companySymbol) {
+    const URL = 'https://www.alphavantage.co/query';
+    return fetch(`${URL}?function=TIME_SERIES_WEEKLY&symbol=${companySymbol}&apikey=demo`);
+  }
+  
+  stockTimeSeriesMonthly(companySymbol) {
+    const URL = 'https://www.alphavantage.co/query';
+    return fetch(`${URL}?function=TIME_SERIES_MONTHLY&symbol=${companySymbol}&apikey=demo`);
+  }
+  
   post(path, options){
     return fetch(`${ENDPOINT}/${path}`,{
       ...options,
