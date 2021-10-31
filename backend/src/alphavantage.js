@@ -1,6 +1,6 @@
 import axios from "axios";
 let apikey = 'NJGHG3ZAKLAELM3E';
-let keys = ['59SO8FIM49NYQS21','WP9NFOYE83L4FABK','5TZVKFQR250ZAQZ4','FLKB7SQBXHGISR7I', 'E23ORO62TPLB096R'];
+let keys = ['FLKB7SQBXHGISR7I','59SO8FIM49NYQS21','WP9NFOYE83L4FABK','5TZVKFQR250ZAQZ4','E23ORO62TPLB096R'];
 let useCounter = 0;
 
 export class Alphavantage {
@@ -101,14 +101,27 @@ export class Alphavantage {
   }
 
   async _callApi(type, stock) {
-    const request = await axios.get(`https://www.alphavantage.co/query?function=${type}&symbol=${stock}&apikey=${apikey}`);
-    this.useCounter++;
-    if (this.useCounter === 5) {
+
+    console.log("useCounter is " + this.useCounter);
+    
+    if (this.useCounter == 5) {
       keys.push(apikey);
       apikey = keys.shift();
       this.useCounter = 0;
     }
-    return await request.data;
+    console.log("THE KEY IS " + apikey);
+    const request = await axios.get(`https://www.alphavantage.co/query?function=${type}&symbol=${stock}&apikey=${apikey}`);
+    
+    console.log(request.data.Note);
+    // how do this work
+    // if (request.data.Note !== undefined) {
+    //   console.log("note detected, we go again");
+    //   this.useCounter = 5;
+    //   return this._callApi(type, stock);
+    // }
+    this.useCounter++;
+    
+    return request.data;
   }
 
   checkStock(check, against) {

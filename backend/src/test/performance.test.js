@@ -6,7 +6,7 @@ import request from 'supertest';
 import { app, database } from "../index";
 
 
-describe('Retrieve stock information', () => {
+/* describe('Retrieve stock information', () => {
 	const d = new Database(true);
   beforeAll(async () => {
     await d.connect();
@@ -291,6 +291,31 @@ describe('Editing stocks doesn\'t affect portfolios', () => {
   //     stocks: expect.arrayContaining(stArray)
   //   })
   // })
+
+  afterAll(async () => {
+    await d.disconnect();
+  })
+}) */
+
+describe('We be having funsies', () => {
+  const d = new Database(true);
+  beforeAll(async () => {
+    await d.connect();
+  })
+
+  jest.setTimeout(100000);
+
+  it('Calling a bunch of stocks', async () => {
+    const a = await getStock('AAPL', 1);
+    const b = await getStock('AAPL', 2);
+    const c = await getStock('AAPL', 3);
+    const d1 = await getStock('AAPL', 4);
+    const b2 = await getStock('AAPL', 5);
+    const b3 = await getStock('AAPL', 6);
+    const b4 = await getStock('AMZN', 1);
+    const b5 = await getStock('AMZN', 2);
+  })
+  
 
   afterAll(async () => {
     await d.disconnect();
