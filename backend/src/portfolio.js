@@ -65,7 +65,7 @@ export const userPfs = async (token, database) => {
 export const getPid = async (token, name, database) => {
   const uid = await database.getTokenUid(token);
   if (uid === null) {
-    return false;
+    return 1;
   }
 
   const pid = await database.getPid(uid, name);
