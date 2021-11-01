@@ -66,7 +66,7 @@ const AddStock = ({token, pid}) => {
         try {
             var floatPrice = parseFloat(price); 
             var intQuantity = parseInt(quantity);
-            await axios.post(`${apiBaseUrl}/user/stocks/add`, 
+            const res = await axios.post(`${apiBaseUrl}/user/stocks/add`, 
                 {token, pid, stock: currCode, price: floatPrice, quantity: intQuantity});
         } catch (e){
             alert(e);

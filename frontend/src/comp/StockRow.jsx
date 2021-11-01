@@ -2,11 +2,13 @@ import React from 'react';
 
 const StockRow = ({data}) => {
   return (
-    <li>
+    <div>
       <ul>{data.stock}</ul>
       <ul>{data.avgPrice}</ul>
       <ul>{data.quantity}</ul>
-    </li>
+      <button>More</button>
+      <button>Delete</button>
+    </div>
   )
 }
 

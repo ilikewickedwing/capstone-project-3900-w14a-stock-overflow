@@ -169,21 +169,7 @@ export class Database {
     await pfs.insertOne({
       pid: watchlistId,
       name: "Watchlist",
-      stocks: [{
-        stock: 'AAPL',
-        avgPrice: 45,
-        quantity: 3,
-      },
-      { 
-        stock: 'AMZN',
-        avgPrice: 1,
-        quantity: 5,
-      },
-      {
-        stock: 'IBM',
-        avgPrice: 3,
-        quantity: 5
-      }],
+      stocks: [],
       value: {
         spent: null,
         sold: null

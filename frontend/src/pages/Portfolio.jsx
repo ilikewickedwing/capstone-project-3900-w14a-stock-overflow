@@ -16,11 +16,7 @@ import {
   FlexRows,
 } from '../styles/styling';
 import Button from '@mui/material/Button';
-import PfTable from './PfTable';
-import AddStock from './AddStock';
-import { apiBaseUrl } from './const';
-import StockRow from './StockRow';
-import PfTable from '../comp/PfTable';
+import StockRow from '../comp/StockRow';
 import AddStock from '../comp/AddStock';
 import { apiBaseUrl } from '../comp/const';
 
