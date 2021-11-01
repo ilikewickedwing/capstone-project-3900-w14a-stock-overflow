@@ -18,15 +18,15 @@ export default function Ohlc(props) {
         {/* open line */}
         <path
             d={`
-              M ${props.x}, ${props.y + (props.open - high) * heightRatio}
-              h ${xIncrem}
+              M ${props.x - 0.75 * xIncrem}, ${props.y + (props.open - high) * heightRatio}
+              h ${1.5 * xIncrem}
             `}
           />
         {/* close line */}
         <path
             d={`
-              M ${props.x + props.width}, ${props.y + (props.close - high) * heightRatio}
-              h ${-1 * xIncrem}
+              M ${props.x + props.width + 0.75 * xIncrem}, ${props.y + (props.close - high) * heightRatio}
+              h ${-1.5 * xIncrem}
             `}
           />
       </React.Fragment>
@@ -35,14 +35,13 @@ export default function Ohlc(props) {
   const color = isIncreasing ? GRAPHCOLORS.INCREASING : GRAPHCOLORS.DECREASING;
   return (
     <g
-      stroke={color} fill={color} strokeWidth="4">
+      stroke={color} fill={color} strokeWidth="2">
       <path
         d={`
           M ${props.x + xIncrem},${props.y}
           L ${props.x + xIncrem},${props.y + props.height}
           L ${props.x + props.width - xIncrem},${props.y + props.height}
           L ${props.x + props.width - xIncrem},${props.y}
-          L ${props.x + xIncrem},${props.y}
         `}
       />
       { drawOpenCloseLines() }

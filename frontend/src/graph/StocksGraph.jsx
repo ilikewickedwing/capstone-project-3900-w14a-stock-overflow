@@ -3,8 +3,10 @@ import PropTypes from "prop-types";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Label, ResponsiveContainer } from "recharts";
 import CandleStick from "./CandleStick";
 import { ApiContext } from "../api";
-import { CircularProgress, InputLabel, MenuItem, Select } from "@material-ui/core";
 import Ohlc from "./Ohlc";
+import GraphOptions from "./GraphOptions";
+import StocksToolTip from "./StocksToolTip";
+import LoadingScreen from "./GraphLoading";
 
 export const GRAPHCOLORS = {
   INCREASING: '#60CD71',
@@ -66,6 +68,7 @@ export default function StocksGraph(props) {
       .then(r => {
         setState(STATES.RECEIVED);
         addToDataCache(r, timeOptions);
+        console.log(r);
       })
     }
     /**
@@ -74,23 +77,12 @@ export default function StocksGraph(props) {
       it leads to an infinite useEffect loop - so just ignore the warning
     */
   }, [api, props.companyId, timeOptions, graphStyle])
+  
   const renderLoad = () => {
     if (state === STATES.LOADING) {
       return (<LoadingScreen/>)
     }
     return null;
-  }
-  const optionsItemStyle = { 
-    minWidth: "10%",
-    padding: "0.1rem",
-    paddingTop: "0.9rem",
-    borderRadius: "10px",
-    display: "flex",
-    justifyContent: "center",
-  }
-  const headerElemStyle = {
-    marginLeft: "0.5rem",
-    marginRight: "0.5rem",
   }
   const renderGraphShape = () => {
     if (graphStyle === "candlestick") {
@@ -132,38 +124,12 @@ export default function StocksGraph(props) {
   }
   return (
     <div style={wrapperStyle}>
-      <div style={{ width: "100%", display: "flex", flexDirection: "row", justifyContent: "flex-end", marginBottom: '1rem' }}>
-        <div style={optionsItemStyle}>
-          <div style={headerElemStyle}>
-            <InputLabel>Interval</InputLabel>
-            <Select
-              style = {{ marginBottom: '10px' }}
-              value={timeOptions}
-              onChange={e => setTimeOptions(e.target.value)}
-            >
-              <MenuItem value={"1min"}>1 min</MenuItem>
-              <MenuItem value={"5min"}>5 min</MenuItem>
-              <MenuItem value={"15min"}>15 min</MenuItem>
-              <MenuItem value={"30min"}>30 min</MenuItem>
-              <MenuItem value={"60min"}>1 hour</MenuItem>
-              <MenuItem value={"1day"}>1 day</MenuItem>
-              <MenuItem value={"1week"}>1 week</MenuItem>
-              <MenuItem value={"1month"}>1 month</MenuItem>
-            </Select>
-          </div>
-          <div style={headerElemStyle}>
-            <InputLabel>Graph</InputLabel>
-            <Select
-              style = {{ marginBottom: '10px' }}
-              value={graphStyle}
-              onChange={e => setGraphStyle(e.target.value)}
-            >
-              <MenuItem value={"candlestick"}>CandleStick</MenuItem>
-              <MenuItem value={"ohlc"}>OHLC</MenuItem>
-            </Select>
-          </div>
-        </div>
-      </div>
+      <GraphOptions
+        timeOptions={timeOptions}
+        setTimeOptions={setTimeOptions}
+        graphStyle={graphStyle}
+        setGraphStyle={setGraphStyle}
+      />
       { renderLoad() }
       { renderGraph() }
     </div>
@@ -244,64 +210,4 @@ const transformData = (data, candlestickMode = true) => {
     parsedData.splice(i, 0, newData);
   }
   return parsedData;
-}
-
-function StocksToolTip (props) {
-  if (props.active && props.payload && props.payload.length > 0) {
-    const dataPoint = props.payload[0].payload;
-    const tooltipStyle = {
-      backgroundColor: "#ffffff",
-      padding: "0.5rem",
-      borderRadius: "10px",
-      boxShadow: "0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)",
-    }
-    if (props.candlestickMode) {
-      return (
-        <div style={tooltipStyle}>
-          <div style={{ fontSize: '20px', fontWeight: '600' }} >{dataPoint.time}</div>
-          <div>High: {dataPoint.high}</div>
-          <div>Low: {dataPoint.low}</div>
-          <div>Open: {dataPoint.openCloseData[0]}</div>
-          <div>Close: {dataPoint.openCloseData[1]}</div>
-          <div>Volume: {dataPoint.volume}</div>
-        </div>
-      ) 
-    } else {
-      return (
-        <div style={tooltipStyle}>
-          <div style={{ fontSize: '20px', fontWeight: '600' }} >{dataPoint.time}</div>
-          <div>High: {dataPoint.highLow[0]}</div>
-          <div>Low: {dataPoint.highLow[1]}</div>
-          <div>Open: {dataPoint.open}</div>
-          <div>Close: {dataPoint.close}</div>
-          <div>Volume: {dataPoint.volume}</div>
-        </div>
-      ) 
-    }
-  }
-  return null;
-}
-
-StocksToolTip.propTypes = {
-  active: PropTypes.bool,
-  payload: PropTypes.array,
-  candlestickMode: PropTypes.bool
-}
-
-function LoadingScreen() {
-  const loadingStyle = {
-    position: "absolute",
-    opacity: "0.8",
-    zIndex: '999',
-    backgroundColor: "#000000",
-    width: "100%",
-    height: "100%",
-    display: "grid",
-    placeItems: "center",
-  }
-  return (
-    <div style={loadingStyle}>
-      <CircularProgress style={{ opacity: "1" }}/>
-    </div>
-  )
 }
