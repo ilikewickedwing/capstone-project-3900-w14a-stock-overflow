@@ -619,7 +619,7 @@ app.post('/user/stocks/add', async (req, res) => {
  * @swagger
  * /user/stocks/edit:
  *   put:
- *     tags: [Stock]
+ *     tags: [Stocks]
  *     description: endpoint for adding or removing stocks
  *     parameters:
  *      - name: token
@@ -715,38 +715,61 @@ app.get('/stocks/all', async (req, res) => {
  * /stocks/info:
  *   get:
  *     tags: [Stocks]
- *     description: endpoint for getting individual stock information
+ *     description: endpoint for getting stock information - uses alphavantage for information, and tradier for prices
  *     parameters:
- *      - name: stock
- *        description: The symbol of the stock
+ *      - name: type
+ *        description: The type of call being made;
+ *          0. Information overview of stock;
+ *          1. Current price of stock(s);
+ *          2. History of one stock not intraday;
+ *          3. History of one stock intraday
  *        in: body
  *        required: true
+ *        type: int
+ *      - name: stocks
+ *        description: The symbol of the stock or stocks
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: interval
+ *        description: The interval needed;
+ *          For not intraday, options are daily, weekly, monthly;
+ *          For intraday, options are 1min, 5min, 15min
+ *        in: body
+ *        required: false
+ *        type: string
+ *      - name: start
+ *        description: The start of the time from when to get data;
+ *          For not intraday, format is string as YYYY-MM-DD;
+ *          For intraday, format is string as YYYY-MM-DD HH:MM
+ *        in: body
+ *        required: false
  *        type: string
  *     responses:
  *       200:
  *         description: Successfully returned information for single stock
  *       403:
- *         description: Invalid stock
+ *         description: Invalid stock, type, interval, start
  *       502:
  *         description: Could not connect to API
  */
  app.get('/stocks/info', async (req, res) => {
-  const { stock, param } = req.query;
+  const { type, stocks, interval, start } = req.query;
   const check = await checkStock(stock);
   if (!check) {
     res.status(403).send({ error: "Invalid stock" });
     return;
   }
 
-  // PLEASE USE THESE PARAMS
-  // if (param == 1) url = 'TIME_SERIES_INTRADAY' + '&interval=1min';
-  //   else if (param == 2) url = 'TIME_SERIES_DAILY_ADJUSTED';
-  //   else if (param == 3) url = 'TIME_SERIES_WEEKLY_ADJUSTED';
-  //   else if (param == 4) url = 'TIME_SERIES_MONTHLY_ADJUSTED';
-  //   else if (param == 5) url = 'GLOBAL_QUOTE';
-  //   else if (param == 6) url = 'OVERVIEW';
+  if (type < 0 || type >3) {
+    res.status(403).send({ error: "Invalid type" });
+  }
 
-  const resp = await getStock(stock, param);
+  if (interval.match(/^(1min|5min|15min|daily|weekly|monthly)$/) == null) {
+    res.status(403).send({ error: "Invalid interval" });
+  }  
+
+  const resp = await getStock(type, stocks, interval, start);
   if (resp == null) {
     res.status(502).send({ error: "Could not connect to API" });
     return;
