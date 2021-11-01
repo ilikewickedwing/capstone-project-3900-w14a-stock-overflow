@@ -1,4 +1,5 @@
 import axios from "axios";
+
 let apikey = 'NJGHG3ZAKLAELM3E';
 let keys = ['FLKB7SQBXHGISR7I','59SO8FIM49NYQS21','WP9NFOYE83L4FABK','5TZVKFQR250ZAQZ4','E23ORO62TPLB096R'];
 let useCounter = 0;
@@ -32,7 +33,7 @@ export class API {
   async _getAllStocks() {
     const stocks = [];
     // Fetching the list of active stocks
-    let result = await this._callAlpha("LISTING_STATUS","no stock");  // Converting result into text
+    let result = await this._callAlpha(-1 ,"no stock");  // Converting result into text
 
     result = result.split('\n');        // Splitting every entry
 
@@ -94,9 +95,10 @@ export class API {
    */
   async _getStock(type, stocks, interval, start) {
 
+    // console.log("type is " + type);
     let data = null;
-    if (type == 0) {
-      data = await this._callAlpha(stocks);
+    if (parseInt(type) === 0) {
+      data = await this._callAlpha(type, stocks);
     } else {
       data = await this._callTradier(type, stocks, interval, start);
     }
@@ -110,7 +112,7 @@ export class API {
     }
     
     // console.log(obj);
-    this.infoCache.push(obj);
+    // this.infoCache.push(obj);
 
     return obj;
   }
@@ -120,25 +122,30 @@ export class API {
    * @param {string} stock 
    * @returns {Promise <object>}
    */
-  async _callAlpha(stock) {
+  async _callAlpha(type, stock) {
 
-    console.log("useCounter is " + this.useCounter);
+    // console.log("useCounter is " + this.useCounter);
+    let url = null;
+
+    if (type === -1) url = "LISTING_STATUS";
+    else if (type === 0) url = "OVERVIEW";
     
     if (this.useCounter == 5) {
       keys.push(apikey);
       apikey = keys.shift();
       this.useCounter = 0;
     }
-    console.log("THE KEY IS " + apikey);
-    const request = await axios.get(`https://www.alphavantage.co/query?function='OVERVIEW'&symbol=${stock}&apikey=${apikey}`);
+
+    // console.log("THE KEY IS " + apikey);
+    const request = await axios.get(`https://www.alphavantage.co/query?function=${url}&symbol=${stock}&apikey=${apikey}`);
     
     
-    console.log(request.data);
+    // console.log(request.data);
     // how do this work
     if (request.data.Note !== undefined) {
-      console.log("note detected, we go again");
+      // console.log("note detected, we go again");
       this.useCounter = 5;
-      return this._callAlpha(type, stock);
+      return await this._callAlpha(type, stock);
     }
     this.useCounter++;
     
@@ -166,17 +173,20 @@ export class API {
     let symbols = null;
     let symbol = null;
 
+    console.log('tradier api call');
     
-    if (type == 1) {
+    if (parseInt(type) === 1) {
       url = 'quotes';
       symbols = stocks;
-    } else if (type == 2) {
+    } else if (parseInt(type) === 2) {
       url = 'history';
       symbol = stocks;
-    } else if (type == 3) {
+    } else if (parseInt(type) === 3) {
       url = 'timesales';
       symbol = stocks;
     }
+
+    console.log("url is " + url + ", symbol is " + symbol + ", symbols is " + symbols);
 
     const request = await axios({
       method: 'get',
@@ -193,7 +203,7 @@ export class API {
         console.log(response.statusCode);
         console.log(body);
     });
-
+    // console.log(request.data);
     return request.data;
   }
 

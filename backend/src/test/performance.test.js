@@ -7,73 +7,67 @@ import request from 'supertest';
 import { app, database } from "../index";
 
 
-/* describe('Retrieve stock information', () => {
+describe('Retrieve stock information', () => {
 	const d = new Database(true);
   beforeAll(async () => {
     await d.connect();
   })
 
-  it('Get stock', async () => {
-	const resp = await getStock('IBM', 0);
-  const daily = await getStockDaily('IBM');
-  const weekly = await getStockWeekly('IBM');
-  const price = await getStockPrice('IBM');
-  const info = await getStockInfo('IBM');
-
+  it('Get stock information', async () => {
+	const resp = await getStock(0, 'AAPL');
+  expect(resp).not.toBe(null);
   expect(resp).toMatchObject({
-    symbol: 'IBM',
-    data: {
-      daily: expect.objectContaining(daily),
-      weekly: expect.objectContaining(weekly),
-      price: expect.objectContaining(price),
-      info: expect.objectContaining(info),
-    },
-    time: expect.any(Date),
+    symbol: 'AAPL',
+    param: 0,
+    data: expect.anything(),
+    time: expect.any(String)
   })
-  //console.log(resp.info.daily['Meta Data']);
-  // for(let i = 0; i < resp.info.daily.'Meta Data'.length(); i++) {
+  console.log(resp.data);
+  })
 
-  // }
-  })
+  
   afterAll(async () => {
     await d.disconnect();
   })
 })
 
 describe('Retrieve stock info endpoint test', () => {
-  jest.setTimeout(30000);
+  // jest.setTimeout(30000);
   beforeAll(async () => {
     await database.connect();
   })
 
+  jest.setTimeout(10000);
+
   it('200 on successful get stock', async () => {
     console.log('200 on successful get stock');
-    const resp = await request(app).get(`/stocks/info?stock=IBM`).send();
+    const resp = await request(app).get(`/stocks/info?type=1&stocks=IBM,AAPL`).send();
     expect(resp.statusCode).toBe(200);
-    expect(resp.body).toMatchObject({
-      symbol: 'IBM',
-      data: {
-        intraday: expect.anything(),
-        daily: expect.anything(),
-        weekly: expect.anything(),
-        monthly: expect.anything(),
-        price: expect.anything(),
-        info: expect.anything()
-      },
-      time: expect.any(String),
-    })
+    // expect(resp.body).toMatchObject({
+    //   symbol: 'IBM',
+    //   data: {
+    //     intraday: expect.anything(),
+    //     daily: expect.anything(),
+    //     weekly: expect.anything(),
+    //     monthly: expect.anything(),
+    //     price: expect.anything(),
+    //     info: expect.anything()
+    //   },
+    //   time: expect.any(String),
+    // })
+    // console.log(resp.body.data.quotes);
   })
-  it('403 on invalid stock', async () => {
-    console.log('403 on invalid stock');
-    const resp = await request(app).get(`/stocks/info?stock=fakestock`).send();
-    expect(resp.statusCode).toBe(403);
-    expect(resp.body.error).toBe("Invalid stock");
-  })
+  // it('403 on invalid stock', async () => {
+  //   console.log('403 on invalid stock');
+  //   const resp = await request(app).get(`/stocks/info?stock=fakestock`).send();
+  //   expect(resp.statusCode).toBe(403);
+  //   expect(resp.body.error).toBe("Invalid stock");
+  // })
 
   afterAll(async() => {
     await database.disconnect();
   })
-}) */
+})
 
 /* describe('Editing stocks doesn\'t affect portfolios', () => {
   const d = new Database(true);
@@ -298,21 +292,21 @@ describe('Retrieve stock info endpoint test', () => {
   })
 }) */
 
-describe('We be having funsies', () => {
+/* describe('We be having funsies', () => {
   const d = new Database(true);
   beforeAll(async () => {
     await d.connect();
   })
 
-  jest.setTimeout(100000);
+  // jest.setTimeout(100000);
 
   it('Calling a bunch of stocks', async () => {
     // const a = await getStock('a', 1);
     // const a = await alphavantage._callTradier(1,'AAPL,AMZN,IBM');
     // console.log(a.quotes.quote);
 
-    const b = await getStock(3, 'AAPL', '15min', '2021-10-29 00:00');
-    console.log(b.data.series);
+    const b = await getStock(1, 'AAPL', '15min', '2021-10-29 00:00');
+    // console.log(b.data.quotes);
 
   })
   
@@ -320,4 +314,4 @@ describe('We be having funsies', () => {
   afterAll(async () => {
     await d.disconnect();
   })
-})
+}) */
