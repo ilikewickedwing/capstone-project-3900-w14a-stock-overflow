@@ -21,6 +21,7 @@ export class API {
   async getAllStocks() {
     // Return cached stocks if available
     if (this.cachedStocks !== null) {
+      console.log('using cache');
       return this.cachedStocks;
     }
     // Else cache doesnt exist so fetch it
@@ -55,21 +56,21 @@ export class API {
 
   async getStock(type, stocks, interval, start) {
     // console.log(this.infoCache);
-    // console.log("stock requested is " + stock);
+    // console.log("stock requested is " + stocks);
     // Search for stock in cache
-    /* const search = this.infoCache.filter(o => (o.symbol === stock) && (o.param === param));
+    const search = this.infoCache.filter(o => (o.symbol === stocks) && (o.param === type));
     const time = Date.now();
 
-    if (search.length !== 0) {
-      // console.log(search[0].time);
-      // console.log(time - search[0].time);
-    }
-    if (search.length !== 0 && time - search[0].time < 600000) {
-      // console.log("returning cached stock");
+    /* if (search.length !== 0) {
+      console.log(search[0].time);
+      console.log(time - search[0].time);
+    } */
+    if (search.length !== 0 && time - search[0].time < 60000) {
+      console.log("returning cached stock");
       return search[0];
     }
 
-    console.log("fetching cache"); */
+    console.log("fetching cache");
     // Fetch stock and add to cache
     const resp = await this._getStock(type, stocks, interval, start);
     // console.log(resp);
@@ -112,7 +113,7 @@ export class API {
     }
     
     // console.log(obj);
-    // this.infoCache.push(obj);
+    this.infoCache.push(obj);
 
     return obj;
   }
@@ -141,9 +142,7 @@ export class API {
     
     
     // console.log(request.data);
-    // how do this work
     if (request.data.Note !== undefined) {
-      // console.log("note detected, we go again");
       this.useCounter = 5;
       return await this._callAlpha(type, stock);
     }
@@ -173,7 +172,7 @@ export class API {
     let symbols = null;
     let symbol = null;
 
-    console.log('tradier api call');
+    // console.log('tradier api call');
     
     if (parseInt(type) === 1) {
       url = 'quotes';
@@ -186,7 +185,7 @@ export class API {
       symbol = stocks;
     }
 
-    console.log("url is " + url + ", symbol is " + symbol + ", symbols is " + symbols);
+    // console.log("url is " + url + ", symbol is " + symbol + ", symbols is " + symbols);
 
     const request = await axios({
       method: 'get',
