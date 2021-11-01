@@ -8,7 +8,8 @@ const StockQuery = ({stockCode, stockName}) => {
         <StockQueryButton onClick={()=>
             history.push(`/stock/${stockCode}`)
         }>
-            {stockCode} 
+            {stockCode}
+            {' '}
             {stockName}
         </StockQueryButton>
     )

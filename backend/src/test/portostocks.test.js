@@ -47,6 +47,10 @@ describe('Create and delete', () => {
       pid: pid1,
       name: 'pf1',
       stocks: expect.arrayContaining(stArray),
+      value: {
+        spent: 2,
+        sold: 0
+      }
     })
   })
   it('Add multiple stocks to portfolio', async () => {
@@ -88,6 +92,10 @@ describe('Create and delete', () => {
       pid: pid1,
       name: 'pf1',
       stocks: expect.arrayContaining(stArray),
+      value: {
+        spent: 9,
+        sold: 0
+      }
     })
   })
   it('Remove first stock from portfolio', async () => {
@@ -118,12 +126,20 @@ describe('Create and delete', () => {
     expect(pf).toMatchObject({
       pid: pid1,
       name: 'pf1',
-      stocks: expect.not.arrayContaining(stArray1)
+      stocks: expect.not.arrayContaining(stArray1),
+      value: {
+        spent: 9,
+        sold: 4
+      }
     })
     expect(pf).toMatchObject({
       pid: pid1,
       name: 'pf1',
-      stocks: expect.arrayContaining(stArray2)
+      stocks: expect.arrayContaining(stArray2),
+      value: {
+        spent: 9,
+        sold: 4
+      }
     })
   })
   it('Remove all stocks from portfolio', async () => {
@@ -139,7 +155,11 @@ describe('Create and delete', () => {
     expect(pf).toMatchObject({
       pid: pid1,
       name: 'pf1',
-      stocks: []
+      stocks: [],
+      value: {
+        spent: 9,
+        sold: 11
+      }
     })
   })
   it('Delete portfolio', async () => {
@@ -224,7 +244,11 @@ describe('Editing portfolio doesn\'t affect stocks', () => {
     expect(stocks).toMatchObject({
       pid: pid,
       name: 'pf',
-      stocks: expect.arrayContaining(stArray)
+      stocks: expect.arrayContaining(stArray),
+      value: {
+        spent: 11,
+        sold: 0
+      }
     })
   })
   it('Change portfolio name', async () => {
@@ -323,7 +347,11 @@ describe('Editing stocks doesn\'t affect portfolios', () => {
     expect(stocks).toMatchObject({
       pid: pid,
       name: 'pf',
-      stocks: expect.arrayContaining(stArray)
+      stocks: expect.arrayContaining(stArray),
+      value: {
+        spent: 11,
+        sold: 0
+      }
     })
   })
   it('Buy extra of first stock in portfolio', async () => {
@@ -343,7 +371,11 @@ describe('Editing stocks doesn\'t affect portfolios', () => {
     expect(pf).toMatchObject({
       pid: pid,
       name: 'pf',
-      stocks: expect.arrayContaining(stArray)
+      stocks: expect.arrayContaining(stArray),
+      value: {
+        spent: 17,
+        sold: 0
+      }
     })
   })
   it('Buy extra of all stocks in portfolio', async () => {
@@ -373,7 +405,11 @@ describe('Editing stocks doesn\'t affect portfolios', () => {
     expect(pf).toMatchObject({
       pid: pid,
       name: 'pf',
-      stocks: expect.arrayContaining(stArray)
+      stocks: expect.arrayContaining(stArray),
+      value: {
+        spent: 35,
+        sold: 0
+      }
     })
   })
   it('Sell some of first stock in portfolio', async () => {
@@ -393,7 +429,11 @@ describe('Editing stocks doesn\'t affect portfolios', () => {
     expect(pf).toMatchObject({
       pid: pid,
       name: 'pf',
-      stocks: expect.arrayContaining(stArray)
+      stocks: expect.arrayContaining(stArray),
+      value: {
+        spent: 35,
+        sold: 4
+      }
     })
   })
   it('Sell some of all stocks in portfolio', async () => {
@@ -423,7 +463,11 @@ describe('Editing stocks doesn\'t affect portfolios', () => {
     expect(pf).toMatchObject({
       pid: pid,
       name: 'pf',
-      stocks: expect.arrayContaining(stArray)
+      stocks: expect.arrayContaining(stArray),
+      value: {
+        spent: 35,
+        sold: 9
+      }
     })
   })
   it('Sell rest of first stock in portfolio', async () => {
@@ -438,7 +482,11 @@ describe('Editing stocks doesn\'t affect portfolios', () => {
     expect(pf).toMatchObject({
       pid: pid,
       name: 'pf',
-      stocks: expect.arrayContaining(stArray)
+      stocks: expect.arrayContaining(stArray),
+      value: {
+        spent: 35,
+        sold: 15
+      }
     })
   })
   it('Sell rest of all stocks in portfolio', async () => {
@@ -457,7 +505,11 @@ describe('Editing stocks doesn\'t affect portfolios', () => {
     expect(pf).toMatchObject({
       pid: pid,
       name: 'pf',
-      stocks: expect.arrayContaining(stArray)
+      stocks: expect.arrayContaining(stArray),
+      value: {
+        spent: 35,
+        sold: 31
+      }
     })
   })
 
@@ -506,7 +558,7 @@ describe('Portfolio and stocks endpoint test', () => {
     expect(add.statusCode).toBe(200);
 
     const get = await userPfs(token, database);
-    const pfArray = [{ name: "myPf", pid: pid1 }];
+    const pfArray = [{ name: 'myPf', pid: pid1 }];
     expect(get).toEqual(expect.arrayContaining(pfArray));
     const stArray = [{
       stock: 'IBM',
@@ -518,6 +570,10 @@ describe('Portfolio and stocks endpoint test', () => {
       pid: pid1,
       name: 'myPf',
       stocks: expect.arrayContaining(stArray),
+      value: { 
+        spent: 2,
+        sold: 0
+      }
     })
   })
   it('200 on subsequent valid stock additions', async () => {
@@ -560,7 +616,11 @@ describe('Portfolio and stocks endpoint test', () => {
     expect(pf).toMatchObject({
       pid: pid1,
       name: 'myPf',
-      stocks: expect.arrayContaining(stArray)
+      stocks: expect.arrayContaining(stArray),
+      value: { 
+        spent: 9,
+        sold: 0
+      }
     })
   })
   it('200 on first valid stock sale', async () => {
@@ -580,7 +640,11 @@ describe('Portfolio and stocks endpoint test', () => {
     expect(pf).toMatchObject({
       pid: pid1,
       name: 'myPf',
-      stocks: expect.arrayContaining(stArray)
+      stocks: expect.arrayContaining(stArray),
+      value: { 
+        spent: 9,
+        sold: 2
+      }
     })
   })
   it('200 on subsequent valid stock sales', async () => {
@@ -609,7 +673,11 @@ describe('Portfolio and stocks endpoint test', () => {
     expect(pf).toMatchObject({
       pid: pid1,
       name: 'myPf',
-      stocks: expect.arrayContaining(stArray)
+      stocks: expect.arrayContaining(stArray),
+      value: { 
+        spent: 9,
+        sold: 9
+      }
     })
   })
   it('200 on subsequent valid portfolio creations', async () => {

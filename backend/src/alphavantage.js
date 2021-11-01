@@ -1,5 +1,7 @@
 import axios from "axios";
-const apikey = "demo";
+let apikey = 'NJGHG3ZAKLAELM3E';
+let keys = ['59SO8FIM49NYQS21','WP9NFOYE83L4FABK','5TZVKFQR250ZAQZ4','FLKB7SQBXHGISR7I', 'E23ORO62TPLB096R'];
+let useCounter = 0;
 
 export class Alphavantage {
   constructor() {
@@ -10,15 +12,14 @@ export class Alphavantage {
     // How long in millisecond before calling get all stocks again
     const pollingInterval = 60000;
     this.intervalObj = setInterval(() => {this._getAllStocks()}, pollingInterval);
+    this.useCounter = 0;
   }
   
   async getAllStocks() {
     // Return cached stocks if available
     if (this.cachedStocks !== null) {
-      console.log("returning cache")
       return this.cachedStocks;
     }
-    console.log("fetching cache");
     // Else cache doesnt exist so fetch it
     const resp = await this._getAllStocks();
     return resp;
@@ -29,8 +30,8 @@ export class Alphavantage {
   async _getAllStocks() {
     const stocks = [];
     // Fetching the list of active stocks
-    const request = await axios.get(`https://www.alphavantage.co/query?function=LISTING_STATUS&apikey=${apikey}`);
-    let result = await request.data;  // Converting result into text
+    let result = await this._callApi("LISTING_STATUS","no stock");  // Converting result into text
+
     result = result.split('\n');        // Splitting every entry
 
     // Going through every entry
@@ -45,54 +46,69 @@ export class Alphavantage {
     });
     // Cache the stocks
     this.cachedStocks = stocks;
+
     return stocks;
   }
 
-  async getStock(stock) {
-    console.log(this.infoCache);
-    console.log("stock requested is " + stock);
+  async getStock(stock, param) {
+    // console.log(this.infoCache);
+    // console.log("stock requested is " + stock);
     // Search for stock in cache
-    const search = this.infoCache.filter(o => o.symbol === stock);
+    const search = this.infoCache.filter(o => (o.symbol === stock) && (o.param === param));
     const time = Date.now();
 
     if (search.length !== 0) {
-      console.log(search[0].time);
-      console.log(time - search[0].time);
+      // console.log(search[0].time);
+      // console.log(time - search[0].time);
     }
     if (search.length !== 0 && time - search[0].time < 600000) {
-      console.log("returning cached stock");
-      return search;
+      // console.log("returning cached stock");
+      return search[0];
     }
 
     console.log("fetching cache");
     // Fetch stock and add to cache
-    const resp = await this._getStock(stock);
+    const resp = await this._getStock(stock, param);
+    // console.log(resp);
     return resp;
   }
 
-  async _getStock(stock) {
-    const dailyRequest = await axios.get(`https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${stock}&apikey=${apikey}`);
-    const weeklyRequest = await axios.get(`https://www.alphavantage.co/query?function=TIME_SERIES_WEEKLY&symbol=${stock}&apikey=${apikey}`);
-    const priceRequest = await axios.get(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${stock}&apikey=${apikey}`);     
-    const infoRequest = await axios.get(`https://www.alphavantage.co/query?function=OVERVIEW&symbol=${stock}&apikey=${apikey}`); 
-    
+  async _getStock(stock, param) {
     //console.log(await dailyRequest.data);
+
+    let url = null;
+
+    if (param == 1) url = 'TIME_SERIES_INTRADAY' + '&interval=1min';
+    else if (param == 2) url = 'TIME_SERIES_DAILY_ADJUSTED';
+    else if (param == 3) url = 'TIME_SERIES_WEEKLY_ADJUSTED';
+    else if (param == 4) url = 'TIME_SERIES_MONTHLY_ADJUSTED';
+    else if (param == 5) url = 'GLOBAL_QUOTE';
+    else if (param == 6) url = 'OVERVIEW';
+    
 
     const time = new Date();
     const obj = {
-      symbol: 'IBM',
-      data: {
-        daily: dailyRequest.data,
-        weekly: weeklyRequest.data,
-        price: priceRequest.data,
-        info: infoRequest.data,
-      },
+      symbol: stock,
+      param: param,
+      data: await this._callApi(url, stock),
       time: time
     }
     
+    // console.log(obj);
     this.infoCache.push(obj);
 
     return obj;
+  }
+
+  async _callApi(type, stock) {
+    const request = await axios.get(`https://www.alphavantage.co/query?function=${type}&symbol=${stock}&apikey=${apikey}`);
+    this.useCounter++;
+    if (this.useCounter === 5) {
+      keys.push(apikey);
+      apikey = keys.shift();
+      this.useCounter = 0;
+    }
+    return await request.data;
   }
 
   checkStock(check, against) {

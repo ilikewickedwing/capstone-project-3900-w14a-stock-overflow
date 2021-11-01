@@ -4,22 +4,16 @@ import { ApiContext } from '../api';
 import axios from "axios";
 import Navigation from './Navigation'; 
 import Tabs from './Tabs'; 
-import Popover from '@mui/material/Popover';
+
 import {
-  CreatePortField, 
-  CreatePortContent, 
-  ConfirmCancel,
   PfBody, 
   LeftBody, 
   RightBody, 
   RightCard, 
   PageBody, 
-  FlexRows,
-  FlexColumns
+  StockOverview,
+  ContentBody
 } from '../styles/styling';
-import Button from '@mui/material/Button';
-import PfTable from './PfTable';
-import AddStock from './AddStock';
 import { apiBaseUrl } from './const';
 
 const Stock = () => {
@@ -30,18 +24,35 @@ const Stock = () => {
 
   const [name, setName] = React.useState('');
 
+  React.useEffect(() =>{
+      loadStockInfo();
+  },[]);
+
+  const loadStockInfo = async () => {
+      try {
+
+      } catch (e) {
+          alert(e);
+      }
+  }
+
   return (
       <PageBody>
           <Navigation />
           <Tabs />
-          <h1> STOCK PAGE: {name}</h1> 
-          <FlexRows>
-          </FlexRows> 
+          <ContentBody>
+          <h3>StockCode:StockName</h3>
+          <h4>$price -3%(live %) (day change %) </h4> 
+          <StockOverview >
+          STOCK PAGE: {name}
+          previous close: 
+          day range: 
+          year range: 
+          market cap: 
+
+          </ StockOverview >
           <PfBody>
             <LeftBody>
-        
-              <PfTable />
-            < AddStock />
             </LeftBody>
             <RightBody>
               <RightCard>
@@ -52,6 +63,7 @@ const Stock = () => {
               </RightCard>
             </RightBody>
           </PfBody>
+          </ContentBody>
       </PageBody>
   );
 };

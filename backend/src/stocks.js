@@ -42,6 +42,7 @@ export const addStock = async (token, pid, stock, price, quantity, database) => 
 
   // Check for watchlist
   const get = await database.openPf(pid);
+  if (get == null) return 3;
   const name = get.name;
 
   if (name !== 'Watchlist') {
@@ -81,6 +82,7 @@ export const modifyStock = async (token, pid, stock, price, quantity, option, da
 
   // Check for watchlist
   const get = await database.openPf(pid);
+  if (get == null) return 3;
   const name = get.name;
 
   if (name !== 'Watchlist') {    
@@ -98,7 +100,7 @@ export const modifyStock = async (token, pid, stock, price, quantity, option, da
     resp = await database.addStocks(pid, stock, price, quantity);
   }
   else {
-    resp = await database.sellStocks(pid, stock, quantity)
+    resp = await database.sellStocks(pid, stock, price, quantity);
   }
   return resp;
 }
@@ -119,12 +121,9 @@ export const getStock = async (stock, param) => {
   // const check = await checkStock(stock);
   // if (!check) return null;
 
-  const stocks = await alphavantage.getStock(stock);
-  if (param == 1) return stocks[0].data.daily;
-  else if (param == 2) return stocks[0].data.weekly;
-  else if (param == 3) return stocks[0].data.price;
-  else if (param == 4) return stocks[0].data.info;
-  else return stocks;
+  const stocks = await alphavantage.getStock(stock, param);
+  // console.log(stocks);
+  return stocks;
 }
 
 /**
@@ -147,7 +146,7 @@ export const getStock = async (stock, param) => {
  * @returns {Promise <Object>}
  */
 export const getStockDaily = async (stock) => {
-  const stocks = await getStock(stock, 1);
+  const stocks = await getStock(stock, 2);
   return stocks;
 }
 
@@ -170,7 +169,7 @@ export const getStockDaily = async (stock) => {
  * @returns {Promise <Object>}
  */
 export const getStockWeekly = async (stock) => {
-  const stocks = await getStock(stock, 2);
+  const stocks = await getStock(stock, 3);
   return stocks;
 }
 
@@ -182,7 +181,7 @@ export const getStockWeekly = async (stock) => {
  *    '02. open'
  *    '03. high'
  *    '04. low'
- *    '05. close'
+ *    '05. price'
  *    '06. volume'
  *    '07. latest trading day'
  *    '08. previous close'
@@ -192,12 +191,12 @@ export const getStockWeekly = async (stock) => {
  * @returns {Promise <Object>}
  */
 export const getStockPrice = async (stock) => {
-  const stocks = await getStock(stock, 3);
+  const stocks = await getStock(stock, 5);
   return stocks;
 }
 
 /**
- * Function to retrieve stock information from alphavantage
+ * Function to retrieve stock ov from alphavantage
  * Returns:
  *  Symbol
  *  AssetType
@@ -261,8 +260,8 @@ export const getStockPrice = async (stock) => {
  * @param {string} stock 
  * @returns {Promise <Object>}
  */
-export const getStockInfo = async (stock) => {
-  const stocks = await getStock(stock, 4);
+export const getStockOverview = async (stock) => {
+  const stocks = await getStock(stock, 6);
   return stocks;
 }
 
