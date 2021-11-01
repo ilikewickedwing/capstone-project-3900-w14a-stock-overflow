@@ -141,7 +141,7 @@ export const getStock = async (type, stocks, interval, start) => {
   const check = await checkStock(stocks);
   if (!check) return -1;
 
-  if (type < 0 || type >3 || !Number.isInteger(type)) return -2;
+  if (type < 0 || type > 3 || !Number.isInteger(type)) return -2;
 
   if ((type === 2 || type === 3) && typeof(interval) !== 'string') return -3;
 
