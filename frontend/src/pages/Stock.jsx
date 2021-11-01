@@ -25,7 +25,7 @@ const Stock = () => {
   const [price, setPrice] = React.useState('');
   
   // daily info 
-  const [close, setClose] = React.useState('');
+  const [close, setClose] = React.useState('-');
   const [low, setLow] = React.useState('');
   const [high, setHigh] = React.useState('');
   const [open,setOpen] = React.useState('');
@@ -35,14 +35,15 @@ const Stock = () => {
   const [prevClose, setPrevClose] = React.useState('');
   const [dayRange, setRange]= React.useState('');
   const [change, setChange] = React.useState('');
+  const [percentage, setPercentage] = React.useState('');
 
   // change: the difference between current price and last trade of prev day
   React.useEffect(() => {
     loadStockInfo();
   },[]);
 
-  function calculatePerc(){
-    let res = (change/price)*100;
+  function calculatePerc(a,b){
+    let res = (a/b)*100;
     return `${res.toFixed(2)}%`;
   }
   
@@ -54,7 +55,7 @@ const Stock = () => {
         setName(reqInfo.description);
         setPrice(reqInfo.ask);
         // if the market is closed, grab the most recent trading day and the day before that
-        if (reqInfo.close === null){
+        if (reqInfo.open === null){
           const request2 = await axios.get(`${apiBaseUrl}/stocks/info?type=2&stocks=${stockCode}`);
           const prevDay = request2.data.data.history.day;
           let latest = prevDay.length -1;
@@ -70,6 +71,18 @@ const Stock = () => {
           setPrevClose(prevDay[latest-1].close);
           let difference = reqInfo.ask - prevDay[latest-1].close;
           setChange(difference.toFixed(4));
+          setPercentage(calculatePerc(reqInfo.ask, prevDay[latest-1].close));
+        
+          // if the markets currently open 
+        } else {
+          setChange(reqInfo.change);
+          setPercentage(reqInfo.change_percentage);
+          setOpen(reqInfo.open);
+          setLow(reqInfo.low);
+          setPrevClose(reqInfo.prevclose);
+          setHigh(reqInfo.high);
+          setVolume(reqInfo.volume);
+          setRange(`${reqInfo.low} - ${reqInfo.high}`);
         }
       } catch (e) {
           alert(e);
@@ -77,18 +90,18 @@ const Stock = () => {
   }
 
   return (
-      <PageBody>
+      <PageBody className="font-two">
           <Navigation />
           <Tabs />
           <ContentBody>
           <h3>{stockCode} {name}</h3>
-          <h4>{price} USD {change} {calculatePerc()} </h4> 
+          <h4>{price} USD {change} {percentage} </h4> 
           <StockOverview >
-          open: {open}
-          low: {low}
-          high: {high}
-          volume: {volume}
-          close:  {close}
+          open: {open} 
+          low: {low} 
+          high: {high} 
+          volume: {volume} 
+          close:  {close} 
           </ StockOverview >
           <PfBody>
             <LeftBody>

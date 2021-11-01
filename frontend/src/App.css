@@ -2,3 +2,11 @@ body {
   margin: 0px;
   padding: 0px;
 }
+
+.font-link {
+  font-family: 'Nunito', sans-serif;
+}
+
+.font-two {
+  font-family: 'Ubuntu', sans-serif;
+}

@@ -7,12 +7,14 @@ import Tabs from '../comp/Tabs';
 
 export default function Dashboard() {
   return (
-    <PageBody>
+    <PageBody className="font-two">
       <Navigation />
       <Tabs />
-      <h1>Dashboard</h1>
       <PfBody>
-              <LeftBody>Left Body
+              <LeftBody>
+                <div style={{margin:'-2% 0%'}}>
+                  <h1>Dashboard</h1> 
+                </div>
                 <p> print the list of stocks in this  </p>
               </LeftBody>
               <RightBody> Right Body: contains the 3 side cards 

@@ -58,7 +58,7 @@ export default function Profile() {
   }
 
   return(
-    <div>
+    <div className="font-two">
       <NavBar>
         <Link to="/dashboard">
             <Logo>

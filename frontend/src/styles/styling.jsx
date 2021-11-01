@@ -87,6 +87,8 @@ export const RightBody= styled(FlexColumns)`
 export const PfBody = styled(FlexRows)`
     width: 100%; 
     flex:1;
+    padding: 1%;
+    margin-top: -2%;
 `;
 
 export const RightCard = styled.div`
@@ -134,4 +136,10 @@ export const CleanButton = styled.button`
     box-shadow: 0px 0px 0px transparent;
     border: 0px solid transparent;
     text-shadow: 0px 0px 0px transparent;
+`;
+
+export const PfBar = styled(FlexColumns)`
+    width: 100%;
+ border: 1px solid green;
+ justify-content: space-between;
 `;
