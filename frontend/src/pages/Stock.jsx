@@ -1,7 +1,5 @@
 import React from 'react'; 
-import { useHistory} from 'react-router-dom';
 import { useParams } from "react-router";
-import { ApiContext } from '../api';
 import axios from "axios";
 import Navigation from '../comp/Navigation'; 
 import Tabs from '../comp/Tabs'; 
@@ -20,10 +18,7 @@ import { apiBaseUrl } from '../comp/const';
 
 
 const Stock = () => {
-  const api = React.useContext(ApiContext);
-  const history = useHistory();
   const { stockCode } = useParams();
-  const token = localStorage.getItem('token');
   
   // live info
   const [name, setName] = React.useState('');
@@ -73,7 +68,7 @@ const Stock = () => {
           // set prev day stats
           setRange(`${prevDay[latest-1].low} - ${prevDay[latest-1].high}`);
           setPrevClose(prevDay[latest-1].close);
-          let difference = price - prevClose;
+          let difference = reqInfo.ask - prevDay[latest-1].close;
           setChange(difference.toFixed(4));
         }
       } catch (e) {
