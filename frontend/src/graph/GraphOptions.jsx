@@ -27,9 +27,9 @@ export default function GraphOptions (props) {
             <MenuItem value={"1min"}>1 min</MenuItem>
             <MenuItem value={"5min"}>5 min</MenuItem>
             <MenuItem value={"15min"}>15 min</MenuItem>
-            <MenuItem value={"daily"}>1 day</MenuItem>
-            <MenuItem value={"weekly"}>1 week</MenuItem>
-            <MenuItem value={"monthly"}>1 month</MenuItem>
+            <MenuItem value={"daily"}>Daily</MenuItem>
+            <MenuItem value={"weekly"}>Weekly</MenuItem>
+            <MenuItem value={"monthly"}>Monthly</MenuItem>
           
           </Select>
         </div>

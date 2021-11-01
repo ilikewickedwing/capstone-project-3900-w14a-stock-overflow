@@ -44,11 +44,11 @@ export default function StocksGraph(props) {
         case "15min":
           return api.stocksInfo(3, company, interval, null);
         case "daily":
-          return api.stocksInfo(2, company, interval, yesterdayTime);
+          return api.stocksInfo(2, company, interval, null);
         case "weekly":
-          return api.stocksInfo(2, company, interval, yesterdayTime);
+          return api.stocksInfo(2, company, interval, null);
         case "monthly":
-          return api.stocksInfo(2, company, interval, yesterdayTime);
+          return api.stocksInfo(2, company, interval, null);
         default:
           throw Error(`Invalid interval of ${interval}`);
       }
@@ -111,7 +111,7 @@ export default function StocksGraph(props) {
             </XAxis>
             <YAxis 
               label={{ value: 'Price (US Dollars)', angle: -90, position: 'insideLeft', dx: -15 }}
-              domain={['dataMin', 'dataMax']} type="number"/>
+              domain={['dataMin', 'dataMax ']} type="number"/>
             <Tooltip content={<StocksToolTip candlestickMode={graphStyle === "candlestick"}/>}/>
             <Bar dataKey={getDataKey()} shape={renderGraphShape()}></Bar>
           </BarChart>
@@ -139,21 +139,23 @@ StocksGraph.propTypes = {
   height: PropTypes.number,
 }
 
-// Compares to time periods
-const compareTime = (time1, time2) => {
-  const t1 = Date.parse(time1);
-  const t2 = Date.parse(time2);
-  return t1 < t2;
-}
-
 /**
  * Transforms stocks data to what is needed
  * @param {*} data 
  * @returns 
  */
 const transformData = (data, candlestickMode = true) => {
-  // Get the data and parse it
-  const timeSeriesData = data.data.series.data;
+  if ('series' in data.data) {
+    return transformIntradayData(data, candlestickMode);
+  } else if ('history' in data.data) {
+    return transformNonIntradayData(data, candlestickMode)
+  }
+  console.log(data);
+  throw new Error("Invalid data received");
+}
+  
+function transformIntradayData(data, candlestickMode = true) {
+  let timeSeriesData = data.data.series.data;
   return timeSeriesData.map(d => {
     let newData = {
       time: d.time,
@@ -180,7 +182,38 @@ const transformData = (data, candlestickMode = true) => {
     }
     return newData;
   });
-  
+}
+ 
+function transformNonIntradayData(data, candlestickMode = true) {
+  let timeSeriesData = data.data.history.day;
+  return timeSeriesData.map(d => {
+    let newData = {
+      time: d.date,
+      openCloseData: [
+        Number(d.open),
+        Number(d.close),
+      ],
+      high: Number(d.high),
+      low: Number(d.low),
+      volume: Number(d.volume),
+    }
+    // Data for ohlc
+    if (!candlestickMode) {
+      newData = {
+        time: d.date,
+        open: Number(d.open),
+        close: Number(d.close),
+        highLow: [
+          Number(d.high),
+          Number(d.low),
+        ],
+        volume: Number(d.volume),
+      }
+    }
+    return newData;
+  });
+}
+ 
   // const parsedData = [];
   // for (const timeKey of Object.keys(timeSeriesData)) {
   //   const objData = timeSeriesData[timeKey];
@@ -219,4 +252,4 @@ const transformData = (data, candlestickMode = true) => {
   //   parsedData.splice(i, 0, newData);
   // }
   // return parsedData;
-}
+
