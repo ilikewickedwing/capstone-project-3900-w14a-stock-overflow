@@ -36,9 +36,9 @@ export const addStock = async (token, pid, stock, price, quantity, database) => 
     return 1;
   }
 
-  /* if (!await checkStock(stock)) {
+  if (!await checkStock(stock)) {
     return 2;
-  } */
+  }
 
   // Check for watchlist
   const get = await database.openPf(pid);
@@ -111,10 +111,11 @@ export const checkStock = async (stock) => {
   console.log("received all stocks");
   const symbols = stock.split(",");
 
-  symbols.forEach(symbol => {
-    const filteredStock = stocks.filter(o => o.symbol === symbol)
+  for (let i = 0; i < symbols.length; i++) {
+    // console.log("symbol is " + symbols[i]);
+    const filteredStock = stocks.filter(o => o.symbol === symbols[i])
     if (filteredStock.length === 0) return false;
-  })
+  }
 
   return true;
 }

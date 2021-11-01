@@ -11,6 +11,8 @@ describe('Create and delete', () => {
     await d.connect();
   })
 
+  jest.setTimeout(10000);
+
   let token = null;
   let pid1 = null;
 
