@@ -769,11 +769,6 @@ app.get('/stocks/all', async (req, res) => {
  */
  app.get('/stocks/info', async (req, res) => {
   const { type, stocks, interval, start } = req.query;
-  const check = await checkStock(stocks);
-  if (!check) {
-    res.status(403).send({ error: "Invalid stock" });
-    return;
-  }
 
   // if (type < 0 || type >3) {
   //   res.status(403).send({ error: "Invalid type" });
@@ -784,7 +779,11 @@ app.get('/stocks/all', async (req, res) => {
   // }  
 
   const resp = await getStock(type, stocks, interval, start);
-  console.log("rec resp");
+
+  if (resp === -1) {
+    res.status(403).send({ error: "Invalid stock" });
+  }
+
   if (resp === null) {
     res.status(502).send({ error: "Could not connect to API" });
     return;
