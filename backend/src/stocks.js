@@ -36,13 +36,13 @@ export const addStock = async (token, pid, stock, price, quantity, database) => 
     return 1;
   }
 
-  if (!await checkStock(stock)) {
+  /* if (!await checkStock(stock)) {
     return 2;
-  }
+  } */
 
   // Check for watchlist
   const get = await database.openPf(pid);
-  if (get === null) return 3;
+  if (get == null) return 3;
   const name = get.name;
 
   if (name !== 'Watchlist') {
@@ -106,52 +106,28 @@ export const modifyStock = async (token, pid, stock, price, quantity, option, da
 }
 
 export const checkStock = async (stock) => {
-  // console.log("checkStock time for " + stock);
+  console.log("checkStock time for " + stock);
   const stocks = await api.getAllStocks();
+  console.log("received all stocks");
   const symbols = stock.split(",");
-  // console.log(symbols);
 
-  for (let i = 0; i < symbols.length; i++) {
-    // console.log("symbol is " + symbols[i]);
-    const filteredStock = stocks.filter(o => o.symbol === symbols[i])
+  symbols.forEach(symbol => {
+    const filteredStock = stocks.filter(o => o.symbol === symbol)
     if (filteredStock.length === 0) return false;
-  }
+  })
 
   return true;
 }
 
 /**
-   * Function that calls the function that calls the api
-   * Type params:
-   *  0. Information overview of stock (AlphaVantage)
-   *  1. Current price of multiple stocks (Tradier)
-   *  2. History of one stock not intraday (Tradier)
-   *  3. History of one stock intraday (Tradier)
-   * @param {int} type 
-   * @param {string} stocks 
-   * @param {string} interval
-   *  For not intraday, options are: daily, weekly, monthly
-   *  For intraday, options are: 1min, 5min, 15min
-   * @param {string} start
-   *  For not intraday, format is string as YYYY-MM-DD
-   *  For intraday, format is string as YYYY-MM-DD HH:MM
-   * @returns {Promise <object>}
-   */
+ * Function to retrieve stock from api
+ * @param {string} stock 
+ * @param {int} param
+ * @returns {Promise <Object>}
+ */
 export const getStock = async (type, stocks, interval, start) => {
   const check = await checkStock(stocks);
-  if (!check) return -1;
-
-  if (type < 0 || type >3 || !Number.isInteger(type)) return -2;
-
-  if ((type === 2 || type === 3) && typeof(interval) !== 'string') return -3;
-
-  if (type === 2 && interval !== null && interval !== undefined) {
-    if (interval.match(/^(daily|weekly|monthly)$/) === null) return -3;
-  }
-
-  if (type === 3 && interval !== null && interval !== undefined) {
-    if (interval.match(/^(1min|5min|15min)$/) === null) return -3;
-  }
+  if (!check) return null;
 
   const resp = await api.getStock(type, stocks, interval, start);
   // console.log(stocks);
