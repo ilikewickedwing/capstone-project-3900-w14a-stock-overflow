@@ -52,7 +52,7 @@ describe('Retrieve stock information', () => {
     })
     console.log(resp.data.quotes);
   })
-  it('Get stock history: 1 day, 1 minute interval', async () => {
+  /* it('Get stock history: 1 day, 1 minute interval', async () => {
     const start = new Date();
     start.setDate(now.getDate()-1);
     var time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2) + " 00:00";
@@ -120,7 +120,7 @@ describe('Retrieve stock information', () => {
     const resp = await getStock(2, 'IBM', 'monthly', time);
     expect(resp).not.toBe(null);
     // console.log(resp.data.history);
-  })
+  }) */
 
 
   
@@ -135,13 +135,13 @@ describe('Retrieve stock information', () => {
     await database.connect();
   })
 
-  jest.setTimeout(10000);
+  jest.setTimeout(30000);
 
   it('200 on successful get stock', async () => {
     console.log('200 on successful get stock');
-    const resp = await request(app).get(`/stocks/info?type=2&stocks=IBM&interval=daily&start='2021-10-28'`).send();
+    const resp = await request(app).get(`/stocks/info?type=2&stocks=IBM`).send();
     // expect(resp.statusCode).toBe(200);
-    console.log(resp);
+    console.log(resp.body);
     // expect(resp.body).toMatchObject({
     //   symbol: 'IBM',
     //   data: {
@@ -162,6 +162,7 @@ describe('Retrieve stock information', () => {
   //   expect(resp.statusCode).toBe(403);
   //   expect(resp.body.error).toBe("Invalid stock");
   // })
+  // it('200 on successful ')
 
   afterAll(async() => {
     await database.disconnect();

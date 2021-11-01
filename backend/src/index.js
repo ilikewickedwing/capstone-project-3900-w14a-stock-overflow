@@ -771,6 +771,7 @@ app.get('/stocks/all', async (req, res) => {
 
   const resp = await getStock(type, stocks, interval, start);
   console.log("rec resp");
+  console.log(resp);
   if (resp === null) {
     res.status(502).send({ error: "Could not connect to API" });
     return;

@@ -127,9 +127,22 @@ export const checkStock = async (stock) => {
  */
 export const getStock = async (type, stocks, interval, start) => {
   const check = await checkStock(stocks);
-  if (!check) return null;
+  if (!check) return -1;
 
-  const resp = await api.getStock(type, stocks, interval, start);
+  const typeInt = parseInt(type);
+  if (typeInt < 0 || typeInt > 3 || !Number.isInteger(typeInt)) return -2;
+
+  // if ((typeInt === 2 || typeInt === 3) && typeof(interval) !== 'string') return -3;
+
+  if (typeInt === 2 && interval) {
+    if (interval.match(/^(daily|weekly|monthly)$/) === null) return -3;
+  }
+
+  if (typeInt === 3 && interval) {
+    if (interval.match(/^(1min|5min|15min)$/) === null) return -3;
+  }
+
+  const resp = await api.getStock(typeInt, stocks, interval, start);
   // console.log(stocks);
   return resp;
 }

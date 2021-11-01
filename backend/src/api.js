@@ -175,18 +175,24 @@ export class API {
 
     console.log('tradier api call');
     
-    if (parseInt(type) === 1) {
+    if ((type) === 1) {
       url = 'quotes';
       symbols = stocks;
-    } else if (parseInt(type) === 2) {
+    } else if ((type) === 2) {
       url = 'history';
       symbol = stocks;
-    } else if (parseInt(type) === 3) {
+    } else if ((type) === 3) {
       url = 'timesales';
       symbol = stocks;
     }
 
     console.log("url is " + url + ", symbol is " + symbol + ", symbols is " + symbols);
+    if (interval !== null) {
+      console.log('interval is ' + interval);
+    }
+    if (start !== null) {
+      console.log('start is ' + start);
+    }
 
     const request = await axios({
       method: 'get',
