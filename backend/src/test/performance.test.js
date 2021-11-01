@@ -1,12 +1,13 @@
 import { authRegister } from "../auth";
 import { createPf, deletePf, userPfs, openPf, getPid, editPf, calcPf } from "../portfolio";
-import { checkStock, addStock, modifyStock, getStock, getStockDaily, getStockWeekly, getStockPrice, getStockInfo } from "../stocks";
+import { checkStock, addStock, modifyStock, getStock, getStockDaily, getStockWeekly, getStockPrice, getStockInfo, alphavantage } from "../stocks";
+import { API } from "../api";
 import { Database } from "../database";
 import request from 'supertest';
 import { app, database } from "../index";
 
 
-describe('Retrieve stock information', () => {
+/* describe('Retrieve stock information', () => {
 	const d = new Database(true);
   beforeAll(async () => {
     await d.connect();
@@ -72,9 +73,9 @@ describe('Retrieve stock info endpoint test', () => {
   afterAll(async() => {
     await database.disconnect();
   })
-})
+}) */
 
-describe('Editing stocks doesn\'t affect portfolios', () => {
+/* describe('Editing stocks doesn\'t affect portfolios', () => {
   const d = new Database(true);
   beforeAll(async () => {
     await d.connect();
@@ -291,6 +292,30 @@ describe('Editing stocks doesn\'t affect portfolios', () => {
   //     stocks: expect.arrayContaining(stArray)
   //   })
   // })
+
+  afterAll(async () => {
+    await d.disconnect();
+  })
+}) */
+
+describe('We be having funsies', () => {
+  const d = new Database(true);
+  beforeAll(async () => {
+    await d.connect();
+  })
+
+  jest.setTimeout(100000);
+
+  it('Calling a bunch of stocks', async () => {
+    // const a = await getStock('a', 1);
+    // const a = await alphavantage._callTradier(1,'AAPL,AMZN,IBM');
+    // console.log(a.quotes.quote);
+
+    const b = await getStock(3, 'AAPL', '15min', '2021-10-29 00:00');
+    console.log(b.data.series);
+
+  })
+  
 
   afterAll(async () => {
     await d.disconnect();

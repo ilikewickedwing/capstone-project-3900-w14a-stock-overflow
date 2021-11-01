@@ -155,8 +155,9 @@ export const calcPf = async (token, pid, database) => {
   const stocks = Pf.stocks;
   for (let i = 0; i < stocks.length; i++) {
     const symbol = stocks[i].stock;
-    const value = await getStockPrice(symbol);
-    const price = value.data['Global Quote']['05. price'];
+    const value = await getStockPrice(1, symbol);
+    console.log(value);
+    const price = value.data.quotes.quote['last'];
     console.log(stocks[i].stock + " currently valued at " + price);
     gain += price * stocks[i].quantity;
   }
