@@ -106,9 +106,17 @@ export const modifyStock = async (token, pid, stock, price, quantity, option, da
 }
 
 export const checkStock = async (stock) => {
+  console.log("checkStock time for " + stock);
   const stocks = await api.getAllStocks();
-  const filteredStocks = stocks.filter(o => o.symbol === stock);
-  return filteredStocks.length !== 0;
+  console.log("received all stocks");
+  const symbols = stock.split(",");
+
+  symbols.forEach(symbol => {
+    const filteredStock = stocks.filter(o => o.symbol === symbol)
+    if (filteredStock.length === 0) return false;
+  })
+
+  return true;
 }
 
 /**
@@ -125,143 +133,3 @@ export const getStock = async (type, stocks, interval, start) => {
   // console.log(stocks);
   return resp;
 }
-
-/**
- * Function to retrieve stock daily data from api
- * Returns:
- *  'Meta Data':
- *    '1. Information'
- *    '2. Symbol'
- *    '3. Last Refreshed'
- *    '4. Output Size'
- *    '5. Time Zone'
- *  'Time Series (Daily)':
- *    Date:
- *      '1. open'
- *      '2. high'
- *      '3. low'
- *      '4. close'
- *      '5. volume'
- * @param {string} stock 
- * @returns {Promise <Object>}
- */
-export const getStockDaily = async (stock) => {
-  const stocks = await getStock(stock, 2);
-  return stocks;
-}
-
-/**
- * Function to retrieve stock weekly data from api
- * Returns:
- *  'Meta Data':
- *    '1. Information'
- *    '2. Symbol'
- *    '3. Last Refreshed'
- *    '4. Time Zone'
- *  'Weekly Time Series':
- *    Date:
- *      '1. open'
- *      '2. high'
- *      '3. low'
- *      '4. close'
- *      '5. volume'
- * @param {string} stock 
- * @returns {Promise <Object>}
- */
-export const getStockWeekly = async (stock) => {
-  const stocks = await getStock(stock, 3);
-  return stocks;
-}
-
-/**
- * Function to retrieve stock price data from api
- * Returns:
- *  'Global Quote':
- *    '01. symbol'
- *    '02. open'
- *    '03. high'
- *    '04. low'
- *    '05. price'
- *    '06. volume'
- *    '07. latest trading day'
- *    '08. previous close'
- *    '09. change'
- *    '10. change percent'
- * @param {string} stock 
- * @returns {Promise <Object>}
- */
-export const getStockPrice = async (type, stocks) => {
-  const resp = await getStock(type, stocks, null, null);
-  return resp;
-}
-
-/**
- * Function to retrieve stock ov from api
- * Returns:
- *  Symbol
- *  AssetType
- *  Name
- *  Description
- *  CIK
- *  Exchange
- *  Currency
- *  Country
- *  Sector
- *  Industry
- *  Address
- *  FiscalYearEnd
- *  LatestQuarter
- *  MarketCapitalization
- *  EBITDA
- *  PERatio
- *  PEGRatio
- *  BookValue
- *  DividendPerShare
- *  DividendYield
- *  EPS
- *  RevenuePerShareTTM
- *  ProfitMargin
- *  OperatingMarginTTM
- *  ReturnOnAssetsTTM
- *  ReturnOnEquityTTM
- *  RevenueTTM
- *  GrossProfitTTM
- *  DilutedEPSTTM
- *  QuarterlyEarningsGrowthYOY
- *  QuarterlyRevenueGrowthYOY
- *  AnalystTargetPrice
- *  TrailingPE
- *  ForwardPE
- *  PriceToSalesRatioTTM
- *  PriceToBookRatio
- *  EVToRevenue
- *  EVToEBITDA
- *  Beta
- *  '52WeekHigh'
- *  '52WeekLow'
- *  '50DayMovingAverage'
- *  '200DayMovingAverage'
- *  SharesOutstanding
- *  SharesFloat
- *  SharesShort
- *  SharesShortPriorMonth
- *  ShortRatio
- *  ShortPercentOutstanding
- *  ShortPercentFloat
- *  PercentInsiders
- *  PercentInstitutions
- *  ForwardAnnualDividendRate
- *  ForwardAnnualDividendYield
- *  PayoutRatio
- *  DividendDate
- *  ExDividendDate
- *  LastSplitFactor
- *  LastSplitDate
- * @param {string} stock 
- * @returns {Promise <Object>}
- */
-export const getStockOverview = async (stock) => {
-  const stocks = await getStock(stock, 6);
-  return stocks;
-}
-

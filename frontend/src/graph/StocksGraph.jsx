@@ -24,7 +24,7 @@ export default function StocksGraph(props) {
   const [ dataCache, setDataCache ] = useState({});
   const api = useContext(ApiContext);
   const [ graphStyle, setGraphStyle ] = useState("candlestick");
-  const [ timeOptions, setTimeOptions ] = useState("1day");
+  const [ timeOptions, setTimeOptions ] = useState("15min");
   const wrapperStyle = {
     display: "flex",
     flexDirection: "column",
@@ -34,23 +34,21 @@ export default function StocksGraph(props) {
   // make api call for time series
   useEffect(() => {
     const callApi = (company, interval) => {
+      const yesterdayTime = (new Date(Date.now() - 86400000)).toLocaleDateString('en-CA');
+      console.log(yesterdayTime);
       switch (interval) {
         case "1min":
-          return api.stockTimeSeriesIntraday(company, interval);
+          return api.stocksInfo(3, company, interval, null);
         case "5min":
-          return api.stockTimeSeriesIntraday(company, interval);
+          return api.stocksInfo(3, company, interval, null);
         case "15min":
-          return api.stockTimeSeriesIntraday(company, interval);
-        case "30min":
-          return api.stockTimeSeriesIntraday(company, interval);
-        case "60min":
-          return api.stockTimeSeriesIntraday(company, interval);
-        case "1day":
-          return api.stockTimeSeriesDaily(company);
-        case "1week":
-          return api.stockTimeSeriesWeekly(company);
-        case "1month":
-          return api.stockTimeSeriesMonthly(company);
+          return api.stocksInfo(3, company, interval, null);
+        case "daily":
+          return api.stocksInfo(2, company, interval, yesterdayTime);
+        case "weekly":
+          return api.stocksInfo(2, company, interval, yesterdayTime);
+        case "monthly":
+          return api.stocksInfo(2, company, interval, yesterdayTime);
         default:
           throw Error(`Invalid interval of ${interval}`);
       }
@@ -66,9 +64,9 @@ export default function StocksGraph(props) {
       callApi(props.companyId.toUpperCase(), timeOptions)
       .then(r => r.json())
       .then(r => {
+        console.log(r);
         setState(STATES.RECEIVED);
         addToDataCache(r, timeOptions);
-        console.log(r);
       })
     }
     /**
@@ -154,60 +152,71 @@ const compareTime = (time1, time2) => {
  * @returns 
  */
 const transformData = (data, candlestickMode = true) => {
-  // Find the name of the key
-  let timeKey = '';
-  for (const dataKey of Object.keys(data)) {
-    if (dataKey.includes("Time Series")) {
-      timeKey = dataKey;
-      break;
-    }
-  }
-  if (timeKey.length === 0) {
-    if ("Note" in data) {
-      alert(data.Note);
-    } else {
-      alert(`Received ${data}`);
-    }
-    return [];
-  }
   // Get the data and parse it
-  const timeSeriesData = data[timeKey];
-  const parsedData = [];
-  for (const timeKey of Object.keys(timeSeriesData)) {
-    const objData = timeSeriesData[timeKey];
-    // Data for candlestick mode
+  const timeSeriesData = data.data.series.data;
+  return timeSeriesData.map(d => {
     let newData = {
-      time: timeKey,
+      time: d.time,
       openCloseData: [
-        Number(objData["1. open"]),
-        Number(objData["4. close"]),
+        Number(d.open),
+        Number(d.close),
       ],
-      high: Number(objData["2. high"]),
-      low: Number(objData["3. low"]),
-      volume: Number(objData["5. volume"]),
+      high: Number(d.high),
+      low: Number(d.low),
+      volume: Number(d.volume),
     }
     // Data for ohlc
     if (!candlestickMode) {
       newData = {
-        time: timeKey,
-        open: Number(objData["1. open"]),
-        close: Number(objData["4. close"]),
+        time: d.time,
+        open: Number(d.open),
+        close: Number(d.close),
         highLow: [
-          Number(objData["2. high"]),
-          Number(objData["3. low"]),
+          Number(d.high),
+          Number(d.low),
         ],
-        volume: Number(objData["5. volume"]),
+        volume: Number(d.volume),
       }
     }
-    // Sort it into an array as it is returned as
-    // an object
-    let i = 0;
-    for (; i < parsedData.length; i++) {
-      if (compareTime(timeKey, parsedData[i].time)) {
-        break;
-      }
-    }
-    parsedData.splice(i, 0, newData);
-  }
-  return parsedData;
+    return newData;
+  });
+  
+  // const parsedData = [];
+  // for (const timeKey of Object.keys(timeSeriesData)) {
+  //   const objData = timeSeriesData[timeKey];
+  //   // Data for candlestick mode
+  //   let newData = {
+  //     time: timeKey,
+  //     openCloseData: [
+  //       Number(objData["1. open"]),
+  //       Number(objData["4. close"]),
+  //     ],
+  //     high: Number(objData["2. high"]),
+  //     low: Number(objData["3. low"]),
+  //     volume: Number(objData["5. volume"]),
+  //   }
+  //   // Data for ohlc
+  //   if (!candlestickMode) {
+  //     newData = {
+  //       time: timeKey,
+  //       open: Number(objData["1. open"]),
+  //       close: Number(objData["4. close"]),
+  //       highLow: [
+  //         Number(objData["2. high"]),
+  //         Number(objData["3. low"]),
+  //       ],
+  //       volume: Number(objData["5. volume"]),
+  //     }
+  //   }
+  //   // Sort it into an array as it is returned as
+  //   // an object
+  //   let i = 0;
+  //   for (; i < parsedData.length; i++) {
+  //     if (compareTime(timeKey, parsedData[i].time)) {
+  //       break;
+  //     }
+  //   }
+  //   parsedData.splice(i, 0, newData);
+  // }
+  // return parsedData;
 }

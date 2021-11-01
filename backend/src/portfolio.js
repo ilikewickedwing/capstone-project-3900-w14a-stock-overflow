@@ -3,7 +3,7 @@
 */
 
 import { Database } from "./database";
-import { getStockPrice } from "./stocks";
+import { getStock } from "./stocks";
 
 /**
  * Creates a new portfolio for the user
@@ -155,7 +155,7 @@ export const calcPf = async (token, pid, database) => {
   const stocks = Pf.stocks;
   for (let i = 0; i < stocks.length; i++) {
     const symbol = stocks[i].stock;
-    const value = await getStockPrice(1, symbol);
+    const value = await getStock(1, symbol);
     console.log(value);
     const price = value.data.quotes.quote['last'];
     console.log(stocks[i].stock + " currently valued at " + price);
