@@ -13,17 +13,115 @@ describe('Retrieve stock information', () => {
     await d.connect();
   })
 
+  jest.setTimeout(10000);
+  
+  const today = new Date();
+  const now = new Date(today);
+  
+
   it('Get stock information', async () => {
-	const resp = await getStock(0, 'AAPL');
-  expect(resp).not.toBe(null);
-  expect(resp).toMatchObject({
-    symbol: 'AAPL',
-    param: 0,
-    data: expect.anything(),
-    time: expect.any(String)
+    const resp = await getStock(0, 'AAPL');
+    expect(resp).not.toBe(null);
+    expect(resp).toMatchObject({
+      symbol: 'AAPL',
+      param: 0,
+      data: expect.anything(),
+      time: expect.any(Date)
+    })
+    // console.log(resp.data);
   })
-  console.log(resp.data);
+  it('Get single stock quotes', async () => {
+    const resp = await getStock(1, 'AAPL');
+    expect(resp).not.toBe(null);
+    expect(resp).toMatchObject({
+      symbol: 'AAPL',
+      param: 1,
+      data: expect.anything(),
+      time: expect.any(Date)
+    })
+    // console.log(resp.data);
   })
+  it('Get multiple stock quotes', async () => {
+    const resp = await getStock(1, 'AAPL,AMZN,IBM');
+    expect(resp).not.toBe(null);
+    expect(resp).toMatchObject({
+      symbol: 'AAPL,AMZN,IBM',
+      param: 1,
+      data: expect.anything(),
+      time: expect.any(Date)
+    })
+    console.log(resp.data.quotes);
+  })
+  it('Get stock history: 1 day, 1 minute interval', async () => {
+    const start = new Date();
+    start.setDate(now.getDate()-1);
+    var time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2) + " 00:00";
+    const resp = await getStock(3, 'IBM', '1min', time);
+    expect(resp).not.toBe(null);
+    // console.log(resp.data.series);
+  }) 
+  it('Get stock history: 1 day, 5 minute interval', async () => {
+    const start = new Date();
+    start.setDate(now.getDate()-1);
+    var time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2) + " 00:00";
+    const resp = await getStock(3, 'IBM', '5min', time);
+    expect(resp).not.toBe(null);
+    // console.log(resp.data.series);
+  }) 
+  it('Get stock history: 1 day, 15 minute interval', async () => {
+    const start = new Date();
+    start.setDate(now.getDate()-1);
+    var time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2) + " 00:00";
+    const resp = await getStock(3, 'IBM', '15min', time);
+    expect(resp).not.toBe(null);
+    // console.log(resp.data.series);
+  }) 
+  it('Get stock history: 1 month, daily interval', async () => {
+    const start = new Date();
+    start.setMonth(now.getMonth() - 1);
+    var time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
+    console.log(time);
+    const resp = await getStock(2, 'IBM', 'daily', time);
+    expect(resp).not.toBe(null);
+    // console.log(resp.data.history);
+  })
+  it('Get stock history: 6 months, daily interval', async () => {
+    const start = new Date();
+    start.setMonth(now.getMonth() - 6);
+    var time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
+    console.log(time);
+    const resp = await getStock(2, 'IBM', 'daily', time);
+    expect(resp).not.toBe(null);
+    // console.log(resp.data.history);
+  })
+  it('Get stock history: 1 year, weekly interval', async () => {
+    const start = new Date();
+    start.setFullYear(start.getFullYear() - 1);
+    var time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
+    console.log(time);
+    const resp = await getStock(2, 'IBM', 'weekly', time);
+    expect(resp).not.toBe(null);
+    // console.log(resp.data.history);
+  })
+  it('Get stock history: 5 years, weekly interval', async () => {
+    const start = new Date();
+    start.setFullYear(start.getFullYear() - 5);
+    var time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
+    console.log(time);
+    const resp = await getStock(2, 'IBM', 'weekly', time);
+    expect(resp).not.toBe(null);
+    // console.log(resp.data.history);
+  })
+  it('Get stock history: 10 years, monthly interval', async () => {
+    const start = new Date();
+    start.setFullYear(start.getFullYear() - 10);
+    var time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
+    console.log(time);
+    const resp = await getStock(2, 'IBM', 'monthly', time);
+    expect(resp).not.toBe(null);
+    // console.log(resp.data.history);
+  })
+
 
   
   afterAll(async () => {
@@ -31,7 +129,7 @@ describe('Retrieve stock information', () => {
   })
 })
 
-describe('Retrieve stock info endpoint test', () => {
+/* describe('Retrieve stock info endpoint test', () => {
   // jest.setTimeout(30000);
   beforeAll(async () => {
     await database.connect();
@@ -41,8 +139,9 @@ describe('Retrieve stock info endpoint test', () => {
 
   it('200 on successful get stock', async () => {
     console.log('200 on successful get stock');
-    const resp = await request(app).get(`/stocks/info?type=1&stocks=IBM,AAPL`).send();
-    expect(resp.statusCode).toBe(200);
+    const resp = await request(app).get(`/stocks/info?type=2&stocks=IBM&interval=daily&start='2021-10-28'`).send();
+    // expect(resp.statusCode).toBe(200);
+    console.log(resp);
     // expect(resp.body).toMatchObject({
     //   symbol: 'IBM',
     //   data: {
@@ -67,9 +166,9 @@ describe('Retrieve stock info endpoint test', () => {
   afterAll(async() => {
     await database.disconnect();
   })
-})
+}) */
 
-/* describe('Editing stocks doesn\'t affect portfolios', () => {
+/* describe('Calculate portfolio performance', () => {
   const d = new Database(true);
   beforeAll(async () => {
     await d.connect();
