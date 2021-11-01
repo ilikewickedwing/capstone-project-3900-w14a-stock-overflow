@@ -2,8 +2,8 @@ import * as React from 'react';
 
 import { PfBody, LeftBody, RightBody, RightCard, PageBody} from '../styles/styling';
 
-import Navigation from './Navigation';
-import Tabs from './Tabs';
+import Navigation from '../comp/Navigation';
+import Tabs from '../comp/Tabs';
 
 export default function Dashboard() {
   return (
