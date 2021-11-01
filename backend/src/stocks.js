@@ -4,9 +4,9 @@
 
 import { Database } from "./database.js";
 import axios from "axios";
-import { Alphavantage } from "./alphavantage.js";
+import { API } from "./api.js";
 
-export const alphavantage = new Alphavantage();
+export const api = new API();
 
 /**
  * Gets a list of active stocks
@@ -15,7 +15,7 @@ export const alphavantage = new Alphavantage();
  * 
  */
 export const getAllStocks = async () => {
-  const resp = await alphavantage.getAllStocks();
+  const resp = await api.getAllStocks();
   return resp;
 }
 
@@ -36,9 +36,9 @@ export const addStock = async (token, pid, stock, price, quantity, database) => 
     return 1;
   }
 
-  if (!await checkStock(stock)) {
+  /* if (!await checkStock(stock)) {
     return 2;
-  }
+  } */
 
   // Check for watchlist
   const get = await database.openPf(pid);
@@ -106,162 +106,30 @@ export const modifyStock = async (token, pid, stock, price, quantity, option, da
 }
 
 export const checkStock = async (stock) => {
-  const stocks = await alphavantage.getAllStocks();
-  const filteredStocks = stocks.filter(o => o.symbol === stock);
-  return filteredStocks.length !== 0;
+  console.log("checkStock time for " + stock);
+  const stocks = await api.getAllStocks();
+  console.log("received all stocks");
+  const symbols = stock.split(",");
+
+  symbols.forEach(symbol => {
+    const filteredStock = stocks.filter(o => o.symbol === symbol)
+    if (filteredStock.length === 0) return false;
+  })
+
+  return true;
 }
 
 /**
- * Function to retrieve stock from alphavantage
+ * Function to retrieve stock from api
  * @param {string} stock 
  * @param {int} param
  * @returns {Promise <Object>}
  */
-export const getStock = async (stock, param) => {
-  // const check = await checkStock(stock);
-  // if (!check) return null;
+export const getStock = async (type, stocks, interval, start) => {
+  const check = await checkStock(stocks);
+  if (!check) return null;
 
-  const stocks = await alphavantage.getStock(stock, param);
+  const resp = await api.getStock(type, stocks, interval, start);
   // console.log(stocks);
-  return stocks;
+  return resp;
 }
-
-/**
- * Function to retrieve stock daily data from alphavantage
- * Returns:
- *  'Meta Data':
- *    '1. Information'
- *    '2. Symbol'
- *    '3. Last Refreshed'
- *    '4. Output Size'
- *    '5. Time Zone'
- *  'Time Series (Daily)':
- *    Date:
- *      '1. open'
- *      '2. high'
- *      '3. low'
- *      '4. close'
- *      '5. volume'
- * @param {string} stock 
- * @returns {Promise <Object>}
- */
-export const getStockDaily = async (stock) => {
-  const stocks = await getStock(stock, 2);
-  return stocks;
-}
-
-/**
- * Function to retrieve stock weekly data from alphavantage
- * Returns:
- *  'Meta Data':
- *    '1. Information'
- *    '2. Symbol'
- *    '3. Last Refreshed'
- *    '4. Time Zone'
- *  'Weekly Time Series':
- *    Date:
- *      '1. open'
- *      '2. high'
- *      '3. low'
- *      '4. close'
- *      '5. volume'
- * @param {string} stock 
- * @returns {Promise <Object>}
- */
-export const getStockWeekly = async (stock) => {
-  const stocks = await getStock(stock, 3);
-  return stocks;
-}
-
-/**
- * Function to retrieve stock price data from alphavantage
- * Returns:
- *  'Global Quote':
- *    '01. symbol'
- *    '02. open'
- *    '03. high'
- *    '04. low'
- *    '05. price'
- *    '06. volume'
- *    '07. latest trading day'
- *    '08. previous close'
- *    '09. change'
- *    '10. change percent'
- * @param {string} stock 
- * @returns {Promise <Object>}
- */
-export const getStockPrice = async (stock) => {
-  const stocks = await getStock(stock, 5);
-  return stocks;
-}
-
-/**
- * Function to retrieve stock ov from alphavantage
- * Returns:
- *  Symbol
- *  AssetType
- *  Name
- *  Description
- *  CIK
- *  Exchange
- *  Currency
- *  Country
- *  Sector
- *  Industry
- *  Address
- *  FiscalYearEnd
- *  LatestQuarter
- *  MarketCapitalization
- *  EBITDA
- *  PERatio
- *  PEGRatio
- *  BookValue
- *  DividendPerShare
- *  DividendYield
- *  EPS
- *  RevenuePerShareTTM
- *  ProfitMargin
- *  OperatingMarginTTM
- *  ReturnOnAssetsTTM
- *  ReturnOnEquityTTM
- *  RevenueTTM
- *  GrossProfitTTM
- *  DilutedEPSTTM
- *  QuarterlyEarningsGrowthYOY
- *  QuarterlyRevenueGrowthYOY
- *  AnalystTargetPrice
- *  TrailingPE
- *  ForwardPE
- *  PriceToSalesRatioTTM
- *  PriceToBookRatio
- *  EVToRevenue
- *  EVToEBITDA
- *  Beta
- *  '52WeekHigh'
- *  '52WeekLow'
- *  '50DayMovingAverage'
- *  '200DayMovingAverage'
- *  SharesOutstanding
- *  SharesFloat
- *  SharesShort
- *  SharesShortPriorMonth
- *  ShortRatio
- *  ShortPercentOutstanding
- *  ShortPercentFloat
- *  PercentInsiders
- *  PercentInstitutions
- *  ForwardAnnualDividendRate
- *  ForwardAnnualDividendYield
- *  PayoutRatio
- *  DividendDate
- *  ExDividendDate
- *  LastSplitFactor
- *  LastSplitDate
- * @param {string} stock 
- * @returns {Promise <Object>}
- */
-export const getStockOverview = async (stock) => {
-  const stocks = await getStock(stock, 6);
-  return stocks;
-}
-

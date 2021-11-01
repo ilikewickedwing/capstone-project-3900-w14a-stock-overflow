@@ -1,4 +1,4 @@
-import express from "express";
+import express, { query } from "express";
 import cors from 'cors';
 import { Database } from "./database";
 import swaggerUI from 'swagger-ui-express';
@@ -360,13 +360,13 @@ app.delete('/auth/delete', async (req, res) => {
 app.post('/user/portfolios/create', async (req, res) => {
   const { token, name } = req.body;
   const resp = await createPf(token, name, database);
-  if (resp == null) {
+  if (resp === null) {
     res.status(400).send({ error: "Portfolio name already in use" });
     return;
-  } else if (resp == false) {
+  } else if (resp === false) {
     res.status(401).send({ error: "Invalid token" });
     return;
-  } else if (resp == 1) {
+  } else if (resp === 1) {
     res.status(400).send({ error: "Invalid portfolio name" });
   } else res.status(200).send(resp);
   return;
@@ -399,9 +399,9 @@ app.post('/user/portfolios/create', async (req, res) => {
 app.get('/user/portfolios', async (req, res) => {
   const { token } = req.query;
   const resp = await userPfs(token, database);
-  if (resp == 1) {
+  if (resp === 1) {
     res.status(401).send({ error: "Invalid token" });
-  } else if (resp == 2) {
+  } else if (resp === 2) {
     res.status(404).send({ error: "Portfolios not found" });
   } else { 
     res.status(200).send(resp);
@@ -465,11 +465,11 @@ app.get('/user/portfolios/getPid', async (req, res) => {
 app.get('/user/portfolios/calculate', async (req, res) => {
   const { token, pid } = req.query;
   const resp = await calcPf(token, pid, database);
-  if (resp == -2) {
+  if (resp === -2) {
     res.status(401).send({ error: "Invalid token" });
-  } else if (resp == -3) {
+  } else if (resp === -3) {
     res.status(403).send({ error: "Invalid pid" });
-  } else if (resp == -4) {
+  } else if (resp === -4) {
     res.status(403).send({ error: "Can not perform for watchlist "});
   } else {
     res.status(200).send(resp);
@@ -512,17 +512,17 @@ app.get('/user/portfolios/calculate', async (req, res) => {
 app.post('/user/portfolios/edit', async (req, res) => {
   const { token, pid, name } = req.body;
   const resp =  await editPf(token, pid, name, database);
-  if (resp == -1) {
+  if (resp === -1) {
     res.status(400).send({ error: "Name already in use" });
-  } else if (resp == 2) {
+  } else if (resp === 2) {
     res.status(400).send({ error: "Invalid name" });
-  } else if (resp == 3) {
+  } else if (resp === 3) {
     res.status(401).send({ error: "Invalid token" });
-  } else if (resp == 4) {
+  } else if (resp === 4) {
     res.status(400).send({ error: "Invalid pid" });
-  } else if (resp == 5) {
+  } else if (resp === 5) {
     res.status(403).send({ error: "Can not edit watchlist" });
-  } else if (resp == 1) {
+  } else if (resp === 1) {
     res.status(200).send();
   } else {
     res.status(404).send();
@@ -553,15 +553,15 @@ app.post('/user/portfolios/edit', async (req, res) => {
 app.delete('/user/portfolios/delete', async (req, res) => {
   const { token, pid } = req.body;
   const resp = await deletePf(token, pid, database);
-  if (resp == 1) {
+  if (resp === 1) {
     res.status(200).send();
-  } else if (resp == 2) {
+  } else if (resp === 2) {
     res.status(401).send({ error: "Invalid token" });
-  } else if (resp == 3) {
+  } else if (resp === 3) {
     res.status(400).send({ error: "Invalid pid" });
-  } else if (resp == 4) {
+  } else if (resp === 4) {
     res.status(403).send({ error: "Can not delete watchlist" });
-  } else if (resp == 0) {
+  } else if (resp === 0) {
     res.status(500).send({ error: "Portfolio not deleted" });
   }
 })
@@ -612,15 +612,15 @@ app.delete('/user/portfolios/delete', async (req, res) => {
 app.post('/user/stocks/add', async (req, res) => {
   const { token, pid, stock, price, quantity } = req.body;
   const resp = await addStock(token, pid, stock, price, quantity, database);
-  if (resp == 1) {
+  if (resp === 1) {
     res.status(401).send({ error: "Invalid token" });
-  } else if (resp == 2) {
+  } else if (resp === 2) {
     res.status(403).send({ error: "Invalid stock" });
-  } else if (resp == 3) {
+  } else if (resp === 3) {
     res.status(403).send({ error: "Invalid pid" });
-  } else if (resp == 4) {
+  } else if (resp === 4) {
     res.status(400).send({ error: "Must include valid quantity purchased" });
-  } else if (resp == 5) {
+  } else if (resp === 5) {
     res.status(400).send({ error: "Must include valid price purchased at" });
   } else {
     res.status(200).send();
@@ -633,7 +633,7 @@ app.post('/user/stocks/add', async (req, res) => {
  * @swagger
  * /user/stocks/edit:
  *   put:
- *     tags: [Stock]
+ *     tags: [Stocks]
  *     description: endpoint for adding or removing stocks
  *     parameters:
  *      - name: token
@@ -679,21 +679,21 @@ app.post('/user/stocks/add', async (req, res) => {
 app.put('/user/stocks/edit', async (req, res) => {
   const { token, pid, stock, price, quantity, option } = req.body;
   const resp = await modifyStock(token, pid, stock, price, quantity, option, database);
-  if (resp == -1) {
+  if (resp === -1) {
     res.status(200).send();
-  } else if (resp == 1) {
+  } else if (resp === 1) {
     res.status(401).send({ error: "Invalid token" });
-  } else if (resp == 2) {
+  } else if (resp === 2) {
     res.status(403).send({ error: "Invalid stock" });
-  } else if (resp == 3) {
+  } else if (resp === 3) {
     res.status(403).send({ error: "Invalid pid" });
-  } else if (resp == 4) {
+  } else if (resp === 4) {
     res.status(403).send({ error: "Quantity to sell too high" });
-  } else if (resp == 5) {
+  } else if (resp === 5) {
     res.status(404).send({ error: "Stock is not in portfolio" });
-  } else if (resp == 6) {
+  } else if (resp === 6) {
     res.status(400).send({ error: "Must include valid quantity purchased" });
-  } else if (resp == 7) {
+  } else if (resp === 7) {
     res.status(400).send({ error: "Must include valid price purchased at" });
   }
   return;
@@ -715,7 +715,7 @@ app.put('/user/stocks/edit', async (req, res) => {
  */
 app.get('/stocks/all', async (req, res) => {
   const resp = await getAllStocks();
-  if (resp == null) {
+  if (resp === null) {
     res.status(502).send({ error: "Could not connect to API" });
     return;
   }
@@ -729,43 +729,85 @@ app.get('/stocks/all', async (req, res) => {
  * /stocks/info:
  *   get:
  *     tags: [Stocks]
- *     description: endpoint for getting individual stock information
+ *     description: endpoint for getting stock information - uses alphavantage for information, and tradier for prices
  *     parameters:
- *      - name: stock
- *        description: The symbol of the stock
+ *      - name: type
+ *        description: The type of call being made;
+ *          0. Information overview of stock;
+ *          1. Current price of stock(s);
+ *          2. History of one stock not intraday;
+ *          3. History of one stock intraday
  *        in: body
  *        required: true
+ *        type: string
+ *      - name: stocks
+ *        description: The symbol of the stock or stocks
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: interval
+ *        description: The interval needed;
+ *          For not intraday, options are daily, weekly, monthly;
+ *          For intraday, options are 1min, 5min, 15min
+ *        in: body
+ *        required: false
+ *        type: string
+ *      - name: start
+ *        description: The start of the time from when to get data;
+ *          For not intraday, format is string as YYYY-MM-DD;
+ *          For intraday, format is string as YYYY-MM-DD HH:MM
+ *        in: body
+ *        required: false
  *        type: string
  *     responses:
  *       200:
  *         description: Successfully returned information for single stock
  *       403:
- *         description: Invalid stock
+ *         description: Invalid stock, type, interval, start
  *       502:
  *         description: Could not connect to API
  */
  app.get('/stocks/info', async (req, res) => {
-  const { stock, param } = req.query;
-  const check = await checkStock(stock);
+  const { type, stocks, interval, start } = req.query;
+  const check = await checkStock(stocks);
   if (!check) {
     res.status(403).send({ error: "Invalid stock" });
     return;
   }
 
-  // PLEASE USE THESE PARAMS
-  // if (param == 1) url = 'TIME_SERIES_INTRADAY' + '&interval=1min';
-  //   else if (param == 2) url = 'TIME_SERIES_DAILY_ADJUSTED';
-  //   else if (param == 3) url = 'TIME_SERIES_WEEKLY_ADJUSTED';
-  //   else if (param == 4) url = 'TIME_SERIES_MONTHLY_ADJUSTED';
-  //   else if (param == 5) url = 'GLOBAL_QUOTE';
-  //   else if (param == 6) url = 'OVERVIEW';
+  // if (type < 0 || type >3) {
+  //   res.status(403).send({ error: "Invalid type" });
+  // }
 
-  const resp = await getStock(stock, param);
-  if (resp == null) {
+  // if (interval.match(/^(1min|5min|15min|daily|weekly|monthly)$/) === null) {
+  //   res.status(403).send({ error: "Invalid interval" });
+  // }  
+
+  const resp = await getStock(type, stocks, interval, start);
+  console.log("rec resp");
+  if (resp === null) {
     res.status(502).send({ error: "Could not connect to API" });
     return;
   }
 
   res.status(200).send(resp);
   return;
+})
+
+// Get endpoint for getting a specific stocks's data from alphavantage
+/**
+ * @swagger
+ * /stocks:
+ *   get:
+ *     tags: [AlphaVantage]
+ *     description: endpoint for a specific stock's data from alphavantage
+ *     parameters:
+ *     responses:
+ *       200:
+ *         description: Return data exactly as given from alphavantage
+ *       502:
+ *         description: Could not connect to API
+ */
+app.get('/stocks', async (req, res) => {
+
 })

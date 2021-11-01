@@ -1,6 +1,7 @@
 import { authRegister } from "../auth";
 import { createPf, deletePf, userPfs, openPf, getPid, editPf, calcPf } from "../portfolio";
-import { checkStock, addStock, modifyStock, getStock, getStockDaily, getStockWeekly, getStockPrice, getStockInfo } from "../stocks";
+import { checkStock, addStock, modifyStock, getStock, getStockDaily, getStockWeekly, getStockPrice, getStockInfo, alphavantage } from "../stocks";
+import { API } from "../api";
 import { Database } from "../database";
 import request from 'supertest';
 import { app, database } from "../index";
@@ -12,69 +13,162 @@ describe('Retrieve stock information', () => {
     await d.connect();
   })
 
-  it('Get stock', async () => {
-	const resp = await getStock('IBM', 0);
-  const daily = await getStockDaily('IBM');
-  const weekly = await getStockWeekly('IBM');
-  const price = await getStockPrice('IBM');
-  const info = await getStockInfo('IBM');
+  jest.setTimeout(10000);
+  
+  const today = new Date();
+  const now = new Date(today);
+  
 
-  expect(resp).toMatchObject({
-    symbol: 'IBM',
-    data: {
-      daily: expect.objectContaining(daily),
-      weekly: expect.objectContaining(weekly),
-      price: expect.objectContaining(price),
-      info: expect.objectContaining(info),
-    },
-    time: expect.any(Date),
+  it('Get stock information', async () => {
+    const resp = await getStock(0, 'AAPL');
+    expect(resp).not.toBe(null);
+    expect(resp).toMatchObject({
+      symbol: 'AAPL',
+      param: 0,
+      data: expect.anything(),
+      time: expect.any(Date)
+    })
+    // console.log(resp.data);
   })
-  //console.log(resp.info.daily['Meta Data']);
-  // for(let i = 0; i < resp.info.daily.'Meta Data'.length(); i++) {
+  it('Get single stock quotes', async () => {
+    const resp = await getStock(1, 'AAPL');
+    expect(resp).not.toBe(null);
+    expect(resp).toMatchObject({
+      symbol: 'AAPL',
+      param: 1,
+      data: expect.anything(),
+      time: expect.any(Date)
+    })
+    // console.log(resp.data);
+  })
+  it('Get multiple stock quotes', async () => {
+    const resp = await getStock(1, 'AAPL,AMZN,IBM');
+    expect(resp).not.toBe(null);
+    expect(resp).toMatchObject({
+      symbol: 'AAPL,AMZN,IBM',
+      param: 1,
+      data: expect.anything(),
+      time: expect.any(Date)
+    })
+    console.log(resp.data.quotes);
+  })
+  it('Get stock history: 1 day, 1 minute interval', async () => {
+    const start = new Date();
+    start.setDate(now.getDate()-1);
+    var time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2) + " 00:00";
+    const resp = await getStock(3, 'IBM', '1min', time);
+    expect(resp).not.toBe(null);
+    // console.log(resp.data.series);
+  }) 
+  it('Get stock history: 1 day, 5 minute interval', async () => {
+    const start = new Date();
+    start.setDate(now.getDate()-1);
+    var time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2) + " 00:00";
+    const resp = await getStock(3, 'IBM', '5min', time);
+    expect(resp).not.toBe(null);
+    // console.log(resp.data.series);
+  }) 
+  it('Get stock history: 1 day, 15 minute interval', async () => {
+    const start = new Date();
+    start.setDate(now.getDate()-1);
+    var time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2) + " 00:00";
+    const resp = await getStock(3, 'IBM', '15min', time);
+    expect(resp).not.toBe(null);
+    // console.log(resp.data.series);
+  }) 
+  it('Get stock history: 1 month, daily interval', async () => {
+    const start = new Date();
+    start.setMonth(now.getMonth() - 1);
+    var time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
+    console.log(time);
+    const resp = await getStock(2, 'IBM', 'daily', time);
+    expect(resp).not.toBe(null);
+    // console.log(resp.data.history);
+  })
+  it('Get stock history: 6 months, daily interval', async () => {
+    const start = new Date();
+    start.setMonth(now.getMonth() - 6);
+    var time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
+    console.log(time);
+    const resp = await getStock(2, 'IBM', 'daily', time);
+    expect(resp).not.toBe(null);
+    // console.log(resp.data.history);
+  })
+  it('Get stock history: 1 year, weekly interval', async () => {
+    const start = new Date();
+    start.setFullYear(start.getFullYear() - 1);
+    var time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
+    console.log(time);
+    const resp = await getStock(2, 'IBM', 'weekly', time);
+    expect(resp).not.toBe(null);
+    // console.log(resp.data.history);
+  })
+  it('Get stock history: 5 years, weekly interval', async () => {
+    const start = new Date();
+    start.setFullYear(start.getFullYear() - 5);
+    var time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
+    console.log(time);
+    const resp = await getStock(2, 'IBM', 'weekly', time);
+    expect(resp).not.toBe(null);
+    // console.log(resp.data.history);
+  })
+  it('Get stock history: 10 years, monthly interval', async () => {
+    const start = new Date();
+    start.setFullYear(start.getFullYear() - 10);
+    var time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
+    console.log(time);
+    const resp = await getStock(2, 'IBM', 'monthly', time);
+    expect(resp).not.toBe(null);
+    // console.log(resp.data.history);
+  })
 
-  // }
-  })
+
+  
   afterAll(async () => {
     await d.disconnect();
   })
 })
 
-describe('Retrieve stock info endpoint test', () => {
-  jest.setTimeout(30000);
+/* describe('Retrieve stock info endpoint test', () => {
+  // jest.setTimeout(30000);
   beforeAll(async () => {
     await database.connect();
   })
 
+  jest.setTimeout(10000);
+
   it('200 on successful get stock', async () => {
     console.log('200 on successful get stock');
-    const resp = await request(app).get(`/stocks/info?stock=IBM`).send();
-    expect(resp.statusCode).toBe(200);
-    expect(resp.body).toMatchObject({
-      symbol: 'IBM',
-      data: {
-        intraday: expect.anything(),
-        daily: expect.anything(),
-        weekly: expect.anything(),
-        monthly: expect.anything(),
-        price: expect.anything(),
-        info: expect.anything()
-      },
-      time: expect.any(String),
-    })
+    const resp = await request(app).get(`/stocks/info?type=2&stocks=IBM&interval=daily&start='2021-10-28'`).send();
+    // expect(resp.statusCode).toBe(200);
+    console.log(resp);
+    // expect(resp.body).toMatchObject({
+    //   symbol: 'IBM',
+    //   data: {
+    //     intraday: expect.anything(),
+    //     daily: expect.anything(),
+    //     weekly: expect.anything(),
+    //     monthly: expect.anything(),
+    //     price: expect.anything(),
+    //     info: expect.anything()
+    //   },
+    //   time: expect.any(String),
+    // })
+    // console.log(resp.body.data.quotes);
   })
-  it('403 on invalid stock', async () => {
-    console.log('403 on invalid stock');
-    const resp = await request(app).get(`/stocks/info?stock=fakestock`).send();
-    expect(resp.statusCode).toBe(403);
-    expect(resp.body.error).toBe("Invalid stock");
-  })
+  // it('403 on invalid stock', async () => {
+  //   console.log('403 on invalid stock');
+  //   const resp = await request(app).get(`/stocks/info?stock=fakestock`).send();
+  //   expect(resp.statusCode).toBe(403);
+  //   expect(resp.body.error).toBe("Invalid stock");
+  // })
 
   afterAll(async() => {
     await database.disconnect();
   })
-})
+}) */
 
-describe('Editing stocks doesn\'t affect portfolios', () => {
+/* describe('Calculate portfolio performance', () => {
   const d = new Database(true);
   beforeAll(async () => {
     await d.connect();
@@ -295,4 +389,28 @@ describe('Editing stocks doesn\'t affect portfolios', () => {
   afterAll(async () => {
     await d.disconnect();
   })
-})
+}) */
+
+/* describe('We be having funsies', () => {
+  const d = new Database(true);
+  beforeAll(async () => {
+    await d.connect();
+  })
+
+  // jest.setTimeout(100000);
+
+  it('Calling a bunch of stocks', async () => {
+    // const a = await getStock('a', 1);
+    // const a = await alphavantage._callTradier(1,'AAPL,AMZN,IBM');
+    // console.log(a.quotes.quote);
+
+    const b = await getStock(1, 'AAPL', '15min', '2021-10-29 00:00');
+    // console.log(b.data.quotes);
+
+  })
+  
+
+  afterAll(async () => {
+    await d.disconnect();
+  })
+}) */
