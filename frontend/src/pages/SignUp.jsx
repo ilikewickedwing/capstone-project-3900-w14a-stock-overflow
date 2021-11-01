@@ -32,7 +32,7 @@ function SignUp() {
         display: 'grid'
     }
     return(
-        <Grid style={gridStyle}>
+        <Grid style={gridStyle} className="font-two">
             <Paper elevation={10} style={paperStyle}>
                 <Grid align='center'>
                      <Avatar style={avatarStyle}><LockOutlinedIcon/></Avatar>

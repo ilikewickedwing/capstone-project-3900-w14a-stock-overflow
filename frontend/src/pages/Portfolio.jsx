@@ -14,6 +14,7 @@ import {
   RightCard, 
   PageBody, 
   FlexRows,
+  PfBar,
 } from '../styles/styling';
 import Button from '@mui/material/Button';
 import PfTable from '../comp/PfTable';
@@ -82,24 +83,28 @@ const Portfolio = () => {
   }
 
   return (
-      <PageBody>
+      <PageBody className="font-two">
           <Navigation />
           <Tabs isChanged={isChanged}/>
-          <h1> PORTFOLIO PAGE: {name}</h1> 
-          <FlexRows>
-          </FlexRows> 
           <PfBody>
             <LeftBody>
-              {isWatchlist === 0 &&
-                <div style={{textAlign: 'right', width:'100%'}}>
-                  <Button id="renamePf" onClick={(e) => setAnchorEl(e.currentTarget)}> 
-                      Rename Portfolio
-                  </Button>
-                  <Button color="secondary" onClick={handleDelete}>
-                      Delete Portfolio
-                  </Button>
-                </div>
-              }
+              {isWatchlist 
+              ? (<PfBar>
+                <h1>{name}</h1> 
+                </PfBar>)
+              :
+            (<PfBar>
+              <div style={{}}>{name}</div> 
+              <div style={{width:'100%'}}>
+                <Button id="renamePf" onClick={(e) => setAnchorEl(e.currentTarget)}> 
+                    Rename Portfolio
+                </Button>
+                <Button color="secondary" onClick={handleDelete}>
+                    Delete Portfolio
+                </Button>
+              </div>
+              </PfBar>
+            )}
               <PfTable />
             < AddStock 
               token={token}
