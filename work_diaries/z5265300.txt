@@ -40,3 +40,4 @@ Week 6
 Week 7
 - refactored more frontend code/ fixed bug issues with the delete portfolio function
 - implemented code for the search bar of the page (located in Navigation.jsx)
+- met up on the 31st Oct Sunday (all attended) to discuss progress 
