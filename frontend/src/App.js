@@ -1,11 +1,11 @@
-import Login from "./comp/Login";
+import Login from "./pages/Login";
 import {BrowserRouter, Route, Switch} from 'react-router-dom'; 
-import Dashboard from "./comp/Dashboard";
+import Dashboard from "./pages/Dashboard";
 import API, { ApiContext } from "./api";
-import SignUp from "./comp/SignUp";
-import Portfolio from "./comp/Portfolio";
-import Profile from "./comp/Profile";
-import Stock from "./comp/Stock";
+import SignUp from "./pages/SignUp";
+import Portfolio from "./pages/Portfolio";
+import Profile from "./pages/Profile";
+import Stock from "./pages/Stock";
 import './App.css';
 import { StocksPage } from "./graph/StocksPage";
 

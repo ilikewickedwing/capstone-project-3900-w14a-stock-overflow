@@ -1,9 +1,11 @@
 import React from 'react'; 
-import { useHistory, useLocation, useParams } from 'react-router-dom';
+import { useHistory} from 'react-router-dom';
+import { useParams } from "react-router";
 import { ApiContext } from '../api';
 import axios from "axios";
-import Navigation from './Navigation'; 
-import Tabs from './Tabs'; 
+import Navigation from '../comp/Navigation'; 
+import Tabs from '../comp/Tabs'; 
+import StocksGraph from "../graph/StocksGraph";
 
 import {
   PfBody, 
@@ -14,13 +16,14 @@ import {
   StockOverview,
   ContentBody
 } from '../styles/styling';
-import { apiBaseUrl } from './const';
+import { apiBaseUrl } from '../comp/const';
 
 const Stock = () => {
   const api = React.useContext(ApiContext);
   const history = useHistory();
-  const { pid } = useParams();
+  const { stockCode } = useParams();
   const token = localStorage.getItem('token');
+  console.log(stockCode);
 
   const [name, setName] = React.useState('');
 
@@ -49,10 +52,10 @@ const Stock = () => {
           day range: 
           year range: 
           market cap: 
-
           </ StockOverview >
           <PfBody>
             <LeftBody>
+              <StocksGraph companyId={stockCode} height={200}/>
             </LeftBody>
             <RightBody>
               <RightCard>
