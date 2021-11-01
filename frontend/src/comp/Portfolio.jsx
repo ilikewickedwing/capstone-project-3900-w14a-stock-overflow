@@ -32,26 +32,14 @@ const Portfolio = () => {
   const [changedName, editName ] = React.useState('');
   const [isWatchlist, setIsWatchlist] = React.useState(0);
   const [isChanged, setChanged ] = React.useState(0);
-  const [stockArray, setStockArray ] = React.useState([]);
+  const [stockArray, setStockArray ] = React.useState([{
+    stock: null,
+    avgPrice: null,
+    quantity: null
+  }]);
 
   const open = Boolean(anchorEl);
   const id = open ? 'simple-popover': undefined;
-
-  // {
-  //   stock: 'AAPL',
-  //   avgPrice: 45,
-  //   quantity: 3,
-  // },
-  // { 
-  //   stock: 'AMZN',
-  //   avgPrice: 1,
-  //   quantity: 5,
-  // },
-  // {
-  //   stock: 'IBM',
-  //   avgPrice: 3,
-  //   quantity: 5
-  // }
 
   // on first load 
   React.useEffect(() => {   
@@ -110,7 +98,7 @@ const Portfolio = () => {
     //setName(porfolioData.name);
     
     array = request.data['stocks'];
-    console.log(stockArray);
+    setStockArray(array);
   }
 
   const handleStockLoad = async (e) => {
@@ -138,15 +126,12 @@ const Portfolio = () => {
                 </div>
               }
               <p> Stock List: </p>
-              {/* print out all the stocks in Watchlist portfolio */}
               {
                 stockArray.map(item => {
                   return <StockRow key={item.stock} data={item}/>
                 })
               }
               
-            <AddStock />
-              <PfTable />
             < AddStock 
               token={token}
               pid={pid}
