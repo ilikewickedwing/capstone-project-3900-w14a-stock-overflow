@@ -87,7 +87,7 @@ const Navigation = () => {
             friends
             <Switch {...label} defaultChecked />
             stocks
-            <FlexRows style={{padding:'1%', background:'white', justifyContent:'center'}}>
+            <FlexRows style={{margin:'1%', background:'white', justifyContent:'center'}}>
             <Autocomplete
                 disablePortal
                 options={queryRes.map((e)=> e.code+" "+ e.name)}
@@ -104,9 +104,7 @@ const Navigation = () => {
                     label="Search Stock" 
                     onKeyDown={e => {
                         if (e.keyCode === 13 && e.target.value) {
-                        searchBar(e);
-                        console.log(currCode); 
-                        console.log(search);
+                            searchBar(e);
                         }
                     }}
                 />)}
