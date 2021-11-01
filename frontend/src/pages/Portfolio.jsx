@@ -1,8 +1,8 @@
 import React from 'react'; 
 import { useHistory, useParams } from 'react-router-dom';
 import axios from "axios";
-import Navigation from './Navigation'; 
-import Tabs from './Tabs'; 
+import Navigation from '../comp/Navigation'; 
+import Tabs from '../comp/Tabs'; 
 import Popover from '@mui/material/Popover';
 import {
   CreatePortField, 
@@ -16,9 +16,9 @@ import {
   FlexRows,
 } from '../styles/styling';
 import Button from '@mui/material/Button';
-import PfTable from './PfTable';
-import AddStock from './AddStock';
-import { apiBaseUrl } from './const';
+import PfTable from '../comp/PfTable';
+import AddStock from '../comp/AddStock';
+import { apiBaseUrl } from '../comp/const';
 
 const Portfolio = () => {
   const history = useHistory();
