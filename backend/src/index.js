@@ -1,4 +1,4 @@
-import express from "express";
+import express, { query } from "express";
 import cors from 'cors';
 import { Database } from "./database";
 import swaggerUI from 'swagger-ui-express';
@@ -755,7 +755,8 @@ app.get('/stocks/all', async (req, res) => {
  */
  app.get('/stocks/info', async (req, res) => {
   const { type, stocks, interval, start } = req.query;
-  const check = await checkStock(stock);
+  const check = await checkStock(stocks);
+  console.log(query);
   if (!check) {
     res.status(403).send({ error: "Invalid stock" });
     return;
