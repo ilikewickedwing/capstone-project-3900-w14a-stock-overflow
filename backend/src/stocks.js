@@ -126,8 +126,8 @@ export const checkStock = async (stock) => {
  * @returns {Promise <Object>}
  */
 export const getStock = async (type, stocks, interval, start) => {
-  // const check = await checkStock(stock);
-  // if (!check) return null;
+  const check = await checkStock(stocks);
+  if (!check) return null;
 
   const resp = await api.getStock(type, stocks, interval, start);
   // console.log(stocks);

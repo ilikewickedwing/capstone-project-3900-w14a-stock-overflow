@@ -1,4 +1,4 @@
-import express from "express";
+import express, { query } from "express";
 import cors from 'cors';
 import { Database } from "./database";
 import swaggerUI from 'swagger-ui-express';
@@ -778,4 +778,22 @@ app.get('/stocks/all', async (req, res) => {
 
   res.status(200).send(resp);
   return;
+})
+
+// Get endpoint for getting a specific stocks's data from alphavantage
+/**
+ * @swagger
+ * /stocks:
+ *   get:
+ *     tags: [AlphaVantage]
+ *     description: endpoint for a specific stock's data from alphavantage
+ *     parameters:
+ *     responses:
+ *       200:
+ *         description: Return data exactly as given from alphavantage
+ *       502:
+ *         description: Could not connect to API
+ */
+app.get('/stocks', async (req, res) => {
+
 })

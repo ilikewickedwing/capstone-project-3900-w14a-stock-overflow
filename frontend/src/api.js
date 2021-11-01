@@ -6,6 +6,8 @@ export const ApiContext = createContext();
 
 const getToken = () => (`Bearer ${localStorage.getItem('token')}`);
 
+const APIKEY = "12G3IUEF5TUMERGL";
+
 /**
  * Wrapper class to make API calls
  */
@@ -84,6 +86,56 @@ export default class API {
     });
   }
 
+  /**
+   * 
+   * @param {int} type
+   *          description: The type of call being made;
+   *          0. Information overview of stock;
+   *          1. Current price of stock(s);
+   *          2. History of one stock not intraday;
+   *          3. History of one stock intraday
+   * @param {string} stocks 
+   *          description: The symbol of the stock or stocks
+   * @param {string} interval 
+   *          description: The interval needed;
+   *          For not intraday, options are daily, weekly, monthly;
+   *          For intraday, options are 1min, 5min, 15min
+   * @param {string} start 
+   *          description: The start of the time from when to get data;
+   *          For not intraday, format is string as YYYY-MM-DD;
+   *          For intraday, format is string as YYYY-MM-DD HH:MM
+   */
+  stocksInfo(type, stocks, interval, start) {
+    let queryStr = `${ENDPOINT}/stocks/info?type=${type}&stocks=${stocks}`;
+    if (start !== null) {
+      queryStr = queryStr + `&start=${start}`;
+    }
+    if (interval !== null) {
+      queryStr = queryStr + `&interval=${interval}`;
+    }
+    return fetch(queryStr);
+  }
+
+  stockTimeSeriesIntraday(companySymbol, interval) {
+    const URL = 'https://www.alphavantage.co/query';
+    return fetch(`${URL}?function=TIME_SERIES_INTRADAY&symbol=${companySymbol}&interval=${interval}&apikey=${APIKEY}`);
+  }
+  
+  stockTimeSeriesDaily(companySymbol) {
+    const URL = 'https://www.alphavantage.co/query';
+    return fetch(`${URL}?function=TIME_SERIES_DAILY&symbol=${companySymbol}&apikey=${APIKEY}`);
+  }
+  
+  stockTimeSeriesWeekly(companySymbol) {
+    const URL = 'https://www.alphavantage.co/query';
+    return fetch(`${URL}?function=TIME_SERIES_WEEKLY&symbol=${companySymbol}&apikey=${APIKEY}`);
+  }
+  
+  stockTimeSeriesMonthly(companySymbol) {
+    const URL = 'https://www.alphavantage.co/query';
+    return fetch(`${URL}?function=TIME_SERIES_MONTHLY&symbol=${companySymbol}&apikey=${APIKEY}`);
+  }
+  
   post(path, options){
     return fetch(`${ENDPOINT}/${path}`,{
       ...options,
