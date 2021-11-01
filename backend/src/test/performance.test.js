@@ -52,7 +52,7 @@ describe('Retrieve stock information', () => {
     })
     console.log(resp.data.quotes);
   })
-  /* it('Get stock history: 1 day, 1 minute interval', async () => {
+  it('Get stock history: 1 day, 1 minute interval', async () => {
     const start = new Date();
     start.setDate(now.getDate()-1);
     var time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2) + " 00:00";
@@ -120,7 +120,7 @@ describe('Retrieve stock information', () => {
     const resp = await getStock(2, 'IBM', 'monthly', time);
     expect(resp).not.toBe(null);
     // console.log(resp.data.history);
-  }) */
+  })
 
 
   
@@ -129,7 +129,7 @@ describe('Retrieve stock information', () => {
   })
 })
 
-/* describe('Retrieve stock info endpoint test', () => {
+describe('Retrieve stock info endpoint test', () => {
   // jest.setTimeout(30000);
   beforeAll(async () => {
     await database.connect();
@@ -167,9 +167,9 @@ describe('Retrieve stock information', () => {
   afterAll(async() => {
     await database.disconnect();
   })
-}) */
+}) 
 
-/* describe('Calculate portfolio performance', () => {
+ describe('Calculate portfolio performance', () => {
   const d = new Database(true);
   beforeAll(async () => {
     await d.connect();
@@ -390,7 +390,7 @@ describe('Retrieve stock information', () => {
   afterAll(async () => {
     await d.disconnect();
   })
-}) */
+})
 
 /* describe('We be having funsies', () => {
   const d = new Database(true);

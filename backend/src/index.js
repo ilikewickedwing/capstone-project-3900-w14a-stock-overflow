@@ -755,29 +755,18 @@ app.get('/stocks/all', async (req, res) => {
  */
  app.get('/stocks/info', async (req, res) => {
   const { type, stocks, interval, start } = req.query;
-  const check = await checkStock(stocks);
-  if (!check) {
-    res.status(403).send({ error: "Invalid stock" });
-    return;
-  }
-
-  // if (type < 0 || type >3) {
-  //   res.status(403).send({ error: "Invalid type" });
-  // }
-
-  // if (interval.match(/^(1min|5min|15min|daily|weekly|monthly)$/) === null) {
-  //   res.status(403).send({ error: "Invalid interval" });
-  // }  
-
   const resp = await getStock(type, stocks, interval, start);
-  console.log("rec resp");
-  console.log(resp);
-  if (resp === null) {
-    res.status(502).send({ error: "Could not connect to API" });
-    return;
-  }
 
-  res.status(200).send(resp);
+  if (resp === -1) {
+    res.status(403).send({ error: "Invalid stock" });
+  } else if (resp === -2) {
+    res.status(403).send({ error: "Invalid type" });
+  } else if (resp === -3) {
+    res.status(403).send({ error: "Invalid interval" });
+  } else if (resp === null) {
+    res.status(502).send({ error: "Could not connect to API" });
+  } else res.status(200).send(resp);
+
   return;
 })
 
