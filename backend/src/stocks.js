@@ -4,9 +4,9 @@
 
 import { Database } from "./database.js";
 import axios from "axios";
-import { Alphavantage } from "./alphavantage.js";
+import { API } from "./api.js";
 
-export const alphavantage = new Alphavantage();
+export const api = new API();
 
 /**
  * Gets a list of active stocks
@@ -15,7 +15,7 @@ export const alphavantage = new Alphavantage();
  * 
  */
 export const getAllStocks = async () => {
-  const resp = await alphavantage.getAllStocks();
+  const resp = await api.getAllStocks();
   return resp;
 }
 
@@ -106,13 +106,13 @@ export const modifyStock = async (token, pid, stock, price, quantity, option, da
 }
 
 export const checkStock = async (stock) => {
-  const stocks = await alphavantage.getAllStocks();
+  const stocks = await api.getAllStocks();
   const filteredStocks = stocks.filter(o => o.symbol === stock);
   return filteredStocks.length !== 0;
 }
 
 /**
- * Function to retrieve stock from alphavantage
+ * Function to retrieve stock from api
  * @param {string} stock 
  * @param {int} param
  * @returns {Promise <Object>}
@@ -121,13 +121,13 @@ export const getStock = async (type, stocks, interval, start) => {
   // const check = await checkStock(stock);
   // if (!check) return null;
 
-  const resp = await alphavantage.getStock(type, stocks, interval, start);
+  const resp = await api.getStock(type, stocks, interval, start);
   // console.log(stocks);
   return resp;
 }
 
 /**
- * Function to retrieve stock daily data from alphavantage
+ * Function to retrieve stock daily data from api
  * Returns:
  *  'Meta Data':
  *    '1. Information'
@@ -151,7 +151,7 @@ export const getStockDaily = async (stock) => {
 }
 
 /**
- * Function to retrieve stock weekly data from alphavantage
+ * Function to retrieve stock weekly data from api
  * Returns:
  *  'Meta Data':
  *    '1. Information'
@@ -174,7 +174,7 @@ export const getStockWeekly = async (stock) => {
 }
 
 /**
- * Function to retrieve stock price data from alphavantage
+ * Function to retrieve stock price data from api
  * Returns:
  *  'Global Quote':
  *    '01. symbol'
@@ -196,7 +196,7 @@ export const getStockPrice = async (type, stocks) => {
 }
 
 /**
- * Function to retrieve stock ov from alphavantage
+ * Function to retrieve stock ov from api
  * Returns:
  *  Symbol
  *  AssetType

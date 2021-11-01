@@ -1,7 +1,7 @@
 import { authRegister } from "../auth";
 import { createPf, deletePf, userPfs, openPf, getPid, editPf, calcPf } from "../portfolio";
 import { checkStock, addStock, modifyStock, getStock, getStockDaily, getStockWeekly, getStockPrice, getStockInfo, alphavantage } from "../stocks";
-import { Alphavantage } from "../alphavantage";
+import { API } from "../api";
 import { Database } from "../database";
 import request from 'supertest';
 import { app, database } from "../index";
@@ -75,7 +75,7 @@ describe('Retrieve stock info endpoint test', () => {
   })
 }) */
 
-describe('Editing stocks doesn\'t affect portfolios', () => {
+/* describe('Editing stocks doesn\'t affect portfolios', () => {
   const d = new Database(true);
   beforeAll(async () => {
     await d.connect();
@@ -296,7 +296,7 @@ describe('Editing stocks doesn\'t affect portfolios', () => {
   afterAll(async () => {
     await d.disconnect();
   })
-})
+}) */
 
 describe('We be having funsies', () => {
   const d = new Database(true);
@@ -311,8 +311,8 @@ describe('We be having funsies', () => {
     // const a = await alphavantage._callTradier(1,'AAPL,AMZN,IBM');
     // console.log(a.quotes.quote);
 
-    const b = await alphavantage._callTradier(3, 'AAPL', '15min', '2021-10-29 00:00');
-    // console.log(b.series);
+    const b = await getStock(3, 'AAPL', '15min', '2021-10-29 00:00');
+    console.log(b.data.series);
 
   })
   
