@@ -19,7 +19,7 @@ describe('Retrieve stock information', () => {
   const now = new Date(today);
   
 
-  /* it('Get stock information', async () => {
+  it('Get stock information', async () => {
     const resp = await getStock(0, 'AAPL');
     expect(resp).not.toBe(null);
     expect(resp).toMatchObject({
@@ -50,7 +50,7 @@ describe('Retrieve stock information', () => {
       data: expect.anything(),
       time: expect.any(Date)
     })
-    // console.log(resp.data.quotes);
+    console.log(resp.data.quotes);
   })
   it('Get stock history: 1 day, 1 minute interval', async () => {
     const start = new Date();
@@ -120,58 +120,6 @@ describe('Retrieve stock information', () => {
     const resp = await getStock(2, 'IBM', 'monthly', time);
     expect(resp).not.toBe(null);
     // console.log(resp.data.history);
-  }) */
-  /* it('Test multiple invalid stocks', async () => {
-    const resp1 = await getStock(0, 'Jono');
-    expect(resp1).toBe(-1);
-    const resp2 = await getStock(0, 'AAPL,Jono');
-    expect(resp2).toBe(-1);
-    const resp3 = await getStock(0, 'Jono,AAPL');
-    expect(resp3).toBe(-1);
-    const resp4 = await getStock(0, 'AAPL,Jono,IBM');
-    expect(resp4).toBe(-1);
-  })
-  it('Test invalid types', async () => {
-    const resp1 = await getStock(-1, 'AAPL');
-    expect(resp1).toBe(-2);
-    const resp2 = await getStock(5, 'AAPL');
-    expect(resp2).toBe(-2);
-    const resp3 = await getStock(null, 'AAPL');
-    expect(resp3).toBe(-2);
-    const resp4 = await getStock(1.2, 'AAPL');
-    expect(resp4).toBe(-2);
-    const resp5 = await getStock('yes', 'AAPL');
-    expect(resp5).toBe(-2);
-  }) */
-  it('Test invalid intervals', async () => {
-    const resp1 = await getStock(2, 'AAPL', 'fakeinterval');
-    expect(resp1).toBe(-3);
-    const resp2 = await getStock(3, 'AAPL', 'fakeinterval');
-    expect(resp2).toBe(-3);
-    const resp3 = await getStock(2, 'AAPL', 2);
-    expect(resp3).toBe(-3);
-    const resp4 = await getStock(3, 'AAPL', 2);
-    expect(resp4).toBe(-3);
-    const resp5 = await getStock(2, 'AAPL', '1min');
-    expect(resp5).toBe(-3);
-    const resp6 = await getStock(2, 'AAPL', '5min');
-    expect(resp6).toBe(-3);
-    const resp7 = await getStock(2, 'AAPL', '15min');
-    expect(resp7).toBe(-3);
-    const resp8 = await getStock(3, 'AAPL', 'daily');
-    expect(resp8).toBe(-3);
-    const resp9 = await getStock(3, 'AAPL', 'weekly');
-    expect(resp9).toBe(-3);
-    const resp10 = await getStock(3, 'AAPL', 'monthly');
-    expect(resp10).toBe(-3);
-    const resp11 = await getStock(2, 'AAPL', null);
-    expect(resp11).toBe(-3);
-    const resp12 = await getStock(3, 'AAPL', null);
-    expect(resp12).toBe(-3);
-    const resp13 = await getStock(2, 'AAPL');
-    expect(resp13).toBe(-3);
-    const resp14 = await getStock(3, 'AAPL');
-    expect(resp14).toBe(-3);
   })
 
 
