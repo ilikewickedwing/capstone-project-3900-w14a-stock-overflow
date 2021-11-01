@@ -11,6 +11,8 @@ describe('Check stock', () => {
     await d.connect();
   })
 
+  jest.setTimeout(10000);
+
   it('Checking valid stock', async () => {
     const resp = await checkStock('AAP');
     expect(resp).toBe(true);
