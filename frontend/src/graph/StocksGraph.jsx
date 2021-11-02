@@ -24,7 +24,7 @@ export default function StocksGraph(props) {
   const [ dataCache, setDataCache ] = useState({});
   const api = useContext(ApiContext);
   const [ graphStyle, setGraphStyle ] = useState("candlestick");
-  const [ timeOptions, setTimeOptions ] = useState("15min");
+  const [ timeOptions, setTimeOptions ] = useState("daily");
   const wrapperStyle = {
     display: "flex",
     flexDirection: "column",
