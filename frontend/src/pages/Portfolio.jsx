@@ -91,7 +91,7 @@ const Portfolio = () => {
               :
             (<PfBar>
               <Heading>{name}</Heading> 
-              <div style={{}}>
+              <div>
                 <Button id="renamePf" onClick={(e) => setAnchorEl(e.currentTarget)}> 
                     Rename Portfolio
                 </Button>
