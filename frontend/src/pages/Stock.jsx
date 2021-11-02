@@ -147,12 +147,12 @@ const Stock = () => {
               <StockHeading> {price} USD {toggle?(
                 <div style= {{color:'red'}}>
                   <ArrowDropDownIcon style={{fontSize:'2em', margin:'-7% 0%'}}/>
-                  {change} {percentage}%
+                  {change} {percentage}
                 </div>
               ):(
                 <div style={{color:'green'}}>
                   <ArrowDropUpIcon style={{fontSize:'2em', margin:'-7% 0%'}}/>
-                  {change} {percentage}%
+                  {change} {percentage}
                 </div>
               )} </StockHeading> 
               <StockOverview >
