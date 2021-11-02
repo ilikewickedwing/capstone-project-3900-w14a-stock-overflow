@@ -3,9 +3,16 @@ import { useParams } from "react-router";
 import axios from "axios";
 import Navigation from '../comp/Navigation'; 
 import Tabs from '../comp/Tabs'; 
+import StockSelect from '../comp/StockSelect';
+
 import StocksGraph from "../graph/StocksGraph";
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import Button from '@mui/material/Button';
+import MenuList from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+
 
 import {
   PfBody, 
@@ -17,6 +24,7 @@ import {
   ContentBody,
   Heading,
   StockHeading,
+  PfBar,
 } from '../styles/styling';
 import { apiBaseUrl } from '../comp/const';
 
@@ -25,7 +33,8 @@ const Stock = () => {
   const { stockCode } = useParams();
   var request = require('request');
   var url = `https://www.alphavantage.co/query?function=OVERVIEW&symbol=${stockCode}&apikey=59SO8FIM49NYQS21`;
-  
+  const token = localStorage.getItem('token');
+
   // live info
   const [name, setName] = React.useState('');
   const [price, setPrice] = React.useState('');
@@ -49,20 +58,40 @@ const Stock = () => {
   // 0:green ; 1:red 
   const [toggle, setToggle] = React.useState(0);
 
+  // portfolios 
+  const [portfolios, setPortfolios] = React.useState([]);
+
+  // dropdown options
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const isOpen = Boolean(anchorEl);
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
   // change: the difference between current price and last trade of prev day
   React.useEffect(() => {
     loadStockInfo();
+    fetchPortfolios();
   },[]);
 
   // rerender of the page in searchbar query 
   React.useEffect(() => {
     loadStockInfo();
+    fetchPortfolios();
   },[stockCode])
 
   function calculatePerc(a,b){
     let res = (a/b)*100; 
     return `${res.toFixed(2)}%`;
   }
+
+  const fetchPortfolios = async () => {
+    const request = await axios.get(`${apiBaseUrl}/user/portfolios?token=${token}`);
+    setPortfolios(request.data);
+  };
   
   const loadStockInfo = async () => {
     try {
@@ -136,6 +165,11 @@ const Stock = () => {
   });
   }
 
+  //popup form to submit if its not watchlist
+  const submitAdd = async (e) => {
+    e.preventDefault();
+  }
+
   return (
       <PageBody className="font-two">
           <Navigation />
@@ -143,7 +177,39 @@ const Stock = () => {
           <ContentBody>
           <PfBody>
             <LeftBody>
-              <Heading>{stockCode} {name}</Heading>
+              <PfBar>
+                <Heading>{stockCode} {name}</Heading>
+                <div>
+                <Button
+                  id="basic-button"
+                  aria-controls="basic-menu"
+                  aria-haspopup="true"
+                  aria-expanded={isOpen ? 'true' : undefined}
+                  onClick={handleClick}
+                  endIcon={<KeyboardArrowDownIcon />}
+                >
+                  Add to Page
+                </Button>
+                <MenuList
+                  id="basic-menu"
+                  anchorEl={anchorEl}
+                  open={isOpen}
+                  onClose={handleClose}
+                >
+                  { portfolios && 
+                    portfolios.map((a) => 
+                        <StockSelect
+                          stockCode = {stockCode}
+                          key={a?.name}
+                          name={a?.name}
+                          pid={a?.pid}
+                          setClose={handleClose}
+                        />
+                  )
+                } 
+                </MenuList>
+              </div>
+              </PfBar>
               <StockHeading> {price} USD {toggle?(
                 <div style= {{color:'red'}}>
                   <ArrowDropDownIcon style={{fontSize:'2em', margin:'-7% 0%'}}/>
