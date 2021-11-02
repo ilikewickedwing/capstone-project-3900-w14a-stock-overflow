@@ -68,6 +68,7 @@ export default function StocksGraph(props) {
         setState(STATES.RECEIVED);
         addToDataCache(r, timeOptions);
       })
+      .catch((error) => console.log(error))
     }
     /**
       NOTE: This may show a warning about not having datacache
@@ -110,7 +111,7 @@ export default function StocksGraph(props) {
               <Label value="Time Interval" offset={-10} position="insideBottom" />
             </XAxis>
             <YAxis 
-              label={{ value: 'Price (US Dollars)', angle: -90, position: 'insideLeft', dx: -15 }}
+              label={{ value: 'Price (US Dollars)', angle: -90, position: 'insideLeft', dx: -15, dy: 20 }}
               domain={['dataMin', 'dataMax ']} type="number"/>
             <Tooltip content={<StocksToolTip candlestickMode={graphStyle === "candlestick"}/>}/>
             <Bar dataKey={getDataKey()} shape={renderGraphShape()}></Bar>
