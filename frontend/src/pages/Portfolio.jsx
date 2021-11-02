@@ -13,7 +13,7 @@ import {
   RightBody, 
   RightCard, 
   PageBody, 
-  FlexRows,
+  Heading,
   PfBar,
 } from '../styles/styling';
 import Button from '@mui/material/Button';
@@ -77,10 +77,6 @@ const Portfolio = () => {
     }
   }
 
-  const handleStockLoad = async (e) => {
-    e.preventDefault();
-
-  }
 
   return (
       <PageBody className="font-two">
@@ -90,12 +86,12 @@ const Portfolio = () => {
             <LeftBody>
               {isWatchlist 
               ? (<PfBar>
-                <h1>{name}</h1> 
+                <Heading>{name}</Heading> 
                 </PfBar>)
               :
             (<PfBar>
-              <div style={{}}>{name}</div> 
-              <div style={{width:'100%'}}>
+              <Heading>{name}</Heading> 
+              <div style={{}}>
                 <Button id="renamePf" onClick={(e) => setAnchorEl(e.currentTarget)}> 
                     Rename Portfolio
                 </Button>

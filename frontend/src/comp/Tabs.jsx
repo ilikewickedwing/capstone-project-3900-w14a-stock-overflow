@@ -1,6 +1,5 @@
 import React from 'react'; 
 import { useHistory } from 'react-router';
-import { ApiContext } from '../api';
 import {TabBar, TabButton, CreatePortField, CreatePortContent} from '../styles/styling';
 import Popover from '@mui/material/Popover';
 import Button from '@mui/material/Button';
@@ -11,7 +10,6 @@ import { apiBaseUrl } from './const';
 
 
 const Tabs = ({isChanged}) => {
-  const api = React.useContext(ApiContext);
   const history = useHistory();
   const token = localStorage.getItem('token');
 
