@@ -3,15 +3,13 @@ import { useHistory } from 'react-router';
 import {Link} from 'react-router-dom';
 import { ApiContext } from '../api';
 import ExitToAppRoundedIcon from '@material-ui/icons/ExitToAppRounded';
-import {NavBar, Logo, LogoutButton, FlexRows } from '../styles/styling';
+import {NavBar, Logo, LogoutButton, FlexRows, SearchToggle } from '../styles/styling';
 import { Button } from '@material-ui/core';
 import {TextInput} from "../styles/styling"; 
 import IconButton from '@mui/material/IconButton';
 import SearchIcon from '@mui/icons-material/Search';
 import Switch from '@mui/material/Switch';
 import Autocomplete from '@mui/material/Autocomplete';
-
-
 
 const label = { inputProps: { 'aria-label': 'toggle' } };
 
@@ -84,10 +82,12 @@ const Navigation = () => {
                     Stock Overflow 
                 </Logo>
             </Link>
-            friends
-            <Switch {...label} defaultChecked />
-            stocks
-            <FlexRows style={{margin:'1%', background:'white', justifyContent:'center'}}>
+            <SearchToggle>
+                friends
+                <Switch {...label} defaultChecked />
+                stocks
+            </SearchToggle>
+            <FlexRows style={{margin:'1%', justifyContent:'center'}}>
             <Autocomplete
                 disablePortal
                 options={queryRes.map((e)=> e.code+" "+ e.name)}
