@@ -20,7 +20,7 @@ const STATES = {
 }
 export default function StocksGraph(props) {
   const [ state, setState ] = useState(STATES.LOADING);
-  // Map of interval to cache
+  // Map of companyid to interval to cache
   const [ dataCache, setDataCache ] = useState({});
   const api = useContext(ApiContext);
   const [ graphStyle, setGraphStyle ] = useState("candlestick");
@@ -31,6 +31,7 @@ export default function StocksGraph(props) {
     alignItems: "center",
     position: "relative",
   }
+  
   // make api call for time series
   useEffect(() => {
     const callApi = (company, interval) => {
@@ -55,11 +56,15 @@ export default function StocksGraph(props) {
     }
     const addToDataCache = (data, interval) => {
       const dataCacheCopy = Object.assign({}, dataCache);
-      dataCacheCopy[interval] = data;
+      // Add current company id if the current company id is not in dataCache
+      if (!(props.companyId in dataCacheCopy)) {
+        dataCacheCopy[props.companyId] = {};
+      }
+      dataCacheCopy[props.companyId][interval] = data;
       setDataCache(dataCacheCopy);
     }
     // Call from api only if needed
-    if (!(timeOptions in dataCache)) {
+    if (!(props.companyId in dataCache) || !(timeOptions in dataCache[props.companyId])) {
       setState(STATES.LOADING);
       callApi(props.companyId.toUpperCase(), timeOptions)
       .then(r => r.json())
@@ -100,12 +105,12 @@ export default function StocksGraph(props) {
     throw Error("Invalid graph type");
   }
   const renderGraph = () => {
-    if (timeOptions in dataCache) {
+    if (props.companyId in dataCache && timeOptions in dataCache[props.companyId]) {
       return (
         <ResponsiveContainer width={'99%'} height={props.height}>
           <BarChart
             margin={{ bottom: 25, left: 25 }}
-            data={transformData(dataCache[timeOptions], graphStyle === "candlestick")}
+            data={transformData(dataCache[props.companyId][timeOptions], graphStyle === "candlestick")}
           >
             <XAxis datakey="time">
               <Label value="Time Interval" offset={-10} position="insideBottom" />
