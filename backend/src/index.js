@@ -3,7 +3,7 @@ import cors from 'cors';
 import { Database } from "./database";
 import swaggerUI from 'swagger-ui-express';
 import { swaggerDocs } from "./docs";
-import { createPf, deletePf, openPf, userPfs, editPf, calcPf } from "./portfolio";
+import { createPf, deletePf, openPf, userPfs, getPid, editPf, calcPf } from "./portfolio";
 import { authDelete, authLogin, authLogout, authRegister } from "./auth";
 import { getUserProfile, postUserProfile } from "./user";
 import { addStock, modifyStock, getAllStocks, checkStock, getStock } from "./stocks";
@@ -446,6 +446,20 @@ app.get('/user/portfolios/open', async (req, res) => {
     return;
   }
   res.status(403).send({ error: "Invalid pid" });
+})
+
+app.get('/user/portfolios/getPid', async (req, res) => {
+  const { token, name } = req.query;
+  const resp = await getPid(token, name, database);
+  if (resp == 1) {
+    res.status(401).send({ error: "Invalid token" });
+  } else {
+    res.status(200).send(resp);
+  }
+
+  // 'Watchlist'
+
+  return;
 })
 
 app.get('/user/portfolios/calculate', async (req, res) => {

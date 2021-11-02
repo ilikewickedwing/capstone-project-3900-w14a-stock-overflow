@@ -1,4 +1,4 @@
-import React from 'react'; 
+import React, {useContext} from 'react'; 
 import { useHistory, useParams } from 'react-router-dom';
 import axios from "axios";
 import Navigation from '../comp/Navigation'; 
@@ -17,9 +17,11 @@ import {
   PfBar,
 } from '../styles/styling';
 import Button from '@mui/material/Button';
-import PfTable from '../comp/PfTable';
+import StockRow from '../comp/StockRow';
 import AddStock from '../comp/AddStock';
 import { apiBaseUrl } from '../comp/const';
+import { ApiContext } from '../api';
+import PfTable from '../comp/PfTable';
 
 const Portfolio = () => {
   const history = useHistory();
@@ -33,6 +35,13 @@ const Portfolio = () => {
   const [isWatchlist, setIsWatchlist] = React.useState(0);
   const [isChanged, setChanged ] = React.useState(0);
   const [stocks, setStocks] = React.useState([]);
+  const [stockArray, setStockArray ] = React.useState([{
+    stock: null,
+    stockName: null,
+    change: null,
+    changePercentage: null
+  }]);
+  const api = useContext(ApiContext);
 
   const open = Boolean(anchorEl);
   const id = open ? 'simple-popover': undefined;
@@ -40,6 +49,7 @@ const Portfolio = () => {
   // on first load 
   React.useEffect(() => {   
     loadPorfolioData();
+    getWatchlist()
   },[pid]);
   
   const loadPorfolioData = async () => {
@@ -80,7 +90,53 @@ const Portfolio = () => {
       alert(e);
     }
   }
+  
+  const getWatchlist = async () => {
+    let array = [];
+    const token = localStorage.getItem('token');
+    // get pid for the watchlist
+    const res = await axios.get(`${apiBaseUrl}/user/portfolios/getPid`, {
+      params: {
+        token: token,
+        name: 'Watchlist'
+      }
+    })
+    const pid = res.data;
+    const request = await axios.get(`${apiBaseUrl}/user/portfolios/open?pid=${pid}`);
+    
+    array = request.data['stocks'];
+    let propsArray = [];
+    for (let i = 0; i < array.length; i++) {
+      const data = await getStockDetails(array[i]['stock']);
+      propsArray.push(data);
+    }
+    // console.log(propsArray);
+    setStockArray(propsArray);
+  }
 
+  async function getStockDetails(stockSymbol) {
+    const resp = await api.stocksInfo(1, stockSymbol, null, null);
+    const jsonResp = await resp.json();
+    let data = {
+      change: jsonResp.data.quotes.quote.change,
+      changePercentage: jsonResp.data.quotes.quote.change_percentage,
+      name: jsonResp.data.quotes.quote.description,
+      stock: jsonResp.data.quotes.quote.symbol
+    }
+    return data;
+  }
+
+  async function handleReload() {
+    const res = await axios.get(`${apiBaseUrl}/user/portfolios/getPid`, {
+      params: {
+        token: token,
+        name: 'Watchlist'
+      }
+    })
+    const pid = res.data;
+    history.push(`/dashboard`)
+    history.push(`/portfolio/${pid}`)
+  }
 
   return (
       <PageBody className="font-two">
@@ -88,10 +144,31 @@ const Portfolio = () => {
           <Tabs isChanged={isChanged}/>
           <PfBody>
             <LeftBody>
+              {/* {isWatchlist === 0 &&
+                <div style={{textAlign: 'right', width:'100%'}}>
+                  <Button id="renamePf" onClick={(e) => setAnchorEl(e.currentTarget)}> 
+                      Rename Portfolio
+                  </Button>
+                  <Button color="secondary" onClick={handleDelete}>
+                      Delete Portfolio
+                  </Button>
+                </div>
+              } */}
+
+              <Button onClick={handleReload}>Update Data</Button>
+             
               {isWatchlist 
-              ? (<PfBar>
-                <Heading>{name}</Heading> 
-                </PfBar>)
+              ? (<div>
+                  <PfBar>
+                    <Heading>{name}</Heading> 
+                  </PfBar>
+                  <p> Stock List: </p>
+                  {
+                    stockArray.map(item => {
+                      return <StockRow key={item.stock} data={item} onDeleteCallback={() => { getWatchlist() }}/>
+                    })
+                  }
+                </div>)
               :
             (<div>
               <PfBar>
@@ -108,10 +185,12 @@ const Portfolio = () => {
               <PfTable stocks={stocks}/>
             </div>
             )}
+            
             < AddStock 
               token={token}
               pid={pid}
               load={loadPorfolioData}
+              onAddCallback={() => { getWatchlist() }}
             />
             </LeftBody>
             <RightBody>
