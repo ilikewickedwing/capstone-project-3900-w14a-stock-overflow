@@ -135,7 +135,7 @@ const Portfolio = () => {
       }
     })
     const pid = res.data;
-    history.push(`/dashboard`)
+    // history.push(`/dashboard`)
     history.push(`/portfolio/${pid}`)
   }
 
@@ -149,7 +149,7 @@ const Portfolio = () => {
               ? (<div>
                   <PfBar>
                     <Heading>{name}</Heading> 
-                    <Button onClick={handleReload}>Update Data</Button>
+                    {/* <Button onClick={handleReload}>Update Data</Button> */}
                   </PfBar>
                   <p> Stock List: </p>
                   {
