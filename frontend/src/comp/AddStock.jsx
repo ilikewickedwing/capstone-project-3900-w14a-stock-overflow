@@ -16,7 +16,7 @@ import { apiBaseUrl } from './const';
 
 
 // add stock form 
-const AddStock = ({token, pid}) => {
+const AddStock = ({token, pid, onAddCallback = () => {}}) => {
     // textinput state
     const [search, setSearch ] = React.useState("");
     // list of api return 
@@ -66,8 +66,9 @@ const AddStock = ({token, pid}) => {
         try {
             var floatPrice = parseFloat(price); 
             var intQuantity = parseInt(quantity);
-            await axios.post(`${apiBaseUrl}/user/stocks/add`, 
+            const res = await axios.post(`${apiBaseUrl}/user/stocks/add`, 
                 {token, pid, stock: currCode, price: floatPrice, quantity: intQuantity});
+            onAddCallback();
         } catch (e){
             alert(e);
         }
