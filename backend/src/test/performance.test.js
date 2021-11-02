@@ -121,7 +121,9 @@ describe('Retrieve stock information', () => {
     expect(resp).not.toBe(null);
     // console.log(resp.data.history);
   })
-
+  it('Get stock information, quote and history of invalid stock', async() => {
+    
+  })
 
   
   afterAll(async () => {
@@ -129,7 +131,7 @@ describe('Retrieve stock information', () => {
   })
 })
 
-describe('Retrieve stock info endpoint test', () => {
+/* describe('Retrieve stock info endpoint test', () => {
   // jest.setTimeout(30000);
   beforeAll(async () => {
     await database.connect();
@@ -167,9 +169,9 @@ describe('Retrieve stock info endpoint test', () => {
   afterAll(async() => {
     await database.disconnect();
   })
-}) 
+})  */
 
- describe('Calculate portfolio performance', () => {
+/* describe('Calculate portfolio performance', () => {
   const d = new Database(true);
   beforeAll(async () => {
     await d.connect();
@@ -390,7 +392,7 @@ describe('Retrieve stock info endpoint test', () => {
   afterAll(async () => {
     await d.disconnect();
   })
-})
+}) */
 
 /* describe('We be having funsies', () => {
   const d = new Database(true);

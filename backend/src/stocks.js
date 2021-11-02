@@ -105,10 +105,15 @@ export const modifyStock = async (token, pid, stock, price, quantity, option, da
   return resp;
 }
 
+/**
+ * Function to check if a stock, or series of stocks is valid
+ * @param {string} stock 
+ * @returns 
+ */
 export const checkStock = async (stock) => {
-  console.log("checkStock time for " + stock);
+  // console.log("checkStock time for " + stock);
   const stocks = await api.getAllStocks();
-  console.log("received all stocks");
+  // console.log("received all stocks");
   const symbols = stock.split(",");
 
   for (let i = 0; i < symbols.length; i++) {
@@ -142,6 +147,9 @@ export const getStock = async (type, stocks, interval, start) => {
   if (typeInt === 3 && interval) {
     if (interval.match(/^(1min|5min|15min)$/) === null) return -3;
   }
+
+  const checkDate = Date.parse(start);
+  if (!(checkDate instanceof Date && !isNaN(checkDate))) return -4;
 
   const resp = await api.getStock(typeInt, stocks, interval, start);
   // console.log(stocks);
