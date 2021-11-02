@@ -1,4 +1,4 @@
-import React from 'react'; 
+import React, {useContext} from 'react'; 
 import { useHistory, useParams } from 'react-router-dom';
 import axios from "axios";
 import Navigation from '../comp/Navigation'; 
@@ -20,6 +20,7 @@ import Button from '@mui/material/Button';
 import StockRow from '../comp/StockRow';
 import AddStock from '../comp/AddStock';
 import { apiBaseUrl } from '../comp/const';
+import { ApiContext } from '../api';
 
 const Portfolio = () => {
   const history = useHistory();
@@ -34,9 +35,11 @@ const Portfolio = () => {
   const [isChanged, setChanged ] = React.useState(0);
   const [stockArray, setStockArray ] = React.useState([{
     stock: null,
-    avgPrice: null,
-    quantity: null
+    stockName: null,
+    change: null,
+    changePercentage: null
   }]);
+  const api = useContext(ApiContext);
 
   const open = Boolean(anchorEl);
   const id = open ? 'simple-popover': undefined;
@@ -82,8 +85,9 @@ const Portfolio = () => {
       alert(e);
     }
   }
-  let array = [];
+  
   const getWatchlist = async () => {
+    let array = [];
     const token = localStorage.getItem('token');
     // get pid for the watchlist
     const res = await axios.get(`${apiBaseUrl}/user/portfolios/getPid`, {
@@ -94,13 +98,40 @@ const Portfolio = () => {
     })
     const pid = res.data;
     const request = await axios.get(`${apiBaseUrl}/user/portfolios/open?pid=${pid}`);
-    //const porfolioData = request.data;
-    //setName(porfolioData.name);
     
     array = request.data['stocks'];
-    setStockArray(array);
+    let propsArray = [];
+    for (let i = 0; i < array.length; i++) {
+      const data = await getStockDetails(array[i]['stock']);
+      propsArray.push(data);
+    }
+    // console.log(propsArray);
+    setStockArray(propsArray);
   }
 
+  async function getStockDetails(stockSymbol) {
+    const resp = await api.stocksInfo(1, stockSymbol, null, null);
+    const jsonResp = await resp.json();
+    let data = {
+      change: jsonResp.data.quotes.quote.change,
+      changePercentage: jsonResp.data.quotes.quote.change_percentage,
+      name: jsonResp.data.quotes.quote.description,
+      stock: jsonResp.data.quotes.quote.symbol
+    }
+    return data;
+  }
+
+  async function handleReload() {
+    const res = await axios.get(`${apiBaseUrl}/user/portfolios/getPid`, {
+      params: {
+        token: token,
+        name: 'Watchlist'
+      }
+    })
+    const pid = res.data;
+    history.push(`/dashboard`)
+    history.push(`/portfolio/${pid}`)
+  }
 
   return (
       <PageBody className="font-two">
@@ -108,7 +139,6 @@ const Portfolio = () => {
           <Tabs isChanged={isChanged}/>
           <PfBody>
             <LeftBody>
-<<<<<<< HEAD
               {isWatchlist === 0 &&
                 <div style={{textAlign: 'right', width:'100%'}}>
                   <Button id="renamePf" onClick={(e) => setAnchorEl(e.currentTarget)}> 
@@ -119,6 +149,7 @@ const Portfolio = () => {
                   </Button>
                 </div>
               }
+              <Button onClick={handleReload}>Reload</Button>
               <p> Stock List: </p>
               {
                 stockArray.map(item => {
@@ -126,7 +157,6 @@ const Portfolio = () => {
                 })
               }
               
-=======
               {isWatchlist 
               ? (<PfBar>
                 <Heading>{name}</Heading> 
@@ -144,8 +174,7 @@ const Portfolio = () => {
               </div>
               </PfBar>
             )}
-              <PfTable />
->>>>>>> main
+            
             < AddStock 
               token={token}
               pid={pid}
