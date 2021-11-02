@@ -35,15 +35,27 @@ export default function StocksGraph(props) {
   // make api call for time series
   useEffect(() => {
     const callApi = (company, interval) => {
-      const yesterdayTime = (new Date(Date.now() - 86400000)).toLocaleDateString('en-CA');
-      console.log(yesterdayTime);
+      const today = new Date();
+      const now = new Date(today);
       switch (interval) {
-        case "1min":
-          return api.stocksInfo(3, company, interval, null);
-        case "5min":
-          return api.stocksInfo(3, company, interval, null);
-        case "15min":
-          return api.stocksInfo(3, company, interval, null);
+        case "1min": {
+          const start = new Date();
+          start.setDate(now.getDate()-1);
+          const time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2) + " 00:00";
+          return api.stocksInfo(3, company, interval, time.toString());
+        }
+        case "5min": {
+          const start = new Date();
+          start.setDate(now.getDate()-1);
+          const time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2) + " 00:00";
+          return api.stocksInfo(3, company, interval, time.toString());
+        }
+        case "15min": {
+          const start = new Date();
+          start.setDate(now.getDate()-1);
+          const time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2) + " 00:00";
+          return api.stocksInfo(3, company, interval, time.toString());
+        }
         case "daily":
           return api.stocksInfo(2, company, interval, null);
         case "weekly":
@@ -153,12 +165,12 @@ StocksGraph.propTypes = {
  * @returns 
  */
 const transformData = (data, candlestickMode = true) => {
+  console.log(data);
   if ('series' in data.data) {
     return transformIntradayData(data, candlestickMode);
   } else if ('history' in data.data) {
     return transformNonIntradayData(data, candlestickMode)
   }
-  console.log(data);
   throw new Error("Invalid data received");
 }
   
