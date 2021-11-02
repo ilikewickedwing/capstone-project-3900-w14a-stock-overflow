@@ -48,10 +48,12 @@ const Portfolio = () => {
       const portfolioData = request.data;
       console.log(portfolioData);
       setName(portfolioData.name);
-      setStocks(portfolioData.stocks);
       if (portfolioData.name === "Watchlist"){
         setIsWatchlist(1);
-      } else {setIsWatchlist(0)}
+      } else {
+        setStocks(portfolioData.stocks);
+        setIsWatchlist(0);
+      }
     } catch (e) {
       alert(e.error);
     }
@@ -91,7 +93,8 @@ const Portfolio = () => {
                 <Heading>{name}</Heading> 
                 </PfBar>)
               :
-            (<PfBar>
+            (<div>
+              <PfBar>
               <Heading>{name}</Heading> 
               <div style={{}}>
                 <Button id="renamePf" onClick={(e) => setAnchorEl(e.currentTarget)}> 
@@ -102,8 +105,9 @@ const Portfolio = () => {
                 </Button>
               </div>
               </PfBar>
+              <PfTable stocks={stocks} pid={pid}/>
+            </div>
             )}
-              <PfTable stocks={stocks}/>
             < AddStock 
               token={token}
               pid={pid}

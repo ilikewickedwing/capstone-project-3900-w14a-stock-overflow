@@ -236,6 +236,10 @@ export default function PfTable({stocks}) {
   },[stocks]);
 
   const loadStocks = async () => {
+    if (stocks.length === 0) {
+      setRows([]);
+      return;
+    }
     const getNames = stocks.map(x=>x.stock);
     const stockNames = getNames.join(',');
     try {
