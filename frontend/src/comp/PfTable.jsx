@@ -255,20 +255,24 @@ export default function PfTable({stocks}) {
     const stockNames = getNames.join(',');
     try {
       const request = await axios.get(`${apiBaseUrl}/stocks/info?type=1&stocks=${stockNames}`);
-      const apiInfo = request.data.data.quotes.quote;
-
+      let apiInfo = request.data.data.quotes.quote;
+      if (!Array.isArray(apiInfo)) {
+        apiInfo = [apiInfo];
+      }
+      
       let stockRows = [];
-
+      
       for (let i = 0; i < stocks.length; i++) {
         const inf = apiInfo[i];
         const totalPrice = stocks[i].quantity * inf.last;
         const profitLoss = totalPrice - (stocks[i].avgPrice * stocks[i].quantity);
         const changePer = (inf.last / stocks[i].avgPrice) * 100;
-        stockRows.push(createData(stocks[i].stock, inf.description, stocks[i].avgPrice, inf.last, changePer.toFixed(2),stocks[i].quantity, totalPrice.toFixed(2), profitLoss.toFixed(2)));
+        stockRows.push(createData(stocks[i].stock, inf.description, stocks[i].avgPrice, inf.last.toFixed(2), changePer.toFixed(2),stocks[i].quantity, totalPrice.toFixed(2), profitLoss.toFixed(2)));
       }
       setRows(stockRows);
-
+      
     } catch (e) {
+      console.log(e);
       alert(e.error);
     }
 
@@ -380,12 +384,12 @@ export default function PfTable({stocks}) {
                         {row.code}
                       </TableCell>
                       <TableCell align="center" >{row.name}</TableCell>
-                      <TableCell align="center" >{row.buyPrice}</TableCell>
-                      <TableCell align="center" >{row.currPrice}</TableCell>
+                      <TableCell align="center" >${row.buyPrice}</TableCell>
+                      <TableCell align="center" >${row.currPrice}</TableCell>
                       <TableCell align="center" >{row.changePer}%</TableCell>
                       <TableCell align="center" >{row.units}</TableCell>
-                      <TableCell align="center" >{row.value}</TableCell>
-                      <TableCell align="center" >{row.profitLoss}</TableCell>
+                      <TableCell align="center" >${row.value}</TableCell>
+                      <TableCell align="center" >${row.profitLoss}</TableCell>
                     </TableRow>
                   );
                 })}
