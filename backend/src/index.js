@@ -470,7 +470,7 @@ app.get('/user/portfolios/calculate', async (req, res) => {
  * /user/portfolios/edit:
  *   post:
  *     tags: [Portfolio]
- *     description: endpoint for editing a single portfolio
+ *     description: endpoint for editing a single portfolio name
  *     parameters:
  *      - name: token
  *        description: The token of the user
@@ -608,6 +608,8 @@ app.post('/user/stocks/add', async (req, res) => {
     res.status(400).send({ error: "Must include valid quantity purchased" });
   } else if (resp === 5) {
     res.status(400).send({ error: "Must include valid price purchased at" });
+  } else if (resp === 6) {
+    res.status(403).send({ error: "Stock already in watchlist" });
   } else {
     res.status(200).send();
   }

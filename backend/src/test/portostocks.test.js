@@ -807,6 +807,10 @@ describe('Adding stocks to watchlist', () => {
       stocks: expect.arrayContaining(stArray)
     })
   })
+  it('Try and add same stock to watchlist', async () => {
+    const add1 = await addStock(token, pid, 'AMZN', null, null, d);
+    expect(add1).toBe(6);
+  })
   it('Remove first stock from watchlist', async () => {
     const rem = await modifyStock(token, pid, 'AAPL', null, null, 0, d);
     expect(rem).toBe(-1);
