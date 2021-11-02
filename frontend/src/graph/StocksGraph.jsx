@@ -119,7 +119,7 @@ export default function StocksGraph(props) {
   const renderGraph = () => {
     if (props.companyId in dataCache && timeOptions in dataCache[props.companyId]) {
       const data = transformData(dataCache[props.companyId][timeOptions], graphStyle === "candlestick");
-      // console.log(data);
+      console.log(data);
       return (
         <ResponsiveContainer width={'99%'} height={props.height}>
           <BarChart
@@ -165,7 +165,7 @@ StocksGraph.propTypes = {
  * @returns 
  */
 const transformData = (data, candlestickMode = true) => {
-  // console.log(data);
+  console.log(data);
   if ('series' in data.data) {
     return transformIntradayData(data, candlestickMode);
   } else if ('history' in data.data) {
