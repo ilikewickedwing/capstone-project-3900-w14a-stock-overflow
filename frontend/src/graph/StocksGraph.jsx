@@ -106,13 +106,15 @@ export default function StocksGraph(props) {
   }
   const renderGraph = () => {
     if (props.companyId in dataCache && timeOptions in dataCache[props.companyId]) {
+      const data = transformData(dataCache[props.companyId][timeOptions], graphStyle === "candlestick");
+      console.log(data);
       return (
         <ResponsiveContainer width={'99%'} height={props.height}>
           <BarChart
             margin={{ bottom: 25, left: 25 }}
-            data={transformData(dataCache[props.companyId][timeOptions], graphStyle === "candlestick")}
+            data={data}
           >
-            <XAxis datakey="time">
+            <XAxis dataKey="time">
               <Label value="Time Interval" offset={-10} position="insideBottom" />
             </XAxis>
             <YAxis 
@@ -219,43 +221,4 @@ function transformNonIntradayData(data, candlestickMode = true) {
     return newData;
   });
 }
- 
-  // const parsedData = [];
-  // for (const timeKey of Object.keys(timeSeriesData)) {
-  //   const objData = timeSeriesData[timeKey];
-  //   // Data for candlestick mode
-  //   let newData = {
-  //     time: timeKey,
-  //     openCloseData: [
-  //       Number(objData["1. open"]),
-  //       Number(objData["4. close"]),
-  //     ],
-  //     high: Number(objData["2. high"]),
-  //     low: Number(objData["3. low"]),
-  //     volume: Number(objData["5. volume"]),
-  //   }
-  //   // Data for ohlc
-  //   if (!candlestickMode) {
-  //     newData = {
-  //       time: timeKey,
-  //       open: Number(objData["1. open"]),
-  //       close: Number(objData["4. close"]),
-  //       highLow: [
-  //         Number(objData["2. high"]),
-  //         Number(objData["3. low"]),
-  //       ],
-  //       volume: Number(objData["5. volume"]),
-  //     }
-  //   }
-  //   // Sort it into an array as it is returned as
-  //   // an object
-  //   let i = 0;
-  //   for (; i < parsedData.length; i++) {
-  //     if (compareTime(timeKey, parsedData[i].time)) {
-  //       break;
-  //     }
-  //   }
-  //   parsedData.splice(i, 0, newData);
-  // }
-  // return parsedData;
 
