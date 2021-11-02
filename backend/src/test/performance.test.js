@@ -20,7 +20,7 @@ describe('Retrieve stock information', () => {
   
 
   it('Get stock information', async () => {
-    const resp = await getStock(0, 'AAPL');
+    const resp = await getStock('0', 'AAPL');
     expect(resp).not.toBe(null);
     expect(resp).toMatchObject({
       symbol: 'AAPL',
@@ -31,7 +31,7 @@ describe('Retrieve stock information', () => {
     // console.log(resp.data);
   })
   it('Get single stock quotes', async () => {
-    const resp = await getStock(1, 'AAPL');
+    const resp = await getStock('1', 'AAPL');
     expect(resp).not.toBe(null);
     expect(resp).toMatchObject({
       symbol: 'AAPL',
@@ -42,7 +42,7 @@ describe('Retrieve stock information', () => {
     // console.log(resp.data);
   })
   it('Get multiple stock quotes', async () => {
-    const resp = await getStock(1, 'AAPL,AMZN,IBM');
+    const resp = await getStock('1', 'AAPL,AMZN,IBM');
     expect(resp).not.toBe(null);
     expect(resp).toMatchObject({
       symbol: 'AAPL,AMZN,IBM',
@@ -50,13 +50,13 @@ describe('Retrieve stock information', () => {
       data: expect.anything(),
       time: expect.any(Date)
     })
-    console.log(resp.data.quotes);
+    // console.log(resp.data.quotes);
   })
   it('Get stock history: 1 day, 1 minute interval', async () => {
     const start = new Date();
     start.setDate(now.getDate()-1);
     var time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2) + " 00:00";
-    const resp = await getStock(3, 'IBM', '1min', time);
+    const resp = await getStock('3', 'IBM', '1min', time.toString());
     expect(resp).not.toBe(null);
     // console.log(resp.data.series);
   }) 
@@ -64,7 +64,7 @@ describe('Retrieve stock information', () => {
     const start = new Date();
     start.setDate(now.getDate()-1);
     var time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2) + " 00:00";
-    const resp = await getStock(3, 'IBM', '5min', time);
+    const resp = await getStock('3', 'IBM', '5min', time.toString());
     expect(resp).not.toBe(null);
     // console.log(resp.data.series);
   }) 
@@ -72,7 +72,7 @@ describe('Retrieve stock information', () => {
     const start = new Date();
     start.setDate(now.getDate()-1);
     var time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2) + " 00:00";
-    const resp = await getStock(3, 'IBM', '15min', time);
+    const resp = await getStock('3', 'IBM', '15min', time.toString());
     expect(resp).not.toBe(null);
     // console.log(resp.data.series);
   }) 
@@ -80,8 +80,8 @@ describe('Retrieve stock information', () => {
     const start = new Date();
     start.setMonth(now.getMonth() - 1);
     var time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
-    console.log(time);
-    const resp = await getStock(2, 'IBM', 'daily', time);
+    // console.log(time);
+    const resp = await getStock('2', 'IBM', 'daily', time.toString());
     expect(resp).not.toBe(null);
     // console.log(resp.data.history);
   })
@@ -89,8 +89,8 @@ describe('Retrieve stock information', () => {
     const start = new Date();
     start.setMonth(now.getMonth() - 6);
     var time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
-    console.log(time);
-    const resp = await getStock(2, 'IBM', 'daily', time);
+    // console.log(time);
+    const resp = await getStock('2', 'IBM', 'daily', time.toString());
     expect(resp).not.toBe(null);
     // console.log(resp.data.history);
   })
@@ -98,8 +98,8 @@ describe('Retrieve stock information', () => {
     const start = new Date();
     start.setFullYear(start.getFullYear() - 1);
     var time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
-    console.log(time);
-    const resp = await getStock(2, 'IBM', 'weekly', time);
+    // console.log(time);
+    const resp = await getStock('2', 'IBM', 'weekly', time.toString());
     expect(resp).not.toBe(null);
     // console.log(resp.data.history);
   })
@@ -107,8 +107,8 @@ describe('Retrieve stock information', () => {
     const start = new Date();
     start.setFullYear(start.getFullYear() - 5);
     var time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
-    console.log(time);
-    const resp = await getStock(2, 'IBM', 'weekly', time);
+    // console.log(time);
+    const resp = await getStock('2', 'IBM', 'weekly', time.toString());
     expect(resp).not.toBe(null);
     // console.log(resp.data.history);
   })
@@ -116,12 +116,93 @@ describe('Retrieve stock information', () => {
     const start = new Date();
     start.setFullYear(start.getFullYear() - 10);
     var time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
-    console.log(time);
-    const resp = await getStock(2, 'IBM', 'monthly', time);
+    // console.log(time);
+    const resp = await getStock('2', 'IBM', 'monthly', time.toString());
     expect(resp).not.toBe(null);
     // console.log(resp.data.history);
   })
-
+  it('Test multiple invalid stocks', async () => {
+    const resp1 = await getStock('0', 'Jono');
+    expect(resp1).toBe(-1);
+    const resp2 = await getStock('0', 'AAPL,Jono');
+    expect(resp2).toBe(-1);
+    const resp3 = await getStock('0', 'Jono,AAPL');
+    expect(resp3).toBe(-1);
+    const resp4 = await getStock('0', 'AAPL,Jono,IBM');
+    expect(resp4).toBe(-1);
+  })
+  it('Test invalid types', async () => {
+    const resp1 = await getStock(-1, 'AAPL');
+    expect(resp1).toBe(-2);
+    const resp2 = await getStock(5, 'AAPL');
+    expect(resp2).toBe(-2);
+    const resp3 = await getStock(null, 'AAPL');
+    expect(resp3).toBe(-2);
+    const resp4 = await getStock(1.2, 'AAPL');
+    expect(resp4).toBe(-2);
+    const resp5 = await getStock('yes', 'AAPL');
+    expect(resp5).toBe(-2);
+  })
+  it('Test invalid intervals', async () => {
+    const resp1 = await getStock('2', 'AAPL', 'fakeinterval');
+    expect(resp1).toBe(-3);
+    const resp2 = await getStock('3', 'AAPL', 'fakeinterval');
+    expect(resp2).toBe(-3);
+    const resp3 = await getStock('2', 'AAPL', 2);
+    expect(resp3).toBe(-3);
+    const resp4 = await getStock('3', 'AAPL', 2);
+    expect(resp4).toBe(-3);
+    const resp5 = await getStock('2', 'AAPL', '1min');
+    expect(resp5).toBe(-3);
+    const resp6 = await getStock('2', 'AAPL', '5min');
+    expect(resp6).toBe(-3);
+    const resp7 = await getStock('2', 'AAPL', '15min');
+    expect(resp7).toBe(-3);
+    const resp8 = await getStock('3', 'AAPL', 'daily');
+    expect(resp8).toBe(-3);
+    const resp9 = await getStock('3', 'AAPL', 'weekly');
+    expect(resp9).toBe(-3);
+    const resp10 = await getStock('3', 'AAPL', 'monthly');
+    expect(resp10).toBe(-3);
+    const resp11 = await getStock('2', 'AAPL', null);
+    expect(resp11).toBe(-3);
+    const resp12 = await getStock('3', 'AAPL', null);
+    expect(resp12).toBe(-3);
+    const resp13 = await getStock('2', 'AAPL');
+    expect(resp13).toBe(-3);
+    const resp14 = await getStock('3', 'AAPL');
+    expect(resp14).toBe(-3);
+  })
+  it('Test invalid starts', async () => {
+    const resp1 = await getStock('2', 'AAPL', 'daily', 'fakedate');
+    expect(resp1).toBe(-4);
+    const resp2 = await getStock('2', 'AAPL', 'daily', 12345);
+    expect(resp2).toBe(-4);
+    const resp3 = await getStock('2', 'AAPL', 'daily', '31/10/2021');
+    expect(resp3).toBe(-4);
+    const resp4 = await getStock('2', 'AAPL', 'daily', '2021-10-31 00:00');
+    expect(resp4).toBe(-4);
+    const resp5 = await getStock('2', 'AAPL', 'daily', '2021/10/31');
+    expect(resp5).toBe(-4);
+    const resp6 = await getStock('2', 'AAPL', 'daily', '2021-31-10');
+    expect(resp6).toBe(-4);
+    const resp7 = await getStock('2', 'AAPL', 'daily', '2021-12-31');
+    expect(resp7).toBe(-4);
+    const resp8 = await getStock('3', 'AAPL', '1min', 'fakedate');
+    expect(resp8).toBe(-4);
+    const resp9 = await getStock('3', 'AAPL', '1min', 12345);
+    expect(resp9).toBe(-4);
+    const resp10 = await getStock('3', 'AAPL', '1min', '2021-10-31 25:00');
+    expect(resp10).toBe(-4);
+    const resp11 = await getStock('3', 'AAPL', '1min', '31-10-2021 00:00');
+    expect(resp11).toBe(-4);
+    const resp12 = await getStock('3', 'AAPL', '1min', '2021/31/10 00:60');
+    expect(resp12).toBe(-4);
+    const resp13 = await getStock('3', 'AAPL', '1min', '2021-31-10 1:10');
+    expect(resp13).toBe(-4);
+    const resp14 = await getStock('3', 'AAPL', '1min', '2021-12-31 00:00');
+    expect(resp14).toBe(-4);
+  })
 
   
   afterAll(async () => {
@@ -129,7 +210,7 @@ describe('Retrieve stock information', () => {
   })
 })
 
-describe('Retrieve stock info endpoint test', () => {
+/* describe('Retrieve stock info endpoint test', () => {
   // jest.setTimeout(30000);
   beforeAll(async () => {
     await database.connect();
@@ -167,9 +248,9 @@ describe('Retrieve stock info endpoint test', () => {
   afterAll(async() => {
     await database.disconnect();
   })
-}) 
+})  */
 
- describe('Calculate portfolio performance', () => {
+/* describe('Calculate portfolio performance', () => {
   const d = new Database(true);
   beforeAll(async () => {
     await d.connect();
@@ -390,7 +471,7 @@ describe('Retrieve stock info endpoint test', () => {
   afterAll(async () => {
     await d.disconnect();
   })
-})
+}) */
 
 /* describe('We be having funsies', () => {
   const d = new Database(true);
@@ -405,7 +486,7 @@ describe('Retrieve stock info endpoint test', () => {
     // const a = await alphavantage._callTradier(1,'AAPL,AMZN,IBM');
     // console.log(a.quotes.quote);
 
-    const b = await getStock(1, 'AAPL', '15min', '2021-10-29 00:00');
+    const b = await getStock('1', 'AAPL', '15min', '2021-10-29 00:00');
     // console.log(b.data.quotes);
 
   })
