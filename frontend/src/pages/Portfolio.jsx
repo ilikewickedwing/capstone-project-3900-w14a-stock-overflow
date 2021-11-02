@@ -149,18 +149,21 @@ const Portfolio = () => {
                   </Button>
                 </div>
               }
-              <Button onClick={handleReload}>Reload</Button>
-              <p> Stock List: </p>
-              {
-                stockArray.map(item => {
-                  return <StockRow key={item.stock} data={item}/>
-                })
-              }
-              
+
+              <Button onClick={handleReload}>Update Data</Button>
+             
               {isWatchlist 
-              ? (<PfBar>
-                <Heading>{name}</Heading> 
-                </PfBar>)
+              ? (<div>
+                  <PfBar>
+                    <Heading>{name}</Heading> 
+                  </PfBar>
+                  <p> Stock List: </p>
+                  {
+                    stockArray.map(item => {
+                      return <StockRow key={item.stock} data={item} onDeleteCallback={() => { getWatchlist() }}/>
+                    })
+                  }
+                </div>)
               :
             (<PfBar>
               <Heading>{name}</Heading> 

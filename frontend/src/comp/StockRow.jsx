@@ -3,7 +3,7 @@ import axios from 'axios';
 import { apiBaseUrl } from './const';
 import { ApiContext } from '../api';
 
-const StockRow = ({data}) => {
+const StockRow = ({data, onDeleteCallback = () => {}}) => {
   const api = useContext(ApiContext);
   const stock = data.stock;
   async function handleDeleteStock() {
@@ -25,6 +25,7 @@ const StockRow = ({data}) => {
       quantity: 0,
       option: 0
     })
+    onDeleteCallback();
   }
 
   // async function getStockDetails() {
