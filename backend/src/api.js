@@ -173,7 +173,7 @@ export class API {
     let symbols = null;
     let symbol = null;
 
-    console.log('tradier api call');
+    // console.log('tradier api call');
     
     if ((type) === 1) {
       url = 'quotes';
@@ -186,13 +186,13 @@ export class API {
       symbol = stocks;
     }
 
-    console.log("url is " + url + ", symbol is " + symbol + ", symbols is " + symbols);
+    /* console.log("url is " + url + ", symbol is " + symbol + ", symbols is " + symbols);
     if (interval !== null) {
       console.log('interval is ' + interval);
     }
     if (start !== null) {
       console.log('start is ' + start);
-    }
+    } */
 
     const request = await axios({
       method: 'get',

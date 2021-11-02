@@ -506,6 +506,7 @@ export class Database {
 
     
     if (stkIndex != -1) { // If the stock is already in the list
+      if(pfResp.name === 'Watchlist') return 6;
       let cost = stockList[stkIndex].avgPrice * stockList[stkIndex].quantity;
       cost += price * quantity;
       stockList[stkIndex].quantity += quantity;
