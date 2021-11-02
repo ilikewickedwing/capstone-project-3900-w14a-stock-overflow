@@ -138,8 +138,6 @@ export const getStock = async (type, stocks, interval, start) => {
   const typeInt = parseFloat(type);
   if (typeInt < 0 || typeInt > 3 || !Number.isInteger(typeInt)) return -2;
 
-  if ((typeInt === 2 || typeInt === 3) && typeof(interval) !== 'string') return -3;
-
   if (typeInt === 2 && interval) {
     if (interval.match(/^(daily|weekly|monthly)$/) === null) return -3;
   }
