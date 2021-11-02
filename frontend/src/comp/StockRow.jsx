@@ -40,7 +40,7 @@ const StockRow = ({data, onDeleteCallback = () => {}}) => {
       <ul>Symbol: {data.stock}</ul>
       <ul>Name: {data.name}</ul>
       <ul>Price change: {data.change}</ul>
-      <ul>Price change percentage: {data.changePercentage}</ul>
+      <ul>Price change percentage: {data.changePercentage}%</ul>
       {/* <button onClick={getStockDetails}>Get Recent Data</button> */}
       <button onClick={handleDeleteStock}>Delete</button>
     </div>
