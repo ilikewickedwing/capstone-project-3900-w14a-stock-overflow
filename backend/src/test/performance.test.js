@@ -65,70 +65,70 @@ describe('Retrieve stock information', () => {
   it('Get stock history: 1 day, 1 minute interval', async () => {
     const start = new Date();
     start.setDate(now.getDate()-1);
-    var time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2) + " 00:00";
+    let time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2) + " 00:00";
     const resp = await getStock('3', 'IBM', '1min', time.toString());
-    expect(resp).not.toBe(null);
+    expect(resp.data.series).not.toBe(null);
     // console.log(resp.data.series);
   }) 
   it('Get stock history: 1 day, 5 minute interval', async () => {
     const start = new Date();
     start.setDate(now.getDate()-1);
-    var time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2) + " 00:00";
+    let time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2) + " 00:00";
     const resp = await getStock('3', 'IBM', '5min', time.toString());
-    expect(resp).not.toBe(null);
+    expect(resp.data.series).not.toBe(null);
     // console.log(resp.data.series);
   }) 
   it('Get stock history: 5 day, 15 minute interval', async () => {
     const start = new Date();
     start.setDate(now.getDate()-5);
-    var time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2) + " 00:00";
+    let time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2) + " 00:00";
     const resp = await getStock('3', 'IBM', '15min', time.toString());
-    expect(resp).not.toBe(null);
+    expect(resp.data.series).not.toBe(null);
     // console.log(resp.data.series);
   }) 
   it('Get stock history: 1 month, daily interval', async () => {
     const start = new Date();
     start.setMonth(now.getMonth() - 1);
-    var time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
+    let time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
     // console.log(time);
     const resp = await getStock('2', 'IBM', 'daily', time.toString());
-    expect(resp).not.toBe(null);
+    expect(resp.data.history).not.toBe(null);
     // console.log(resp.data.history);
   })
   it('Get stock history: 6 months, daily interval', async () => {
     const start = new Date();
     start.setMonth(now.getMonth() - 6);
-    var time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
+    let time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
     // console.log(time);
     const resp = await getStock('2', 'IBM', 'daily', time.toString());
-    expect(resp).not.toBe(null);
+    expect(resp.data.history).not.toBe(null);
     // console.log(resp.data.history);
   })
   it('Get stock history: 1 year, weekly interval', async () => {
     const start = new Date();
     start.setFullYear(start.getFullYear() - 1);
-    var time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
+    let time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
     // console.log(time);
     const resp = await getStock('2', 'IBM', 'weekly', time.toString());
-    expect(resp).not.toBe(null);
+    expect(resp.data.history).not.toBe(null);
     // console.log(resp.data.history);
   })
   it('Get stock history: 5 years, weekly interval', async () => {
     const start = new Date();
     start.setFullYear(start.getFullYear() - 5);
-    var time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
+    let time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
     // console.log(time);
     const resp = await getStock('2', 'IBM', 'weekly', time.toString());
-    expect(resp).not.toBe(null);
+    expect(resp.data.history).not.toBe(null);
     // console.log(resp.data.history);
   })
   it('Get stock history: 10 years, monthly interval', async () => {
     const start = new Date();
     start.setFullYear(start.getFullYear() - 10);
-    var time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
+    let time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
     // console.log(time);
     const resp = await getStock('2', 'IBM', 'monthly', time.toString());
-    expect(resp).not.toBe(null);
+    expect(resp.data.history).not.toBe(null);
     // console.log(resp.data.history);
   })
   it('Test multiple invalid stocks', async () => {
@@ -254,65 +254,73 @@ describe('Retrieve stock information endpoint test', () => {
   it('200 on successful get stock history: 1 day, 1 minute interval', async () => {
     const start = new Date();
     start.setDate(now.getDate()-1);
-    var time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2) + " 00:00";
+    let time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2) + " 00:00";
     const resp = await request(app).get(`/stocks/info?type=3&stocks=AAPL&interval=1min&start=${time}`).send();
     expect(resp.statusCode).toBe(200);
+    expect(resp.body.data.series).not.toBe(null);
     // console.log(resp.body);
   })
   it('200 on successful get stock history: 1 day, 5 minute interval', async () => {
     const start = new Date();
     start.setDate(now.getDate()-1);
-    var time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2) + " 00:00";
+    let time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2) + " 00:00";
     const resp = await request(app).get(`/stocks/info?type=3&stocks=AAPL&interval=5min&start=${time}`).send();
     expect(resp.statusCode).toBe(200);
+    expect(resp.body.data.series).not.toBe(null);
     // console.log(resp.body);
   }) 
   it('200 on successful get stock history: 1 day, 15 minute interval', async () => {
     const start = new Date();
     start.setDate(now.getDate()-1);
-    var time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2) + " 00:00";
+    let time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2) + " 00:00";
     const resp = await request(app).get(`/stocks/info?type=3&stocks=AAPL&interval=15min&start=${time}`).send();
     expect(resp.statusCode).toBe(200);
+    expect(resp.body.data.series).not.toBe(null);
     // console.log(resp.body);
   }) 
   it('200 on successful get stock history: 1 month, daily interval', async () => {
     const start = new Date();
     start.setMonth(now.getMonth() - 1);
-    var time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
+    let time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
     const resp = await request(app).get(`/stocks/info?type=2&stocks=AAPL&interval=daily&start=${time}`).send();
     expect(resp.statusCode).toBe(200);
+    expect(resp.body.data.history).not.toBe(null);
     // console.log(resp.body);
   })
   it('200 on successful get stock history: 6 months, daily interval', async () => {
     const start = new Date();
     start.setMonth(now.getMonth() - 6);
-    var time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
+    let time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
     const resp = await request(app).get(`/stocks/info?type=2&stocks=AAPL&interval=daily&start=${time}`).send();
     expect(resp.statusCode).toBe(200);
+    expect(resp.body.data.history).not.toBe(null);
     // console.log(resp.body);
   })
   it('200 on successful get stock history: 1 year, weekly interval', async () => {
     const start = new Date();
     start.setFullYear(start.getFullYear() - 1);
-    var time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
+    let time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
     const resp = await request(app).get(`/stocks/info?type=2&stocks=AAPL&interval=weekly&start=${time}`).send();
     expect(resp.statusCode).toBe(200);
+    expect(resp.body.data.history).not.toBe(null);
     // console.log(resp.body);
   })
   it('200 on successful get stock history: 5 years, weekly interval', async () => {
     const start = new Date();
     start.setFullYear(start.getFullYear() - 5);
-    var time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
+    let time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
     const resp = await request(app).get(`/stocks/info?type=2&stocks=AAPL&interval=weekly&start=${time}`).send();
     expect(resp.statusCode).toBe(200);
+    expect(resp.body.data.history).not.toBe(null);
     // console.log(resp.body);
   })
   it('200 on successful get stock history: 10 years, monthly interval', async () => {
     const start = new Date();
     start.setFullYear(start.getFullYear() - 10);
-    var time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
+    let time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
     const resp = await request(app).get(`/stocks/info?type=2&stocks=AAPL&interval=monthly&start=${time}`).send();
     expect(resp.statusCode).toBe(200);
+    expect(resp.body.data.history).not.toBe(null);
     // console.log(resp.body);
   })
   it('403 on invalid stock name', async () => {
@@ -423,7 +431,7 @@ describe('Calculate portfolio performance', () => {
   it('Calculate portfolio performance first', async () => {
     const calc = await calcPf(token, pid, d);
     expect(calc).not.toBe(null);
-    console.log("calc is " + calc);
+    // console.log("calc is " + calc);
   })
   it('Buy extra of first stock in portfolio', async () => {
     const add = await modifyStock(token, pid, 'AAPL', 3, 2, 1, d);
@@ -478,7 +486,7 @@ describe('Calculate portfolio performance', () => {
   it('Calculate portfolio performance second', async () => {
     const calc = await calcPf(token, pid, d);
     expect(calc).not.toBe(null);
-    console.log("calc is " + calc);
+    // console.log("calc is " + calc);
   })
   it('Sell some of first stock in portfolio', async () => {
     const add = await modifyStock(token, pid, 'AAPL', 2, 2, 0, d);
@@ -503,7 +511,7 @@ describe('Calculate portfolio performance', () => {
   it('Calculate portfolio performance third', async () => {
     const calc = await calcPf(token, pid, d);
     expect(calc).not.toBe(null);
-    console.log("calc is " + calc);
+    // console.log("calc is " + calc);
   })
   it('Sell some of all stocks in portfolio', async () => {
     const add1 = await modifyStock(token, pid, 'AMZN', 1.5, 2, 0, d);
@@ -538,7 +546,7 @@ describe('Calculate portfolio performance', () => {
   it('Calculate portfolio performance fourth', async () => {
     const calc = await calcPf(token, pid, d);
     expect(calc).not.toBe(null);
-    console.log("calc is " + calc);
+    // console.log("calc is " + calc);
   })
   it('Sell rest of first stock in portfolio', async () => {
     const add = await modifyStock(token, pid, 'AAPL', 3, 2, 0, d);
@@ -558,7 +566,7 @@ describe('Calculate portfolio performance', () => {
   it('Calculate portfolio performance fifth', async () => {
     const calc = await calcPf(token, pid, d);
     expect(calc).not.toBe(null);
-    console.log("calc is " + calc);
+    // console.log("calc is " + calc);
   })
   it('Sell rest of all stocks in portfolio', async () => {
     const add1 = await modifyStock(token, pid, 'AMZN', 2, 3, 0, d);
@@ -582,7 +590,7 @@ describe('Calculate portfolio performance', () => {
   it('Calculate portfolio performance sixth', async () => {
     const calc = await calcPf(token, pid, d);
     expect(calc).not.toBe(null);
-    console.log("calc is " + calc);
+    // console.log("calc is " + calc);
   })
 
   afterAll(async () => {
@@ -654,7 +662,7 @@ describe('Portfolio and stocks endpoint test', () => {
     const resp = await request(app).get(`/user/portfolios/calculate?token=${token}&pid=${pid1}`).send();
     expect(resp.statusCode).toBe(200);
     expect(resp.body).not.toBe(null);
-    console.log(resp.body.performance);
+    // console.log(resp.body.performance);
   })
   it('200 on subsequent valid stock additions', async () => {
     const add1 = await request(app).post(`/user/stocks/add`).send({
@@ -707,7 +715,7 @@ describe('Portfolio and stocks endpoint test', () => {
     const resp = await request(app).get(`/user/portfolios/calculate?token=${token}&pid=${pid1}`).send();
     expect(resp.statusCode).toBe(200);
     expect(resp.body).not.toBe(null);
-    console.log(resp.body.performance);
+    // console.log(resp.body.performance);
   })
   it('200 on first valid stock sale', async () => {
     const sell = await request(app).put(`/user/stocks/edit`).send({
@@ -737,7 +745,7 @@ describe('Portfolio and stocks endpoint test', () => {
     const resp = await request(app).get(`/user/portfolios/calculate?token=${token}&pid=${pid1}`).send();
     expect(resp.statusCode).toBe(200);
     expect(resp.body).not.toBe(null);
-    console.log(resp.body.performance);
+    // console.log(resp.body.performance);
   })
   it('200 on subsequent valid stock sales', async () => {
     const sell1 = await request(app).put(`/user/stocks/edit`).send({
@@ -776,7 +784,7 @@ describe('Portfolio and stocks endpoint test', () => {
     const resp = await request(app).get(`/user/portfolios/calculate?token=${token}&pid=${pid1}`).send();
     expect(resp.statusCode).toBe(200);
     expect(resp.body).not.toBe(null);
-    console.log(resp.body.performance);
+    // console.log(resp.body.performance);
   })
   it('200 on subsequent valid portfolio creations', async () => {
     const resp1 = await request(app).post(`/user/portfolios/create`).send({
