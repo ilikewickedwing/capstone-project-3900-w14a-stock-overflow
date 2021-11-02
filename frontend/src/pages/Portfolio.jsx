@@ -107,6 +107,7 @@ const Portfolio = () => {
             < AddStock 
               token={token}
               pid={pid}
+              load={loadPorfolioData}
             />
             </LeftBody>
             <RightBody>

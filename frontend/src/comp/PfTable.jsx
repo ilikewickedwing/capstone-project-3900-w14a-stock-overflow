@@ -229,12 +229,7 @@ export default function PfTable({stocks}) {
   const [selected, setSelected] = React.useState([]);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
-  const [rows, setRows] = React.useState([
-    createData("ABC", "asdadasd", 35, 37, 5, 3, 95,5),
-    createData("BBC", "BusbisCorp", 36, 38, 5, 3, 95,5),
-    createData("CBC", "CusbisCorp", 37, 36, 5, 3, 95,5),
-    createData("DBC", "DusbisCorp", 38, 32, 5, 3, 95,5)
-  ]);
+  const [rows, setRows] = React.useState([]);
 
   React.useEffect(() => {
     loadStocks();
@@ -251,10 +246,10 @@ export default function PfTable({stocks}) {
 
       for (let i = 0; i < stocks.length; i++) {
         const inf = apiInfo[i];
-        const totalPrice = stocks[i].quantity * stocks[i].avgPrice;
-        const profitLoss = (inf.last * stocks[i].quantity) - totalPrice;
-        const changePer = profitLoss / totalPrice;
-        stockRows.push(createData(stocks[i].stock, inf.description, stocks[i].avgPrice, inf.last, changePer,stocks[i].quantity, totalPrice, profitLoss));
+        const totalPrice = stocks[i].quantity * inf.last;
+        const profitLoss = totalPrice - (stocks[i].avgPrice * stocks[i].quantity);
+        const changePer = (inf.last / stocks[i].avgPrice) * 100;
+        stockRows.push(createData(stocks[i].stock, inf.description, stocks[i].avgPrice, inf.last, changePer.toFixed(2),stocks[i].quantity, totalPrice.toFixed(2), profitLoss.toFixed(2)));
       }
       setRows(stockRows);
 
@@ -372,7 +367,7 @@ export default function PfTable({stocks}) {
                       <TableCell align="center" >{row.name}</TableCell>
                       <TableCell align="center" >{row.buyPrice}</TableCell>
                       <TableCell align="center" >{row.currPrice}</TableCell>
-                      <TableCell align="center" >{row.changePer}</TableCell>
+                      <TableCell align="center" >{row.changePer}%</TableCell>
                       <TableCell align="center" >{row.units}</TableCell>
                       <TableCell align="center" >{row.value}</TableCell>
                       <TableCell align="center" >{row.profitLoss}</TableCell>
