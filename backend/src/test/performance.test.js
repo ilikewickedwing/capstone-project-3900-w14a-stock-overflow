@@ -7,7 +7,7 @@ import request from 'supertest';
 import { app, database } from "../index";
 
 
-/* describe('Retrieve stock information', () => {
+describe('Retrieve stock information', () => {
 	const d = new Database(true);
   beforeAll(async () => {
     await d.connect();
@@ -51,6 +51,16 @@ import { app, database } from "../index";
       time: expect.any(Date)
     })
     // console.log(resp.data.quotes);
+  })
+  it('Get stock history: intraday', async() => {
+    const resp = await getStock('3', 'IBM');
+    expect(resp).not.toBe(null);
+    // console.log(resp);
+  })
+  it('Get stock history: not intraday', async() => {
+    const resp = await getStock('2', 'IBM');
+    expect(resp).not.toBe(null);
+    // console.log(resp);
   })
   it('Get stock history: 1 day, 1 minute interval', async () => {
     const start = new Date();
@@ -148,9 +158,9 @@ import { app, database } from "../index";
     expect(resp1).toBe(-3);
     const resp2 = await getStock('3', 'AAPL', 'fakeinterval');
     expect(resp2).toBe(-3);
-    const resp3 = await getStock('2', 'AAPL', 2);
+    const resp3 = await getStock('2', 'AAPL', '2');
     expect(resp3).toBe(-3);
-    const resp4 = await getStock('3', 'AAPL', 2);
+    const resp4 = await getStock('3', 'AAPL', '2');
     expect(resp4).toBe(-3);
     const resp5 = await getStock('2', 'AAPL', '1min');
     expect(resp5).toBe(-3);
@@ -176,7 +186,7 @@ import { app, database } from "../index";
   it('Test invalid starts', async () => {
     const resp1 = await getStock('2', 'AAPL', 'daily', 'fakedate');
     expect(resp1).toBe(-4);
-    const resp2 = await getStock('2', 'AAPL', 'daily', 12345);
+    const resp2 = await getStock('2', 'AAPL', 'daily', '12345');
     expect(resp2).toBe(-4);
     const resp3 = await getStock('2', 'AAPL', 'daily', '31/10/2021');
     expect(resp3).toBe(-4);
@@ -190,7 +200,7 @@ import { app, database } from "../index";
     expect(resp7).toBe(-4);
     const resp8 = await getStock('3', 'AAPL', '1min', 'fakedate');
     expect(resp8).toBe(-4);
-    const resp9 = await getStock('3', 'AAPL', '1min', 12345);
+    const resp9 = await getStock('3', 'AAPL', '1min', '12345');
     expect(resp9).toBe(-4);
     const resp10 = await getStock('3', 'AAPL', '1min', '2021-10-31 25:00');
     expect(resp10).toBe(-4);
@@ -210,7 +220,7 @@ import { app, database } from "../index";
   })
 })
 
-describe('Retrieve stock information endpoint test', () => {
+/* describe('Retrieve stock information endpoint test', () => {
   beforeAll(async () => {
     await database.connect();
   })
