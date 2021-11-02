@@ -57,7 +57,7 @@ export class API {
     // console.log(this.infoCache);
     // console.log("stock requested is " + stock);
     // Search for stock in cache
-    /* const search = this.infoCache.filter(o => (o.symbol === stock) && (o.param === param));
+    const search = this.infoCache.filter(o => (o.symbol === stocks) && (o.param === type));
     const time = Date.now();
 
     if (search.length !== 0) {
@@ -69,7 +69,7 @@ export class API {
       return search[0];
     }
 
-    console.log("fetching cache"); */
+    // console.log("fetching cache");
     // Fetch stock and add to cache
     const resp = await this._getStock(type, stocks, interval, start);
     // console.log(resp);
@@ -112,7 +112,7 @@ export class API {
     }
     
     // console.log(obj);
-    // this.infoCache.push(obj);
+    this.infoCache.push(obj);
 
     return obj;
   }

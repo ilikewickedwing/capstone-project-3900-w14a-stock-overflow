@@ -7,7 +7,7 @@ import request from 'supertest';
 import { app, database } from "../index";
 
 
-describe('Retrieve stock information', () => {
+/* describe('Retrieve stock information', () => {
 	const d = new Database(true);
   beforeAll(async () => {
     await d.connect();
@@ -210,47 +210,137 @@ describe('Retrieve stock information', () => {
   })
 })
 
-/* describe('Retrieve stock info endpoint test', () => {
-  // jest.setTimeout(30000);
+describe('Retrieve stock information endpoint test', () => {
   beforeAll(async () => {
     await database.connect();
   })
 
   jest.setTimeout(30000);
+  const today = new Date();
+  const now = new Date(today);
 
-  it('200 on successful get stock', async () => {
-    console.log('200 on successful get stock');
-    const resp = await request(app).get(`/stocks/info?type=2&stocks=IBM`).send();
-    // expect(resp.statusCode).toBe(200);
-    console.log(resp.body);
-    // expect(resp.body).toMatchObject({
-    //   symbol: 'IBM',
-    //   data: {
-    //     intraday: expect.anything(),
-    //     daily: expect.anything(),
-    //     weekly: expect.anything(),
-    //     monthly: expect.anything(),
-    //     price: expect.anything(),
-    //     info: expect.anything()
-    //   },
-    //   time: expect.any(String),
-    // })
-    // console.log(resp.body.data.quotes);
+  it('200 on successful get stock information', async () => {
+    const resp = await request(app).get(`/stocks/info?type=0&stocks=AAPL`).send();
+    expect(resp.statusCode).toBe(200);
+    expect(resp.body).toMatchObject({
+      symbol: 'AAPL',
+      param: 0,
+      data: expect.anything(),
+      time: expect.any(String)
+    })
   })
-  // it('403 on invalid stock', async () => {
-  //   console.log('403 on invalid stock');
-  //   const resp = await request(app).get(`/stocks/info?stock=fakestock`).send();
-  //   expect(resp.statusCode).toBe(403);
-  //   expect(resp.body.error).toBe("Invalid stock");
-  // })
-  // it('200 on successful ')
+  it('200 on successful get single stock quote', async () => {
+    const resp = await request(app).get(`/stocks/info?type=1&stocks=AAPL`).send();
+    expect(resp.statusCode).toBe(200);
+    expect(resp.body).toMatchObject({
+      symbol: 'AAPL',
+      param: 1,
+      data: expect.anything(),
+      time: expect.any(String)
+    })
+  })
+  it('200 on successful get multiple stock quotes', async () => {
+    const resp = await request(app).get(`/stocks/info?type=1&stocks=AAPL,AMZN,IBM`).send();
+    expect(resp.statusCode).toBe(200);
+    expect(resp.body).toMatchObject({
+      symbol: 'AAPL,AMZN,IBM',
+      param: 1,
+      data: expect.anything(),
+      time: expect.any(String)
+    })
+  })
+  it('200 on successful get stock history: 1 day, 1 minute interval', async () => {
+    const start = new Date();
+    start.setDate(now.getDate()-1);
+    var time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2) + " 00:00";
+    const resp = await request(app).get(`/stocks/info?type=3&stocks=AAPL&interval=1min&start=${time}`).send();
+    expect(resp.statusCode).toBe(200);
+    // console.log(resp.body);
+  })
+  it('200 on successful get stock history: 1 day, 5 minute interval', async () => {
+    const start = new Date();
+    start.setDate(now.getDate()-1);
+    var time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2) + " 00:00";
+    const resp = await request(app).get(`/stocks/info?type=3&stocks=AAPL&interval=5min&start=${time}`).send();
+    expect(resp.statusCode).toBe(200);
+    // console.log(resp.body);
+  }) 
+  it('200 on successful get stock history: 1 day, 15 minute interval', async () => {
+    const start = new Date();
+    start.setDate(now.getDate()-1);
+    var time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2) + " 00:00";
+    const resp = await request(app).get(`/stocks/info?type=3&stocks=AAPL&interval=15min&start=${time}`).send();
+    expect(resp.statusCode).toBe(200);
+    // console.log(resp.body);
+  }) 
+  it('200 on successful get stock history: 1 month, daily interval', async () => {
+    const start = new Date();
+    start.setMonth(now.getMonth() - 1);
+    var time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
+    const resp = await request(app).get(`/stocks/info?type=2&stocks=AAPL&interval=daily&start=${time}`).send();
+    expect(resp.statusCode).toBe(200);
+    // console.log(resp.body);
+  })
+  it('200 on successful get stock history: 6 months, daily interval', async () => {
+    const start = new Date();
+    start.setMonth(now.getMonth() - 6);
+    var time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
+    const resp = await request(app).get(`/stocks/info?type=2&stocks=AAPL&interval=daily&start=${time}`).send();
+    expect(resp.statusCode).toBe(200);
+    // console.log(resp.body);
+  })
+  it('200 on successful get stock history: 1 year, weekly interval', async () => {
+    const start = new Date();
+    start.setFullYear(start.getFullYear() - 1);
+    var time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
+    const resp = await request(app).get(`/stocks/info?type=2&stocks=AAPL&interval=weekly&start=${time}`).send();
+    expect(resp.statusCode).toBe(200);
+    // console.log(resp.body);
+  })
+  it('200 on successful get stock history: 5 years, weekly interval', async () => {
+    const start = new Date();
+    start.setFullYear(start.getFullYear() - 5);
+    var time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
+    const resp = await request(app).get(`/stocks/info?type=2&stocks=AAPL&interval=weekly&start=${time}`).send();
+    expect(resp.statusCode).toBe(200);
+    // console.log(resp.body);
+  })
+  it('200 on successful get stock history: 10 years, monthly interval', async () => {
+    const start = new Date();
+    start.setFullYear(start.getFullYear() - 10);
+    var time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
+    const resp = await request(app).get(`/stocks/info?type=2&stocks=AAPL&interval=monthly&start=${time}`).send();
+    expect(resp.statusCode).toBe(200);
+    // console.log(resp.body);
+  })
+  it('403 on invalid stock name', async () => {
+    const resp = await request(app).get(`/stocks/info?type=0&stocks=fakestock`).send();
+    expect(resp.statusCode).toBe(403);
+    expect(resp.body.error).toMatch('Invalid stock');
+  })
+  it('403 on invalid type', async () => {
+    const resp = await request(app).get(`/stocks/info?type=-1&stocks=AAPL`).send();
+    expect(resp.statusCode).toBe(403);
+    expect(resp.body.error).toMatch('Invalid type');
+  })
+  it('403 on invalid interval', async () => {
+    const resp = await request(app).get(`/stocks/info?type=2&stocks=AAPL&interval=fakeinterval`).send();
+    expect(resp.statusCode).toBe(403);
+    expect(resp.body.error).toMatch('Invalid interval');
+  })
+  it('403 on invalid start', async () => {
+    const resp = await request(app).get(`/stocks/info?type=2&stocks=AAPL&interval=daily&start=fakedate`).send();
+    expect(resp.statusCode).toBe(403);
+    expect(resp.body.error).toMatch('Invalid start');
+  })
+  
 
   afterAll(async() => {
     await database.disconnect();
   })
-})  */
+}) */
 
-/* describe('Calculate portfolio performance', () => {
+describe('Calculate portfolio performance', () => {
   const d = new Database(true);
   beforeAll(async () => {
     await d.connect();
@@ -330,7 +420,7 @@ describe('Retrieve stock information', () => {
   })
   it('Calculate portfolio performance', async () => {
     const calc = await calcPf(token, pid, d);
-    expect(calc).not.toBe(null);
+    expect(calc).toBe(expect.any(Number));
     console.log("calc is " + calc);
   })
   // it('Buy extra of first stock in portfolio', async () => {
@@ -471,7 +561,7 @@ describe('Retrieve stock information', () => {
   afterAll(async () => {
     await d.disconnect();
   })
-}) */
+})
 
 /* describe('We be having funsies', () => {
   const d = new Database(true);
