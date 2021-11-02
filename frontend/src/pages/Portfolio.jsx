@@ -32,6 +32,7 @@ const Portfolio = () => {
   const [changedName, editName ] = React.useState('');
   const [isWatchlist, setIsWatchlist] = React.useState(0);
   const [isChanged, setChanged ] = React.useState(0);
+  const [stocks, setStocks] = React.useState([]);
 
   const open = Boolean(anchorEl);
   const id = open ? 'simple-popover': undefined;
@@ -44,10 +45,11 @@ const Portfolio = () => {
   const loadPorfolioData = async () => {
     try {
       const request = await axios.get(`${apiBaseUrl}/user/portfolios/open?pid=${pid}`);
-      const porfolioData = request.data;
-      setName(porfolioData.name);
-
-      if (porfolioData.name === "Watchlist"){
+      const portfolioData = request.data;
+      console.log(portfolioData);
+      setName(portfolioData.name);
+      setStocks(portfolioData.stocks);
+      if (portfolioData.name === "Watchlist"){
         setIsWatchlist(1);
       } else {setIsWatchlist(0)}
     } catch (e) {
@@ -91,7 +93,7 @@ const Portfolio = () => {
               :
             (<PfBar>
               <Heading>{name}</Heading> 
-              <div>
+              <div style={{}}>
                 <Button id="renamePf" onClick={(e) => setAnchorEl(e.currentTarget)}> 
                     Rename Portfolio
                 </Button>
@@ -101,7 +103,7 @@ const Portfolio = () => {
               </div>
               </PfBar>
             )}
-              <PfTable />
+              <PfTable stocks={stocks}/>
             < AddStock 
               token={token}
               pid={pid}

@@ -105,15 +105,10 @@ export const modifyStock = async (token, pid, stock, price, quantity, option, da
   return resp;
 }
 
-/**
- * Function to check if a stock, or series of stocks is valid
- * @param {string} stock 
- * @returns 
- */
 export const checkStock = async (stock) => {
-  // console.log("checkStock time for " + stock);
+  console.log("checkStock time for " + stock);
   const stocks = await api.getAllStocks();
-  // console.log("received all stocks");
+  console.log("received all stocks");
   const symbols = stock.split(",");
 
   for (let i = 0; i < symbols.length; i++) {
@@ -135,8 +130,10 @@ export const getStock = async (type, stocks, interval, start) => {
   const check = await checkStock(stocks);
   if (!check) return -1;
 
-  const typeInt = parseFloat(type);
+  const typeInt = parseInt(type);
   if (typeInt < 0 || typeInt > 3 || !Number.isInteger(typeInt)) return -2;
+
+  // if ((typeInt === 2 || typeInt === 3) && typeof(interval) !== 'string') return -3;
 
   if (typeInt === 2 && interval) {
     if (interval.match(/^(daily|weekly|monthly)$/) === null) return -3;
@@ -144,19 +141,6 @@ export const getStock = async (type, stocks, interval, start) => {
 
   if (typeInt === 3 && interval) {
     if (interval.match(/^(1min|5min|15min)$/) === null) return -3;
-  }
-
-  if (start) {
-    const startCheck = start.toString();
-    if (typeof(startCheck) !== 'string') return -4;
-
-    const today = Date.now();
-    const dateCheck = Date.parse(start);
-    if (dateCheck > today) return -4;
-
-    if (typeInt === 2 && startCheck.match(/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/) === null) return -4;
-    if (typeInt === 3 && startCheck.match(/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1]) ([0-1][0-9]|2[0-4]):([0-5][0-9])$/) === null) return -4;
-
   }
 
   const resp = await api.getStock(typeInt, stocks, interval, start);

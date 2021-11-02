@@ -21,23 +21,22 @@ import EditIcon from "@mui/icons-material/Edit";
 
 import { visuallyHidden } from "@mui/utils";
 
-function createData(code, name, avgPrice, profitLoss, units, value) {
+
+import axios from "axios";
+import { apiBaseUrl } from '../comp/const';
+
+function createData(code, name, buyPrice, currPrice, changePer, units, value, profitLoss) {
   return {
     code,
     name,
-    avgPrice,
-    profitLoss,
+    buyPrice,
+    currPrice,
+    changePer,
     units,
-    value
+    value,
+    profitLoss,
   };
 }
-
-const rows = [
-  createData("ABC", "AusbisCorp", 35, 5, 3, 95),
-  createData("BBC", "BusbisCorp", 36, 5, 3, 95),
-  createData("CBC", "CusbisCorp", 37, 5, 3, 95),
-  createData("DBC", "DusbisCorp", 38, 5, 3, 95)
-];
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -79,12 +78,16 @@ const headCells = [
     label: "Name"
   },
   {
-    id: "avgPrice",
-    label: "Average Price"
+    id: "buyPrice",
+    label: "Buy Price"
   },
   {
-    id: "profitLoss",
-    label: "Profit/ Loss "
+    id: "currPrice",
+    label: "Current Price"
+  },
+  {
+    id: "changePer",
+    label: "Change (%)"
   },
   {
     id: "units",
@@ -93,7 +96,11 @@ const headCells = [
   {
     id: "value",
     label: "Value"
-  }
+  },
+  {
+    id: "profitLoss",
+    label: "Profit/ Loss"
+  },
 ];
 
 function EnhancedTableHead(props) {
@@ -216,12 +223,46 @@ EnhancedTableToolbar.propTypes = {
   numSelected: PropTypes.number.isRequired
 };
 
-export default function PfTable() {
+export default function PfTable({stocks}) {
   const [order, setOrder] = React.useState("asc");
   const [orderBy, setOrderBy] = React.useState("prices");
   const [selected, setSelected] = React.useState([]);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const [rows, setRows] = React.useState([
+    createData("ABC", "asdadasd", 35, 37, 5, 3, 95,5),
+    createData("BBC", "BusbisCorp", 36, 38, 5, 3, 95,5),
+    createData("CBC", "CusbisCorp", 37, 36, 5, 3, 95,5),
+    createData("DBC", "DusbisCorp", 38, 32, 5, 3, 95,5)
+  ]);
+
+  React.useEffect(() => {
+    loadStocks();
+  },[stocks]);
+
+  const loadStocks = async () => {
+    const getNames = stocks.map(x=>x.stock);
+    const stockNames = getNames.join(',');
+    try {
+      const request = await axios.get(`${apiBaseUrl}/stocks/info?type=1&stocks=${stockNames}`);
+      const apiInfo = request.data.data.quotes.quote;
+
+      let stockRows = [];
+
+      for (let i = 0; i < stocks.length; i++) {
+        const inf = apiInfo[i];
+        const totalPrice = stocks[i].quantity * stocks[i].avgPrice;
+        const profitLoss = (inf.last * stocks[i].quantity) - totalPrice;
+        const changePer = profitLoss / totalPrice;
+        stockRows.push(createData(stocks[i].stock, inf.description, stocks[i].avgPrice, inf.last, changePer,stocks[i].quantity, totalPrice, profitLoss));
+      }
+      setRows(stockRows);
+
+    } catch (e) {
+      alert(e.error);
+    }
+
+  };
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc";
@@ -329,17 +370,19 @@ export default function PfTable() {
                         {row.code}
                       </TableCell>
                       <TableCell align="center" >{row.name}</TableCell>
-                      <TableCell align="center" >{row.avgPrice}</TableCell>
-                      <TableCell align="center" >{row.profitLoss}</TableCell>
+                      <TableCell align="center" >{row.buyPrice}</TableCell>
+                      <TableCell align="center" >{row.currPrice}</TableCell>
+                      <TableCell align="center" >{row.changePer}</TableCell>
                       <TableCell align="center" >{row.units}</TableCell>
                       <TableCell align="center" >{row.value}</TableCell>
+                      <TableCell align="center" >{row.profitLoss}</TableCell>
                     </TableRow>
                   );
                 })}
               {emptyRows > 0 && (
                 <TableRow
                 >
-                  <TableCell colSpan={6} />
+                  <TableCell colSpan={8} />
                 </TableRow>
               )}
             </TableBody>
