@@ -2,18 +2,20 @@ import styled from 'styled-components';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 
+// for in- the same row layouts 
 export const FlexRows = styled.div`
     display:flex;
     flex-direction: row;
 `;
 
+// for top -> down layouts
 export const FlexColumns = styled.div`
     display:flex;
     flex-direction: column;
 `;
 export const NavBar = styled(FlexRows)`
     justify-content: space-between;
-    padding: 0 5%;
+    padding: 2% 5%;
     background: rgb(72,3,84);
     background: linear-gradient(90deg, rgba(72,3,84,1) 0%, rgba(0,133,186,1) 36%, rgba(0,212,255,1) 100%);
 `;
@@ -92,7 +94,6 @@ export const PfBody = styled(FlexRows)`
 `;
 
 export const RightCard = styled.div`
-    height: 20%;
     border 3px solid green;
     border-radius: 15px;
     padding: 2%;
@@ -123,7 +124,7 @@ export const StockOverview = styled(FlexColumns)`
     border: 1px solid pink;
     padding: 2%;
     border-radius: 15px;
-
+    text-align: center;
 `;
 
 export const ContentBody = styled(FlexColumns)`
@@ -138,8 +139,21 @@ export const CleanButton = styled.button`
     text-shadow: 0px 0px 0px transparent;
 `;
 
-export const PfBar = styled(FlexColumns)`
+export const PfBar = styled(FlexRows)`
     width: 100%;
- border: 1px solid green;
- justify-content: space-between;
+    border: 1px solid green;
+    justify-content: space-between;
+    padding: 2% 0%;
 `;
+
+export const Heading = styled.div`
+    font-size: 2em;
+    font-weight: bold;
+`;
+
+export const StockHeading = styled(FlexRows)`
+    font-size: 1em;
+    font-weight: bold;
+    padding: 2% 0%;
+    position: relative;
+`
