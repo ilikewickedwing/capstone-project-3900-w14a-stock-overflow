@@ -35,6 +35,9 @@ export class API {
     // Fetching the list of active stocks
     let result = await this._callAlpha(-1 ,"no stock");  // Converting result into text
 
+    // console.log(result);
+    console.log('calling alphavantage');
+
     result = result.split('\n');        // Splitting every entry
 
     // Going through every entry
@@ -57,7 +60,7 @@ export class API {
     // console.log(this.infoCache);
     // console.log("stock requested is " + stock);
     // Search for stock in cache
-    const search = this.infoCache.filter(o => (o.symbol === stocks) && (o.param === type));
+    const search = this.infoCache.filter(o => (o.symbol === stocks) && (o.param === type) && (o.interval === interval) && (o.start === start));
     const time = Date.now();
 
     if (search.length !== 0) {
@@ -107,6 +110,8 @@ export class API {
     const obj = {
       symbol: stocks,
       param: type,
+      interval: interval,
+      start: start,
       data: data,
       time: time
     }
