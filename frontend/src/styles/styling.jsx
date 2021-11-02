@@ -23,8 +23,9 @@ export const BoxShadow = styled.div`
 `;
 export const NavBar = styled(FlexRows)`
     justify-content: space-between;
-    padding: 2% 5%;
-    background-color: #FEC89A;
+    padding: 1% 3%;
+    background-color: #6d6875;
+    
     // background: rgb(72,3,84);
     // background: linear-gradient(90deg, rgba(72,3,84,1) 0%, rgba(0,133,186,1) 36%, rgba(0,212,255,1) 100%);
 `;
@@ -53,7 +54,12 @@ export const CreatePortField = styled(TextField)
 }
 `;
 
-export const Logo = styled.h1`
+export const SearchToggle = styled.div`
+    font-size: 0.7 em;
+`;
+export const Logo = styled.div`
+    font-size:2em;
+    font-weight: bold;
     color:white;
 `;
 
