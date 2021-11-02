@@ -448,6 +448,7 @@ app.get('/user/portfolios/open', async (req, res) => {
   res.status(403).send({ error: "Invalid pid" });
 })
 
+
 app.get('/user/portfolios/calculate', async (req, res) => {
   const { token, pid } = req.query;
   const resp = await calcPf(token, pid, database);
@@ -456,7 +457,7 @@ app.get('/user/portfolios/calculate', async (req, res) => {
   } else if (resp === -3) {
     res.status(403).send({ error: "Invalid pid" });
   } else if (resp === -4) {
-    res.status(403).send({ error: "Can not perform for watchlist "});
+    res.status(403).send({ error: "Can not perform for watchlist" });
   } else {
     res.status(200).send(resp);
   }
