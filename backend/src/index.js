@@ -470,7 +470,7 @@ app.get('/user/portfolios/calculate', async (req, res) => {
   } else if (resp === -3) {
     res.status(403).send({ error: "Invalid pid" });
   } else if (resp === -4) {
-    res.status(403).send({ error: "Can not perform for watchlist" });
+    res.status(403).send({ error: "Can not perform for watchlist "});
   } else {
     res.status(200).send({ performance: resp.toString() });
   }
@@ -484,7 +484,7 @@ app.get('/user/portfolios/calculate', async (req, res) => {
  * /user/portfolios/edit:
  *   post:
  *     tags: [Portfolio]
- *     description: endpoint for editing a single portfolio name
+ *     description: endpoint for editing a single portfolio
  *     parameters:
  *      - name: token
  *        description: The token of the user
@@ -622,8 +622,6 @@ app.post('/user/stocks/add', async (req, res) => {
     res.status(400).send({ error: "Must include valid quantity purchased" });
   } else if (resp === 5) {
     res.status(400).send({ error: "Must include valid price purchased at" });
-  } else if (resp === 6) {
-    res.status(403).send({ error: "Stock already in watchlist" });
   } else {
     res.status(200).send();
   }
@@ -779,11 +777,27 @@ app.get('/stocks/all', async (req, res) => {
     res.status(403).send({ error: "Invalid type" });
   } else if (resp === -3) {
     res.status(403).send({ error: "Invalid interval" });
-  } else if (resp === -4) {
-    res.status(403).send({ error: "Invalid start" });
   } else if (resp === null) {
     res.status(502).send({ error: "Could not connect to API" });
   } else res.status(200).send(resp);
 
   return;
+})
+
+// Get endpoint for getting a specific stocks's data from alphavantage
+/**
+ * @swagger
+ * /stocks:
+ *   get:
+ *     tags: [AlphaVantage]
+ *     description: endpoint for a specific stock's data from alphavantage
+ *     parameters:
+ *     responses:
+ *       200:
+ *         description: Return data exactly as given from alphavantage
+ *       502:
+ *         description: Could not connect to API
+ */
+app.get('/stocks', async (req, res) => {
+
 })

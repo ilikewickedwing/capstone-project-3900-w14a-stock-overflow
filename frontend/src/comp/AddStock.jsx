@@ -1,8 +1,8 @@
 import React from 'react'; 
 
-import Accordion from '@mui/material/Accordion';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import AccordionDetails from '@mui/material/AccordionDetails';
+import ExpansionPanel from "@material-ui/core/ExpansionPanel";
+import ExpansionPanelSummary from "@material-ui/core/ExpansionPanelSummary";
+import ExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
 
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 
@@ -16,7 +16,7 @@ import { apiBaseUrl } from './const';
 
 
 // add stock form 
-const AddStock = ({token, pid, onAddCallback = () => {}}) => {
+const AddStock = ({token, pid, onAddCallback, load = () => {}}) => {
     // textinput state
     const [search, setSearch ] = React.useState("");
     // list of api return 
@@ -69,17 +69,18 @@ const AddStock = ({token, pid, onAddCallback = () => {}}) => {
             const res = await axios.post(`${apiBaseUrl}/user/stocks/add`, 
                 {token, pid, stock: currCode, price: floatPrice, quantity: intQuantity});
             onAddCallback();
+            load();
         } catch (e){
             alert(e);
         }
     }
 
     return (
-        <Accordion>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+        <ExpansionPanel>
+        <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
           <u>  + Add New Stock </u> 
-        </AccordionSummary>
-        <AccordionDetails>
+        </ExpansionPanelSummary>
+        <ExpansionPanelDetails>
         <FlexColumns style={{width:'100%', justifyContent:'space-between'}}>
         <Autocomplete
             disablePortal
@@ -113,8 +114,8 @@ const AddStock = ({token, pid, onAddCallback = () => {}}) => {
             </Button>
         </form>
         </FlexColumns>
-        </AccordionDetails>
-      </Accordion>
+        </ExpansionPanelDetails>
+      </ExpansionPanel>
     )
 };
 

@@ -21,23 +21,22 @@ import EditIcon from "@mui/icons-material/Edit";
 
 import { visuallyHidden } from "@mui/utils";
 
-function createData(code, name, avgPrice, profitLoss, units, value) {
+
+import axios from "axios";
+import { apiBaseUrl } from '../comp/const';
+
+function createData(code, name, buyPrice, currPrice, changePer, units, value, profitLoss) {
   return {
     code,
     name,
-    avgPrice,
-    profitLoss,
+    buyPrice,
+    currPrice,
+    changePer,
     units,
-    value
+    value,
+    profitLoss,
   };
 }
-
-const rows = [
-  createData("ABC", "AusbisCorp", 35, 5, 3, 95),
-  createData("BBC", "BusbisCorp", 36, 5, 3, 95),
-  createData("CBC", "CusbisCorp", 37, 5, 3, 95),
-  createData("DBC", "DusbisCorp", 38, 5, 3, 95)
-];
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -79,12 +78,16 @@ const headCells = [
     label: "Name"
   },
   {
-    id: "avgPrice",
-    label: "Average Price"
+    id: "buyPrice",
+    label: "Buy Price"
   },
   {
-    id: "profitLoss",
-    label: "Profit/ Loss "
+    id: "currPrice",
+    label: "Current Price"
+  },
+  {
+    id: "changePer",
+    label: "Change (%)"
   },
   {
     id: "units",
@@ -93,7 +96,11 @@ const headCells = [
   {
     id: "value",
     label: "Value"
-  }
+  },
+  {
+    id: "profitLoss",
+    label: "Profit/ Loss"
+  },
 ];
 
 function EnhancedTableHead(props) {
@@ -161,6 +168,17 @@ EnhancedTableHead.propTypes = {
 const EnhancedTableToolbar = (props) => {
   const { numSelected } = props;
 
+  React.useEffect(() => {
+    
+  },[])
+
+  const editClick = async () => {
+
+  }
+  const deleteClick = async () => {
+
+  }
+
   return (
     <Toolbar
       sx={{
@@ -196,14 +214,14 @@ const EnhancedTableToolbar = (props) => {
       )}
       {numSelected === 1 &&
         <Tooltip title="Edit">
-          <IconButton>
+          <IconButton onClick={editClick}>
             <EditIcon /> 
           </IconButton>
         </Tooltip>
       }
       {numSelected > 0 &&
         <Tooltip title="Delete">
-          <IconButton>
+          <IconButton onClick={deleteClick}>
             <DeleteIcon />
           </IconButton>
         </Tooltip>
@@ -216,12 +234,49 @@ EnhancedTableToolbar.propTypes = {
   numSelected: PropTypes.number.isRequired
 };
 
-export default function PfTable() {
+export default function PfTable({stocks}) {
   const [order, setOrder] = React.useState("asc");
   const [orderBy, setOrderBy] = React.useState("prices");
   const [selected, setSelected] = React.useState([]);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const [rows, setRows] = React.useState([]);
+
+  React.useEffect(() => {
+    loadStocks();
+  },[stocks]);
+
+  const loadStocks = async () => {
+    if (stocks.length === 0) {
+      setRows([]);
+      return;
+    }
+    const getNames = stocks.map(x=>x.stock);
+    const stockNames = getNames.join(',');
+    try {
+      const request = await axios.get(`${apiBaseUrl}/stocks/info?type=1&stocks=${stockNames}`);
+      let apiInfo = request.data.data.quotes.quote;
+      if (!Array.isArray(apiInfo)) {
+        apiInfo = [apiInfo];
+      }
+      
+      let stockRows = [];
+      
+      for (let i = 0; i < stocks.length; i++) {
+        const inf = apiInfo[i];
+        const totalPrice = stocks[i].quantity * inf.last;
+        const profitLoss = totalPrice - (stocks[i].avgPrice * stocks[i].quantity);
+        const changePer = (inf.last / stocks[i].avgPrice) * 100;
+        stockRows.push(createData(stocks[i].stock, inf.description, stocks[i].avgPrice, inf.last.toFixed(2), changePer.toFixed(2),stocks[i].quantity, totalPrice.toFixed(2), profitLoss.toFixed(2)));
+      }
+      setRows(stockRows);
+      
+    } catch (e) {
+      console.log(e);
+      alert(e.error);
+    }
+
+  };
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc";
@@ -329,17 +384,19 @@ export default function PfTable() {
                         {row.code}
                       </TableCell>
                       <TableCell align="center" >{row.name}</TableCell>
-                      <TableCell align="center" >{row.avgPrice}</TableCell>
-                      <TableCell align="center" >{row.profitLoss}</TableCell>
+                      <TableCell align="center" >${row.buyPrice}</TableCell>
+                      <TableCell align="center" >${row.currPrice}</TableCell>
+                      <TableCell align="center" >{row.changePer}%</TableCell>
                       <TableCell align="center" >{row.units}</TableCell>
-                      <TableCell align="center" >{row.value}</TableCell>
+                      <TableCell align="center" >${row.value}</TableCell>
+                      <TableCell align="center" >${row.profitLoss}</TableCell>
                     </TableRow>
                   );
                 })}
               {emptyRows > 0 && (
                 <TableRow
                 >
-                  <TableCell colSpan={6} />
+                  <TableCell colSpan={8} />
                 </TableRow>
               )}
             </TableBody>

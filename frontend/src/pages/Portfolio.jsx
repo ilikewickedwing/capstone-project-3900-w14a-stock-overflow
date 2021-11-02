@@ -21,6 +21,7 @@ import StockRow from '../comp/StockRow';
 import AddStock from '../comp/AddStock';
 import { apiBaseUrl } from '../comp/const';
 import { ApiContext } from '../api';
+import PfTable from '../comp/PfTable';
 
 const Portfolio = () => {
   const history = useHistory();
@@ -33,6 +34,7 @@ const Portfolio = () => {
   const [changedName, editName ] = React.useState('');
   const [isWatchlist, setIsWatchlist] = React.useState(0);
   const [isChanged, setChanged ] = React.useState(0);
+  const [stocks, setStocks] = React.useState([]);
   const [stockArray, setStockArray ] = React.useState([{
     stock: null,
     stockName: null,
@@ -53,12 +55,15 @@ const Portfolio = () => {
   const loadPorfolioData = async () => {
     try {
       const request = await axios.get(`${apiBaseUrl}/user/portfolios/open?pid=${pid}`);
-      const porfolioData = request.data;
-      setName(porfolioData.name);
-
-      if (porfolioData.name === "Watchlist"){
+      const portfolioData = request.data;
+      console.log(portfolioData);
+      setName(portfolioData.name);
+      if (portfolioData.name === "Watchlist"){
         setIsWatchlist(1);
-      } else {setIsWatchlist(0)}
+      } else {
+        setStocks(portfolioData.stocks);
+        setIsWatchlist(0);
+      }
     } catch (e) {
       alert(e.error);
     }
@@ -139,7 +144,7 @@ const Portfolio = () => {
           <Tabs isChanged={isChanged}/>
           <PfBody>
             <LeftBody>
-              {isWatchlist === 0 &&
+              {/* {isWatchlist === 0 &&
                 <div style={{textAlign: 'right', width:'100%'}}>
                   <Button id="renamePf" onClick={(e) => setAnchorEl(e.currentTarget)}> 
                       Rename Portfolio
@@ -148,7 +153,7 @@ const Portfolio = () => {
                       Delete Portfolio
                   </Button>
                 </div>
-              }
+              } */}
 
               <Button onClick={handleReload}>Update Data</Button>
              
@@ -165,9 +170,10 @@ const Portfolio = () => {
                   }
                 </div>)
               :
-            (<PfBar>
+            (<div>
+              <PfBar>
               <Heading>{name}</Heading> 
-              <div>
+              <div style={{}}>
                 <Button id="renamePf" onClick={(e) => setAnchorEl(e.currentTarget)}> 
                     Rename Portfolio
                 </Button>
@@ -176,11 +182,14 @@ const Portfolio = () => {
                 </Button>
               </div>
               </PfBar>
+              <PfTable stocks={stocks}/>
+            </div>
             )}
             
             < AddStock 
               token={token}
               pid={pid}
+              load={loadPorfolioData}
               onAddCallback={() => { getWatchlist() }}
             />
             </LeftBody>

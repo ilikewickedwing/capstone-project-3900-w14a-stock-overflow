@@ -20,7 +20,7 @@ describe('Retrieve stock information', () => {
   
 
   it('Get stock information', async () => {
-    const resp = await getStock('0', 'AAPL');
+    const resp = await getStock(0, 'AAPL');
     expect(resp).not.toBe(null);
     expect(resp).toMatchObject({
       symbol: 'AAPL',
@@ -31,7 +31,7 @@ describe('Retrieve stock information', () => {
     // console.log(resp.data);
   })
   it('Get single stock quotes', async () => {
-    const resp = await getStock('1', 'AAPL');
+    const resp = await getStock(1, 'AAPL');
     expect(resp).not.toBe(null);
     expect(resp).toMatchObject({
       symbol: 'AAPL',
@@ -42,7 +42,7 @@ describe('Retrieve stock information', () => {
     // console.log(resp.data);
   })
   it('Get multiple stock quotes', async () => {
-    const resp = await getStock('1', 'AAPL,AMZN,IBM');
+    const resp = await getStock(1, 'AAPL,AMZN,IBM');
     expect(resp).not.toBe(null);
     expect(resp).toMatchObject({
       symbol: 'AAPL,AMZN,IBM',
@@ -50,17 +50,7 @@ describe('Retrieve stock information', () => {
       data: expect.anything(),
       time: expect.any(Date)
     })
-    // console.log(resp.data.quotes);
-  })
-  it('Get stock history: intraday', async() => {
-    const resp = await getStock('3', 'IBM');
-    expect(resp).not.toBe(null);
-    // console.log(resp);
-  })
-  it('Get stock history: not intraday', async() => {
-    const resp = await getStock('2', 'IBM');
-    expect(resp).not.toBe(null);
-    // console.log(resp);
+    console.log(resp.data.quotes);
   })
   it('Get stock history: 1 day, 1 minute interval', async () => {
     const start = new Date();
@@ -218,8 +208,6 @@ describe('Retrieve stock information endpoint test', () => {
   })
 
   jest.setTimeout(30000);
-  const today = new Date();
-  const now = new Date(today);
 
   it('200 on successful get stock information', async () => {
     const resp = await request(app).get(`/stocks/info?type=0&stocks=AAPL`).send();
@@ -350,7 +338,7 @@ describe('Retrieve stock information endpoint test', () => {
   })
 })
 
-describe('Calculate portfolio performance', () => {
+ describe('Calculate portfolio performance', () => {
   const d = new Database(true);
   beforeAll(async () => {
     await d.connect();
