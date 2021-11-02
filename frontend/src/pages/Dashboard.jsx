@@ -1,18 +1,28 @@
 import * as React from 'react';
 
-import { PfBody, LeftBody, RightBody, RightCard, PageBody} from '../styles/styling';
+import { 
+  PfBody, 
+  LeftBody, 
+  RightBody, 
+  RightCard, 
+  PageBody,
+  Heading,
+  PfBar,
+} from '../styles/styling';
 
 import Navigation from '../comp/Navigation';
 import Tabs from '../comp/Tabs';
 
 export default function Dashboard() {
   return (
-    <PageBody>
+    <PageBody className="font-two">
       <Navigation />
       <Tabs />
-      <h1>Dashboard</h1>
       <PfBody>
-              <LeftBody>Left Body
+              <LeftBody>
+              <PfBar>
+                <Heading>Dashboard</Heading> 
+              </PfBar>
                 <p> print the list of stocks in this  </p>
               </LeftBody>
               <RightBody> Right Body: contains the 3 side cards 

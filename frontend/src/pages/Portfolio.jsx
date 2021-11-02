@@ -13,7 +13,8 @@ import {
   RightBody, 
   RightCard, 
   PageBody, 
-  FlexRows,
+  Heading,
+  PfBar,
 } from '../styles/styling';
 import Button from '@mui/material/Button';
 import StockRow from '../comp/StockRow';
@@ -100,20 +101,14 @@ const Portfolio = () => {
     setStockArray(array);
   }
 
-  const handleStockLoad = async (e) => {
-    e.preventDefault();
-
-  }
 
   return (
-      <PageBody>
+      <PageBody className="font-two">
           <Navigation />
           <Tabs isChanged={isChanged}/>
-          <h1> PORTFOLIO PAGE: {name}</h1> 
-          <FlexRows>
-          </FlexRows> 
           <PfBody>
             <LeftBody>
+<<<<<<< HEAD
               {isWatchlist === 0 &&
                 <div style={{textAlign: 'right', width:'100%'}}>
                   <Button id="renamePf" onClick={(e) => setAnchorEl(e.currentTarget)}> 
@@ -131,6 +126,26 @@ const Portfolio = () => {
                 })
               }
               
+=======
+              {isWatchlist 
+              ? (<PfBar>
+                <Heading>{name}</Heading> 
+                </PfBar>)
+              :
+            (<PfBar>
+              <Heading>{name}</Heading> 
+              <div>
+                <Button id="renamePf" onClick={(e) => setAnchorEl(e.currentTarget)}> 
+                    Rename Portfolio
+                </Button>
+                <Button color="secondary" onClick={handleDelete}>
+                    Delete Portfolio
+                </Button>
+              </div>
+              </PfBar>
+            )}
+              <PfTable />
+>>>>>>> main
             < AddStock 
               token={token}
               pid={pid}

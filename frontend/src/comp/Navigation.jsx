@@ -78,7 +78,7 @@ const Navigation = () => {
     }
 
     return (
-        <NavBar>
+        <NavBar className="font-two">
             <Link to="/dashboard">
                 <Logo>
                     Stock Overflow 

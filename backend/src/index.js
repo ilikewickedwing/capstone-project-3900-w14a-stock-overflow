@@ -484,7 +484,7 @@ app.get('/user/portfolios/calculate', async (req, res) => {
  * /user/portfolios/edit:
  *   post:
  *     tags: [Portfolio]
- *     description: endpoint for editing a single portfolio
+ *     description: endpoint for editing a single portfolio name
  *     parameters:
  *      - name: token
  *        description: The token of the user
@@ -622,6 +622,8 @@ app.post('/user/stocks/add', async (req, res) => {
     res.status(400).send({ error: "Must include valid quantity purchased" });
   } else if (resp === 5) {
     res.status(400).send({ error: "Must include valid price purchased at" });
+  } else if (resp === 6) {
+    res.status(403).send({ error: "Stock already in watchlist" });
   } else {
     res.status(200).send();
   }
@@ -769,45 +771,19 @@ app.get('/stocks/all', async (req, res) => {
  */
  app.get('/stocks/info', async (req, res) => {
   const { type, stocks, interval, start } = req.query;
-  const check = await checkStock(stocks);
-  if (!check) {
-    res.status(403).send({ error: "Invalid stock" });
-    return;
-  }
-
-  // if (type < 0 || type >3) {
-  //   res.status(403).send({ error: "Invalid type" });
-  // }
-
-  // if (interval.match(/^(1min|5min|15min|daily|weekly|monthly)$/) === null) {
-  //   res.status(403).send({ error: "Invalid interval" });
-  // }  
-
   const resp = await getStock(type, stocks, interval, start);
-  console.log("rec resp");
-  if (resp === null) {
+
+  if (resp === -1) {
+    res.status(403).send({ error: "Invalid stock" });
+  } else if (resp === -2) {
+    res.status(403).send({ error: "Invalid type" });
+  } else if (resp === -3) {
+    res.status(403).send({ error: "Invalid interval" });
+  } else if (resp === -4) {
+    res.status(403).send({ error: "Invalid start" });
+  } else if (resp === null) {
     res.status(502).send({ error: "Could not connect to API" });
-    return;
-  }
+  } else res.status(200).send(resp);
 
-  res.status(200).send(resp);
   return;
-})
-
-// Get endpoint for getting a specific stocks's data from alphavantage
-/**
- * @swagger
- * /stocks:
- *   get:
- *     tags: [AlphaVantage]
- *     description: endpoint for a specific stock's data from alphavantage
- *     parameters:
- *     responses:
- *       200:
- *         description: Return data exactly as given from alphavantage
- *       502:
- *         description: Could not connect to API
- */
-app.get('/stocks', async (req, res) => {
-
 })
