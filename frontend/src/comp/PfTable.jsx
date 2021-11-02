@@ -168,6 +168,17 @@ EnhancedTableHead.propTypes = {
 const EnhancedTableToolbar = (props) => {
   const { numSelected } = props;
 
+  React.useEffect(() => {
+    
+  },[])
+
+  const editClick = async () => {
+
+  }
+  const deleteClick = async () => {
+
+  }
+
   return (
     <Toolbar
       sx={{
@@ -203,14 +214,14 @@ const EnhancedTableToolbar = (props) => {
       )}
       {numSelected === 1 &&
         <Tooltip title="Edit">
-          <IconButton>
+          <IconButton onClick={editClick}>
             <EditIcon /> 
           </IconButton>
         </Tooltip>
       }
       {numSelected > 0 &&
         <Tooltip title="Delete">
-          <IconButton>
+          <IconButton onClick={deleteClick}>
             <DeleteIcon />
           </IconButton>
         </Tooltip>

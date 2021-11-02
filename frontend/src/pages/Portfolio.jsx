@@ -105,7 +105,7 @@ const Portfolio = () => {
                 </Button>
               </div>
               </PfBar>
-              <PfTable stocks={stocks} pid={pid}/>
+              <PfTable stocks={stocks}/>
             </div>
             )}
             < AddStock 
