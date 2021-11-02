@@ -470,9 +470,9 @@ app.get('/user/portfolios/calculate', async (req, res) => {
   } else if (resp === -3) {
     res.status(403).send({ error: "Invalid pid" });
   } else if (resp === -4) {
-    res.status(403).send({ error: "Can not perform for watchlist "});
+    res.status(403).send({ error: "Can not perform for watchlist" });
   } else {
-    res.status(200).send(resp);
+    res.status(200).send({ performance: resp.toString() });
   }
 
   return;

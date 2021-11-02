@@ -145,7 +145,7 @@ const Stock = () => {
         }
     }}
     catch (e) {
-        alert(e);
+      alert(e);
     }
   }
 
@@ -228,7 +228,7 @@ const Stock = () => {
               volume: {volume} &nbsp;
               close:  {close} 
               </ StockOverview >
-              <StocksGraph companyId={stockCode} height={200}/>
+              <StocksGraph companyId={stockCode} height={300}/>
             </LeftBody>
             <RightBody>
               <RightCard>
