@@ -35,15 +35,27 @@ export default function StocksGraph(props) {
   // make api call for time series
   useEffect(() => {
     const callApi = (company, interval) => {
-      const yesterdayTime = (new Date(Date.now() - 86400000)).toLocaleDateString('en-CA');
-      console.log(yesterdayTime);
+      const today = new Date();
+      const now = new Date(today);
       switch (interval) {
-        case "1min":
-          return api.stocksInfo(3, company, interval, null);
-        case "5min":
-          return api.stocksInfo(3, company, interval, null);
-        case "15min":
-          return api.stocksInfo(3, company, interval, null);
+        case "1min": {
+          const start = new Date();
+          start.setDate(now.getDate()-1);
+          const time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2) + " 00:00";
+          return api.stocksInfo(3, company, interval, time.toString());
+        }
+        case "5min": {
+          const start = new Date();
+          start.setDate(now.getDate()-1);
+          const time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2) + " 00:00";
+          return api.stocksInfo(3, company, interval, time.toString());
+        }
+        case "15min": {
+          const start = new Date();
+          start.setDate(now.getDate()-1);
+          const time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2) + " 00:00";
+          return api.stocksInfo(3, company, interval, time.toString());
+        }
         case "daily":
           return api.stocksInfo(2, company, interval, null);
         case "weekly":
@@ -106,13 +118,15 @@ export default function StocksGraph(props) {
   }
   const renderGraph = () => {
     if (props.companyId in dataCache && timeOptions in dataCache[props.companyId]) {
+      const data = transformData(dataCache[props.companyId][timeOptions], graphStyle === "candlestick");
+      console.log(data);
       return (
         <ResponsiveContainer width={'99%'} height={props.height}>
           <BarChart
             margin={{ bottom: 25, left: 25 }}
-            data={transformData(dataCache[props.companyId][timeOptions], graphStyle === "candlestick")}
+            data={data}
           >
-            <XAxis datakey="time">
+            <XAxis dataKey="time">
               <Label value="Time Interval" offset={-10} position="insideBottom" />
             </XAxis>
             <YAxis 
@@ -151,12 +165,12 @@ StocksGraph.propTypes = {
  * @returns 
  */
 const transformData = (data, candlestickMode = true) => {
+  console.log(data);
   if ('series' in data.data) {
     return transformIntradayData(data, candlestickMode);
   } else if ('history' in data.data) {
     return transformNonIntradayData(data, candlestickMode)
   }
-  console.log(data);
   throw new Error("Invalid data received");
 }
   
@@ -219,43 +233,4 @@ function transformNonIntradayData(data, candlestickMode = true) {
     return newData;
   });
 }
- 
-  // const parsedData = [];
-  // for (const timeKey of Object.keys(timeSeriesData)) {
-  //   const objData = timeSeriesData[timeKey];
-  //   // Data for candlestick mode
-  //   let newData = {
-  //     time: timeKey,
-  //     openCloseData: [
-  //       Number(objData["1. open"]),
-  //       Number(objData["4. close"]),
-  //     ],
-  //     high: Number(objData["2. high"]),
-  //     low: Number(objData["3. low"]),
-  //     volume: Number(objData["5. volume"]),
-  //   }
-  //   // Data for ohlc
-  //   if (!candlestickMode) {
-  //     newData = {
-  //       time: timeKey,
-  //       open: Number(objData["1. open"]),
-  //       close: Number(objData["4. close"]),
-  //       highLow: [
-  //         Number(objData["2. high"]),
-  //         Number(objData["3. low"]),
-  //       ],
-  //       volume: Number(objData["5. volume"]),
-  //     }
-  //   }
-  //   // Sort it into an array as it is returned as
-  //   // an object
-  //   let i = 0;
-  //   for (; i < parsedData.length; i++) {
-  //     if (compareTime(timeKey, parsedData[i].time)) {
-  //       break;
-  //     }
-  //   }
-  //   parsedData.splice(i, 0, newData);
-  // }
-  // return parsedData;
 
