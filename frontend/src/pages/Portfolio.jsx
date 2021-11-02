@@ -178,6 +178,7 @@ const Portfolio = () => {
             < AddStock 
               token={token}
               pid={pid}
+              onAddCallback={() => { getWatchlist() }}
             />
             </LeftBody>
             <RightBody>
