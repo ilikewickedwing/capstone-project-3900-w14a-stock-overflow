@@ -413,7 +413,8 @@ describe('Calculate portfolio performance', () => {
         quantity: 2,
         performance: [
           {
-            date: 0,
+            date: date,
+            perf: 0
           }
         ]
       },
@@ -423,7 +424,8 @@ describe('Calculate portfolio performance', () => {
         quantity: 2,
         performance: [
           {
-            date: 0,
+            date: date,
+            perf: 0
           }
         ]
       },
@@ -433,7 +435,8 @@ describe('Calculate portfolio performance', () => {
         quantity: 1,
         performance: [
           {
-            date: 0,
+            date: date,
+            perf: 0
           }
         ]
       }
@@ -447,7 +450,8 @@ describe('Calculate portfolio performance', () => {
         sold: 0,
         performance: [
           {
-            date: 0,
+            date: date,
+            perf: 0
           }
         ]
       }

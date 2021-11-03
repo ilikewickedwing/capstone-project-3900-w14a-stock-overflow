@@ -127,14 +127,22 @@ export const modifyStock = async (token, pid, stock, price, quantity, option, da
  */
 export const checkStock = async (stock) => {
   // console.log("checkStock time for " + stock);
-  const stocks = await api.getAllStocks();
+  // const stocks = await api.getAllStocks();
   // console.log("received all stocks");
   const symbols = stock.split(",");
 
   for (let i = 0; i < symbols.length; i++) {
     // console.log("symbol is " + symbols[i]);
-    const filteredStock = stocks.filter(o => o.symbol === symbols[i])
-    if (filteredStock.length === 0) return false;
+    // const filteredStock = stocks.filter(o => o.symbol === symbols[i])
+    console.log(symbols[i]);
+    const resp = await api.lookupStock(symbols[i]);
+    if (resp == null) return false;
+    if (Array.isArray(resp)) {
+      const filteredStock = resp.filter(o => o.symbol === symbols[i]);
+      if (filteredStock.length === 0) return false;
+    } else {
+      if (resp.symbol !== symbols[i]) return false;
+    }
   }
 
   return true;

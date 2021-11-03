@@ -352,7 +352,8 @@ export class Database {
         sold: 0,
         performance: [
           {
-            date: 0,
+            date: date,
+            perf: 0
           }
         ]
       }
@@ -542,7 +543,8 @@ export class Database {
         quantity: quantity,
         performance: [
           {
-            date: 0,
+            date: date,
+            perf: 0
           }
         ]
       })

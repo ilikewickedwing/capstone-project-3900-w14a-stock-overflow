@@ -9,16 +9,16 @@ axios.defaults.headers.common['Accept'] = 'application/json';
 export class API {
   constructor() {
     // Stores the last cached stocks
-    this.cachedStocks = null;
+    this.cachedStocks = [];
     // Stores the full information of stocks
     this.infoCache = [];
     // How long in millisecond before calling get all stocks again
-    const pollingInterval = 60000;
-    this.intervalObj = setInterval(() => {this._getAllStocks()}, pollingInterval);
+    // const pollingInterval = 60000;
+    // this.intervalObj = setInterval(() => {this._getAllStocks()}, pollingInterval);
     this.useCounter = 0;
   }
   
-  async getAllStocks() {
+  /* async getAllStocks() {
     // Return cached stocks if available
     if (this.cachedStocks !== null) {
       return this.cachedStocks;
@@ -54,6 +54,27 @@ export class API {
     this.cachedStocks = stocks;
 
     return stocks;
+  } */
+
+  async lookupStock(stocks) {
+    const search = this.cachedStocks.filter(o => (o.stocks === stocks));
+    if (search.length !== 0) {
+      console.log('returning cache');
+      return search[0].check;
+    }
+    // console.log('tradier is searching up ' + stocks);
+    const resp = await this._callTradier(-1, stocks);
+    if (resp.securities == null) return null;
+    const check = resp.securities.security;
+
+    const obj = {
+      stocks: stocks,
+      check: check
+    }
+    console.log(obj);
+
+    this.cachedStocks.push(obj);
+    return check;
   }
 
   async getStock(type, stocks, interval, start) {
@@ -177,18 +198,24 @@ export class API {
     let url = null;
     let symbols = null;
     let symbol = null;
+    let q = null;
+    let indexes = null;
 
     // console.log('tradier api call');
     
-    if ((type) === 1) {
+    if (type === 1) {
       url = 'quotes';
       symbols = stocks;
-    } else if ((type) === 2) {
+    } else if (type === 2) {
       url = 'history';
       symbol = stocks;
-    } else if ((type) === 3) {
+    } else if (type === 3) {
       url = 'timesales';
       symbol = stocks;
+    } else if (type === -1) {
+      url = 'lookup'
+      q = stocks;
+      indexes = false;
     }
 
     /* console.log("url is " + url + ", symbol is " + symbol + ", symbols is " + symbols);
@@ -204,11 +231,13 @@ export class API {
       url: url,
       baseURL: 'https://sandbox.tradier.com/v1/markets/',
       params: {
-         'symbols': symbols,
-         'symbol': symbol,
-         'interval': interval,
-         'start': start,
-         'greeks': 'false'
+          'symbols': symbols,
+          'symbol': symbol,
+          'interval': interval,
+          'start': start,
+          'q': q,
+          'indexes': indexes,
+          'greeks': 'false'
       },
     }, (error, response, body) => {
         console.log(response.statusCode);
@@ -222,10 +251,10 @@ export class API {
     return check == against;
   }
 
-  // Call this when deleting this object to remove all time intervals
+  /* // Call this when deleting this object to remove all time intervals
   // to prevent a memory leak
   destroy() {
     // Clear interval
     clearInterval(this.intervalObj);
-  }
+  } */
 }
