@@ -19,15 +19,18 @@ import { getStock } from "./stocks";
  * @returns {Promise<Pfs | null>}
  */
 export const createPf = async (token, name, database) => {
+  // Return error if no name given
   if (name == "") {
     return 1;
   }
 
+  // Return error if user not found
   const uid = await database.getTokenUid(token);
   if (uid === null) {
     return false;
   }
 
+  // Create the portfolio and return the result
   const pidResp = await database.insertPf(uid, name);
   if (pidResp !== null) {
     const obj = { pid: pidResp };
@@ -48,9 +51,11 @@ export const createPf = async (token, name, database) => {
  * @returns {Promise<array>}
  */
 export const userPfs = async (token, database) => {
+  // Return error if user not found
   const uid = await database.getTokenUid(token);
   if (uid === null) return 1;
   
+  // Return result of database function
 	const userPf = await database.getPfs(uid);
   return userPf;
 }
@@ -63,11 +68,13 @@ export const userPfs = async (token, database) => {
  * @returns {Promise<string | null>}
  */
 export const getPid = async (token, name, database) => {
+  // Return error if user not found
   const uid = await database.getTokenUid(token);
   if (uid === null) {
     return 1;
   }
 
+  // Return result of database function
   const pid = await database.getPid(uid, name);
   return pid;
 }
@@ -80,6 +87,7 @@ export const getPid = async (token, name, database) => {
  * @returns {Promise<Object>}
  */
 export const openPf = async (pid, database) => {
+  // Return result of database function
   const Pf = await database.openPf(pid);
   return Pf;
 }
@@ -94,20 +102,24 @@ export const openPf = async (pid, database) => {
  * @returns 
  */
 export const editPf = async (token, pid, name, database) => {
+  // Return error if name is not valid
   if (name == '') {
     return 2;
   }
 
+  // Return error if user is not found
   const uid = await database.getTokenUid(token);
   if (uid === null) {
     return 3;
   }
 
+  // Return error if pid is not valid
   const Pf = await database.openPf(pid);
   if (Pf == null) {
     return 4;
   }
 
+  // Return result of database function
   const update = await database.editPf(uid, pid, name);
   return update;
 }
@@ -119,28 +131,42 @@ export const editPf = async (token, pid, name, database) => {
  * @returns {Promise<boolean>}
  */
 export const deletePf = async (token, pid, database) => {
+  // Return error if user is not found
   const uid = await database.getTokenUid(token);
   if (uid === null) {
     return 2;
   }
 
+  // Return error if pid is not valid
+  // Return error if pid belongs to watchlist
   const Pf = await database.openPf(pid);
   if (Pf == null) {
     return 3;
   } else if (Pf.name == "Watchlist") {
     return 4;
   }
-  // Delete portfolio
+
+  // Return result of database function
   const del = await database.deletePf(uid, pid);
   return del;
 }
 
+/**
+ * Function to calculate the performance of a portfolio
+ * @param {string} token 
+ * @param {string} pid 
+ * @param {Database} database 
+ * @returns 
+ */
 export const calcPf = async (token, pid, database) => {
+  // Return error if user is not found
   const uid = await database.getTokenUid(token);
   if (uid == null) {
     return -2;
   }
 
+  // Return error if pid is not valid
+  // Return error if pid belongs to watchlist
   const Pf = await database.openPf(pid);
   if (Pf == null) {
     return -3;
@@ -148,20 +174,23 @@ export const calcPf = async (token, pid, database) => {
     return -4;
   }
 
+  // Calculate performance of portfolio
+  // Add in actual sold profit with current value or portfolio
+  //  versus the amount invested in portfolio
   let perf = 0;
-  // Calculate profit so far
   let gain = Pf.value.sold;
 
+  // Get stocklist
   const stocks = Pf.stocks;
   for (let i = 0; i < stocks.length; i++) {
+    // Add up the current price of each stock to determine current value
     const symbol = stocks[i].stock;
     const value = await getStock(1, symbol);
-    // console.log(value);
     const price = value.data.quotes.quote['last'];
-    // console.log(stocks[i].stock + " currently valued at " + price);
     gain += price * stocks[i].quantity;
   }
 
+  // Calculate profit as a percentage
   const profit = gain - Pf.value.spent;
   perf = profit/Pf.value.spent;
 

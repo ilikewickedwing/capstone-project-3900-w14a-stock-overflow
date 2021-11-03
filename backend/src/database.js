@@ -308,7 +308,7 @@ export class Database {
   }
 
   /**
-   * Returns the portfolio id
+   * Function to create new portfolio and returns the portfolio id
    * @param {string} uid 
    * @param {string} name 
    * @returns {Promise<string | null>}
@@ -373,11 +373,13 @@ export class Database {
       return null;
     }
 
+    // Find the list of portfolios belonging to the user
     const userPortos = this.database.collection('userPortos');
     const query1 = { ownerUid: uid };
     const userPortoResp = await userPortos.findOne(query1);
     const userPfs = userPortoResp.pfs;
 
+    // Search for the portfolio and return the pid
     for (let i = 0; i < userPfs.length; i++) {
       if (userPfs[i].name == name) {
         return userPfs[i].pid;
@@ -403,6 +405,13 @@ export class Database {
     return null
   }
 
+  /**
+   * Function to change the name of the portfolio
+   * @param {string} uid 
+   * @param {string} pid 
+   * @param {string} name 
+   * @returns 
+   */
   async editPf(uid, pid, name) {
     // Change the name in the database
     const pfs = this.database.collection('portfolios');
@@ -472,7 +481,7 @@ export class Database {
   }
 
   /**
-   * 
+   * Adds a stock to the portfolio and returns result
    * @param {string} pid 
    * @param {string} stock 
    * @param {float} price 
@@ -484,15 +493,8 @@ export class Database {
     const pfs = this.database.collection('portfolios');
     const query = {pid: pid};
     const pfResp = await pfs.findOne(query);
-
-    // If portfolio does not exist
-    if (pfResp == null) {
-      return 3;
-    }
-
     const stockList = pfResp.stocks; // The stock list inside the portfolio
     const pfValue = pfResp.value; // The value object inside the portfolio
-
 
     // Trying to find the index of the stock if it already exists
     // in stock list
@@ -504,7 +506,6 @@ export class Database {
       }
     }
 
-    
     if (stkIndex != -1) { // If the stock is already in the list
       if(pfResp.name === 'Watchlist') return 6;
       let cost = stockList[stkIndex].avgPrice * stockList[stkIndex].quantity;
@@ -527,7 +528,7 @@ export class Database {
   }
 
   /**
-   * 
+   * Function to sell stocks from portfolio
    * @param {string} pid 
    * @param {string} stock 
    * @param {int} quantity 
@@ -538,12 +539,6 @@ export class Database {
     const pfs = this.database.collection('portfolios');
     const query = {pid: pid};
     const pfResp = await pfs.findOne(query);
-
-    // If portfolio does not exist
-    if (pfResp == null) {
-      return 3;
-    }
-
     const stockList = pfResp.stocks; // The stock list in the portfolio
     const pfValue = pfResp.value; // The value object inside the portfolio
 
@@ -576,12 +571,17 @@ export class Database {
 
     pfValue.sold += price * quantity;
 
-
     // Updating database
     await pfs.updateOne(query, { $set: { stocks: stockList, value: pfValue } } );
     return -1;
   }
 
+  /**
+   * Function to check on stock contained within portfolio
+   * @param {string} pid 
+   * @param {string} stock 
+   * @returns {Promise <object>}
+   */
   async getStock(pid, stock) {
     // Find the corresponding portfolio for the given pid
     const pfs = this.database.collection('portfolios');
@@ -591,6 +591,7 @@ export class Database {
     if (pfResp == null) {
       return null;
     }
+
     const stockList = pfResp.stocks; // The stock list inside the portfolio
 
     // Trying to find the stock in stockList

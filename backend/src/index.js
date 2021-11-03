@@ -448,20 +448,85 @@ app.get('/user/portfolios/open', async (req, res) => {
   res.status(403).send({ error: "Invalid pid" });
 })
 
+
+// Get endpoint for getting the pid of a single portfolio
+/**
+ * @swagger
+ * /user/portfolios/getPid:
+ *   get:
+ *     tags: [Portfolio]
+ *     description: Endpoint for getting a pid
+ *     parameters:
+ *      - name: token
+ *        description: The token of the user
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: pid
+ *        description: The id of the portfolio
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Returns the portfolio
+ *         schema:
+ *            type: object
+ *            properties:
+ *              portfolioId:
+ *                type: string
+ *                description: The pid of the portfolio
+ *       401:
+ *         description: Invalid token
+ *       403: 
+ *         description: Invalid name
+ */
 app.get('/user/portfolios/getPid', async (req, res) => {
   const { token, name } = req.query;
   const resp = await getPid(token, name, database);
-  if (resp == 1) {
+  if (resp === 1) {
     res.status(401).send({ error: "Invalid token" });
+  } else if (resp === null) {
+    res.status(403).send({ error: "Invalid name" });
   } else {
     res.status(200).send(resp);
   }
 
-  // 'Watchlist'
-
   return;
 })
 
+// Get endpoint for calculating a single portfolio performance
+/**
+ * @swagger
+ * /user/portfolios/calculate:
+ *   get:
+ *     tags: [Portfolio]
+ *     description: Endpoint for calculating a single portfolio performance
+ *     parameters:
+ *      - name: token
+ *        description: The token of the user
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: pid
+ *        description: The id of the portfolio
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Returns the portfolio performance as a percentage
+ *         schema:
+ *            type: object
+ *            properties:
+ *              performance]:
+ *                type: string
+ *                description: The performance of the portfolio
+ *       401:
+ *         description: Invalid token
+ *       403: 
+ *         description: Invalid pid, watchlist performance not existent
+ */
 app.get('/user/portfolios/calculate', async (req, res) => {
   const { token, pid } = req.query;
   const resp = await calcPf(token, pid, database);

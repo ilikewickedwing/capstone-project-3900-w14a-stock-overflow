@@ -598,7 +598,7 @@ describe('Calculate portfolio performance', () => {
   })
 })
 
-describe('Portfolio and stocks endpoint test', () => {
+describe('Calculate portfolio performance endpoint test', () => {
   beforeAll(async () => {
     await database.connect();
   })
