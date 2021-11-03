@@ -20,3 +20,4 @@ Week 6
 Flex week.
 
 Week 7
+Changed api from Alphavantage to Tradier since rate limits too much. Also worked one portfolio table. Implemented calls to Tradier with Richard.
