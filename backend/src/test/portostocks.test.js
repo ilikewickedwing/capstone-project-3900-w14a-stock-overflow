@@ -840,7 +840,3 @@ describe('Adding stocks to watchlist', () => {
     await d.disconnect();
   })
 })
-
-describe('Stress testing of portfolio and stocks', () => {
-
-})
