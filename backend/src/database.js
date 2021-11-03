@@ -58,11 +58,19 @@ const COLLECTIONS = [
           stock: string,
           avgPrice: float,
           quantity: int,
+          performance: [
+            {
+              date: performance, // (stored as a float and as percentage)
+            }
+          ]
         }
       ],
       value: {
         spent: float,
         sold: float,
+        performance: [
+          date: perforamnce, // (stored as a float and as percentage)
+        ]
       }
     }
    */
@@ -172,7 +180,8 @@ export class Database {
       stocks: [],
       value: {
         spent: null,
-        sold: null
+        sold: null,
+        performance: null,
       }
     })
 
@@ -320,6 +329,10 @@ export class Database {
     const userPortoResp = await userPortos.findOne(query1);
     const userPfs = userPortoResp.pfs;
     const pfs = this.database.collection('portfolios');
+    const now = new Date();
+    const today = new Date(now);
+    const time = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + today.getDate()).slice(-2);
+    const date = time.toString();
 
     // If user owns no portfolios with same name then create 
     // a new portfolio
@@ -336,9 +349,16 @@ export class Database {
       stocks: [],
       value: {
         spent: 0,
-        sold: 0
+        sold: 0,
+        performance: [
+          {
+            date: date,
+            perf: 0
+          }
+        ]
       }
     });
+
     userPfs.push({ pid: Pid, name: name });
     await userPortos.updateOne( query1, { $set : { pfs: userPfs } } );
     return Pid;
@@ -513,10 +533,20 @@ export class Database {
       stockList[stkIndex].quantity += quantity;
       stockList[stkIndex].avgPrice = cost / stockList[stkIndex].quantity;
     } else { // Else if the stock is not in the list
+      const now = new Date();
+      const today = new Date(now);
+      const time = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + today.getDate()).slice(-2);
+      const date = time.toString();
       stockList.push({
         stock: stock,
         avgPrice: price,
         quantity: quantity,
+        performance: [
+          {
+            date: date,
+            perf: 0
+          }
+        ]
       })
     }
 
@@ -558,9 +588,9 @@ export class Database {
         }
         else {
           stockList[stkIndex].quantity -= quantity;
-          if (stockList[stkIndex].quantity == 0) {
-            stockList.splice(stkIndex, 1);
-          }
+          // if (stockList[stkIndex].quantity == 0) {
+          //   stockList.splice(stkIndex, 1);
+          // }
         }
       } else {
         stockList.splice(stkIndex, 1);
