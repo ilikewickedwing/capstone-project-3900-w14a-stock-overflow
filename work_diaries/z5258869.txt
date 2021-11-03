@@ -13,6 +13,7 @@ Week 3
 	We met to talk about what else we need to add in the proposal and we met again on
 	Sunday 8:30pm to add finishing touches. I did the software quality part and redid
 	the diagram
+
 Week 4
 	I was responsible for implementing the backend authentication system and setting
 	up the stub functions and the mongoDb database. We met again at Sunday 8:30pm to
@@ -24,5 +25,12 @@ Week 4
 	Mison was responsible for the frontend for the user authentication
 	
 	Lily was responsible for the frontend of creating portfolios
+
 Week 5
 	We met again at Tuesday to do finishing touches before our demo
+
+Week 6
+	We assigned roles for second sprint
+	
+Week 7
+	We met up on Sunday to update how everyone was going
