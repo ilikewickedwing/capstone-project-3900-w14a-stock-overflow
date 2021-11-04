@@ -1,17 +1,17 @@
 import React, { useContext, useEffect, useState } from "react"
 import PropTypes from "prop-types";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, Label, ResponsiveContainer, LineChart, Line } from "recharts";
+import { BarChart, Legend, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts";
 import CandleStick from "./CandleStick";
 import { ApiContext } from "../api";
 import Ohlc from "./Ohlc";
 import GraphOptions from "./GraphOptions";
 import StocksToolTip from "./StocksToolTip";
 import LoadingScreen from "./GraphLoading";
+import randomColor from "randomcolor";
 
 export const GRAPHCOLORS = {
   INCREASING: '#60CD71',
   DECREASING: '#F14C62',
-  DEFAULT: '#8884d8'
 }
 
 const STATES = {
@@ -95,7 +95,6 @@ export default function StocksGraph(props) {
     // Loop through the given companies and call the api for data if needed
     const loadData = async () => {
       setState(STATES.LOADING);
-      console.log("Loading");
       // Loop through each company id
       const companyIds = props.companyId.split(',');
       // Fetches a specific company's data
@@ -103,9 +102,8 @@ export default function StocksGraph(props) {
         // Call from api only if needed
         if (!(cid in dataCache) || !(timeOptions in dataCache[cid])) {
           try {
-            const resp = await callApi(props.companyId.toUpperCase(), timeOptions)
+            const resp = await callApi(cid.toUpperCase(), timeOptions)
             const respJson = await resp.json();
-            console.log(`Received resp for: ${cid}`);
             return respJson  
           } catch (err) {
             console.log(err);
@@ -117,7 +115,6 @@ export default function StocksGraph(props) {
       const companyDatas = await Promise.all(companyIds.map(cid => loadCompanyData(cid)));
       addToDataCache(companyIds, companyDatas, timeOptions);
       setState(STATES.RECEIVED);
-      console.log("Received");
     }
     loadData();
     /**
@@ -161,17 +158,28 @@ export default function StocksGraph(props) {
     const hasAllCData = companyIds.every(v => v in dataCache && timeOptions in dataCache[v]);
     if (hasAllCData) {
       if (companyIds.length > 1) {
-        // return (
-        //   <ResponsiveContainer width={'99%'} height={props.height}>
-        //     <LineChart>
-            
-        //     </LineChart>
-        //   </ResponsiveContainer>
-        // )
-        // for (const cid of companyIds) {
-        //   const data = transformData(dataCache[cid][timeOptions], graphStyle);
-        // }
-        
+        const formatedData = transformMultiStockData(companyIds, timeOptions, dataCache);
+        console.log(formatedData);
+        return (
+          <ResponsiveContainer width={'99%'} height={props.height}>
+            <LineChart
+              margin={{ bottom: 25, left: 25, right: 25 }}
+              data={formatedData}
+            >
+              <XAxis dataKey="time"></XAxis>
+              <YAxis 
+                label={{ value: 'Price (US Dollars)', angle: -90, position: 'insideLeft', dx: -15, dy: 20 }}
+                domain={[0, 'dataMax']} type="number"/>
+              <Tooltip/>
+              {
+                companyIds.map(cid => (
+                  <Line key={cid} dot={false} type="monotone" dataKey={cid} stroke={randomColor({ luminosity: 'dark' })}/>    
+                ))
+              }
+              <Legend wrapperStyle={{bottom: 0, right: 0}}/>
+            </LineChart>
+          </ResponsiveContainer>
+        )
       }
       if (companyIds.length === 1) {
         const data = transformData(dataCache[props.companyId][timeOptions], graphStyle);
@@ -182,14 +190,12 @@ export default function StocksGraph(props) {
                 margin={{ bottom: 25, left: 25 }}
                 data={data}
               >
-                <XAxis dataKey="time">
-                  <Label value="Time Interval" offset={-10} position="insideBottom" />
-                </XAxis>
+                <XAxis dataKey="time"></XAxis>
                 <YAxis 
                   label={{ value: 'Price (US Dollars)', angle: -90, position: 'insideLeft', dx: -15, dy: 20 }}
                   domain={['dataMin', 'dataMax ']} type="number"/>
                 <Tooltip content={<StocksToolTip graphStyle={graphStyle}/>}/>
-                <Line type="monotone" dataKey="close" stroke={GRAPHCOLORS.DEFAULT}/>
+                <Line dot={false} type="monotone" dataKey="close" stroke={randomColor({luminosity: 'dark'})}/>
               </LineChart>
             </ResponsiveContainer>
           )
@@ -200,9 +206,7 @@ export default function StocksGraph(props) {
               margin={{ bottom: 25, left: 25 }}
               data={data}
             >
-              <XAxis dataKey="time">
-                <Label value="Time Interval" offset={-10} position="insideBottom" />
-              </XAxis>
+              <XAxis dataKey="time"></XAxis>
               <YAxis 
                 label={{ value: 'Price (US Dollars)', angle: -90, position: 'insideLeft', dx: -15, dy: 20 }}
                 domain={['dataMin', 'dataMax ']} type="number"/>
@@ -237,6 +241,46 @@ export default function StocksGraph(props) {
 StocksGraph.propTypes = {
   companyId: PropTypes.string,
   height: PropTypes.number,
+}
+
+const transformMultiStockData = (companyIds, interval, dataCache) => {
+  console.log(dataCache);
+  const timePointsNum = getTimeSeriesData(dataCache[companyIds[0]][interval]).length;
+  const output = []
+  for (let i = 0; i < timePointsNum; i++) {    
+    const timePoint = {
+      time: getDataTime(getTimeSeriesData(dataCache[companyIds[0]][interval])[i])
+    };
+    for (const cid of companyIds) {
+      timePoint[cid] = getTimeSeriesData(dataCache[cid][interval])[i].close
+    }
+    output.push(timePoint);
+  }
+  return output;
+}
+
+const getDataTime = (data) => {
+  if ('date' in data) {
+    return data.date;
+  } else if ('time' in data) {
+    return data.time;
+  }
+  return null;
+}
+
+/**
+ * Given the api data received from the backend
+ * return the actual timeseries of the data
+ * @param {*} apiData 
+ * @returns 
+ */
+const getTimeSeriesData = (apiData) => {
+  if ('series' in apiData.data) {
+    return apiData.data.series.data;
+  } else if ('history' in apiData.data) {
+    return apiData.data.history.day;
+  }
+  return null;
 }
 
 /**
