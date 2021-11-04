@@ -119,9 +119,34 @@ export const editPf = async (token, pid, name, database) => {
     return 4;
   }
 
+  // Return error if portfolio not owned by user
+  const verify = await verifyPf(uid, pid, database);
+  if (!verify) return 6;
+
   // Return result of database function
   const update = await database.editPf(uid, pid, name);
   return update;
+}
+
+/**
+ * Verifies that user owns the portfolio
+ * @param {string} uid 
+ * @param {string} pid 
+ * @param {Database} database 
+ * @returns {Promise<boolean>}
+ */
+export const verifyPf = async (uid, pid, database) => {
+  const userPfs = await database.getPfs(uid, database);
+  let check = 0;
+
+  for (let i = 0; i < userPfs.length; i++) {
+    if (userPfs[i].pid === pid) {
+      check = 1;
+      break;
+    }
+  }
+
+  return (check === 1);
 }
 
 /**
@@ -145,6 +170,10 @@ export const deletePf = async (token, pid, database) => {
   } else if (Pf.name == "Watchlist") {
     return 4;
   }
+
+  // Return error if portfolio not owned by user
+  const verify = await verifyPf(uid, pid, database);
+  if (!verify) return -1;
 
   // Return result of database function
   const del = await database.deletePf(uid, pid);
@@ -174,25 +203,11 @@ export const calcPf = async (token, pid, database) => {
     return -4;
   }
 
-  // Calculate performance of portfolio
-  // Add in actual sold profit with current value or portfolio
-  //  versus the amount invested in portfolio
-  let perf = 0;
-  let gain = Pf.value.sold;
+  // Return error if portfolio not owned by user
+  const verify = await verifyPf(uid, pid, database);
+  if (!verify) return -1;
 
-  // Get stocklist
-  const stocks = Pf.stocks;
-  for (let i = 0; i < stocks.length; i++) {
-    // Add up the current price of each stock to determine current value
-    const symbol = stocks[i].stock;
-    const value = await getStock(1, symbol);
-    const price = value.data.quotes.quote['last'];
-    gain += price * stocks[i].quantity;
-  }
-
-  // Calculate profit as a percentage
-  const profit = gain - Pf.value.spent;
-  perf = profit/Pf.value.spent;
+  const perf = await database.calcPf(pid);
 
   return perf;
 }
