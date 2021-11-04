@@ -41,3 +41,8 @@ Week 7
 - refactored more frontend code/ fixed bug issues with the delete portfolio function
 - implemented code for the search bar of the page (located in Navigation.jsx)
 - met up on the 31st Oct Sunday (all attended) to discuss progress 
+- hurdle: alphavantage limited my api calls and i couldnt progress further in the project
+
+Week 8
+- TODO: complete milestone 2 before starting 3. Alternatively, implement the frontend for 3 first then go back to continue 2. 
+
