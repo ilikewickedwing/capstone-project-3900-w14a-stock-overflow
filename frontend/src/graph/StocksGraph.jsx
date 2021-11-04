@@ -166,7 +166,7 @@ export default function StocksGraph(props) {
               margin={{ bottom: 25, left: 25, right: 25 }}
               data={formatedData}
             >
-              <XAxis dataKey="time"></XAxis>
+              <XAxis minTickGap={25} dataKey="time"></XAxis>
               <YAxis 
                 label={{ value: 'Price (US Dollars)', angle: -90, position: 'insideLeft', dx: -15, dy: 20 }}
                 domain={[0, 'dataMax']} type="number"/>
@@ -190,8 +190,8 @@ export default function StocksGraph(props) {
                 margin={{ bottom: 25, left: 25 }}
                 data={data}
               >
-                <XAxis dataKey="time"></XAxis>
-                <YAxis 
+                <XAxis minTickGap={25} dataKey="time"></XAxis>
+                <YAxis
                   label={{ value: 'Price (US Dollars)', angle: -90, position: 'insideLeft', dx: -15, dy: 20 }}
                   domain={['dataMin', 'dataMax ']} type="number"/>
                 <Tooltip content={<StocksToolTip graphStyle={graphStyle}/>}/>
@@ -206,7 +206,7 @@ export default function StocksGraph(props) {
               margin={{ bottom: 25, left: 25 }}
               data={data}
             >
-              <XAxis dataKey="time"></XAxis>
+              <XAxis minTickGap={25} dataKey="time"></XAxis>
               <YAxis 
                 label={{ value: 'Price (US Dollars)', angle: -90, position: 'insideLeft', dx: -15, dy: 20 }}
                 domain={['dataMin', 'dataMax ']} type="number"/>
@@ -243,13 +243,24 @@ StocksGraph.propTypes = {
   height: PropTypes.number,
 }
 
+// Converts a time string to a nicely displayed one
+const transformTimeStr = (timeStr) => {
+  const date = new Date(Date.parse(timeStr));
+  if (timeStr.includes('T')) {
+    return date.toLocaleTimeString('en-US',
+      {timeZone:'UTC',hour12:true,hour:'numeric',minute:'numeric'}
+    );
+  }
+  return date.toLocaleString('default',{month:'short', year:'numeric', day: 'numeric'})
+}
+
 const transformMultiStockData = (companyIds, interval, dataCache) => {
   console.log(dataCache);
   const timePointsNum = getTimeSeriesData(dataCache[companyIds[0]][interval]).length;
   const output = []
   for (let i = 0; i < timePointsNum; i++) {    
     const timePoint = {
-      time: getDataTime(getTimeSeriesData(dataCache[companyIds[0]][interval])[i])
+      time: transformTimeStr(getDataTime(getTimeSeriesData(dataCache[companyIds[0]][interval])[i]))
     };
     for (const cid of companyIds) {
       timePoint[cid] = getTimeSeriesData(dataCache[cid][interval])[i].close
@@ -303,7 +314,7 @@ function transformIntradayData(data, graphStyle) {
     switch (graphStyle) {
       case 'candlestick':
         return {
-          time: d.time,
+          time: transformTimeStr(d.time),
           openCloseData: [
             Number(d.open),
             Number(d.close),
@@ -314,7 +325,7 @@ function transformIntradayData(data, graphStyle) {
         }
       case 'ohlc':
         return {
-          time: d.time,
+          time: transformTimeStr(d.time),
           open: Number(d.open),
           close: Number(d.close),
           highLow: [
@@ -325,7 +336,7 @@ function transformIntradayData(data, graphStyle) {
         }
       case 'line':
         return {
-          time: d.time,
+          time: transformTimeStr(d.time),
           open: Number(d.open),
           close: Number(d.close),
           high: Number(d.high),
@@ -344,7 +355,7 @@ function transformNonIntradayData(data, graphStyle) {
     switch (graphStyle) {
       case 'candlestick':
         return {
-          time: d.date,
+          time: transformTimeStr(d.date),
           openCloseData: [
             Number(d.open),
             Number(d.close),
@@ -355,7 +366,7 @@ function transformNonIntradayData(data, graphStyle) {
         }
       case 'ohlc':
         return {
-          time: d.date,
+          time: transformTimeStr(d.date),
           open: Number(d.open),
           close: Number(d.close),
           highLow: [
@@ -366,7 +377,7 @@ function transformNonIntradayData(data, graphStyle) {
         }
       case 'line':
         return {
-          time: d.date,
+          time: transformTimeStr(d.date),
           open: Number(d.open),
           close: Number(d.close),
           high: Number(d.high),
