@@ -9,10 +9,9 @@ import { API } from "./api.js";
 export const api = new API();
 
 /**
- * Gets a list of active stocks
+ * Gets a list of active stocks from the api
  * @returns {Promise <[{symbol: String, name: String}]>}
  * A list of stocks with their symbol and name
- * 
  */
 export const getAllStocks = async () => {
   const resp = await api.getAllStocks();
@@ -27,33 +26,41 @@ export const getAllStocks = async () => {
  * @param {float} price 
  * @param {int} quantity 
  * @param {Database} database
- * @returns {Promise <boolean>}
+ * @returns {Promise}
  */
 export const addStock = async (token, pid, stock, price, quantity, database) => {
   // Finding corresponding user for the given token
   const uid = await database.getTokenUid(token);
+  // Return error if user not found
   if (uid === null) {
     return 1;
   }
 
+  // Return error if stock is not valid
   if (!await checkStock(stock)) {
     return 2;
   }
 
-  // Check for watchlist
   const get = await database.openPf(pid);
+  // Return error if pid is not valid
   if (get == null) return 3;
+  
   const name = get.name;
-
   if (name !== 'Watchlist') {
+    // Return error if quantity of stock is not valid
     if (!Number.isInteger(quantity) || quantity <= 0) {
       return 4;
-    } else if (isNaN(price) || price <= 0) {
-      return 5;
-    } else {
-      return await database.addStocks(pid, stock, price, quantity);
     }
+    
+    // Return error if price is not valid
+    if (isNaN(price) || price <= 0) {
+      return 5;
+    }
+    
+    // Return result of adding stock to portfolio
+    return await database.addStocks(pid, stock, price, quantity);
   } else {
+    // Return result of adding stock to watchlist
     return await database.addStocks(pid, stock, null, null);
   }
 }
@@ -72,36 +79,44 @@ export const addStock = async (token, pid, stock, price, quantity, database) => 
 export const modifyStock = async (token, pid, stock, price, quantity, option, database) => {
   // Finding corresponding user for the given token
   const uid = await database.getTokenUid(token);
+  // Return error if user not found
   if (uid === null) {
     return 1;
   }
 
+  // Return error if stock is not valid
   if (!await checkStock(stock)) {
     return 2;
   }
 
-  // Check for watchlist
   const get = await database.openPf(pid);
+  // Return error if pid is not valid
   if (get == null) return 3;
+  
   const name = get.name;
-
-  if (name !== 'Watchlist') {    
+  if (name !== 'Watchlist') {  
+    // Return error if quantity of stock is not valid
     if (!Number.isInteger(quantity) || quantity <= 0) {
       return 6;
-    } 
-      
+    }
+    
+    // Return error if price is not valid
     if (isNaN(price) || price <= 0) {
       return 7;
     }
   }
   
   let resp = null;
+  // Determine if buying or selling stocks
   if (option) {
+    // Return result of buying stocks
     resp = await database.addStocks(pid, stock, price, quantity);
   }
   else {
+    // Return result of selling stocks
     resp = await database.sellStocks(pid, stock, price, quantity);
   }
+  
   return resp;
 }
 
@@ -112,14 +127,22 @@ export const modifyStock = async (token, pid, stock, price, quantity, option, da
  */
 export const checkStock = async (stock) => {
   // console.log("checkStock time for " + stock);
-  const stocks = await api.getAllStocks();
+  // const stocks = await api.getAllStocks();
   // console.log("received all stocks");
   const symbols = stock.split(",");
 
   for (let i = 0; i < symbols.length; i++) {
     // console.log("symbol is " + symbols[i]);
-    const filteredStock = stocks.filter(o => o.symbol === symbols[i])
-    if (filteredStock.length === 0) return false;
+    // const filteredStock = stocks.filter(o => o.symbol === symbols[i])
+    console.log(symbols[i]);
+    const resp = await api.lookupStock(symbols[i]);
+    if (resp == null) return false;
+    if (Array.isArray(resp)) {
+      const filteredStock = resp.filter(o => o.symbol === symbols[i]);
+      if (filteredStock.length === 0) return false;
+    } else {
+      if (resp.symbol !== symbols[i]) return false;
+    }
   }
 
   return true;
@@ -156,7 +179,6 @@ export const getStock = async (type, stocks, interval, start) => {
 
     if (typeInt === 2 && startCheck.match(/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/) === null) return -4;
     if (typeInt === 3 && startCheck.match(/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1]) ([0-1][0-9]|2[0-4]):([0-5][0-9])$/) === null) return -4;
-
   }
 
   const resp = await api.getStock(typeInt, stocks, interval, start);

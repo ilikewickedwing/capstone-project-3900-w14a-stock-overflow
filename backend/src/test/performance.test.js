@@ -7,7 +7,7 @@ import request from 'supertest';
 import { app, database } from "../index";
 
 
-describe('Retrieve stock information', () => {
+/* describe('Retrieve stock information', () => {
 	const d = new Database(true);
   beforeAll(async () => {
     await d.connect();
@@ -65,7 +65,7 @@ describe('Retrieve stock information', () => {
   it('Get stock history: 1 day, 1 minute interval', async () => {
     const start = new Date();
     start.setDate(now.getDate()-1);
-    let time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2) + " 00:00";
+    const time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2) + " 00:00";
     const resp = await getStock('3', 'IBM', '1min', time.toString());
     expect(resp.data.series).not.toBe(null);
     // console.log(resp.data.series);
@@ -73,7 +73,7 @@ describe('Retrieve stock information', () => {
   it('Get stock history: 1 day, 5 minute interval', async () => {
     const start = new Date();
     start.setDate(now.getDate()-1);
-    let time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2) + " 00:00";
+    const time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2) + " 00:00";
     const resp = await getStock('3', 'IBM', '5min', time.toString());
     expect(resp.data.series).not.toBe(null);
     // console.log(resp.data.series);
@@ -81,7 +81,7 @@ describe('Retrieve stock information', () => {
   it('Get stock history: 5 day, 15 minute interval', async () => {
     const start = new Date();
     start.setDate(now.getDate()-5);
-    let time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2) + " 00:00";
+    const time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2) + " 00:00";
     const resp = await getStock('3', 'IBM', '15min', time.toString());
     expect(resp.data.series).not.toBe(null);
     // console.log(resp.data.series);
@@ -89,7 +89,7 @@ describe('Retrieve stock information', () => {
   it('Get stock history: 1 month, daily interval', async () => {
     const start = new Date();
     start.setMonth(now.getMonth() - 1);
-    let time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
+    const time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
     // console.log(time);
     const resp = await getStock('2', 'IBM', 'daily', time.toString());
     expect(resp.data.history).not.toBe(null);
@@ -98,7 +98,7 @@ describe('Retrieve stock information', () => {
   it('Get stock history: 6 months, daily interval', async () => {
     const start = new Date();
     start.setMonth(now.getMonth() - 6);
-    let time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
+    const time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
     // console.log(time);
     const resp = await getStock('2', 'IBM', 'daily', time.toString());
     expect(resp.data.history).not.toBe(null);
@@ -107,7 +107,7 @@ describe('Retrieve stock information', () => {
   it('Get stock history: 1 year, weekly interval', async () => {
     const start = new Date();
     start.setFullYear(start.getFullYear() - 1);
-    let time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
+    const time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
     // console.log(time);
     const resp = await getStock('2', 'IBM', 'weekly', time.toString());
     expect(resp.data.history).not.toBe(null);
@@ -116,7 +116,7 @@ describe('Retrieve stock information', () => {
   it('Get stock history: 5 years, weekly interval', async () => {
     const start = new Date();
     start.setFullYear(start.getFullYear() - 5);
-    let time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
+    const time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
     // console.log(time);
     const resp = await getStock('2', 'IBM', 'weekly', time.toString());
     expect(resp.data.history).not.toBe(null);
@@ -125,7 +125,7 @@ describe('Retrieve stock information', () => {
   it('Get stock history: 10 years, monthly interval', async () => {
     const start = new Date();
     start.setFullYear(start.getFullYear() - 10);
-    let time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
+    const time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
     // console.log(time);
     const resp = await getStock('2', 'IBM', 'monthly', time.toString());
     expect(resp.data.history).not.toBe(null);
@@ -254,7 +254,7 @@ describe('Retrieve stock information endpoint test', () => {
   it('200 on successful get stock history: 1 day, 1 minute interval', async () => {
     const start = new Date();
     start.setDate(now.getDate()-1);
-    let time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2) + " 00:00";
+    const time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2) + " 00:00";
     const resp = await request(app).get(`/stocks/info?type=3&stocks=AAPL&interval=1min&start=${time}`).send();
     expect(resp.statusCode).toBe(200);
     expect(resp.body.data.series).not.toBe(null);
@@ -263,7 +263,7 @@ describe('Retrieve stock information endpoint test', () => {
   it('200 on successful get stock history: 1 day, 5 minute interval', async () => {
     const start = new Date();
     start.setDate(now.getDate()-1);
-    let time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2) + " 00:00";
+    const time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2) + " 00:00";
     const resp = await request(app).get(`/stocks/info?type=3&stocks=AAPL&interval=5min&start=${time}`).send();
     expect(resp.statusCode).toBe(200);
     expect(resp.body.data.series).not.toBe(null);
@@ -272,7 +272,7 @@ describe('Retrieve stock information endpoint test', () => {
   it('200 on successful get stock history: 1 day, 15 minute interval', async () => {
     const start = new Date();
     start.setDate(now.getDate()-1);
-    let time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2) + " 00:00";
+    const time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2) + " 00:00";
     const resp = await request(app).get(`/stocks/info?type=3&stocks=AAPL&interval=15min&start=${time}`).send();
     expect(resp.statusCode).toBe(200);
     expect(resp.body.data.series).not.toBe(null);
@@ -281,7 +281,7 @@ describe('Retrieve stock information endpoint test', () => {
   it('200 on successful get stock history: 1 month, daily interval', async () => {
     const start = new Date();
     start.setMonth(now.getMonth() - 1);
-    let time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
+    const time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
     const resp = await request(app).get(`/stocks/info?type=2&stocks=AAPL&interval=daily&start=${time}`).send();
     expect(resp.statusCode).toBe(200);
     expect(resp.body.data.history).not.toBe(null);
@@ -290,7 +290,7 @@ describe('Retrieve stock information endpoint test', () => {
   it('200 on successful get stock history: 6 months, daily interval', async () => {
     const start = new Date();
     start.setMonth(now.getMonth() - 6);
-    let time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
+    const time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
     const resp = await request(app).get(`/stocks/info?type=2&stocks=AAPL&interval=daily&start=${time}`).send();
     expect(resp.statusCode).toBe(200);
     expect(resp.body.data.history).not.toBe(null);
@@ -299,7 +299,7 @@ describe('Retrieve stock information endpoint test', () => {
   it('200 on successful get stock history: 1 year, weekly interval', async () => {
     const start = new Date();
     start.setFullYear(start.getFullYear() - 1);
-    let time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
+    const time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
     const resp = await request(app).get(`/stocks/info?type=2&stocks=AAPL&interval=weekly&start=${time}`).send();
     expect(resp.statusCode).toBe(200);
     expect(resp.body.data.history).not.toBe(null);
@@ -308,7 +308,7 @@ describe('Retrieve stock information endpoint test', () => {
   it('200 on successful get stock history: 5 years, weekly interval', async () => {
     const start = new Date();
     start.setFullYear(start.getFullYear() - 5);
-    let time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
+    const time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
     const resp = await request(app).get(`/stocks/info?type=2&stocks=AAPL&interval=weekly&start=${time}`).send();
     expect(resp.statusCode).toBe(200);
     expect(resp.body.data.history).not.toBe(null);
@@ -317,7 +317,7 @@ describe('Retrieve stock information endpoint test', () => {
   it('200 on successful get stock history: 10 years, monthly interval', async () => {
     const start = new Date();
     start.setFullYear(start.getFullYear() - 10);
-    let time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
+    const time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
     const resp = await request(app).get(`/stocks/info?type=2&stocks=AAPL&interval=monthly&start=${time}`).send();
     expect(resp.statusCode).toBe(200);
     expect(resp.body.data.history).not.toBe(null);
@@ -348,7 +348,7 @@ describe('Retrieve stock information endpoint test', () => {
   afterAll(async() => {
     await database.disconnect();
   })
-})
+}) */
 
 describe('Calculate portfolio performance', () => {
   const d = new Database(true);
@@ -362,6 +362,11 @@ describe('Calculate portfolio performance', () => {
   let pid = null;
   let pfArray = null;
   let stArray = null;
+
+  const now = new Date();
+  const today = new Date(now);
+  const time = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + today.getDate()).slice(-2);
+  const date = time.toString();
 
   it('Register user and create first portfolio', async () => {
     const rego = await authRegister('Ashley', 'strongpassword', d);
@@ -405,17 +410,35 @@ describe('Calculate portfolio performance', () => {
       {
         stock: 'AAPL',
         avgPrice: 2,
-        quantity: 2
+        quantity: 2,
+        performance: [
+          {
+            date: date,
+            perf: 0
+          }
+        ]
       },
       {
         stock: 'AMZN',
         avgPrice: 3,
-        quantity: 2
+        quantity: 2,
+        performance: [
+          {
+            date: date,
+            perf: 0
+          }
+        ]
       },
       {
         stock: 'IBM',
         avgPrice: 1,
-        quantity: 1
+        quantity: 1,
+        performance: [
+          {
+            date: date,
+            perf: 0
+          }
+        ]
       }
     ]
     expect(stocks).toMatchObject({
@@ -424,7 +447,13 @@ describe('Calculate portfolio performance', () => {
       stocks: expect.arrayContaining(stArray),
       value: {
         spent: 11,
-        sold: 0
+        sold: 0,
+        performance: [
+          {
+            date: date,
+            perf: 0
+          }
+        ]
       }
     })
   })
@@ -433,7 +462,7 @@ describe('Calculate portfolio performance', () => {
     expect(calc).not.toBe(null);
     // console.log("calc is " + calc);
   })
-  it('Buy extra of first stock in portfolio', async () => {
+  /* it('Buy extra of first stock in portfolio', async () => {
     const add = await modifyStock(token, pid, 'AAPL', 3, 2, 1, d);
     expect(add).toBe(-1);
     const stock = await d.getStock(pid, 'AAPL');
@@ -591,14 +620,14 @@ describe('Calculate portfolio performance', () => {
     const calc = await calcPf(token, pid, d);
     expect(calc).not.toBe(null);
     // console.log("calc is " + calc);
-  })
+  }) */
 
   afterAll(async () => {
     await d.disconnect();
   })
 })
 
-describe('Portfolio and stocks endpoint test', () => {
+/* describe('Calculate portfolio performance endpoint test', () => {
   beforeAll(async () => {
     await database.connect();
   })
@@ -814,4 +843,4 @@ describe('Portfolio and stocks endpoint test', () => {
   afterAll(async() => {
     await database.disconnect();
   })
-})
+}) */

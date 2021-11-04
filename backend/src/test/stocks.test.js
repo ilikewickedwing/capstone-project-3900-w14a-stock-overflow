@@ -27,7 +27,7 @@ describe('Check stock', () => {
   })
 })
 
-describe('Add stock', () => {
+/* describe('Add stock', () => {
 	const d = new Database(true);
   beforeAll(async () => {
     await d.connect();
@@ -581,4 +581,4 @@ describe('Modify stock endpoint test', () => {
   afterAll(async () => {
     await database.disconnect();
   })
-})
+}) */

@@ -58,11 +58,19 @@ const COLLECTIONS = [
           stock: string,
           avgPrice: float,
           quantity: int,
+          performance: [
+            {
+              date: performance, // (stored as a float and as percentage)
+            }
+          ]
         }
       ],
       value: {
         spent: float,
         sold: float,
+        performance: [
+          date: perforamnce, // (stored as a float and as percentage)
+        ]
       }
     }
    */
@@ -172,7 +180,8 @@ export class Database {
       stocks: [],
       value: {
         spent: null,
-        sold: null
+        sold: null,
+        performance: null,
       }
     })
 
@@ -308,7 +317,7 @@ export class Database {
   }
 
   /**
-   * Returns the portfolio id
+   * Function to create new portfolio and returns the portfolio id
    * @param {string} uid 
    * @param {string} name 
    * @returns {Promise<string | null>}
@@ -320,6 +329,10 @@ export class Database {
     const userPortoResp = await userPortos.findOne(query1);
     const userPfs = userPortoResp.pfs;
     const pfs = this.database.collection('portfolios');
+    const now = new Date();
+    const today = new Date(now);
+    const time = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + today.getDate()).slice(-2);
+    const date = time.toString();
 
     // If user owns no portfolios with same name then create 
     // a new portfolio
@@ -336,9 +349,16 @@ export class Database {
       stocks: [],
       value: {
         spent: 0,
-        sold: 0
+        sold: 0,
+        performance: [
+          {
+            date: date,
+            perf: 0
+          }
+        ]
       }
     });
+
     userPfs.push({ pid: Pid, name: name });
     await userPortos.updateOne( query1, { $set : { pfs: userPfs } } );
     return Pid;
@@ -373,11 +393,13 @@ export class Database {
       return null;
     }
 
+    // Find the list of portfolios belonging to the user
     const userPortos = this.database.collection('userPortos');
     const query1 = { ownerUid: uid };
     const userPortoResp = await userPortos.findOne(query1);
     const userPfs = userPortoResp.pfs;
 
+    // Search for the portfolio and return the pid
     for (let i = 0; i < userPfs.length; i++) {
       if (userPfs[i].name == name) {
         return userPfs[i].pid;
@@ -403,6 +425,13 @@ export class Database {
     return null
   }
 
+  /**
+   * Function to change the name of the portfolio
+   * @param {string} uid 
+   * @param {string} pid 
+   * @param {string} name 
+   * @returns 
+   */
   async editPf(uid, pid, name) {
     // Change the name in the database
     const pfs = this.database.collection('portfolios');
@@ -472,7 +501,7 @@ export class Database {
   }
 
   /**
-   * 
+   * Adds a stock to the portfolio and returns result
    * @param {string} pid 
    * @param {string} stock 
    * @param {float} price 
@@ -484,15 +513,8 @@ export class Database {
     const pfs = this.database.collection('portfolios');
     const query = {pid: pid};
     const pfResp = await pfs.findOne(query);
-
-    // If portfolio does not exist
-    if (pfResp == null) {
-      return 3;
-    }
-
     const stockList = pfResp.stocks; // The stock list inside the portfolio
     const pfValue = pfResp.value; // The value object inside the portfolio
-
 
     // Trying to find the index of the stock if it already exists
     // in stock list
@@ -504,7 +526,6 @@ export class Database {
       }
     }
 
-    
     if (stkIndex != -1) { // If the stock is already in the list
       if(pfResp.name === 'Watchlist') return 6;
       let cost = stockList[stkIndex].avgPrice * stockList[stkIndex].quantity;
@@ -512,10 +533,20 @@ export class Database {
       stockList[stkIndex].quantity += quantity;
       stockList[stkIndex].avgPrice = cost / stockList[stkIndex].quantity;
     } else { // Else if the stock is not in the list
+      const now = new Date();
+      const today = new Date(now);
+      const time = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + today.getDate()).slice(-2);
+      const date = time.toString();
       stockList.push({
         stock: stock,
         avgPrice: price,
         quantity: quantity,
+        performance: [
+          {
+            date: date,
+            perf: 0
+          }
+        ]
       })
     }
 
@@ -527,7 +558,7 @@ export class Database {
   }
 
   /**
-   * 
+   * Function to sell stocks from portfolio
    * @param {string} pid 
    * @param {string} stock 
    * @param {int} quantity 
@@ -538,12 +569,6 @@ export class Database {
     const pfs = this.database.collection('portfolios');
     const query = {pid: pid};
     const pfResp = await pfs.findOne(query);
-
-    // If portfolio does not exist
-    if (pfResp == null) {
-      return 3;
-    }
-
     const stockList = pfResp.stocks; // The stock list in the portfolio
     const pfValue = pfResp.value; // The value object inside the portfolio
 
@@ -563,9 +588,9 @@ export class Database {
         }
         else {
           stockList[stkIndex].quantity -= quantity;
-          if (stockList[stkIndex].quantity == 0) {
-            stockList.splice(stkIndex, 1);
-          }
+          // if (stockList[stkIndex].quantity == 0) {
+          //   stockList.splice(stkIndex, 1);
+          // }
         }
       } else {
         stockList.splice(stkIndex, 1);
@@ -576,12 +601,17 @@ export class Database {
 
     pfValue.sold += price * quantity;
 
-
     // Updating database
     await pfs.updateOne(query, { $set: { stocks: stockList, value: pfValue } } );
     return -1;
   }
 
+  /**
+   * Function to check on stock contained within portfolio
+   * @param {string} pid 
+   * @param {string} stock 
+   * @returns {Promise <object>}
+   */
   async getStock(pid, stock) {
     // Find the corresponding portfolio for the given pid
     const pfs = this.database.collection('portfolios');
@@ -591,6 +621,7 @@ export class Database {
     if (pfResp == null) {
       return null;
     }
+
     const stockList = pfResp.stocks; // The stock list inside the portfolio
 
     // Trying to find the stock in stockList

@@ -21,3 +21,6 @@ Flex week, took a break
 
 Week 7
 Worked with Jono to polish api stock calls, stock functions, portfolio functions, watchlist functionality, performance calculations.
+
+Week 8
+Swapped APIs to Tradier and refactored the code to fit with that. Worked with the frontend to ensure that everything else works.
