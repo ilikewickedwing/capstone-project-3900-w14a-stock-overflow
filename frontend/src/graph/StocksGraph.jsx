@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react"
 import PropTypes from "prop-types";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, Label, ResponsiveContainer } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, Label, ResponsiveContainer, LineChart, Line } from "recharts";
 import CandleStick from "./CandleStick";
 import { ApiContext } from "../api";
 import Ohlc from "./Ohlc";
@@ -10,7 +10,8 @@ import LoadingScreen from "./GraphLoading";
 
 export const GRAPHCOLORS = {
   INCREASING: '#60CD71',
-  DECREASING: '#F14C62'
+  DECREASING: '#F14C62',
+  DEFAULT: '#8884d8'
 }
 
 const STATES = {
@@ -18,12 +19,18 @@ const STATES = {
   RECEIVED: 1,
   ERROR: 2,
 }
+
+/**
+ * Graph component that displays stocks data
+ * @param {*} props 
+ * @returns 
+ */
 export default function StocksGraph(props) {
   const [ state, setState ] = useState(STATES.LOADING);
   // Map of companyid to interval to cache
   const [ dataCache, setDataCache ] = useState({});
   const api = useContext(ApiContext);
-  const [ graphStyle, setGraphStyle ] = useState("candlestick");
+  const [ graphStyle, setGraphStyle ] = useState("line");
   const [ timeOptions, setTimeOptions ] = useState("daily");
   const wrapperStyle = {
     display: "flex",
@@ -66,40 +73,69 @@ export default function StocksGraph(props) {
           throw Error(`Invalid interval of ${interval}`);
       }
     }
-    const addToDataCache = (data, interval) => {
+    
+    // Add a data to received from the api to the cache
+    const addToDataCache = (companyIds, companyDatas, interval) => {
       const dataCacheCopy = Object.assign({}, dataCache);
       // Add current company id if the current company id is not in dataCache
-      if (!(props.companyId in dataCacheCopy)) {
-        dataCacheCopy[props.companyId] = {};
+      for (let cidIndex = 0; cidIndex < companyIds.length; cidIndex++) {
+        const cid = companyIds[cidIndex];
+        // Cid is null when the backend isnt called
+        if (!(cid in dataCacheCopy)) {
+          dataCacheCopy[cid] = {};
+        }
+        const cData = companyDatas[cidIndex];
+        if (cData !== null) {
+          dataCacheCopy[cid][interval] = cData;
+        }
       }
-      dataCacheCopy[props.companyId][interval] = data;
       setDataCache(dataCacheCopy);
     }
-    // Call from api only if needed
-    if (!(props.companyId in dataCache) || !(timeOptions in dataCache[props.companyId])) {
+    
+    // Loop through the given companies and call the api for data if needed
+    const loadData = async () => {
       setState(STATES.LOADING);
-      callApi(props.companyId.toUpperCase(), timeOptions)
-      .then(r => r.json())
-      .then(r => {
-        console.log(r);
-        setState(STATES.RECEIVED);
-        addToDataCache(r, timeOptions);
-      })
-      .catch((error) => console.log(error))
+      console.log("Loading");
+      // Loop through each company id
+      const companyIds = props.companyId.split(',');
+      // Fetches a specific company's data
+      const loadCompanyData = async (cid) => {
+        // Call from api only if needed
+        if (!(cid in dataCache) || !(timeOptions in dataCache[cid])) {
+          try {
+            const resp = await callApi(props.companyId.toUpperCase(), timeOptions)
+            const respJson = await resp.json();
+            console.log(`Received resp for: ${cid}`);
+            return respJson  
+          } catch (err) {
+            console.log(err);
+          }
+        }
+        return null;
+      }
+      // Wait for all company data to be loaded
+      const companyDatas = await Promise.all(companyIds.map(cid => loadCompanyData(cid)));
+      addToDataCache(companyIds, companyDatas, timeOptions);
+      setState(STATES.RECEIVED);
+      console.log("Received");
     }
+    loadData();
     /**
       NOTE: This may show a warning about not having datacache
       in the dependency list but please leave it out. If you leave it in
       it leads to an infinite useEffect loop - so just ignore the warning
     */
-  }, [api, props.companyId, timeOptions, graphStyle])
+  }, [api, props.companyId, timeOptions])
   
+  // Render loading screen if needed
   const renderLoad = () => {
     if (state === STATES.LOADING) {
       return (<LoadingScreen/>)
     }
     return null;
   }
+  
+  // Choose the correct type graph
   const renderGraphShape = () => {
     if (graphStyle === "candlestick") {
       return (<CandleStick/>)
@@ -108,6 +144,8 @@ export default function StocksGraph(props) {
     }
     throw Error("Invalid graph type");
   }
+  
+  // Choose the correct data key for the graph
   const getDataKey = () => {
     if (graphStyle === "candlestick") {
       return "openCloseData";
@@ -116,30 +154,72 @@ export default function StocksGraph(props) {
     }
     throw Error("Invalid graph type");
   }
+  
+  // Renders the graph in the graph component
   const renderGraph = () => {
-    if (props.companyId in dataCache && timeOptions in dataCache[props.companyId]) {
-      const data = transformData(dataCache[props.companyId][timeOptions], graphStyle === "candlestick");
-      console.log(data);
-      return (
-        <ResponsiveContainer width={'99%'} height={props.height}>
-          <BarChart
-            margin={{ bottom: 25, left: 25 }}
-            data={data}
-          >
-            <XAxis dataKey="time">
-              <Label value="Time Interval" offset={-10} position="insideBottom" />
-            </XAxis>
-            <YAxis 
-              label={{ value: 'Price (US Dollars)', angle: -90, position: 'insideLeft', dx: -15, dy: 20 }}
-              domain={['dataMin', 'dataMax ']} type="number"/>
-            <Tooltip content={<StocksToolTip candlestickMode={graphStyle === "candlestick"}/>}/>
-            <Bar dataKey={getDataKey()} shape={renderGraphShape()}></Bar>
-          </BarChart>
-        </ResponsiveContainer>
-      )
+    const companyIds = props.companyId.split(',');
+    const hasAllCData = companyIds.every(v => v in dataCache && timeOptions in dataCache[v]);
+    if (hasAllCData) {
+      if (companyIds.length > 1) {
+        // return (
+        //   <ResponsiveContainer width={'99%'} height={props.height}>
+        //     <LineChart>
+            
+        //     </LineChart>
+        //   </ResponsiveContainer>
+        // )
+        // for (const cid of companyIds) {
+        //   const data = transformData(dataCache[cid][timeOptions], graphStyle);
+        // }
+        
+      }
+      if (companyIds.length === 1) {
+        const data = transformData(dataCache[props.companyId][timeOptions], graphStyle);
+        if (graphStyle === 'line') {
+          return (
+            <ResponsiveContainer width={'99%'} height={props.height}>
+              <LineChart
+                margin={{ bottom: 25, left: 25 }}
+                data={data}
+              >
+                <XAxis dataKey="time">
+                  <Label value="Time Interval" offset={-10} position="insideBottom" />
+                </XAxis>
+                <YAxis 
+                  label={{ value: 'Price (US Dollars)', angle: -90, position: 'insideLeft', dx: -15, dy: 20 }}
+                  domain={['dataMin', 'dataMax ']} type="number"/>
+                <Tooltip content={<StocksToolTip graphStyle={graphStyle}/>}/>
+                <Line type="monotone" dataKey="close" stroke={GRAPHCOLORS.DEFAULT}/>
+              </LineChart>
+            </ResponsiveContainer>
+          )
+        }
+        return (
+          <ResponsiveContainer width={'99%'} height={props.height}>
+            <BarChart
+              margin={{ bottom: 25, left: 25 }}
+              data={data}
+            >
+              <XAxis dataKey="time">
+                <Label value="Time Interval" offset={-10} position="insideBottom" />
+              </XAxis>
+              <YAxis 
+                label={{ value: 'Price (US Dollars)', angle: -90, position: 'insideLeft', dx: -15, dy: 20 }}
+                domain={['dataMin', 'dataMax ']} type="number"/>
+              <Tooltip content={<StocksToolTip graphStyle={graphStyle}/>}/>
+              <Bar dataKey={getDataKey()} shape={renderGraphShape()}></Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        )
+      } else {
+        return (
+          <div>This is a multigraph</div>
+        )
+      }
     }
     return <div style={{ height: props.height }}></div>;
   }
+  
   return (
     <div style={wrapperStyle}>
       <GraphOptions
@@ -164,73 +244,94 @@ StocksGraph.propTypes = {
  * @param {*} data 
  * @returns 
  */
-const transformData = (data, candlestickMode = true) => {
-  console.log(data);
+const transformData = (data, graphStyle) => {
   if ('series' in data.data) {
-    return transformIntradayData(data, candlestickMode);
+    return transformIntradayData(data, graphStyle);
   } else if ('history' in data.data) {
-    return transformNonIntradayData(data, candlestickMode)
+    return transformNonIntradayData(data, graphStyle)
   }
   throw new Error("Invalid data received");
 }
   
-function transformIntradayData(data, candlestickMode = true) {
+function transformIntradayData(data, graphStyle) {
   let timeSeriesData = data.data.series.data;
   return timeSeriesData.map(d => {
-    let newData = {
-      time: d.time,
-      openCloseData: [
-        Number(d.open),
-        Number(d.close),
-      ],
-      high: Number(d.high),
-      low: Number(d.low),
-      volume: Number(d.volume),
+    switch (graphStyle) {
+      case 'candlestick':
+        return {
+          time: d.time,
+          openCloseData: [
+            Number(d.open),
+            Number(d.close),
+          ],
+          high: Number(d.high),
+          low: Number(d.low),
+          volume: Number(d.volume),
+        }
+      case 'ohlc':
+        return {
+          time: d.time,
+          open: Number(d.open),
+          close: Number(d.close),
+          highLow: [
+            Number(d.high),
+            Number(d.low),
+          ],
+          volume: Number(d.volume),
+        }
+      case 'line':
+        return {
+          time: d.time,
+          open: Number(d.open),
+          close: Number(d.close),
+          high: Number(d.high),
+          low: Number(d.low),
+          volume: Number(d.volume),  
+        }
+      default:
+        throw new Error('Invalid style');
     }
-    // Data for ohlc
-    if (!candlestickMode) {
-      newData = {
-        time: d.time,
-        open: Number(d.open),
-        close: Number(d.close),
-        highLow: [
-          Number(d.high),
-          Number(d.low),
-        ],
-        volume: Number(d.volume),
-      }
-    }
-    return newData;
   });
 }
  
-function transformNonIntradayData(data, candlestickMode = true) {
+function transformNonIntradayData(data, graphStyle) {
   let timeSeriesData = data.data.history.day;
   return timeSeriesData.map(d => {
-    let newData = {
-      time: d.date,
-      openCloseData: [
-        Number(d.open),
-        Number(d.close),
-      ],
-      high: Number(d.high),
-      low: Number(d.low),
-      volume: Number(d.volume),
+    switch (graphStyle) {
+      case 'candlestick':
+        return {
+          time: d.date,
+          openCloseData: [
+            Number(d.open),
+            Number(d.close),
+          ],
+          high: Number(d.high),
+          low: Number(d.low),
+          volume: Number(d.volume),
+        }
+      case 'ohlc':
+        return {
+          time: d.date,
+          open: Number(d.open),
+          close: Number(d.close),
+          highLow: [
+            Number(d.high),
+            Number(d.low),
+          ],
+          volume: Number(d.volume),
+        }
+      case 'line':
+        return {
+          time: d.date,
+          open: Number(d.open),
+          close: Number(d.close),
+          high: Number(d.high),
+          low: Number(d.low),
+          volume: Number(d.volume),  
+        }
+      default:
+        throw new Error('Invalid style');
     }
-    // Data for ohlc
-    if (!candlestickMode) {
-      newData = {
-        time: d.date,
-        open: Number(d.open),
-        close: Number(d.close),
-        highLow: [
-          Number(d.high),
-          Number(d.low),
-        ],
-        volume: Number(d.volume),
-      }
-    }
-    return newData;
   });
 }
 

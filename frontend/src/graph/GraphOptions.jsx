@@ -34,12 +34,13 @@ export default function GraphOptions (props) {
           </Select>
         </div>
         <div style={headerElemStyle}>
-          <InputLabel>Graph</InputLabel>
+          <InputLabel>Graph Style</InputLabel>
           <Select
             style = {{ marginBottom: '10px' }}
             value={props.graphStyle}
             onChange={e => props.setGraphStyle(e.target.value)}
           >
+            <MenuItem value={"line"}>Line</MenuItem>
             <MenuItem value={"candlestick"}>CandleStick</MenuItem>
             <MenuItem value={"ohlc"}>OHLC</MenuItem>
           </Select>
