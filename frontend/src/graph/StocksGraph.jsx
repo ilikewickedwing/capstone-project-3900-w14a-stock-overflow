@@ -159,7 +159,6 @@ export default function StocksGraph(props) {
     if (hasAllCData) {
       if (companyIds.length > 1) {
         const formatedData = transformMultiStockData(companyIds, timeOptions, dataCache);
-        console.log(formatedData);
         return (
           <ResponsiveContainer width={'99%'} height={props.height}>
             <LineChart
@@ -227,6 +226,7 @@ export default function StocksGraph(props) {
   return (
     <div style={wrapperStyle}>
       <GraphOptions
+        isMulti={props.companyId.split(',').length > 1}
         timeOptions={timeOptions}
         setTimeOptions={setTimeOptions}
         graphStyle={graphStyle}
@@ -239,6 +239,9 @@ export default function StocksGraph(props) {
 }
 
 StocksGraph.propTypes = {
+  /**
+    The company id of stock. For multiple stocks, separate with a comma
+  */
   companyId: PropTypes.string,
   height: PropTypes.number,
 }
@@ -255,7 +258,6 @@ const transformTimeStr = (timeStr) => {
 }
 
 const transformMultiStockData = (companyIds, interval, dataCache) => {
-  console.log(dataCache);
   const timePointsNum = getTimeSeriesData(dataCache[companyIds[0]][interval]).length;
   const output = []
   for (let i = 0; i < timePointsNum; i++) {    

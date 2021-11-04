@@ -14,6 +14,25 @@ export default function GraphOptions (props) {
     marginLeft: "0.5rem",
     marginRight: "0.5rem",
   }
+  const renderStyleOptions = () => {
+    if (!props.isMulti) {
+      return (
+        <div style={headerElemStyle}>
+          <InputLabel>Graph Style</InputLabel>
+          <Select
+            style = {{ marginBottom: '10px' }}
+            value={props.graphStyle}
+            onChange={e => props.setGraphStyle(e.target.value)}
+          >
+            <MenuItem value={"line"}>Line</MenuItem>
+            <MenuItem value={"candlestick"}>CandleStick</MenuItem>
+            <MenuItem value={"ohlc"}>OHLC</MenuItem>
+          </Select>
+        </div>
+      )          
+    }
+    return null;
+  }
   return (
     <div style={{ width: "100%", display: "flex", flexDirection: "row", justifyContent: "flex-end", marginBottom: '1rem' }}>
       <div style={optionsItemStyle}>
@@ -33,24 +52,14 @@ export default function GraphOptions (props) {
           
           </Select>
         </div>
-        <div style={headerElemStyle}>
-          <InputLabel>Graph Style</InputLabel>
-          <Select
-            style = {{ marginBottom: '10px' }}
-            value={props.graphStyle}
-            onChange={e => props.setGraphStyle(e.target.value)}
-          >
-            <MenuItem value={"line"}>Line</MenuItem>
-            <MenuItem value={"candlestick"}>CandleStick</MenuItem>
-            <MenuItem value={"ohlc"}>OHLC</MenuItem>
-          </Select>
-        </div>
+        { renderStyleOptions() }
       </div>
     </div>
   )
 }
 
 GraphOptions.propTypes = {
+  isMulti: PropTypes.bool,
   timeOptions: PropTypes.string,
   setTimeOptions: PropTypes.func,
   graphStyle: PropTypes.string,
