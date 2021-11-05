@@ -4,6 +4,7 @@
 
 import { Database } from "./database";
 import { getStock } from "./stocks";
+import schedule from "node-schedule";
 
 /**
  * Creates a new portfolio for the user
@@ -188,6 +189,10 @@ export const deletePf = async (token, pid, database) => {
  * @returns 
  */
 export const calcPf = async (token, pid, database) => {
+  const now = new Date();
+  const today = new Date(now);
+  const time = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + today.getDate()).slice(-2);
+  const date = time.toString();
   // Return error if user is not found
   const uid = await database.getTokenUid(token);
   if (uid == null) {
@@ -207,7 +212,47 @@ export const calcPf = async (token, pid, database) => {
   const verify = await verifyPf(uid, pid, database);
   if (!verify) return -1;
 
-  const perf = await database.calcPf(pid);
+  // Calculate performance of portfolio
+  // Add in actual sold profit with current value or portfolio
+  //  versus the amount invested in portfolio
+  let perf = 0;
+  let gain = Pf.value.sold;
+
+  // Get stocklist
+  const stocks = Pf.stocks;
+  for (let i = 0; i < stocks.length; i++) {
+    // Add up the current price of each stock to determine current value and add to stock list
+    const symbol = stocks[i].stock;
+    const values = await getStock(1, symbol);
+    const price = values.data.quotes.quote['last'];
+    const value = price * stocks[i].quantity;
+    const spent = stocks[i].avgPrice * stocks[i].quantity;
+    const amt = (value - spent)/spent;
+    stocks[i].performance.push({ date: date, performance: amt });
+    gain += value;
+  }
+
+
+  // Calculate profit as a percentage
+  const profit = gain - Pf.value.spent;
+  perf = profit/Pf.value.spent;
+
+  // Add performance history to portfolio array
+  Pf.value.performance.push({ date: date, performance: perf });
+
+/*   console.log(Pf);
+  
+  for (let i = 0; i < stocks.length; i++) {
+    const stockPerf = stocks[i].performance;
+    console.log('Performance for ' + stocks[i].stock + ' is:');
+    console.log(stockPerf);
+  }
+
+  console.log(Pf.value.performance); */
+
+  const update = await database.calcPf(pid, Pf.value, Pf.stocks);
+
+  if (!update) return -5;
 
   return perf;
 }

@@ -59,7 +59,7 @@ export class API {
   async lookupStock(stocks) {
     const search = this.cachedStocks.filter(o => (o.stocks === stocks));
     if (search.length !== 0) {
-      console.log('returning cache');
+      // console.log('returning cache');
       return search[0].check;
     }
     // console.log('tradier is searching up ' + stocks);
@@ -71,7 +71,7 @@ export class API {
       stocks: stocks,
       check: check
     }
-    console.log(obj);
+    // console.log(obj);
 
     this.cachedStocks.push(obj);
     return check;

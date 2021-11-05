@@ -414,7 +414,7 @@ describe('Calculate portfolio performance', () => {
         performance: [
           {
             date: date,
-            perf: 0
+            performance: 0
           }
         ]
       },
@@ -425,7 +425,7 @@ describe('Calculate portfolio performance', () => {
         performance: [
           {
             date: date,
-            perf: 0
+            performance: 0
           }
         ]
       },
@@ -436,7 +436,7 @@ describe('Calculate portfolio performance', () => {
         performance: [
           {
             date: date,
-            perf: 0
+            performance: 0
           }
         ]
       }
@@ -451,7 +451,7 @@ describe('Calculate portfolio performance', () => {
         performance: [
           {
             date: date,
-            perf: 0
+            performance: 0
           }
         ]
       }
@@ -461,6 +461,76 @@ describe('Calculate portfolio performance', () => {
     const calc = await calcPf(token, pid, d);
     expect(calc).not.toBe(null);
     // console.log("calc is " + calc);
+    const pfs = await userPfs(token, d);
+    pfArray = [{ name: 'pf', pid: pid }];
+    expect(pfs).toEqual(expect.arrayContaining(pfArray));
+    const stocks = await openPf(pid, d);
+    stArray = [
+      {
+        stock: 'AAPL',
+        avgPrice: 2,
+        quantity: 2,
+        performance: [
+          {
+            date: date,
+            performance: 0
+          },
+          {
+            date: date,
+            performance: expect.any(Number)
+          }
+        ]
+      },
+      {
+        stock: 'AMZN',
+        avgPrice: 3,
+        quantity: 2,
+        performance: [
+          {
+            date: date,
+            performance: 0
+          },
+          {
+            date: date,
+            performance: expect.any(Number)
+          }
+        ]
+      },
+      {
+        stock: 'IBM',
+        avgPrice: 1,
+        quantity: 1,
+        performance: [
+          {
+            date: date,
+            performance: 0
+          },
+          {
+            date: date,
+            performance: expect.any(Number)
+          }
+        ]
+      }
+    ]
+    expect(stocks).toMatchObject({
+      pid: pid,
+      name: 'pf',
+      stocks: expect.arrayContaining(stArray),
+      value: {
+        spent: 11,
+        sold: 0,
+        performance: [
+          {
+            date: date,
+            performance: 0
+          },
+          {
+            date: date,
+            performance: calc
+          }
+        ]
+      }
+    })
   })
   /* it('Buy extra of first stock in portfolio', async () => {
     const add = await modifyStock(token, pid, 'AAPL', 3, 2, 1, d);
