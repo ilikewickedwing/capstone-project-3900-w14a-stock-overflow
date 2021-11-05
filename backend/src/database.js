@@ -1,11 +1,10 @@
-import e from "express";
 import { MongoClient } from "mongodb";
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import { nanoid } from 'nanoid';
 
-const URI = "mongodb+srv://deployment:deployment@cluster0.86ffq.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
-
-'stocksarecool'
+// This is the uri authentication for the mongodb database in the cloud
+// It is the pretty mcuh the password to accessing the deployment database
+const URI = `mongodb+srv://deployment:deployment@cluster0.86ffq.mongodb.net/stockportfolio?retryWrites=true&w=majority`;
 
 const DATABASENAME = "stockportfolio";
 
@@ -668,6 +667,7 @@ export class Database {
    async connect() {
     let uri = URI;
     if (this.testmode) {
+      console.log("Test mode");
       // Start test server in memory
       this.mongoTestServer = await MongoMemoryServer.create();
       // Get uri string
@@ -677,9 +677,9 @@ export class Database {
     this.client = new MongoClient(uri);
     // Connect to server
     try {
-      // console.log('Connecting to MongoDB database...');
+      console.log('Connecting to MongoDB database...');
       await this.client.connect();
-      // console.log('Successfully connected to MongoDB database');
+      console.log('Successfully connected to MongoDB database');
     } catch (err) {
       console.error('Unable to connect to MongoDb database');
     }
@@ -690,6 +690,7 @@ export class Database {
       const hasNext = await cursor.hasNext();
       cursor.close();
       if (!hasNext) {
+        console.log(`Creating ${collection}`);
         await this.database.createCollection(collection);
       }
     }
