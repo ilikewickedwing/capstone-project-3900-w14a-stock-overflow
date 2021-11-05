@@ -5,6 +5,10 @@
 import { Database } from "./database";
 import { getStock } from "./stocks";
 import schedule from "node-schedule";
+import { API } from "./api.js";
+
+export const api = new API();
+export const database = new Database();
 
 /**
  * Creates a new portfolio for the user
@@ -188,29 +192,49 @@ export const deletePf = async (token, pid, database) => {
  * @param {Database} database 
  * @returns 
  */
-export const calcPf = async (token, pid, database) => {
+export const calcPf = async (token, pid, database, admin) => {
   const now = new Date();
   const today = new Date(now);
   const time = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + today.getDate()).slice(-2);
   const date = time.toString();
-  // Return error if user is not found
-  const uid = await database.getTokenUid(token);
-  if (uid == null) {
-    return -2;
+
+  // Check if command being issued by admin
+  if (master !== 'yes') {
+    // Return error if user is not found
+    const uid = await database.getTokenUid(token);
+    if (uid == null) {
+      return -2;
+    }
+
+    // Return error if pid is not valid
+    // Return error if pid belongs to watchlist
+    const Pf = await database.openPf(pid);
+    if (Pf == null) {
+      return -3;
+    } else if (Pf.name == "Watchlist") {
+      return -4;
+    }
+
+    // Return error if portfolio not owned by user
+    const verify = await verifyPf(uid, pid, database);
+    if (!verify) return -1;
   }
 
-  // Return error if pid is not valid
-  // Return error if pid belongs to watchlist
-  const Pf = await database.openPf(pid);
-  if (Pf == null) {
-    return -3;
-  } else if (Pf.name == "Watchlist") {
-    return -4;
-  }
+  // Check if the market day has closed yet and if the performance has been calculated
+  // If both are no, then calculate the new performance
+  // If either are yes, return the most recent submission
 
-  // Return error if portfolio not owned by user
-  const verify = await verifyPf(uid, pid, database);
-  if (!verify) return -1;
+  const status = await api.marketStatus();
+  const pfPerf = Pf.value.performance;
+
+  // If the market is open, then return yesterday's performance
+  // Else if it is the same day and it has been calculated already, return it
+  // Otherwise, calculate the performance
+  if (!status) return pfPerf[pfPerf.length - 1];
+  else {
+    if(pfPerf[pfPerf.length - 1].date === date) return pfPerf[pfPerf.length - 1];
+  }
+  
 
   // Calculate performance of portfolio
   // Add in actual sold profit with current value or portfolio
@@ -255,4 +279,27 @@ export const calcPf = async (token, pid, database) => {
   if (!update) return -5;
 
   return perf;
+}
+
+const calcAll = async () => {
+  // const rule = new schedule.RecurrenceRule();
+  // rule.hour = 16;
+  // rule.tz = 'Etc/UTC';
+
+  // const job = schedule.scheduleJob(rule, function() {
+  //   console.log('Market is now closed. Portfolio calculation has begun.');
+  //   const portfolios = database.collection('portfolios');
+  //   for (let i = 0; i < portfolios.length; i++) {
+  //     calcPf(null, portfolios[i].pid, database, 'yes');
+  //   }
+  // })
+
+  const job = schedule.scheduleJob('0 * * * * *', function() {
+    console.log('A new minute has started.');
+    test();
+  })
+}
+
+const test = () => {
+  console.log('Hello world!');
 }

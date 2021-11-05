@@ -475,10 +475,6 @@ describe('Calculate portfolio performance', () => {
             date: date,
             performance: 0
           },
-          {
-            date: date,
-            performance: expect.any(Number)
-          }
         ]
       },
       {
@@ -490,10 +486,6 @@ describe('Calculate portfolio performance', () => {
             date: date,
             performance: 0
           },
-          {
-            date: date,
-            performance: expect.any(Number)
-          }
         ]
       },
       {
@@ -505,10 +497,6 @@ describe('Calculate portfolio performance', () => {
             date: date,
             performance: 0
           },
-          {
-            date: date,
-            performance: expect.any(Number)
-          }
         ]
       }
     ]
@@ -524,10 +512,6 @@ describe('Calculate portfolio performance', () => {
             date: date,
             performance: 0
           },
-          {
-            date: date,
-            performance: calc
-          }
         ]
       }
     })
