@@ -6,6 +6,7 @@
   "license": "MIT",
   "scripts": {
     "start": "nodemon --experimental-specifier-resolution=node src/start.js $PORT",
+    "deploy": "node --experimental-specifier-resolution=node src/start.js deploy $PORT",
     "test": "jest --watchAll --verbose --silent"
   },
   "dependencies": {
