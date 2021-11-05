@@ -523,14 +523,16 @@ app.get('/user/portfolios/getPid', async (req, res) => {
  *                type: string
  *                description: The performance of the portfolio
  *       401:
- *         description: Invalid token
+ *         description: Invalid token, or invalid user
  *       403: 
  *         description: Invalid pid, watchlist performance not existent
  */
 app.get('/user/portfolios/calculate', async (req, res) => {
   const { token, pid } = req.query;
   const resp = await calcPf(token, pid, database);
-  if (resp === -2) {
+  if (resp === -1) {
+    res.status(401).send({ error: "You do not have access to this portfolio" });
+  } else if (resp === -2) {
     res.status(401).send({ error: "Invalid token" });
   } else if (resp === -3) {
     res.status(403).send({ error: "Invalid pid" });
@@ -587,6 +589,8 @@ app.post('/user/portfolios/edit', async (req, res) => {
     res.status(400).send({ error: "Invalid pid" });
   } else if (resp === 5) {
     res.status(403).send({ error: "Can not edit watchlist" });
+  } else if (resp === 6) {
+    res.status(401).send({ error: "You do not have access to this portfolio" });
   } else if (resp === 1) {
     res.status(200).send();
   } else {
@@ -628,6 +632,8 @@ app.delete('/user/portfolios/delete', async (req, res) => {
     res.status(403).send({ error: "Can not delete watchlist" });
   } else if (resp === 0) {
     res.status(500).send({ error: "Portfolio not deleted" });
+  } else if (resp === -1) {
+    res.status(401).send({ error: "You do not have access to this portfolio" });
   }
 })
 

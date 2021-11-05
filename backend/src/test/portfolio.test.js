@@ -385,6 +385,19 @@ describe('Portfolio edit', () => {
     const edit = await editPf(token, "fakepid", 'updatedPf3', d);
     expect(edit).toBe(4);
   })
+  it('Portfolio can not be edited by another user', async () => {
+    const rego = await authRegister('Richard', 'strongpassword', d);
+    const token1 = rego.token;
+    const resp = await userPfs(token1, d);
+    expect(resp).not.toBe(null);
+    expect(resp[0]).toMatchObject({ 
+      name: "Watchlist",
+      pid: expect.any(String),
+    });
+    const edit = await editPf(token1, myPid, 'updatedPfAgain', d);
+    expect(edit).not.toBe(null);
+    expect(edit).toBe(6);
+  })
 
   afterAll(async () => {
     await d.disconnect();
@@ -518,6 +531,18 @@ describe('Portfolio edit endpoint test', () => {
     expect(resp.statusCode).toBe(403);
     expect(resp.body.error).toBe("Can not edit watchlist");
   })
+  it('401 on unauthorised user', async () => {
+    const rego = await authRegister('Richard', 'strongpassword', database);
+    const token1 = rego.token;
+    const pid = await getPid(token, "myPf2", database);
+    const resp = await request(app).post(`/user/portfolios/edit`).send({
+      token: token1,
+      pid: pid,
+      name: 'My name'
+    })
+    expect(resp.statusCode).toBe(401);
+    expect(resp.body.error).toBe("You do not have access to this portfolio");
+  })
 
   afterAll(async() => {
     await database.disconnect();
@@ -574,6 +599,25 @@ describe('Porfolio delete', () => {
     Pfs = await userPfs(token, d);
     expect(Pfs).toEqual(expect.not.arrayContaining(myArray));
   })
+  it('Portfolio can not be deleted by another user', async () => {
+    const rego = await authRegister('Richard', 'strongpassword', d);
+    const token1 = rego.token;
+    const resp = await userPfs(token1, d);
+    expect(resp).not.toBe(null);
+    expect(resp[0]).toMatchObject({ 
+      name: "Watchlist",
+      pid: expect.any(String),
+    });
+    const getpid = await createPf(token, 'myPf', d);
+    const create = getpid.pid;
+    const myArray = [{ name: 'myPf', pid: create }];
+    let Pfs = await userPfs(token, d);
+    expect(Pfs).toEqual(expect.arrayContaining(myArray));
+    let myPid1 = await getPid(token, 'myPf', d);
+    expect(myPid1).toBe(create);
+    const delResp = await deletePf(token1, create, d);
+    expect(delResp).toBe(-1);
+  })
 
   afterAll(async () => {
     await d.disconnect();
@@ -623,14 +667,6 @@ describe('Portfolio delete endpoint test', () => {
     expect(resp.statusCode).toBe(400);
   })
   it('401 on invalid token', async () => {
-    const create = await request(app).post(`/user/portfolios/create`).send({
-      token: token,
-      name: 'myPf2'
-    })
-    expect(create.statusCode).toBe(200);
-    expect(create.body).toMatchObject({
-      pid: expect.any(String)
-    });
     const pid = await getPid(token, "myPf", database);
     const resp = await request(app).delete(`/user/portfolios/delete`).send({
       token: 'faketoken',
@@ -645,6 +681,17 @@ describe('Portfolio delete endpoint test', () => {
       pid: pid
     });    
     expect(resp.statusCode).toBe(403);
+  })
+  it('401 on unauthorised user', async () => {
+    const rego = await authRegister('Richard', 'strongpassword', database);
+    const token1 = rego.token;
+    const pid = await getPid(token, "myPf", database);
+    const resp = await request(app).delete(`/user/portfolios/delete`).send({
+      token: token1,
+      pid: pid
+    });
+    expect(resp.statusCode).toBe(401);
+    expect(resp.body.error).toBe("You do not have access to this portfolio");
   })
 
   afterAll(async() => {
