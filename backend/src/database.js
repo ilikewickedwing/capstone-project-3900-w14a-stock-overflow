@@ -590,6 +590,34 @@ export class Database {
     else return 0;
   }
 
+  async calcPf(pid) {
+    const pfs = this.database.collection('portfolios');
+    const query = { pid: pid };
+    const Pf = await pfs.findOne(query);
+
+    // Calculate performance of portfolio
+    // Add in actual sold profit with current value or portfolio
+    //  versus the amount invested in portfolio
+    let perf = 0;
+    let gain = Pf.value.sold;
+
+    // Get stocklist
+    const stocks = Pf.stocks;
+    for (let i = 0; i < stocks.length; i++) {
+      // Add up the current price of each stock to determine current value
+      const symbol = stocks[i].stock;
+      const value = await getStock(1, symbol);
+      const price = value.data.quotes.quote['last'];
+      gain += price * stocks[i].quantity;
+    }
+
+    // Calculate profit as a percentage
+    const profit = gain - Pf.value.spent;
+    perf = profit/Pf.value.spent;
+
+    return perf;
+  }
+
 
   /**
    * Deletes a given portfolio from the database and
