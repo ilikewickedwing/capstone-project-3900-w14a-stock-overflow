@@ -86,6 +86,15 @@ const COLLECTIONS = [
     }
   */
   'celebrityRequests',
+  /**
+    Stores all the notifications for a given user
+    {
+      ownerUid: string,
+      // Info of the notification
+      info: string,
+    }
+  */
+  'notifications',
 ]
 
 /**
@@ -370,17 +379,63 @@ export class Database {
     return request;
   }
   
+  /**
+   * Get all requests to become a celebrity
+   * @returns 
+   */
   async getAllCelebrityRequests() {
     const celebrityRequests = this.database.collection('celebrityRequests');
     const requests = await celebrityRequests.find().toArray();
     return requests;
   }
   
+  /**
+   * Deletes a specific request to be a celebrity
+   * @param {string} rid 
+   * @returns 
+   */
   async deleteCelebrityRequest(rid) {
     const celebrityRequests = this.database.collection('celebrityRequests');
     const query = { rid: rid };
     const request = await celebrityRequests.deleteOne(query);
     return request.deletedCount !== 0;
+  }
+  
+  /**
+   * Insert a new user notification
+   * @param {string} ownerUid 
+   * @param {string} info 
+   */
+  async insertUserNotification(ownerUid, info) {
+    const notifications = this.database.collection('notifications');
+    await notifications.insertOne({
+      ownerUid: ownerUid,
+      info: info
+    })
+  }
+  
+  /**
+   * Get all the notifications for a specific user
+   * @param {string} ownerUid 
+   * @returns 
+   */
+  async getAllUserNotifications(ownerUid) {
+    const notifications = this.database.collection('notifications');
+    const query = { ownerUid: ownerUid };
+    const requests = await notifications.find(query).toArray();
+    return requests;
+  }
+  
+  /**
+   * Delete all the user notifications of a specific user
+   * @param {string} ownerUid 
+   * @returns 
+   */
+  async clearAllUserNotifications(ownerUid) {
+    const notifications = this.database.collection('notifications');
+    const query = { ownerUid: ownerUid };
+    const result = await notifications.deleteMany(query);
+    return result.deletedCount;
   }
   
   /**
