@@ -15,6 +15,7 @@ const COLLECTIONS = [
     {
       uid: string,
       username: string,
+      userType: string  // This can either be: user, admin, celebrity
     }
   */
   'users',
@@ -74,6 +75,17 @@ const COLLECTIONS = [
     }
    */
   'portfolios',
+  /**
+    Stores all the requests made by ordinary users to become celebrity
+    {
+      // Id of the request
+      rid: string,
+      ownerUid: string,
+      // Info given by the user on why they want to be a celebrity and so on
+      info: string,
+    }
+  */
+  'celebrityRequests',
 ]
 
 /**
@@ -151,13 +163,14 @@ export class Database {
    * @param {string} username 
    * @returns {Promise<string>}
    */
-  async insertUser(username) {
+  async insertUser(username, userType = 'user') {
     // Generate a new unique id
     const uid = nanoid();
     const users = this.database.collection('users');
     await users.insertOne({
       uid: uid,
       username: username,
+      userType: userType
     })
 
     // Create a new userPorto and add a watchlist for the new user
@@ -314,7 +327,42 @@ export class Database {
     }
     return null;
   }
-
+  
+  /**
+   * Inserts request into database. Does not check if ownerUid already exists
+   * so make sure to check it with the getRequest
+   * @param {string} ownerUid 
+   * @param {string} info 
+   */
+  async insertCelebrityRequest(ownerUid, info) {
+    // Generate a new unique rid
+    const rid = nanoid();
+    const celebrityRequests = this.database.collection('celebrityRequests');
+    await celebrityRequests.insertOne({
+      rid: rid,
+      ownerUid: ownerUid,
+      info: info
+    });
+  }
+  
+  /**
+   * Given an ownerUid return the celebrity request
+   * @param {string} ownerUid 
+   * @returns 
+   */
+  async getCelebrityRequest(ownerUid) {
+    const celebrityRequests = this.database.collection('celebrityRequests');
+    const query = { ownerUid: ownerUid };
+    const request = await celebrityRequests.findOne(query);
+    return request;
+  }
+  
+  async getAllCelebrityRequests() {
+    const celebrityRequests = this.database.collection('celebrityRequests');
+    const requests = await celebrityRequests.find().toArray();
+    return requests;
+  }
+  
   /**
    * Function to create new portfolio and returns the portfolio id
    * @param {string} uid 
@@ -639,19 +687,21 @@ export class Database {
    async connect() {
     let uri = URI;
     if (this.testmode) {
-      console.log("Test mode");
+      console.log("Starting in development mode...")
       // Start test server in memory
       this.mongoTestServer = await MongoMemoryServer.create();
       // Get uri string
       uri = this.mongoTestServer.getUri();
+    } else {
+      console.log("Starting in deployment mode...")
     }
     // Start client
     this.client = new MongoClient(uri);
     // Connect to server
     try {
-      console.log('Connecting to MongoDB database...');
+      // console.log('Connecting to MongoDB database...');
       await this.client.connect();
-      console.log('Successfully connected to MongoDB database');
+      // console.log('Successfully connected to MongoDB database');
     } catch (err) {
       console.error('Unable to connect to MongoDb database');
     }
@@ -662,7 +712,6 @@ export class Database {
       const hasNext = await cursor.hasNext();
       cursor.close();
       if (!hasNext) {
-        console.log(`Creating ${collection}`);
         await this.database.createCollection(collection);
       }
     }
