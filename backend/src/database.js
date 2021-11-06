@@ -1,6 +1,7 @@
 import { MongoClient } from "mongodb";
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import { nanoid } from 'nanoid';
+import { calcAll } from './portfolio';
 
 // This is the uri authentication for the mongodb database in the cloud
 // It is the pretty mcuh the password to accessing the deployment database
@@ -683,6 +684,7 @@ export class Database {
         await this.database.createCollection(collection);
       }
     }
+    calcAll(this.database);
   }
   /**
    * Disconnects from the database

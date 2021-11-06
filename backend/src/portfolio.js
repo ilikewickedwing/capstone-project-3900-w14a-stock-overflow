@@ -4,11 +4,10 @@
 
 import { Database } from "./database";
 import { getStock } from "./stocks";
-import schedule from "node-schedule";
-import { API } from "./api.js";
+import * as schedule from "node-schedule";
+import { API } from "./api";
 
-export const api = new API();
-export const database = new Database();
+const api = new API(); 
 
 /**
  * Creates a new portfolio for the user
@@ -197,9 +196,10 @@ export const calcPf = async (token, pid, database, admin) => {
   const today = new Date(now);
   const time = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + today.getDate()).slice(-2);
   const date = time.toString();
+  const Pf = await database.openPf(pid);
 
   // Check if command being issued by admin
-  if (master !== 'yes') {
+  if (admin !== 'yes') {
     // Return error if user is not found
     const uid = await database.getTokenUid(token);
     if (uid == null) {
@@ -208,22 +208,21 @@ export const calcPf = async (token, pid, database, admin) => {
 
     // Return error if pid is not valid
     // Return error if pid belongs to watchlist
-    const Pf = await database.openPf(pid);
-    if (Pf == null) {
+    if (Pf === null) {
       return -3;
     } else if (Pf.name == "Watchlist") {
       return -4;
     }
-
+    
     // Return error if portfolio not owned by user
     const verify = await verifyPf(uid, pid, database);
     if (!verify) return -1;
   }
-
+  
   // Check if the market day has closed yet and if the performance has been calculated
   // If both are no, then calculate the new performance
   // If either are yes, return the most recent submission
-
+  
   const status = await api.marketStatus();
   const pfPerf = Pf.value.performance;
 
@@ -281,25 +280,16 @@ export const calcPf = async (token, pid, database, admin) => {
   return perf;
 }
 
-const calcAll = async () => {
-  // const rule = new schedule.RecurrenceRule();
-  // rule.hour = 16;
-  // rule.tz = 'Etc/UTC';
+export const calcAll = async (database) => {
+  const rule = new schedule.RecurrenceRule();
+  rule.hour = 6;
+  rule.tz = 'Etc/UTC';
 
-  // const job = schedule.scheduleJob(rule, function() {
-  //   console.log('Market is now closed. Portfolio calculation has begun.');
-  //   const portfolios = database.collection('portfolios');
-  //   for (let i = 0; i < portfolios.length; i++) {
-  //     calcPf(null, portfolios[i].pid, database, 'yes');
-  //   }
-  // })
-
-  const job = schedule.scheduleJob('0 * * * * *', function() {
-    console.log('A new minute has started.');
-    test();
+  const job = schedule.scheduleJob(rule, function() {
+    console.log('Market is now closed. Portfolio calculation has begun.');
+    const portfolios = database.collection('portfolios');
+    for (let i = 0; i < portfolios.length; i++) {
+      calcPf(null, portfolios[i].pid, database, 'yes');
+    }
   })
-}
-
-const test = () => {
-  console.log('Hello world!');
 }
