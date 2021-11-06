@@ -6,8 +6,6 @@ export const ApiContext = createContext();
 
 const getToken = () => (`Bearer ${localStorage.getItem('token')}`);
 
-const APIKEY = "12G3IUEF5TUMERGL";
-
 /**
  * Wrapper class to make API calls
  */
@@ -116,24 +114,9 @@ export default class API {
     return fetch(queryStr);
   }
 
-  stockTimeSeriesIntraday(companySymbol, interval) {
-    const URL = 'https://www.alphavantage.co/query';
-    return fetch(`${URL}?function=TIME_SERIES_INTRADAY&symbol=${companySymbol}&interval=${interval}&apikey=${APIKEY}`);
-  }
-  
-  stockTimeSeriesDaily(companySymbol) {
-    const URL = 'https://www.alphavantage.co/query';
-    return fetch(`${URL}?function=TIME_SERIES_DAILY&symbol=${companySymbol}&apikey=${APIKEY}`);
-  }
-  
-  stockTimeSeriesWeekly(companySymbol) {
-    const URL = 'https://www.alphavantage.co/query';
-    return fetch(`${URL}?function=TIME_SERIES_WEEKLY&symbol=${companySymbol}&apikey=${APIKEY}`);
-  }
-  
-  stockTimeSeriesMonthly(companySymbol) {
-    const URL = 'https://www.alphavantage.co/query';
-    return fetch(`${URL}?function=TIME_SERIES_MONTHLY&symbol=${companySymbol}&apikey=${APIKEY}`);
+  getAdminCelebrityRequests(token) {
+    let queryStr = `${ENDPOINT}/admin/celebrity/requests?token=${token}`;
+    return fetch(queryStr);
   }
   
   post(path, options){

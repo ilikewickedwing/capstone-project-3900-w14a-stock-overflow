@@ -8,6 +8,7 @@ import Profile from "./pages/Profile";
 import Stock from "./pages/Stock";
 import './App.css';
 import { StocksPage } from "./graph/StocksPage";
+import AdminPage from "./admin/AdminPage";
 
 function App() {
   const api = new API();
@@ -24,6 +25,7 @@ function App() {
             <Route path="/portfolio/:pid" component={Portfolio} />
             <Route path="/profile" component={Profile} />
             <Route path="/stock/:stockCode" component={Stock} />
+            <Route path="/admin" component={AdminPage} />
           </Switch>  
         </div>
       </BrowserRouter>

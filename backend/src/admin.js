@@ -1,3 +1,9 @@
+import { authRegister } from "./auth";
+
+export const DEFAULTADMIN = {
+  username: 'admin',
+  password: 'admin'
+}
 
 export const postCelebrityMakeRequest = async (token, info, database, res) => {
   // Validate token
@@ -71,4 +77,13 @@ export const postAdminCelebrityHandlerequest = async (token, approve, rid, datab
   // Remove request from database
   await database.deleteCelebrityRequest(rid);
   res.status(200).send();
+}
+
+// Makes sure that there is at least one admin
+export const insertDefaultAdmin =  async (database) => {
+  const uid = await database.getUid(DEFAULTADMIN.username);
+  if (uid === null) {
+    const resp = await authRegister(DEFAULTADMIN.username, DEFAULTADMIN.password, database);
+    await database.updateUser(resp.uid, { userType: 'admin' });
+  }
 }

@@ -1,6 +1,7 @@
 import { MongoClient } from "mongodb";
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import { nanoid } from 'nanoid';
+import { insertDefaultAdmin } from "./admin";
 
 // This is the uri authentication for the mongodb database in the cloud
 // It is the pretty mcuh the password to accessing the deployment database
@@ -787,7 +788,7 @@ export class Database {
   /**
    * Connect to the database
    */
-   async connect() {
+  async connect() {
     let uri = URI;
     if (this.testmode) {
       console.log("Starting in development mode...")
@@ -818,7 +819,16 @@ export class Database {
         await this.database.createCollection(collection);
       }
     }
+    this.onDatabaseConnect()
   }
+  
+  /**
+   * This is called when the database first connects
+   */
+  async onDatabaseConnect() {
+    await insertDefaultAdmin(this);
+  }
+  
   /**
    * Disconnects from the database
    */
