@@ -902,7 +902,13 @@ app.get('/user/notifications', async (req, res) => {
  *        type: string
  *     responses:
  *       200:
- *         description: Request has been made
+ *         description: Returns the rid
+*         schema:
+ *            type: object
+ *            properties:
+ *              rid:
+ *                type: string
+ *                description: rid of request
  *       401:
  *         description: Invalid token
  *       403:

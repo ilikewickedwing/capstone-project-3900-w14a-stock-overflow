@@ -343,6 +343,7 @@ export class Database {
       ownerUid: ownerUid,
       info: info
     });
+    return rid;
   }
   
   /**

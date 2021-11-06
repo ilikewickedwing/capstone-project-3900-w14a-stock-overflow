@@ -19,8 +19,10 @@ export const postCelebrityMakeRequest = async (token, info, database, res) => {
     return;
   }
   // Make a request
-  await database.insertCelebrityRequest(uid, info);
-  res.status(200).send();
+  const rid = await database.insertCelebrityRequest(uid, info);
+  res.status(200).send({
+    rid: rid
+  });
 }
 
 export const getAdminCelebrityRequests = async (token, database, res) => {
