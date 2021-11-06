@@ -7,7 +7,7 @@ import { createPf, deletePf, openPf, userPfs, getPid, editPf, calcPf } from "./p
 import { authDelete, authLogin, authLogout, authRegister } from "./auth";
 import { getUserProfile, postUserProfile } from "./user";
 import { addStock, modifyStock, getAllStocks, checkStock, getStock } from "./stocks";
-import { getAdminCelebrityRequests, postCelebrityMakeRequest } from "./admin";
+import { getAdminCelebrityRequests, postAdminCelebrityHandlerequest, postCelebrityMakeRequest } from "./admin";
 
 // Make the server instance
 export const app = express();
@@ -854,6 +854,34 @@ app.get('/stocks/info', async (req, res) => {
   return;
 })
 
+/**
+ * @swagger
+ * /user/notifications:
+ *   get:
+ *     tags: [User]
+ *     description: Get the recent notifications for the user
+ *     parameters:
+ *      - name: token
+ *        description: The token of the admin
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Returns the an array of notifications
+ *         schema:
+ *            type: object
+ *            properties:
+ *              requests:
+ *                type: array
+ *                description: An array of notifications
+ *       401:
+ *         description: Invalid token
+ */
+app.get('/user/notifications', async (req, res) => {
+  const { token } = req.query;
+})
+
 // Get endpoint for user to request to be a celebrity
 /**
  * @swagger
@@ -935,12 +963,22 @@ app.get('/admin/celebrity/requests', async (req, res) => {
  *        in: body
  *        required: true
  *        type: boolean
+ *      - name: rid
+ *        description: The id of the request to approve or reject
+ *        in: body
+ *        required: true
+ *        type: string
  *     responses:
  *       200:
  *         description: Everything went okay
  *       401:
  *         description: Invalid token
+ *       403:
+ *         description: Not an admin
+ *       400:
+ *         description: Invalid rid
  */
 app.post('/admin/celebrity/handlerequest', async (req, res) => {
-  
+  const { token, approve, rid } = req.body;
+  await postAdminCelebrityHandlerequest(token, approve, rid, database, res);
 })

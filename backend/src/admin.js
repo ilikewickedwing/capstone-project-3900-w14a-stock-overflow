@@ -43,6 +43,30 @@ export const getAdminCelebrityRequests = async (token, database, res) => {
   })
 }
 
-export const postAdminCelebrityHandlerequest = async () => {
-
+export const postAdminCelebrityHandlerequest = async (token, approve, rid, database, res) => {
+  // Validate token
+  const uid = await database.getTokenUid(token);
+  if (uid === null) {
+    res.status(401).send({ error: "Invalid token" });
+    return;
+  }
+  // Check that the user is an admin
+  const user = await database.getUser(uid);
+  if (user.userType !== 'admin') {
+    res.status(403).send({ error: "You must be an admin to handle requests" })
+    return;
+  }
+  // Get the request
+  const requestData = await database.getCelebrityRequestById(rid);
+  if (requestData === null) {
+    res.status(400).send({ error: "Invalid rid" })
+    return;
+  }
+  // Handle the request
+  if (approve) {
+    database.updateUser(requestData.ownerUid, { userType: 'celebrity' });
+  }
+  // Remove request from database
+  await database.deleteCelebrityRequest(rid);
+  res.status(200).send();
 }

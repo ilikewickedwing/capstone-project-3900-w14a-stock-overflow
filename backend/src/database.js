@@ -357,10 +357,29 @@ export class Database {
     return request;
   }
   
+  /**
+   * Get the celebrity request given the rid
+   * @param {string} rid 
+   * @returns 
+   */
+  async getCelebrityRequestById(rid) {
+    const celebrityRequests = this.database.collection('celebrityRequests');
+    const query = { rid: rid };
+    const request = await celebrityRequests.findOne(query);
+    return request;
+  }
+  
   async getAllCelebrityRequests() {
     const celebrityRequests = this.database.collection('celebrityRequests');
     const requests = await celebrityRequests.find().toArray();
     return requests;
+  }
+  
+  async deleteCelebrityRequest(rid) {
+    const celebrityRequests = this.database.collection('celebrityRequests');
+    const query = { rid: rid };
+    const request = await celebrityRequests.deleteOne(query);
+    return request.deletedCount !== 0;
   }
   
   /**
