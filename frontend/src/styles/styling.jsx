@@ -17,23 +17,79 @@ export const FlexColumns = styled.div`
 `;
 
 export const BoxShadow = styled.div`
-    box-shadow: 2px 1px 8px 1px rgba(181,177,177,0.72);
-    -webkit-box-shadow: 2px 1px 8px 1px rgba(181,177,177,0.72);
-    -moz-box-shadow: 2px 1px 8px 1px rgba(181,177,177,0.72);
+box-shadow: 2px 1px 8px 1px rgba(181,177,177,0.72);
+-webkit-box-shadow: 2px 1px 8px 1px rgba(181,177,177,0.72);
+-moz-box-shadow: 2px 1px 8px 1px rgba(181,177,177,0.72);
+border-radius: 15px;
 `;
 export const NavBar = styled(FlexRows)`
-    justify-content: space-between;
-    padding: 1% 3%;
-    background-color: #6d6875;
-    
-    // background: rgb(72,3,84);
-    // background: linear-gradient(90deg, rgba(72,3,84,1) 0%, rgba(0,133,186,1) 36%, rgba(0,212,255,1) 100%);
+justify-content: space-between;
+padding: 1% 3%;
+background-color: #6d6875;
 `;
+
+// body containers
+export const PageBody = styled(FlexColumns)`
+    height:100vh;
+    width: 100vw;
+    background-color: #FAE1DD;
+`;
+
+export const LeftBody= styled(BoxShadow)`
+    padding: 2%;
+    margin: 1% 0%;
+    background-color: white;
+    flex:2;
+`;
+
+export const RightBody= styled(BoxShadow)`
+    display:flex;
+    flex-direction: column;
+    margin:1%;
+    padding: 2%;
+    background-color: white;
+    flex-wrap: wrap;
+    flex:1;
+`;
+
+export const PfBody = styled(FlexRows)`
+    width: 100%; 
+    padding: 1%;
+    margin-top: -2%;
+    justify-content:center;
+`;
+
+export const WatchlistBody = styled(BoxShadow)`
+    padding: 2%;
+    margin: 1% 0%;
+    background-color: white;
+    width: 70%;
+    text-align: center;
+`;
+
+export const ContentBody = styled(FlexColumns)`
+    padding: 1%;
+    height: 100%;
+`;
+
+export const WatchlistCardContainer = styled(BoxShadow)`
+    padding: 1%;
+    margin 1% 0;
+    display:flex;
+    justify-content: space-between;
+    border-radius: 5px;
+    font-size: 1.3em;
+    &: hover {
+        background-color: #edf6f9;
+        transition: 0.3s;
+    }
+`;
+// component styling
 export const TabButton = styled(Button)
 `
-    &&{
-        margin: 5px;
-    }
+&&{
+    margin: 5px;
+}
 `;
 
 export const CreatePortContent = styled.div`
@@ -85,44 +141,12 @@ export const ConfirmCancel = styled(FlexRows)`
     justify-content: space-between; 
 `;
 
-export const LeftBody= styled(BoxShadow)`
-    flex: 2;
-    border-radius: 15px;
-    padding: 2%;
-    margin: 1% 0%;
-    background-color: white;
-    
-`;
-
-export const RightBody= styled(BoxShadow)`
-    display:flex;
-    flex-direction: column;
-    flex: 1;
-    margin:1%;
-    padding: 2%;
-    border-radius: 15px;
-    background-color: white;
-`;
-
-export const PfBody = styled(FlexRows)`
-    width: 100%; 
-    flex:1;
-    padding: 1%;
-    margin-top: -2%;
-`;
 
 export const RightCard = styled(BoxShadow)`
-    border-radius: 15px;
     padding: 2%;
     margin: 1%; 
     background-color: white;
 
-`;
-
-export const PageBody = styled(FlexColumns)`
-    height:100vh;
-    width: 100vw;
-    background-color: #FAE1DD;
 `;
 
 export const TextInput = styled(TextField)`
@@ -130,7 +154,6 @@ export const TextInput = styled(TextField)`
      margin: 0.5%; 
  }
 `;
-
 
 export const StockQueryButton= styled.button`
  &&{
@@ -143,13 +166,7 @@ export const StockOverview = styled(BoxShadow)`
     display:flex;
     flex-direction: column;
     padding: 2%;
-    border-radius: 15px;
     text-align: center;
-`;
-
-export const ContentBody = styled(FlexColumns)`
-    padding: 1%;
-    height: 100%;
 `;
 
 export const CleanButton = styled.button`
@@ -176,3 +193,4 @@ export const StockHeading = styled(FlexRows)`
     padding: 2% 0%;
     position: relative;
 `
+

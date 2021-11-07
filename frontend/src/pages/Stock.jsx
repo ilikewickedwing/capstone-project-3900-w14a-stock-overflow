@@ -212,13 +212,13 @@ const Stock = () => {
               </PfBar>
               <StockHeading> {price} USD {toggle?(
                 <div style= {{color:'red'}}>
-                  <ArrowDropDownIcon style={{fontSize:'2em', margin:'-7% 0%'}}/>
-                  {change} {percentage}
+                  <ArrowDropDownIcon style={{fontSize:'2em', margin:'-10% 0%'}}/>
+                  {change} {percentage}%
                 </div>
               ):(
                 <div style={{color:'green'}}>
-                  <ArrowDropUpIcon style={{fontSize:'2em', margin:'-7% 0%'}}/>
-                  {change} {percentage}
+                  <ArrowDropUpIcon style={{fontSize:'2em', margin:'-10% 0%'}}/>
+                  {change} {percentage}%
                 </div>
               )} </StockHeading> 
               <StockOverview >
