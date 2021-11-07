@@ -17,49 +17,11 @@ export class API {
     // this.intervalObj = setInterval(() => {this._getAllStocks()}, pollingInterval);
     this.useCounter = 0;
   }
-  
-  /* async getAllStocks() {
-    // Return cached stocks if available
-    if (this.cachedStocks !== null) {
-      return this.cachedStocks;
-    }
-    // Else cache doesnt exist so fetch it
-    const resp = await this._getAllStocks();
-    return resp;
-  }
-  
-  // This makes the actual call to alpha vantage
-  // Dont call this directly
-  async _getAllStocks() {
-    const stocks = [];
-    // Fetching the list of active stocks
-    let result = await this._callAlpha(-1 ,"no stock");  // Converting result into text
-
-    // console.log(result);
-    console.log('calling alphavantage');
-
-    result = result.split('\n');        // Splitting every entry
-
-    // Going through every entry
-    result.forEach(stock => {
-        const info = stock.split(',');
-        if (info[3] == "Stock") {   // only add to list if the entry is a stock and not a fund
-            stocks.push({
-                symbol: info[0],
-                name: info[1],
-            })
-        }
-    });
-    // Cache the stocks
-    this.cachedStocks = stocks;
-
-    return stocks;
-  } */
 
   async lookupStock(stocks) {
     const search = this.cachedStocks.filter(o => (o.stocks === stocks));
     if (search.length !== 0) {
-      console.log('returning cache');
+      // console.log('returning cache');
       return search[0].check;
     }
     // console.log('tradier is searching up ' + stocks);
@@ -71,10 +33,15 @@ export class API {
       stocks: stocks,
       check: check
     }
-    console.log(obj);
+    // console.log(obj);
 
     this.cachedStocks.push(obj);
     return check;
+  }
+
+  async marketStatus() {
+    const status = await this._callTradier(4);
+    return (status === 'closed');
   }
 
   async getStock(type, stocks, interval, start) {
@@ -184,6 +151,7 @@ export class API {
    *  1. Current price of multiple stocks
    *  2. History of one stock not intraday
    *  3. History of one stock intraday
+   *  4. Current status of market
    * @param {int} type 
    * @param {string} stocks 
    * @param {string} interval
@@ -212,6 +180,8 @@ export class API {
     } else if (type === 3) {
       url = 'timesales';
       symbol = stocks;
+    } else if (type === 4) {
+      url = 'clock';
     } else if (type === -1) {
       url = 'lookup'
       q = stocks;
@@ -247,9 +217,9 @@ export class API {
     return request.data;
   }
 
-  checkStock(check, against) {
+  /* checkStock(check, against) {
     return check == against;
-  }
+  } */
 
   /* // Call this when deleting this object to remove all time intervals
   // to prevent a memory leak

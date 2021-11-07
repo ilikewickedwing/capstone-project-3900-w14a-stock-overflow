@@ -1,6 +1,7 @@
 import { MongoClient } from "mongodb";
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import { nanoid } from 'nanoid';
+import { calcAll } from './portfolio';
 
 // This is the uri authentication for the mongodb database in the cloud
 // It is the pretty mcuh the password to accessing the deployment database
@@ -59,7 +60,8 @@ const COLLECTIONS = [
           quantity: int,
           performance: [
             {
-              date: performance, // (stored as a float and as percentage)
+              date: string,
+              performance: float,
             }
           ]
         }
@@ -68,7 +70,8 @@ const COLLECTIONS = [
         spent: float,
         sold: float,
         performance: [
-          date: perforamnce, // (stored as a float and as percentage)
+          date: string,
+          perforamnce: float
         ]
       }
     }
@@ -352,7 +355,7 @@ export class Database {
         performance: [
           {
             date: date,
-            perf: 0
+            performance: 0
           }
         ]
       }
@@ -467,32 +470,19 @@ export class Database {
     else return 0;
   }
 
-  async calcPf(pid) {
+  /**
+   * Function to update the calculated portfolio in the database
+   * @param {string} pid 
+   * @param {Object} value 
+   * @param {Object} stocks 
+   * @returns {Promise<boolean>}}
+   */
+  async calcPf(pid, value, stocks) {
     const pfs = this.database.collection('portfolios');
     const query = { pid: pid };
-    const Pf = await pfs.findOne(query);
 
-    // Calculate performance of portfolio
-    // Add in actual sold profit with current value or portfolio
-    //  versus the amount invested in portfolio
-    let perf = 0;
-    let gain = Pf.value.sold;
-
-    // Get stocklist
-    const stocks = Pf.stocks;
-    for (let i = 0; i < stocks.length; i++) {
-      // Add up the current price of each stock to determine current value
-      const symbol = stocks[i].stock;
-      const value = await getStock(1, symbol);
-      const price = value.data.quotes.quote['last'];
-      gain += price * stocks[i].quantity;
-    }
-
-    // Calculate profit as a percentage
-    const profit = gain - Pf.value.spent;
-    perf = profit/Pf.value.spent;
-
-    return perf;
+    const result = await pfs.updateOne(query, { $set: { stocks: stocks, value: value } } );
+    return (result.modifiedCount!== 0);
   }
 
 
@@ -571,7 +561,7 @@ export class Database {
         performance: [
           {
             date: date,
-            perf: 0
+            performance: 0
           }
         ]
       })
@@ -667,7 +657,7 @@ export class Database {
    async connect() {
     let uri = URI;
     if (this.testmode) {
-      console.log("Test mode");
+      // console.log("Test mode");
       // Start test server in memory
       this.mongoTestServer = await MongoMemoryServer.create();
       // Get uri string
@@ -677,11 +667,11 @@ export class Database {
     this.client = new MongoClient(uri);
     // Connect to server
     try {
-      console.log('Connecting to MongoDB database...');
+      // console.log('Connecting to MongoDB database...');
       await this.client.connect();
-      console.log('Successfully connected to MongoDB database');
+      // console.log('Successfully connected to MongoDB database');
     } catch (err) {
-      console.error('Unable to connect to MongoDb database');
+      // console.error('Unable to connect to MongoDb database');
     }
     // Initialise database
     this.database = this.client.db(DATABASENAME);
@@ -690,10 +680,11 @@ export class Database {
       const hasNext = await cursor.hasNext();
       cursor.close();
       if (!hasNext) {
-        console.log(`Creating ${collection}`);
+        // console.log(`Creating ${collection}`);
         await this.database.createCollection(collection);
       }
     }
+    calcAll(this.database);
   }
   /**
    * Disconnects from the database
