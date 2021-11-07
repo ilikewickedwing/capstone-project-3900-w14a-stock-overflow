@@ -16,7 +16,7 @@ import { apiBaseUrl } from './const';
 
 
 // add stock form 
-const AddStock = ({token, pid, onAddCallback, load = () => {}}) => {
+const AddStock = ({token, pid, onAddCallback, load = () => {}, name}) => {
     // textinput state
     const [search, setSearch ] = React.useState("");
     // list of api return 
@@ -25,6 +25,7 @@ const AddStock = ({token, pid, onAddCallback, load = () => {}}) => {
     const [currCode, setCode] = React.useState("");
     const [price, setPrice] = React.useState("");
     const [quantity, setQuantity] = React.useState(0);
+    const [broker, setBroker] = React.useState(0);
 
 
     var request = require('request');
@@ -104,11 +105,23 @@ const AddStock = ({token, pid, onAddCallback, load = () => {}}) => {
             />)}
         />
         <form>
-
-           <TextField type="text" required variant="standard" label="price"
-            onChange={e => setPrice(e.target.value)}/>
-           <TextField type="text" required variant="standard" label="quantity"
-            onChange={e => setQuantity(e.target.value)}/>
+        {
+            name === 'Watchlist' ? (
+                <div>
+                </div>
+            ) : (
+                <div>
+                    <TextField type="text" required variant="standard" label="Price (USD$)"
+                     onChange={e => setPrice(e.target.value)}/>
+                     <br/>
+                    <TextField type="text" required variant="standard" label="Quantity"
+                     onChange={e => setQuantity(e.target.value)}/>
+                      <br/>
+                    <TextField type="text" required variant="standard" label="Brokerage fee (USD$)"
+                     onChange={e => setBroker(e.target.value)}/>
+                </div>
+            )
+        }
             <Button type='submit' onClick={handleAddStock}>
                 Add Stock
             </Button>
