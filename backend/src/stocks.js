@@ -28,7 +28,9 @@ export const getAllStocks = async () => {
  * @param {Database} database
  * @returns {Promise}
  */
-export const addStock = async (token, pid, stock, price, quantity, database) => {
+export const addStock = async (token, pid, stock, price, quantity, brokerage, database) => {
+  let bkCost = null;
+
   // Finding corresponding user for the given token
   const uid = await database.getTokenUid(token);
   // Return error if user not found
@@ -56,12 +58,27 @@ export const addStock = async (token, pid, stock, price, quantity, database) => 
     if (isNaN(price) || price <= 0) {
       return 5;
     }
+
+    // Return error if brokerage is not valid
+    if (brokerage === null) {
+      const userPfs = await database.getPfs(uid);
+      bkCost = userPfs.brokerage;
+      if (isNaN(brokerage) || brokerage <= 0) {
+        return 8;
+      }
+    } else {
+      if (isNaN(brokerage) || brokerage <= 0) {
+        return 7;
+      } else {
+        bkCost = brokerage;
+      }
+    }
     
     // Return result of adding stock to portfolio
-    return await database.addStocks(pid, stock, price, quantity);
+    return await database.addStocks(pid, stock, price, quantity, bkCost);
   } else {
     // Return result of adding stock to watchlist
-    return await database.addStocks(pid, stock, null, null);
+    return await database.addStocks(pid, stock, null, null, null);
   }
 }
 
@@ -77,6 +94,8 @@ export const addStock = async (token, pid, stock, price, quantity, database) => 
  * @returns {Promise <boolean>}
  */
 export const modifyStock = async (token, pid, stock, price, quantity, option, database) => {
+  let bkCost = null;
+
   // Finding corresponding user for the given token
   const uid = await database.getTokenUid(token);
   // Return error if user not found
@@ -104,17 +123,32 @@ export const modifyStock = async (token, pid, stock, price, quantity, option, da
     if (isNaN(price) || price <= 0) {
       return 7;
     }
+
+    // Return error if brokerage is not valid
+    if (brokerage === null) {
+      const userPfs = await database.getPfs(uid);
+      bkCost = userPfs.brokerage;
+      if (isNaN(brokerage) || brokerage <= 0) {
+        return 9;
+      }
+    } else {
+      if (isNaN(brokerage) || brokerage <= 0) {
+        return 8;
+      } else {
+        bkCost = brokerage;
+      }
+    }
   }
   
   let resp = null;
   // Determine if buying or selling stocks
   if (option) {
     // Return result of buying stocks
-    resp = await database.addStocks(pid, stock, price, quantity);
+    resp = await database.addStocks(pid, stock, price, quantity, bkCost);
   }
   else {
     // Return result of selling stocks
-    resp = await database.sellStocks(pid, stock, price, quantity);
+    resp = await database.sellStocks(pid, stock, price, quantity, bkCost);
   }
   
   return resp;

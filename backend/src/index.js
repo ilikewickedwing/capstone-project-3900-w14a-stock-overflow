@@ -5,7 +5,7 @@ import swaggerUI from 'swagger-ui-express';
 import { swaggerDocs } from "./docs";
 import { createPf, deletePf, openPf, userPfs, getPid, editPf, calcPf } from "./portfolio";
 import { authDelete, authLogin, authLogout, authRegister } from "./auth";
-import { getUserProfile, postUserProfile } from "./user";
+import { getUserProfile, postUserProfile, setDefBroker } from "./user";
 import { addStock, modifyStock, getAllStocks, checkStock, getStock } from "./stocks";
 
 // Make the server instance
@@ -326,6 +326,19 @@ app.delete('/auth/delete', async (req, res) => {
     return;
   }
   res.status(403).send({ mesage: 'Uid does not exist' });
+})
+
+// Post endpoint for setting default broker price
+app.post('/user/setDefBroker', async (req, res) => {
+  const { token, defBroker } = req.body;
+  const resp = await setDefBroker(token, defBroker, database);
+  if (resp === 2) {
+    res.status(401).send({ error: "Invalid token" });
+  } else if (resp === 0) {
+    res.status(404).send();
+  } else if (resp === 1) {
+    res.status(200).send();
+  }
 })
 
 // Post endpoint for creating a single portfolio
@@ -683,8 +696,8 @@ app.delete('/user/portfolios/delete', async (req, res) => {
  *         description: Invalid pid or invalid stock
  */
 app.post('/user/stocks/add', async (req, res) => {
-  const { token, pid, stock, price, quantity } = req.body;
-  const resp = await addStock(token, pid, stock, price, quantity, database);
+  const { token, pid, stock, price, quantity, brokerage } = req.body;
+  const resp = await addStock(token, pid, stock, price, quantity, brokerage, database);
   if (resp === 1) {
     res.status(401).send({ error: "Invalid token" });
   } else if (resp === 2) {
@@ -697,6 +710,10 @@ app.post('/user/stocks/add', async (req, res) => {
     res.status(400).send({ error: "Must include valid price purchased at" });
   } else if (resp === 6) {
     res.status(403).send({ error: "Stock already in watchlist" });
+  } else if (resp === 7) {
+    res.status(403).send({ error: "Invalid brokerage cost" });
+  } else if (resp === 8) {
+    res.status(403).send({ error: "Default brokerage cost not set" });
   } else {
     res.status(200).send();
   }
@@ -770,6 +787,10 @@ app.put('/user/stocks/edit', async (req, res) => {
     res.status(400).send({ error: "Must include valid quantity purchased" });
   } else if (resp === 7) {
     res.status(400).send({ error: "Must include valid price purchased at" });
+  } else if (resp === 8) {
+    res.status(403).send({ error: "Invalid brokerage cost" });
+  } else if (resp === 9) {
+    res.status(403).send({ error: "Default brokerage cost not set" });
   }
   return;
 })

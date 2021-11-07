@@ -53,3 +53,14 @@ export const postUserProfile = async (uid, token, userData, database, res) => {
   }
   res.status(403).send({ message: 'Invalid uid given '});
 }
+
+export const setDefBroker = async (token, defBroker, database) => {
+  // Return error if user not found
+  const uid = await database.getTokenUid(token);
+  if (uid === null) {
+    return 2;
+  }
+
+  const resp = await database.setDefBroker(uid, defBroker);
+  return resp;
+}

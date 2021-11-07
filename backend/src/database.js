@@ -45,6 +45,7 @@ const COLLECTIONS = [
           name: string,
         }
       ],
+      defBroker: float
     }
    */
   'userPortos',
@@ -71,7 +72,7 @@ const COLLECTIONS = [
         sold: float,
         performance: [
           date: string,
-          perforamnce: float
+          performance: float
         ]
       }
     }
@@ -318,6 +319,15 @@ export class Database {
     return null;
   }
 
+  async setDefBroker(uid, broker) {
+    const userPortos = this.database.collection('userPortos');
+    const query1 = { ownerUid: uid };
+    const result = await userPortos.updateOne( query1, { defBroker: broker } );
+    
+    if (result.modifiedCount !== 0) return 1;
+    else return 0;
+  }
+
   /**
    * Function to create new portfolio and returns the portfolio id
    * @param {string} uid 
@@ -525,7 +535,7 @@ export class Database {
    * @param {int} quantity 
    * @returns {Promise <boolean>}
    */
-  async addStocks(pid, stock, price, quantity) {
+  async addStocks(pid, stock, price, quantity, brokerage) {
     // Find the corresponding portfolio for the given pid
     const pfs = this.database.collection('portfolios');
     const query = {pid: pid};
@@ -554,20 +564,34 @@ export class Database {
       const today = new Date(now);
       const time = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + today.getDate()).slice(-2);
       const date = time.toString();
-      stockList.push({
-        stock: stock,
-        avgPrice: price,
-        quantity: quantity,
-        performance: [
-          {
-            date: date,
-            performance: 0
-          }
-        ]
-      })
+      if (pfResp.name === 'Watchlist') {
+        stockList.push({
+          stock: stock,
+          avgPrice: null,
+          quantity: null,
+          performance: [
+            {
+              date: null,
+              performance: null
+            }
+          ]
+        })
+      } else {
+        stockList.push({
+          stock: stock,
+          avgPrice: price,
+          quantity: quantity,
+          performance: [
+            {
+              date: date,
+              performance: 0
+            }
+          ]
+        })
+      }
     }
 
-    pfValue.spent += price * quantity;
+    pfValue.spent += price * quantity + brokerage;
 
     // Updating database
     await pfs.updateOne(query, { $set: { stocks: stockList, value: pfValue } } );
@@ -581,7 +605,7 @@ export class Database {
    * @param {int} quantity 
    * @returns {Promise <boolean>}
    */
-  async sellStocks(pid, stock, price, quantity) {
+  async sellStocks(pid, stock, price, quantity, brokerage) {
     // Find the corresponding portfolio for the given pid
     const pfs = this.database.collection('portfolios');
     const query = {pid: pid};
@@ -617,6 +641,7 @@ export class Database {
     }
 
     pfValue.sold += price * quantity;
+    pfValue.spent += brokerage;
 
     // Updating database
     await pfs.updateOne(query, { $set: { stocks: stockList, value: pfValue } } );
