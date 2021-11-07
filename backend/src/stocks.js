@@ -134,7 +134,7 @@ export const checkStock = async (stock) => {
   for (let i = 0; i < symbols.length; i++) {
     // console.log("symbol is " + symbols[i]);
     // const filteredStock = stocks.filter(o => o.symbol === symbols[i])
-    console.log(symbols[i]);
+    // console.log(symbols[i]);
     const resp = await api.lookupStock(symbols[i]);
     if (resp == null) return false;
     if (Array.isArray(resp)) {

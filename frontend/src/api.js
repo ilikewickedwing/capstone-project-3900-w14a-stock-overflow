@@ -113,7 +113,11 @@ export default class API {
     }
     return fetch(queryStr);
   }
-
+  
+  userPortfoliosOpen(pid) {
+    return fetch(`${ENDPOINT}/user/portfolios/open?pid=${pid}`);
+  }
+  
   getAdminCelebrityRequests(token) {
     let queryStr = `${ENDPOINT}/admin/celebrity/requests?token=${token}`;
     return fetch(queryStr);
