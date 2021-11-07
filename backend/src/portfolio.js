@@ -282,8 +282,8 @@ export const calcPf = async (token, pid, database, admin) => {
 
 export const calcAll = async (database) => {
   const rule = new schedule.RecurrenceRule();
-  rule.hour = 6;
-  rule.tz = 'Etc/UTC';
+  rule.hour = 16;
+  rule.tz = 'US/Eastern';
 
   const job = schedule.scheduleJob(rule, function() {
     console.log('Market is now closed. Portfolio calculation has begun.');
