@@ -45,4 +45,7 @@ Week 7
 
 Week 8
 - TODO: complete milestone 2 before starting 3. Alternatively, implement the frontend for 3 first then go back to continue 2. 
+- done: 
+  - refactored Mison's part from milestone 2, reformatted some page layouts
+  - fixed visibility on component change (AddStock)
 
