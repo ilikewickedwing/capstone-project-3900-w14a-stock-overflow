@@ -45,9 +45,11 @@ yarn install
 
 The backend is written in javascript with Node Js
 
-### 2.1 Starting development server
+### 2.1 Starting backend server
 
-To start the server, simply run the command from within the **/backend** directory
+You are able to run the backend server in two modes: development and deployment mode.
+
+To start the server in developement mode, simply run the command from within the **/backend** directory
 ```
 yarn start
 ```
@@ -56,6 +58,15 @@ You can also choose the port number the server runs of by passing it as a comman
 
 ```
 yarn start 5050
+```
+
+Note that in developement mode, the database runs in RAM and so all data will be removed when the server is restarted
+
+To start the server in deployment mode run the command from within the **/backend** directory
+```
+yarn deploy
+// or to specify port number
+yarn deploy 5050
 ```
 
 ### 2.2 Testing

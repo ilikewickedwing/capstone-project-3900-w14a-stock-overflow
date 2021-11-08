@@ -1,6 +1,7 @@
 import { MongoClient } from "mongodb";
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import { nanoid } from 'nanoid';
+import { insertDefaultAdmin } from "./admin";
 import { calcAll } from './portfolio';
 
 // This is the uri authentication for the mongodb database in the cloud
@@ -16,6 +17,7 @@ const COLLECTIONS = [
     {
       uid: string,
       username: string,
+      userType: string  // This can either be: user, admin, celebrity
     }
   */
   'users',
@@ -77,6 +79,26 @@ const COLLECTIONS = [
     }
    */
   'portfolios',
+  /**
+    Stores all the requests made by ordinary users to become celebrity
+    {
+      // Id of the request
+      rid: string,
+      ownerUid: string,
+      // Info given by the user on why they want to be a celebrity and so on
+      info: string,
+    }
+  */
+  'celebrityRequests',
+  /**
+    Stores all the notifications for a given user
+    {
+      ownerUid: string,
+      // Info of the notification
+      info: string,
+    }
+  */
+  'notifications',
 ]
 
 /**
@@ -154,13 +176,14 @@ export class Database {
    * @param {string} username 
    * @returns {Promise<string>}
    */
-  async insertUser(username) {
+  async insertUser(username, userType = 'user') {
     // Generate a new unique id
     const uid = nanoid();
     const users = this.database.collection('users');
     await users.insertOne({
       uid: uid,
       username: username,
+      userType: userType
     })
 
     // Create a new userPorto and add a watchlist for the new user
@@ -317,7 +340,108 @@ export class Database {
     }
     return null;
   }
-
+  
+  /**
+   * Inserts request into database. Does not check if ownerUid already exists
+   * so make sure to check it with the getRequest
+   * @param {string} ownerUid 
+   * @param {string} info 
+   */
+  async insertCelebrityRequest(ownerUid, info) {
+    // Generate a new unique rid
+    const rid = nanoid();
+    const celebrityRequests = this.database.collection('celebrityRequests');
+    await celebrityRequests.insertOne({
+      rid: rid,
+      ownerUid: ownerUid,
+      info: info
+    });
+    return rid;
+  }
+  
+  /**
+   * Given an ownerUid return the celebrity request
+   * @param {string} ownerUid 
+   * @returns 
+   */
+  async getCelebrityRequest(ownerUid) {
+    const celebrityRequests = this.database.collection('celebrityRequests');
+    const query = { ownerUid: ownerUid };
+    const request = await celebrityRequests.findOne(query);
+    return request;
+  }
+  
+  /**
+   * Get the celebrity request given the rid
+   * @param {string} rid 
+   * @returns 
+   */
+  async getCelebrityRequestById(rid) {
+    const celebrityRequests = this.database.collection('celebrityRequests');
+    const query = { rid: rid };
+    const request = await celebrityRequests.findOne(query);
+    return request;
+  }
+  
+  /**
+   * Get all requests to become a celebrity
+   * @returns 
+   */
+  async getAllCelebrityRequests() {
+    const celebrityRequests = this.database.collection('celebrityRequests');
+    const requests = await celebrityRequests.find().toArray();
+    return requests;
+  }
+  
+  /**
+   * Deletes a specific request to be a celebrity
+   * @param {string} rid 
+   * @returns 
+   */
+  async deleteCelebrityRequest(rid) {
+    const celebrityRequests = this.database.collection('celebrityRequests');
+    const query = { rid: rid };
+    const request = await celebrityRequests.deleteOne(query);
+    return request.deletedCount !== 0;
+  }
+  
+  /**
+   * Insert a new user notification
+   * @param {string} ownerUid 
+   * @param {string} info 
+   */
+  async insertUserNotification(ownerUid, info) {
+    const notifications = this.database.collection('notifications');
+    await notifications.insertOne({
+      ownerUid: ownerUid,
+      info: info
+    })
+  }
+  
+  /**
+   * Get all the notifications for a specific user
+   * @param {string} ownerUid 
+   * @returns 
+   */
+  async getAllUserNotifications(ownerUid) {
+    const notifications = this.database.collection('notifications');
+    const query = { ownerUid: ownerUid };
+    const requests = await notifications.find(query).toArray();
+    return requests;
+  }
+  
+  /**
+   * Delete all the user notifications of a specific user
+   * @param {string} ownerUid 
+   * @returns 
+   */
+  async clearAllUserNotifications(ownerUid) {
+    const notifications = this.database.collection('notifications');
+    const query = { ownerUid: ownerUid };
+    const result = await notifications.deleteMany(query);
+    return result.deletedCount;
+  }
+  
   /**
    * Function to create new portfolio and returns the portfolio id
    * @param {string} uid 
@@ -654,14 +778,16 @@ export class Database {
   /**
    * Connect to the database
    */
-   async connect() {
+  async connect() {
     let uri = URI;
     if (this.testmode) {
-      // console.log("Test mode");
+      console.log("Starting in development mode...")
       // Start test server in memory
       this.mongoTestServer = await MongoMemoryServer.create();
       // Get uri string
       uri = this.mongoTestServer.getUri();
+    } else {
+      console.log("Starting in deployment mode...")
     }
     // Start client
     this.client = new MongoClient(uri);
@@ -684,6 +810,14 @@ export class Database {
         await this.database.createCollection(collection);
       }
     }
+    await this.onDatabaseConnect()
+  }
+
+  /**
+  * This is called when the database first connects
+  */
+  async onDatabaseConnect() {
+    await insertDefaultAdmin(this);
     calcAll(this.database);
   }
   /**

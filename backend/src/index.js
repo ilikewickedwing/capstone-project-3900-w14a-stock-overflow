@@ -7,6 +7,8 @@ import { createPf, deletePf, openPf, userPfs, getPid, editPf, calcPf } from "./p
 import { authDelete, authLogin, authLogout, authRegister } from "./auth";
 import { getUserProfile, postUserProfile } from "./user";
 import { addStock, modifyStock, getAllStocks, checkStock, getStock } from "./stocks";
+import { getAdminCelebrityRequests, postAdminCelebrityHandlerequest, postCelebrityMakeRequest } from "./admin";
+import { getUserNotifications } from "./notifications";
 
 // Make the server instance
 export const app = express();
@@ -842,7 +844,7 @@ app.get('/stocks/all', async (req, res) => {
  *       502:
  *         description: Could not connect to API
  */
- app.get('/stocks/info', async (req, res) => {
+app.get('/stocks/info', async (req, res) => {
   const { type, stocks, interval, start } = req.query;
   const resp = await getStock(type, stocks, interval, start);
 
@@ -859,4 +861,140 @@ app.get('/stocks/all', async (req, res) => {
   } else res.status(200).send(resp);
 
   return;
+})
+
+/**
+ * @swagger
+ * /user/notifications:
+ *   get:
+ *     tags: [User]
+ *     description: Get the recent notifications for the user
+ *     parameters:
+ *      - name: token
+ *        description: The token of the admin
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Returns the an array of notifications
+ *         schema:
+ *            type: object
+ *            properties:
+ *              requests:
+ *                type: array
+ *                description: An array of notifications
+ *       401:
+ *         description: Invalid token
+ */
+app.get('/user/notifications', async (req, res) => {
+  const { token } = req.query;
+  getUserNotifications(token, database, res);
+})
+
+// Get endpoint for user to request to be a celebrity
+/**
+ * @swagger
+ * /celebrity/makerequest:
+ *   post:
+ *     tags: [Celebrity]
+ *     description: User makes a request to be a celebrity
+ *     parameters:
+ *      - name: token
+ *        description: The token of the user
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: info
+ *        description: The information the celebrity wants to provide to the user
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Returns the rid
+*         schema:
+ *            type: object
+ *            properties:
+ *              rid:
+ *                type: string
+ *                description: rid of request
+ *       401:
+ *         description: Invalid token
+ *       403:
+ *         description: Request has already been made
+ */
+app.post('/celebrity/makerequest', async (req, res) => {
+  const { token, info } = req.body;
+  await postCelebrityMakeRequest(token, info, database, res);
+})
+
+// Get endpoint for admin to fetch a list of all requests to be a celebrity
+/**
+ * @swagger
+ * /admin/celebrity/requests:
+ *   get:
+ *     tags: [Admin]
+ *     description: Get endpoint for admin to fetch a list of all requests to be a celebrity
+ *     parameters:
+ *      - name: token
+ *        description: The token of the admin
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Returns the an array of celebrity requests
+ *         schema:
+ *            type: object
+ *            properties:
+ *              requests:
+ *                type: array
+ *                description: An array of the celebrity requests
+ *       401:
+ *         description: Invalid token
+ *       403:
+ *         description: User is not an admin
+ */
+app.get('/admin/celebrity/requests', async (req, res) => {
+  const { token } = req.query;
+  await getAdminCelebrityRequests(token, database, res);
+})
+
+// Get endpoint for admin to fetch a list of all requests to be a celebrity
+/**
+ * @swagger
+ * /admin/celebrity/handlerequest:
+ *   post:
+ *     tags: [Admin]
+ *     description: Get endpoint for admin to fetch a list of all requests to be a celebrity
+ *     parameters:
+ *      - name: token
+ *        description: The token of the admin
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: approve
+ *        description: Whether to approve or reject the request
+ *        in: body
+ *        required: true
+ *        type: boolean
+ *      - name: rid
+ *        description: The id of the request to approve or reject
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Everything went okay
+ *       401:
+ *         description: Invalid token
+ *       403:
+ *         description: Not an admin
+ *       400:
+ *         description: Invalid rid
+ */
+app.post('/admin/celebrity/handlerequest', async (req, res) => {
+  const { token, approve, rid } = req.body;
+  await postAdminCelebrityHandlerequest(token, approve, rid, database, res);
 })
