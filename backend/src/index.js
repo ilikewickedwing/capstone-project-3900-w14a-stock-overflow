@@ -5,8 +5,10 @@ import swaggerUI from 'swagger-ui-express';
 import { swaggerDocs } from "./docs";
 import { createPf, deletePf, openPf, userPfs, getPid, editPf, calcPf } from "./portfolio";
 import { authDelete, authLogin, authLogout, authRegister } from "./auth";
-import { getUserProfile, postUserProfile } from "./user";
+import { getDefBroker, getUserProfile, postUserProfile, setDefBroker } from "./user";
 import { addStock, modifyStock, getAllStocks, checkStock, getStock } from "./stocks";
+import { getAdminCelebrityRequests, postAdminCelebrityHandlerequest, postCelebrityMakeRequest } from "./admin";
+import { getUserNotifications } from "./notifications";
 
 // Make the server instance
 export const app = express();
@@ -328,6 +330,35 @@ app.delete('/auth/delete', async (req, res) => {
   res.status(403).send({ message: 'Uid does not exist' });
 })
 
+// Get endpoint for getting default broker price
+app.get('/user/getDefBroker', async (req, res) => {
+  const { token } = req.query;
+  const resp = await getDefBroker(token, database);
+  console.log
+  if (resp === 2) {
+    res.status(401).send({ error: "Invalid token" });
+  } else {
+    res.status(200).send({ defBroker: resp });
+  }
+})
+
+// Post endpoint for setting default broker price
+app.post('/user/setDefBroker', async (req, res) => {
+  const { token, defBroker, brokerFlag } = req.body;
+  const resp = await setDefBroker(token, defBroker, brokerFlag, database);
+  if (resp === 2) {
+    res.status(401).send({ error: "Invalid token" });
+  } else if (resp === 3) {
+    res.status(403).send({ error: "Invalid brokerage fee" });
+  } else if (resp === 4) {
+    res.status(403).send({ error: "Invalid brokerage type" });
+  } else if (resp === 0) {
+    res.status(404).send();
+  } else if (resp === 1) {
+    res.status(200).send();
+  }
+})
+
 // Post endpoint for creating a single portfolio
 /**
  * @swagger
@@ -541,7 +572,7 @@ app.get('/user/portfolios/calculate', async (req, res) => {
   } else if (resp === -5) {
     res.status(404).send({ error: "Could not update database" });
   } else {
-    res.status(200).send({ performance: resp.toString() });
+    res.status(200).send({ performance: resp });
   }
 
   return;
@@ -672,6 +703,16 @@ app.delete('/user/portfolios/delete', async (req, res) => {
  *        in: body
  *        required: true
  *        type: int
+ *      - name: brokerage
+ *        description: The price of the brokerage fee
+ *        in: body
+ *        required: true
+ *        type: float
+ *      - name: flag
+ *        description: The type of the brokerage fee; 0 for flat and 1 for percentage
+ *        in: body
+ *        required: true
+ *        type: int
  *     responses:
  *       200:
  *         description: Successfully added stock
@@ -683,8 +724,8 @@ app.delete('/user/portfolios/delete', async (req, res) => {
  *         description: Invalid pid or invalid stock
  */
 app.post('/user/stocks/add', async (req, res) => {
-  const { token, pid, stock, price, quantity } = req.body;
-  const resp = await addStock(token, pid, stock, price, quantity, database);
+  const { token, pid, stock, price, quantity, brokerage, flag } = req.body;
+  const resp = await addStock(token, pid, stock, price, quantity, brokerage, flag, database);
   if (resp === 1) {
     res.status(401).send({ error: "Invalid token" });
   } else if (resp === 2) {
@@ -697,6 +738,12 @@ app.post('/user/stocks/add', async (req, res) => {
     res.status(400).send({ error: "Must include valid price purchased at" });
   } else if (resp === 6) {
     res.status(403).send({ error: "Stock already in watchlist" });
+  } else if (resp === 7) {
+    res.status(403).send({ error: "Default brokerage cost not set" });
+  } else if (resp === 8) {
+    res.status(403).send({ error: "Invalid brokerage cost" });
+  } else if (resp === 9) {
+    res.status(403).send({ error: "Invalid brokerage type" });
   } else {
     res.status(200).send();
   }
@@ -741,6 +788,16 @@ app.post('/user/stocks/add', async (req, res) => {
  *        in: body
  *        required: true
  *        type: int
+ *      - name: brokerage
+ *        description: The price of the brokerage fee
+ *        in: body
+ *        required: true
+ *        type: float
+ *      - name: flag
+ *        description: The type of the brokerage fee; 0 for flat and 1 for percentage
+ *        in: body
+ *        required: true
+ *        type: int
  *     responses:
  *       200:
  *         description: Successfully deleted portfolio
@@ -752,8 +809,8 @@ app.post('/user/stocks/add', async (req, res) => {
  *         description: Stock not in portfolio
  */
 app.put('/user/stocks/edit', async (req, res) => {
-  const { token, pid, stock, price, quantity, option } = req.body;
-  const resp = await modifyStock(token, pid, stock, price, quantity, option, database);
+  const { token, pid, stock, price, quantity, option, brokerage, flag } = req.body;
+  const resp = await modifyStock(token, pid, stock, price, quantity, option, brokerage, flag, database);
   if (resp === -1) {
     res.status(200).send();
   } else if (resp === 1) {
@@ -767,9 +824,15 @@ app.put('/user/stocks/edit', async (req, res) => {
   } else if (resp === 5) {
     res.status(404).send({ error: "Stock is not in portfolio" });
   } else if (resp === 6) {
-    res.status(400).send({ error: "Must include valid quantity purchased" });
+    res.status(400).send({ error: "Must include valid quantity sold" });
   } else if (resp === 7) {
-    res.status(400).send({ error: "Must include valid price purchased at" });
+    res.status(400).send({ error: "Must include valid price sold at" });
+  } else if (resp === 8) {
+    res.status(403).send({ error: "Invalid brokerage cost" });
+  } else if (resp === 9) {
+    res.status(403).send({ error: "Default brokerage cost not set" });
+  } else if (resp === 10) {
+    res.status(403).send({ error: "Invalid brokerage type" });
   }
   return;
 })
@@ -842,7 +905,7 @@ app.get('/stocks/all', async (req, res) => {
  *       502:
  *         description: Could not connect to API
  */
- app.get('/stocks/info', async (req, res) => {
+app.get('/stocks/info', async (req, res) => {
   const { type, stocks, interval, start } = req.query;
   const resp = await getStock(type, stocks, interval, start);
 
@@ -859,4 +922,140 @@ app.get('/stocks/all', async (req, res) => {
   } else res.status(200).send(resp);
 
   return;
+})
+
+/**
+ * @swagger
+ * /user/notifications:
+ *   get:
+ *     tags: [User]
+ *     description: Get the recent notifications for the user
+ *     parameters:
+ *      - name: token
+ *        description: The token of the admin
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Returns the an array of notifications
+ *         schema:
+ *            type: object
+ *            properties:
+ *              requests:
+ *                type: array
+ *                description: An array of notifications
+ *       401:
+ *         description: Invalid token
+ */
+app.get('/user/notifications', async (req, res) => {
+  const { token } = req.query;
+  getUserNotifications(token, database, res);
+})
+
+// Get endpoint for user to request to be a celebrity
+/**
+ * @swagger
+ * /celebrity/makerequest:
+ *   post:
+ *     tags: [Celebrity]
+ *     description: User makes a request to be a celebrity
+ *     parameters:
+ *      - name: token
+ *        description: The token of the user
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: info
+ *        description: The information the celebrity wants to provide to the user
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Returns the rid
+*         schema:
+ *            type: object
+ *            properties:
+ *              rid:
+ *                type: string
+ *                description: rid of request
+ *       401:
+ *         description: Invalid token
+ *       403:
+ *         description: Request has already been made
+ */
+app.post('/celebrity/makerequest', async (req, res) => {
+  const { token, info } = req.body;
+  await postCelebrityMakeRequest(token, info, database, res);
+})
+
+// Get endpoint for admin to fetch a list of all requests to be a celebrity
+/**
+ * @swagger
+ * /admin/celebrity/requests:
+ *   get:
+ *     tags: [Admin]
+ *     description: Get endpoint for admin to fetch a list of all requests to be a celebrity
+ *     parameters:
+ *      - name: token
+ *        description: The token of the admin
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Returns the an array of celebrity requests
+ *         schema:
+ *            type: object
+ *            properties:
+ *              requests:
+ *                type: array
+ *                description: An array of the celebrity requests
+ *       401:
+ *         description: Invalid token
+ *       403:
+ *         description: User is not an admin
+ */
+app.get('/admin/celebrity/requests', async (req, res) => {
+  const { token } = req.query;
+  await getAdminCelebrityRequests(token, database, res);
+})
+
+// Get endpoint for admin to fetch a list of all requests to be a celebrity
+/**
+ * @swagger
+ * /admin/celebrity/handlerequest:
+ *   post:
+ *     tags: [Admin]
+ *     description: Get endpoint for admin to fetch a list of all requests to be a celebrity
+ *     parameters:
+ *      - name: token
+ *        description: The token of the admin
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: approve
+ *        description: Whether to approve or reject the request
+ *        in: body
+ *        required: true
+ *        type: boolean
+ *      - name: rid
+ *        description: The id of the request to approve or reject
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Everything went okay
+ *       401:
+ *         description: Invalid token
+ *       403:
+ *         description: Not an admin
+ *       400:
+ *         description: Invalid rid
+ */
+app.post('/admin/celebrity/handlerequest', async (req, res) => {
+  const { token, approve, rid } = req.body;
+  await postAdminCelebrityHandlerequest(token, approve, rid, database, res);
 })

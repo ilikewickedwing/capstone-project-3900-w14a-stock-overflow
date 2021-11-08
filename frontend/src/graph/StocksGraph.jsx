@@ -247,7 +247,7 @@ StocksGraph.propTypes = {
 }
 
 // Converts a time string to a nicely displayed one
-const transformTimeStr = (timeStr) => {
+export const transformTimeStr = (timeStr) => {
   const date = new Date(Date.parse(timeStr));
   if (timeStr.includes('T')) {
     return date.toLocaleTimeString('en-US',

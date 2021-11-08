@@ -1,6 +1,7 @@
 import { MongoClient } from "mongodb";
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import { nanoid } from 'nanoid';
+import { insertDefaultAdmin } from "./admin";
 import { calcAll } from './portfolio';
 
 // This is the uri authentication for the mongodb database in the cloud
@@ -16,6 +17,7 @@ const COLLECTIONS = [
     {
       uid: string,
       username: string,
+      userType: string  // This can either be: user, admin, celebrity
     }
   */
   'users',
@@ -45,6 +47,8 @@ const COLLECTIONS = [
           name: string,
         }
       ],
+      defBroker: float,
+      brokerFlag: int
     }
    */
   'userPortos',
@@ -71,12 +75,32 @@ const COLLECTIONS = [
         sold: float,
         performance: [
           date: string,
-          perforamnce: float
+          performance: float
         ]
       }
     }
    */
   'portfolios',
+  /**
+    Stores all the requests made by ordinary users to become celebrity
+    {
+      // Id of the request
+      rid: string,
+      ownerUid: string,
+      // Info given by the user on why they want to be a celebrity and so on
+      info: string,
+    }
+  */
+  'celebrityRequests',
+  /**
+    Stores all the notifications for a given user
+    {
+      ownerUid: string,
+      // Info of the notification
+      info: string,
+    }
+  */
+  'notifications',
 ]
 
 /**
@@ -154,13 +178,14 @@ export class Database {
    * @param {string} username 
    * @returns {Promise<string>}
    */
-  async insertUser(username) {
+  async insertUser(username, userType = 'user') {
     // Generate a new unique id
     const uid = nanoid();
     const users = this.database.collection('users');
     await users.insertOne({
       uid: uid,
       username: username,
+      userType: userType
     })
 
     // Create a new userPorto and add a watchlist for the new user
@@ -174,6 +199,8 @@ export class Database {
           name: "Watchlist",
         }
       ],
+      defBroker: null,
+      brokerFlag: null
     })
     const pfs = this.database.collection('portfolios');
     await pfs.insertOne({
@@ -316,6 +343,141 @@ export class Database {
       return tokenResp.ownerUid;
     }
     return null;
+  }
+  
+  /**
+   * Inserts request into database. Does not check if ownerUid already exists
+   * so make sure to check it with the getRequest
+   * @param {string} ownerUid 
+   * @param {string} info 
+   */
+  async insertCelebrityRequest(ownerUid, info) {
+    // Generate a new unique rid
+    const rid = nanoid();
+    const celebrityRequests = this.database.collection('celebrityRequests');
+    await celebrityRequests.insertOne({
+      rid: rid,
+      ownerUid: ownerUid,
+      info: info
+    });
+    return rid;
+  }
+  
+  /**
+   * Given an ownerUid return the celebrity request
+   * @param {string} ownerUid 
+   * @returns 
+   */
+  async getCelebrityRequest(ownerUid) {
+    const celebrityRequests = this.database.collection('celebrityRequests');
+    const query = { ownerUid: ownerUid };
+    const request = await celebrityRequests.findOne(query);
+    return request;
+  }
+  
+  /**
+   * Get the celebrity request given the rid
+   * @param {string} rid 
+   * @returns 
+   */
+  async getCelebrityRequestById(rid) {
+    const celebrityRequests = this.database.collection('celebrityRequests');
+    const query = { rid: rid };
+    const request = await celebrityRequests.findOne(query);
+    return request;
+  }
+  
+  /**
+   * Get all requests to become a celebrity
+   * @returns 
+   */
+  async getAllCelebrityRequests() {
+    const celebrityRequests = this.database.collection('celebrityRequests');
+    const requests = await celebrityRequests.find().toArray();
+    return requests;
+  }
+  
+  /**
+   * Deletes a specific request to be a celebrity
+   * @param {string} rid 
+   * @returns 
+   */
+  async deleteCelebrityRequest(rid) {
+    const celebrityRequests = this.database.collection('celebrityRequests');
+    const query = { rid: rid };
+    const request = await celebrityRequests.deleteOne(query);
+    return request.deletedCount !== 0;
+  }
+  
+  /**
+   * Insert a new user notification
+   * @param {string} ownerUid 
+   * @param {string} info 
+   */
+  async insertUserNotification(ownerUid, info) {
+    const notifications = this.database.collection('notifications');
+    await notifications.insertOne({
+      ownerUid: ownerUid,
+      info: info
+    })
+  }
+  
+  /**
+   * Get all the notifications for a specific user
+   * @param {string} ownerUid 
+   * @returns 
+   */
+  async getAllUserNotifications(ownerUid) {
+    const notifications = this.database.collection('notifications');
+    const query = { ownerUid: ownerUid };
+    const requests = await notifications.find(query).toArray();
+    return requests;
+  }
+  
+  /**
+   * Delete all the user notifications of a specific user
+   * @param {string} ownerUid 
+   * @returns 
+   */
+  async clearAllUserNotifications(ownerUid) {
+    const notifications = this.database.collection('notifications');
+    const query = { ownerUid: ownerUid };
+    const result = await notifications.deleteMany(query);
+    return result.deletedCount;
+  }
+  
+  /**
+   * Returns the default brokerage cost of the user
+   * @param {string} uid 
+   * @returns {Promise<float>}
+   */
+  async getDefBroker(uid) {
+    const userPortos = this.database.collection('userPortos');
+    const query = { ownerUid: uid };
+    const userPortoResp = await userPortos.findOne(query);
+
+    return { defBroker: userPortoResp.defBroker, brokerFlag: userPortoResp.brokerFlag };
+  }
+
+  /**
+   * Sets the default brokerage cost of the user
+   * @param {string} uid 
+   * @param {float} broker 
+   * @param {int} flag 
+   * @returns{Promise<int>}
+   */
+  async setDefBroker(uid, broker, flag) {
+    const userPortos = this.database.collection('userPortos');
+    const query = { ownerUid: uid };
+    const userPortoResp = await userPortos.findOne(query);
+
+    const brokerFee = parseFloat(broker);
+    userPortoResp.defBroker = brokerFee;
+    userPortoResp.brokerFlag = flag;
+    const result = await userPortos.updateOne( query, { $set: { defBroker: brokerFee, brokerFlag: flag } } );
+
+    if (result.modifiedCount !== 0) return 1;
+    else return 0;
   }
 
   /**
@@ -525,7 +687,7 @@ export class Database {
    * @param {int} quantity 
    * @returns {Promise <boolean>}
    */
-  async addStocks(pid, stock, price, quantity) {
+  async addStocks(pid, stock, price, quantity, brokerage, flag) {
     // Find the corresponding portfolio for the given pid
     const pfs = this.database.collection('portfolios');
     const query = {pid: pid};
@@ -554,20 +716,36 @@ export class Database {
       const today = new Date(now);
       const time = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + today.getDate()).slice(-2);
       const date = time.toString();
-      stockList.push({
-        stock: stock,
-        avgPrice: price,
-        quantity: quantity,
-        performance: [
-          {
-            date: date,
-            performance: 0
-          }
-        ]
-      })
+      if (pfResp.name === 'Watchlist') {
+        stockList.push({
+          stock: stock,
+          avgPrice: null,
+          quantity: null,
+          performance: [
+            {
+              date: null,
+              performance: null
+            }
+          ]
+        })
+      } else {
+        stockList.push({
+          stock: stock,
+          avgPrice: price,
+          quantity: quantity,
+          performance: [
+            {
+              date: date,
+              performance: 0
+            }
+          ]
+        })
+      }
     }
 
     pfValue.spent += price * quantity;
+    if (flag === 0) pfValue.spent += brokerage;
+    else if (flag === 1) pfValue.spent += (brokerage * (quantity * price) / 100);
 
     // Updating database
     await pfs.updateOne(query, { $set: { stocks: stockList, value: pfValue } } );
@@ -581,7 +759,7 @@ export class Database {
    * @param {int} quantity 
    * @returns {Promise <boolean>}
    */
-  async sellStocks(pid, stock, price, quantity) {
+  async sellStocks(pid, stock, price, quantity, brokerage, flag) {
     // Find the corresponding portfolio for the given pid
     const pfs = this.database.collection('portfolios');
     const query = {pid: pid};
@@ -617,6 +795,9 @@ export class Database {
     }
 
     pfValue.sold += price * quantity;
+
+    if (flag === 0) pfValue.spent += brokerage;
+    else if (flag === 1) pfValue.spent += (brokerage * (quantity * price) / 100);
 
     // Updating database
     await pfs.updateOne(query, { $set: { stocks: stockList, value: pfValue } } );
@@ -654,14 +835,16 @@ export class Database {
   /**
    * Connect to the database
    */
-   async connect() {
+  async connect() {
     let uri = URI;
     if (this.testmode) {
-      // console.log("Test mode");
+      console.log("Starting in development mode...")
       // Start test server in memory
       this.mongoTestServer = await MongoMemoryServer.create();
       // Get uri string
       uri = this.mongoTestServer.getUri();
+    } else {
+      console.log("Starting in deployment mode...")
     }
     // Start client
     this.client = new MongoClient(uri);
@@ -684,6 +867,14 @@ export class Database {
         await this.database.createCollection(collection);
       }
     }
+    await this.onDatabaseConnect()
+  }
+
+  /**
+  * This is called when the database first connects
+  */
+  async onDatabaseConnect() {
+    await insertDefaultAdmin(this);
     calcAll(this.database);
   }
   /**
