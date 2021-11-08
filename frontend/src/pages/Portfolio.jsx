@@ -15,6 +15,7 @@ import {
   PageBody, 
   Heading,
   PfBar,
+  WatchlistBody,
 } from '../styles/styling';
 import Button from '@mui/material/Button';
 import StockRow from '../comp/StockRow';
@@ -143,23 +144,30 @@ const Portfolio = () => {
       <PageBody className="font-two">
           <Navigation />
           <Tabs isChanged={isChanged}/>
-          <PfBody>
-            <LeftBody>
               {isWatchlist 
-              ? (<div>
-                  <PfBar>
-                    <Heading>{name}</Heading> 
-                    {/* <Button onClick={handleReload}>Update Data</Button> */}
-                  </PfBar>
-                  <p> Stock List: </p>
-                  {
-                    stockArray.map(item => {
-                      return <StockRow key={item.stock} data={item} onDeleteCallback={() => { getWatchlist() }}/>
-                    })
-                  }
-                </div>)
+              ? (<PfBody>
+                    <WatchlistBody>
+                      <PfBar>
+                        <Heading>{name}</Heading> 
+                        {/* <Button onClick={handleReload}>Update Data</Button> */}
+                      </PfBar>
+                      {
+                        stockArray.map(item => {
+                          return <StockRow key={item.stock} data={item} onDeleteCallback={() => { getWatchlist() }}/>
+                        })
+                      }
+                      < AddStock 
+                        token={token}
+                        pid={pid}
+                        onAddCallback={() => { getWatchlist() }}
+                        load={loadPorfolioData}
+                        name={name}
+                      />
+                    </WatchlistBody>
+                </PfBody>)
               :
-            (<div>
+            (<PfBody>
+              <LeftBody>
               <PfBar>
               <Heading>{name}</Heading> 
               <div>
@@ -172,16 +180,14 @@ const Portfolio = () => {
               </div>
               </PfBar>
               <PfTable stocks={stocks}/>
-            </div>
-            )}
-            
-            < AddStock 
-              token={token}
-              pid={pid}
-              onAddCallback={() => { getWatchlist() }}
-              load={loadPorfolioData}
-            />
-            </LeftBody>
+              < AddStock 
+                token={token}
+                pid={pid}
+                onAddCallback={() => { getWatchlist() }}
+                load={loadPorfolioData}
+                name={name}
+              />
+              </LeftBody>
             <RightBody>
               <RightCard>
                 <h3 style={{textAlign:'center'}}>Daily Estimated Earnings</h3>
@@ -190,7 +196,8 @@ const Portfolio = () => {
                 2nd card
               </RightCard>
             </RightBody>
-          </PfBody>
+            </PfBody>
+            )}
           <Popover
               id={id}
               open={open}

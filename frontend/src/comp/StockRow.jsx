@@ -1,11 +1,33 @@
-import React, { useContext, useState } from 'react'; 
+import React from 'react'; 
+import { useHistory } from 'react-router';
 import axios from 'axios';
 import { apiBaseUrl } from './const';
-import { ApiContext } from '../api';
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import IconButton from "@mui/material/IconButton";
+import ClearIcon from '@mui/icons-material/Clear';
+import {
+  WatchlistCardContainer,
+
+} from '../styles/styling';
 
 const StockRow = ({data, onDeleteCallback = () => {}}) => {
-  const api = useContext(ApiContext);
+
+  const history = useHistory();
   const stock = data.stock;
+  // 0:green ; 1:red 
+  const [toggle, setToggle] = React.useState(0);
+
+  
+  React.useEffect(() =>{
+    const string = JSON.stringify(data.change);
+    // if contains a minus change, set the toggle 
+    if (string.indexOf('-') !== -1){
+      setToggle(1);
+    }
+  },[])
+
+
   async function handleDeleteStock() {
     // get token from local storage
     const token = localStorage.getItem('token');
@@ -28,6 +50,10 @@ const StockRow = ({data, onDeleteCallback = () => {}}) => {
     onDeleteCallback();
   }
 
+  const handleCardClick = async() => {
+    history.push(`/stock/${data.stock}`);
+  }
+
   // async function getStockDetails() {
   //   const resp = await api.stocksInfo(1, data.stock, null, null);
   //   const jsonResp = await resp.json();
@@ -36,14 +62,29 @@ const StockRow = ({data, onDeleteCallback = () => {}}) => {
   //   setChangePercentage(jsonResp.data.quotes.quote.change_percentage);
   // }
   return (
-    <div>
-      <ul>Symbol: {data.stock}</ul>
-      <ul>Name: {data.name}</ul>
-      <ul>Price change: {data.change}</ul>
-      <ul>Price change percentage: {data.changePercentage}%</ul>
+    <WatchlistCardContainer onClick={handleCardClick}>
+      <div style={{display:'flex'}}>
+        {data.stock}: {data.name} 
+      {toggle?(
+        <div style= {{color:'red'}}>
+          <ArrowDropDownIcon style={{fontSize:'2em', margin:'-10% 0%'}}/>
+          {data.change} {data.changePercentage}%
+        </div>
+      ):(
+        <div style={{color:'green'}}>
+          <ArrowDropUpIcon style={{fontSize:'2em', margin:'-10% 0%'}}/>
+          {data.change} {data.changePercentage}%
+        </div>
+      )}
+      </div>
+      <div>
+
+        <IconButton onClick={handleDeleteStock}>
+          <ClearIcon />
+        </IconButton>
+      </div>
       {/* <button onClick={getStockDetails}>Get Recent Data</button> */}
-      <button onClick={handleDeleteStock}>Delete</button>
-    </div>
+    </WatchlistCardContainer>
   )
 }
 
