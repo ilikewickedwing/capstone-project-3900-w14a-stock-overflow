@@ -7,6 +7,7 @@ import { createPf, deletePf, openPf, userPfs, getPid, editPf, calcPf } from "./p
 import { authDelete, authLogin, authLogout, authRegister } from "./auth";
 import { getUserProfile, postUserProfile } from "./user";
 import { addStock, modifyStock, getAllStocks, checkStock, getStock } from "./stocks";
+import { addFriend, removeFriend, getFriends } from "./social";
 
 // Make the server instance
 export const app = express();
@@ -856,6 +857,93 @@ app.get('/stocks/all', async (req, res) => {
     res.status(403).send({ error: "Invalid start" });
   } else if (resp === null) {
     res.status(502).send({ error: "Could not connect to API" });
+  } else res.status(200).send(resp);
+
+  return;
+})
+
+// Get endpoint for searching for stock info
+/**
+ * @swagger
+ * /stocks/info:
+ *   get:
+ *     tags: [Stocks]
+ *     description: endpoint for getting stock information - uses alphavantage for information, and tradier for prices
+ *     parameters:
+ *      - name: type
+ *        description: The type of call being made;
+ *          0. Information overview of stock;
+ *          1. Current price of stock(s);
+ *          2. History of one stock not intraday;
+ *          3. History of one stock intraday
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: stocks
+ *        description: The symbol of the stock or stocks
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: interval
+ *        description: The interval needed;
+ *          For not intraday, options are daily, weekly, monthly;
+ *          For intraday, options are 1min, 5min, 15min
+ *        in: body
+ *        required: false
+ *        type: string
+ *      - name: start
+ *        description: The start of the time from when to get data;
+ *          For not intraday, format is string as YYYY-MM-DD;
+ *          For intraday, format is string as YYYY-MM-DD HH:MM
+ *        in: body
+ *        required: false
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Successfully returned information for single stock
+ *       401:
+ *         description: Invalid token, user does not exist
+ *       403:
+ *         description: Invalid friend id
+ */
+app.post('/friends/add', async (req, res) => {
+  const { token, friendID } = req.body;
+  const resp = await addFriend(token, friendID);
+
+  if (resp === -1) {
+    res.status(403).send({ error: "Invalid friendID" });
+  } else if (resp === -2) {
+    res.status(401).send({ error: "Invalid token" });
+  } else if (resp === -3) {
+    res.status(401).send({ error: "User does not exist" });
+  } else res.status(200).send(resp);
+
+  return;
+})
+
+app.delete('/friends/remove', async (req, res) => {
+  const { token, friendID } = req.body;
+  const resp = await removeFriend(token, friendID);
+
+  if (resp === -1) {
+    res.status(403).send({ error: "Invalid friendID" });
+  } else if (resp === -2) {
+    res.status(401).send({ error: "Invalid token" });
+  } else if (resp === -3) {
+    res.status(401).send({ error: "User does not exist" });
+  } else res.status(200).send(resp);
+
+  return;
+})
+
+app.get('/friends/all', async (req, res) => {
+  const { token } = req.query;
+  const resp = await getFriends(token);
+
+  if (resp === -1) {
+    res.status(401).send({ error: "Invalid token" });
+  } else if (resp === -2) {
+    res.status(401).send({ error: "User does not exist" });
   } else res.status(200).send(resp);
 
   return;

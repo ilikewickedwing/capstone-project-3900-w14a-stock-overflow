@@ -77,6 +77,40 @@ const COLLECTIONS = [
     }
    */
   'portfolios',
+  /**
+    This stores all the friends in the following form:
+    {
+      ownerUid: string,
+      friends: string,
+    }
+  */
+  'friends',
+    /**
+    Stores all the portfolios of a user in the following form:
+    {
+      ownerUid: string,
+      activities: [string],
+    }
+   */
+    'userActivity',
+  /**
+    This stores all the friends in the following form:
+    {
+      ownerUid: string,
+      aid: string,
+      message: string,
+      time: Date,
+      likes: int,
+      comments: [{
+        cid: string,
+        user: string,
+        comment: string,
+        likes: string,
+        time: Date,
+      }],
+    }
+  */
+    'activity',
 ]
 
 /**
@@ -185,6 +219,20 @@ export class Database {
         sold: null,
         performance: null,
       }
+    })
+
+    // Create an empty friends list
+    const friends = this.database.collection('friends');
+    await friends.insertOne({
+      ownerUid: uid,
+      friends: [],
+    })
+
+    // Create an empty userActivity
+    const activities = this.database.collection('userActivity');
+    await activities.insertOne({
+      ownerUid: uid,
+      activities: [],
     })
 
     return uid;
@@ -571,6 +619,9 @@ export class Database {
 
     // Updating database
     await pfs.updateOne(query, { $set: { stocks: stockList, value: pfValue } } );
+    // Creating activity
+    const message = `has bought ${quantity} ${stock} at $${price}`;
+    this.createActivity(uid, message);
     return -1;
   }
 
@@ -597,7 +648,7 @@ export class Database {
         break;
       }
     }
-
+    
     if (stkIndex != -1) { // If stock is in the portfolio
       if (pfResp.name !== 'Watchlist') {
           if (stockList[stkIndex].quantity - quantity < 0) {
@@ -620,6 +671,11 @@ export class Database {
 
     // Updating database
     await pfs.updateOne(query, { $set: { stocks: stockList, value: pfValue } } );
+
+    // Creating activity
+    const message = `has sold ${quantity} ${stock} at $${price}`;
+    this.createActivity(uid, message);
+    
     return -1;
   }
 
@@ -649,6 +705,91 @@ export class Database {
       }
     }
     return null;
+  }
+  async addFriend(uid, friend) {
+    // Check whether given friend id is valid
+    const friendResp = await this.getUser(friend);
+    if (friendResp === null) {
+      return -1;
+    }
+
+    // Find the friendlist for the given uid
+    const friends = this.database.collection('friends');
+    const query = {ownerUid: uid};
+    const friendsResp = await friends.findOne(query);
+
+    if (friendsResp == null) {
+      return -3;
+    }
+    let friendList = friendResp.friends;
+    friendList.push(friend);
+    
+    await friends.updateOne( query, { $set : { friends: friendList } } );
+    return true;
+  }
+
+  async removeFriend(uid, friend) {
+    // Find the friendlist for the given uid
+    const friends = this.database.collection('friends');
+    const query = {ownerUid: uid};
+    const friendsResp = await friends.findOne(query);
+
+    if (friendsResp == null) {
+      return -3;
+    }
+    let friendList = friendResp.friends;
+    const index = friendList.indexOf(friend);
+    if (index === -1) {
+      return -1;
+    }
+    friendList.splice(index,1);
+    
+    await friends.updateOne( query, { $set : { friends: friendList } } );
+    return true;
+  }
+
+  async getFriends(uid) {
+    // Find the friendlist for the given uid
+    const friends = this.database.collection('friends');
+    const query = {ownerUid: uid};
+    const friendsResp = await friends.findOne(query);
+
+    if (friendsResp == null) {
+      return -2;
+    }
+
+    return friendResp.friends;
+  }
+
+  async checkFriend(uid, friend) {
+    // Find the friendlist for the given uid
+    const friends = this.database.collection('friends');
+    const query = {ownerUid: uid};
+    const friendsResp = await friends.findOne(query);
+
+    if (friendsResp == null) {
+      return false;
+    }
+
+    let friendList = friendResp.friends;
+    const index = friendList.indexOf(friend);
+    if (index === -1) {
+      return false;
+    }
+    return true;
+  }
+  async createActivity(uid, message) {
+    const userResp = await this.getUser(uid);
+    const userComment = user + ' ' + message;
+    return true;
+  }
+
+  async comment(uid, aid, message) {
+    return true;
+  }
+
+  async like(uid, aid) {
+    return true;
   }
 
   /**

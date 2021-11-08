@@ -85,6 +85,10 @@ export const authDelete = async (token, database) => {
     return false;
   }
   // Delete user
+  const portfolios = await database.getPfs(uid);
+  for (let i = 0; i < portfolios.length; i++) {
+    await database.deletePf(uid, portfolios[i].pid);
+  }
   await database.deleteUser(uid);
   await database.deletePassword(uid);
   await database.deleteAllTokensOfUser(uid);
