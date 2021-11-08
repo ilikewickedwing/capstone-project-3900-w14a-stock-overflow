@@ -325,7 +325,7 @@ app.delete('/auth/delete', async (req, res) => {
     res.status(200).send();
     return;
   }
-  res.status(403).send({ mesage: 'Uid does not exist' });
+  res.status(403).send({ message: 'Uid does not exist' });
 })
 
 // Post endpoint for creating a single portfolio

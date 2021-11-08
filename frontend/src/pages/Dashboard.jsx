@@ -23,7 +23,7 @@ export default function Dashboard() {
               <PfBar>
                 <Heading>Dashboard</Heading> 
               </PfBar>
-                <p> print the list of stocks in this  </p>
+                print the list of stocks in this 
               </LeftBody>
               <RightBody> Right Body: contains the 3 side cards 
                 <RightCard>

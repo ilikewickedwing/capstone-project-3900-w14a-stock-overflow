@@ -1,28 +1,24 @@
 import { Grid,Paper, Avatar, TextField, Button, Typography,Link } from '@material-ui/core'
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
-import { useContext, useState } from 'react';
-import { ApiContext } from '../api';
+import { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Welcome } from '../styles/styling';
+import axios from 'axios';
+import { apiBaseUrl } from '../comp/const';
 
 function Login() {
-    const api = useContext(ApiContext);
     const [ username, setUsername ] = useState('');
     const [ password, setPassword ] = useState('');
     let history = useHistory();
     const onLogIn = async () => {
-        const resp = await api.authLogin(username, password);
-        if (resp.status === 403) {
-            alert('Invalid username and password combination')
-        } else if (resp.status === 200) {
-            const jsondata = await resp.json();
-            alert('Log in successful');
-            console.log(jsondata);
-            localStorage.setItem('token', jsondata.token);
-            localStorage.setItem('uid', jsondata.uid); 
+        try {
+            const res = await axios.post(`${apiBaseUrl}/auth/login`, 
+                {username, password});
+            localStorage.setItem('token', res.data.token);
+            localStorage.setItem('uid', res.data.uid); 
             history.push('/dashboard');
-        } else {
-            alert(`Server returned unexpected status code of ${resp.status}`);
+        } catch (e) {
+            alert(`Status Code ${e.response.status} : ${e.response.data.message}`);
         }
     }
     const paperStyle={padding :'3%', width:'50%', margin:"20px auto"}

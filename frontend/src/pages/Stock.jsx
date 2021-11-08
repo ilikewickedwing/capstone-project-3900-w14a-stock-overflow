@@ -89,8 +89,12 @@ const Stock = () => {
   }
 
   const fetchPortfolios = async () => {
-    const request = await axios.get(`${apiBaseUrl}/user/portfolios?token=${token}`);
-    setPortfolios(request.data);
+    try {
+      const request = await axios.get(`${apiBaseUrl}/user/portfolios?token=${token}`);
+      setPortfolios(request.data);
+    } catch (e) {
+      alert(`Status Code ${e.response.status} : ${e.response.data.error}`);
+    }
   };
   
   const loadStockInfo = async () => {
@@ -145,7 +149,7 @@ const Stock = () => {
         }
     }}
     catch (e) {
-      alert(e);
+      alert(`Status Code ${e.response.status} : ${e.response.data.error}`);;
     }
   }
 
@@ -195,6 +199,7 @@ const Stock = () => {
                   anchorEl={anchorEl}
                   open={isOpen}
                   onClose={handleClose}
+                  autoWidth="true"
                 >
                   { portfolios && 
                     portfolios.map((a) => 
@@ -232,12 +237,15 @@ const Stock = () => {
             </LeftBody>
             <RightBody>
               <RightCard>
-                <p>previous close: {prevClose}</p>
-                <p>day range: {dayRange}</p>
+                previous close: {prevClose}
+                <br />
+                day range: {dayRange}
+                <br />
               </RightCard>
               <RightCard>
                 <h3 style={{textAlign:'center'}}>Business Summary</h3>
-                <p>{description}</p>
+                {description}
+                <br />
               </RightCard>
             </RightBody>
           </PfBody>
