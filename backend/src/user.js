@@ -43,6 +43,9 @@ export const postUserProfile = async (uid, token, userData, database, res) => {
     if (hasUsername) {
       res.status(400).send({ message: 'Username already exists' });
       return;
+    } else if (userData.username.length === 0) {
+      res.status(400).send({ message: 'Username cannot be blank' });
+      return;
     }
   }
   // Make change to userData

@@ -951,6 +951,9 @@ app.post('/celebrity/makerequest', async (req, res) => {
  *              requests:
  *                type: array
  *                description: An array of the celebrity requests
+ *              users:
+ *                type: object
+ *                description: An object mapping the uid to the user data
  *       401:
  *         description: Invalid token
  *       403:

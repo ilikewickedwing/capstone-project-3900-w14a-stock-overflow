@@ -68,6 +68,7 @@ describe('Get admin celebrity requests endpoint test', () => {
     const celebResp = await request(app).get(`/admin/celebrity/requests?token=${resp.token}`);
     expect(celebResp.statusCode).toBe(200);
     expect(celebResp.body.requests.length).toBe(1);
+    expect(resp.uid in celebResp.body.users).toBe(true);
   })
   it('401 on invalid token', async () => {
     const resp = await authRegister('Ashley5', 'strongpassword', database);

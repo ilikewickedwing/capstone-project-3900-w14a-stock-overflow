@@ -2,24 +2,41 @@ import { Button } from "@material-ui/core";
 import { useContext, useEffect, useState } from "react"
 import { useHistory } from "react-router";
 import { ApiContext } from "../api";
+import profileImg from '../assets/profile.png';
 
-const mockRequests = [
-  {
-    ownerUid: '1',
-    info: 'I want to be a celebrity',
-  },
-  {
-    ownerUid: '2',
-    info: 'Im tony stark',
-  },
-  {
-    ownerUid: '3',
-    info: 'Pls give it to me',
-  },
-]
+const mockResponse = {
+  requests: [
+    {
+      ownerUid: '1',
+      info: 'I want to be a celebrity',
+    },
+    {
+      ownerUid: '2',
+      info: 'Im tony sasdfasdfasdtark',
+    },
+    {
+      ownerUid: '3',
+      info: 'Pls give it sdfadsfasdfasdfsadfsadfasfto me',
+    },
+  ],
+  users: {
+    '1': {
+      username: 'Bob',
+      userType: 'user'
+    },
+    '2': {
+      username: 'Dave',
+      userType: 'user'
+    },
+    '3': {
+      username: 'Blake',
+      userType: 'user'
+    }
+  }
+}
 
 export default function AdminPage() {
-  const [ requests, setRequests ] = useState([]);
+  const [ response, setResponse ] = useState({});
   const api = useContext(ApiContext);
   const history = useHistory();
   // Get celebrity requests
@@ -37,35 +54,60 @@ export default function AdminPage() {
         return
       }
       // setRequests(respJson.requests);
-      setRequests(mockRequests);
+      setResponse(mockResponse);
     }
     callApi();
   }, [history, api]);
   
   const renderRequests = () => {
-    console.log(requests);
+    console.log(response);
     const requestWrapStyle = {
       backgroundColor: 'red',
       padding: '1rem',
       marginBottom: '1rem',
       borderRadius: '5px',
       display: 'flex',
-      justifyContent: 'space-between',
+      justifyContent: 'center',
     }
     const dpStyle = {
-      backgroundColor: 'blue'
+      height: '4rem',
+      borderRadius: '50%',
     }
     const infoStyle = {
       fontSize: '1.2rem',
       backgroundColor: 'green'
     }
-    return requests.map((r, i) => (
-      <div style={requestWrapStyle} key={i}>
-        <div style={dpStyle}></div>
-        <div style={infoStyle}>{ r.info }</div>
-        <Button color='primary' variant="contained">Respond</Button>
-      </div>
-    ))
+    if ('requests' in response && 'users' in response) {
+      return response.requests.map((r, i) => {
+        const userData = response.users[r.ownerUid];
+        const onApprove = () => {
+          
+        }
+        const onReject = () => {
+        
+        }
+        return (
+          <div style={requestWrapStyle} key={i}>
+            <div style={{ display: 'flex', flexDirection: 'column',
+              backgroundColor: 'pink', alignItems: 'center' }}>
+              <img style={dpStyle} src={profileImg} alt='logo'/>
+              <div >{ userData.username }</div>
+            </div>
+            <div style={{ display: 'flex', 
+              padding: '1rem',
+              flexDirection: 'column', backgroundColor: 'yellow',
+              justifyContent: 'space-evenly' }}>
+              <div style={infoStyle}>{ r.info }</div>
+              <div style={{ display: 'flex', justifyContent: 'center' }}>
+                <Button onClick={onApprove} color='primary' variant="contained">Approve</Button>
+                <Button onClick={onReject} color='primary' variant="contained">Reject</Button>
+              </div>
+            </div>
+          </div>
+        )
+      })
+    }
+    return null;
   }
   
   const pageStyle = {
