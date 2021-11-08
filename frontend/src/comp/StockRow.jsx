@@ -63,16 +63,21 @@ const StockRow = ({data, onDeleteCallback = () => {}}) => {
   // }
   return (
     <WatchlistCardContainer onClick={handleCardClick}>
-      <div style={{display:'flex'}}>
-        {data.stock}: {data.name} 
+      <div style={{display:'flex', flexDirection:'column', padding:'1%', textAlign:'left'}}>
+        <div style={{fontWeight:'bold'}}>
+          {data.stock}: {data.name} 
+        </div>
+        <div>
+        ${data.open}
+        </div>
       {toggle?(
         <div style= {{color:'red'}}>
-          <ArrowDropDownIcon style={{fontSize:'2em', margin:'-10% 0%'}}/>
+          <ArrowDropDownIcon style={{fontSize:'2em', margin:'-6% 0%'}}/>
           {data.change} {data.changePercentage}%
         </div>
       ):(
         <div style={{color:'green'}}>
-          <ArrowDropUpIcon style={{fontSize:'2em', margin:'-10% 0%'}}/>
+          <ArrowDropUpIcon style={{fontSize:'2em', margin:'-6% 0%'}}/>
           {data.change} {data.changePercentage}%
         </div>
       )}

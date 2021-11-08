@@ -38,6 +38,7 @@ const Portfolio = () => {
   const [isChanged, setChanged ] = React.useState(0);
   const [stocks, setStocks] = React.useState([]);
   const [stockArray, setStockArray ] = React.useState([{
+    open: null,
     stock: null,
     stockName: null,
     change: null,
@@ -119,11 +120,33 @@ const Portfolio = () => {
   async function getStockDetails(stockSymbol) {
     const resp = await api.stocksInfo(1, stockSymbol, null, null);
     const jsonResp = await resp.json();
-    let data = {
-      change: jsonResp.data.quotes.quote.change,
-      changePercentage: jsonResp.data.quotes.quote.change_percentage,
-      name: jsonResp.data.quotes.quote.description,
-      stock: jsonResp.data.quotes.quote.symbol
+    const respData = jsonResp.data.quotes.quote;
+    let data = null; 
+    if (respData.open === null){
+      console.log('Hello');
+      const resp2 = await api.stocksInfo(2, stockSymbol, null, null);
+      const json2 = await resp2.json();
+      const prevDay = json2.data.history.day;
+      console.log(prevDay);
+      let latest = prevDay.length -1;
+      let difference = (respData.ask - prevDay[latest-1].close).toFixed(4);
+      let percentage = ((difference/respData.ask)*100).toFixed(2);
+
+      data = {
+        open: respData.ask,
+        change: difference,
+        changePercentage: percentage,
+        name: respData.description,
+        stock: respData.symbol,
+      }
+    } else {
+      data = {
+        open: respData.ask,
+        change: respData.change,
+        changePercentage: respData.change_percentage,
+        name: respData.description,
+        stock: respData.symbol
+      }
     }
     return data;
   }

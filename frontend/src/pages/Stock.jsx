@@ -124,7 +124,7 @@ const Stock = () => {
         if (string1.indexOf('-') !== -1){
           setToggle(1);
         }
-        console.log(reqInfo.ask, prevDay[latest-1].close);
+
         setPercentage(calculatePerc(reqInfo.ask, prevDay[latest-1].close));
         
         // if the markets currently open 
