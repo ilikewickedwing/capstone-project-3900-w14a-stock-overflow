@@ -45,7 +45,8 @@ const COLLECTIONS = [
           name: string,
         }
       ],
-      defBroker: float
+      defBroker: float,
+      brokerFlag: int
     }
    */
   'userPortos',
@@ -175,6 +176,8 @@ export class Database {
           name: "Watchlist",
         }
       ],
+      defBroker: null,
+      brokerFlag: null
     })
     const pfs = this.database.collection('portfolios');
     await pfs.insertOne({
@@ -319,11 +322,36 @@ export class Database {
     return null;
   }
 
-  async setDefBroker(uid, broker) {
+  /**
+   * Returns the default brokerage cost of the user
+   * @param {string} uid 
+   * @returns {Promise<float>}
+   */
+  async getDefBroker(uid) {
     const userPortos = this.database.collection('userPortos');
-    const query1 = { ownerUid: uid };
-    const result = await userPortos.updateOne( query1, { defBroker: broker } );
-    
+    const query = { ownerUid: uid };
+    const userPortoResp = await userPortos.findOne(query);
+
+    return { defBroker: userPortoResp.defBroker, brokerFlag: userPortoResp.brokerFlag };
+  }
+
+  /**
+   * Sets the default brokerage cost of the user
+   * @param {string} uid 
+   * @param {float} broker 
+   * @param {int} flag 
+   * @returns{Promise<int>}
+   */
+  async setDefBroker(uid, broker, flag) {
+    const userPortos = this.database.collection('userPortos');
+    const query = { ownerUid: uid };
+    const userPortoResp = await userPortos.findOne(query);
+
+    const brokerFee = parseFloat(broker);
+    userPortoResp.defBroker = brokerFee;
+    userPortoResp.brokerFlag = flag;
+    const result = await userPortos.updateOne( query, { $set: { defBroker: brokerFee, brokerFlag: flag } } );
+
     if (result.modifiedCount !== 0) return 1;
     else return 0;
   }
@@ -535,7 +563,7 @@ export class Database {
    * @param {int} quantity 
    * @returns {Promise <boolean>}
    */
-  async addStocks(pid, stock, price, quantity, brokerage) {
+  async addStocks(pid, stock, price, quantity, brokerage, flag) {
     // Find the corresponding portfolio for the given pid
     const pfs = this.database.collection('portfolios');
     const query = {pid: pid};
@@ -591,7 +619,9 @@ export class Database {
       }
     }
 
-    pfValue.spent += price * quantity + brokerage;
+    pfValue.spent += price * quantity;
+    if (flag === 0) pfValue.spent += brokerage;
+    else if (flag === 1) pfValue.spent += (brokerage * (quantity * price) / 100);
 
     // Updating database
     await pfs.updateOne(query, { $set: { stocks: stockList, value: pfValue } } );
@@ -605,7 +635,7 @@ export class Database {
    * @param {int} quantity 
    * @returns {Promise <boolean>}
    */
-  async sellStocks(pid, stock, price, quantity, brokerage) {
+  async sellStocks(pid, stock, price, quantity, brokerage, flag) {
     // Find the corresponding portfolio for the given pid
     const pfs = this.database.collection('portfolios');
     const query = {pid: pid};
@@ -641,7 +671,9 @@ export class Database {
     }
 
     pfValue.sold += price * quantity;
-    pfValue.spent += brokerage;
+
+    if (flag === 0) pfValue.spent += brokerage;
+    else if (flag === 1) pfValue.spent += (brokerage * (quantity * price) / 100);
 
     // Updating database
     await pfs.updateOne(query, { $set: { stocks: stockList, value: pfValue } } );

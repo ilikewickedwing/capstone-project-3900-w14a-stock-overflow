@@ -28,9 +28,8 @@ export const getAllStocks = async () => {
  * @param {Database} database
  * @returns {Promise}
  */
-export const addStock = async (token, pid, stock, price, quantity, brokerage, database) => {
-  let bkCost = null;
-
+export const addStock = async (token, pid, stock, price, quantity, brokerage, brokerFlag, database) => {
+  let flag = null;
   // Finding corresponding user for the given token
   const uid = await database.getTokenUid(token);
   // Return error if user not found
@@ -59,26 +58,37 @@ export const addStock = async (token, pid, stock, price, quantity, brokerage, da
       return 5;
     }
 
+    let brokerageNum = parseFloat(brokerage);
+
     // Return error if brokerage is not valid
     if (brokerage === null) {
-      const userPfs = await database.getPfs(uid);
-      bkCost = userPfs.brokerage;
-      if (isNaN(brokerage) || brokerage <= 0) {
-        return 8;
+      // Return error if no default brokerage value set
+      const resp = await database.getDefBroker(uid);
+      brokerageNum = resp.defBroker;
+      flag = resp.brokerFlag;
+      // console.log(brokerageNum);
+      if (brokerageNum === null) {
+        return 7;
       }
     } else {
-      if (isNaN(brokerage) || brokerage <= 0) {
-        return 7;
+      // Return error if brokerage is not valid
+      if (isNaN(brokerageNum) || brokerageNum < 0) {
+        return 8;
+      }
+
+      // Return error if flag is not valid
+      if (!(brokerFlag === 0 || brokerFlag === 1)) {
+        return 9;
       } else {
-        bkCost = brokerage;
+        flag = brokerFlag;
       }
     }
-    
+
     // Return result of adding stock to portfolio
-    return await database.addStocks(pid, stock, price, quantity, bkCost);
+    return await database.addStocks(pid, stock, price, quantity, brokerageNum, flag);
   } else {
     // Return result of adding stock to watchlist
-    return await database.addStocks(pid, stock, null, null, null);
+    return await database.addStocks(pid, stock, null, null, null, null);
   }
 }
 
@@ -93,9 +103,8 @@ export const addStock = async (token, pid, stock, price, quantity, brokerage, da
  * @param {Database} database
  * @returns {Promise <boolean>}
  */
-export const modifyStock = async (token, pid, stock, price, quantity, option, database) => {
-  let bkCost = null;
-
+export const modifyStock = async (token, pid, stock, price, quantity, option, brokerage, brokerFlag, database) => {
+  let flag = null;
   // Finding corresponding user for the given token
   const uid = await database.getTokenUid(token);
   // Return error if user not found
@@ -112,6 +121,7 @@ export const modifyStock = async (token, pid, stock, price, quantity, option, da
   // Return error if pid is not valid
   if (get == null) return 3;
   
+  let brokerageNum = parseFloat(brokerage);
   const name = get.name;
   if (name !== 'Watchlist') {  
     // Return error if quantity of stock is not valid
@@ -126,29 +136,38 @@ export const modifyStock = async (token, pid, stock, price, quantity, option, da
 
     // Return error if brokerage is not valid
     if (brokerage === null) {
-      const userPfs = await database.getPfs(uid);
-      bkCost = userPfs.brokerage;
-      if (isNaN(brokerage) || brokerage <= 0) {
+      // Return error if no default brokerage value set
+      const resp = await database.getDefBroker(uid);
+      brokerageNum = resp.defBroker;
+      flag = resp.brokerFlag;
+      if (isNaN(brokerageNum) || brokerageNum < 0 || brokerageNum === null) {
         return 9;
       }
     } else {
-      if (isNaN(brokerage) || brokerage <= 0) {
+      // Return error if brokerage is not valid
+      if (isNaN(brokerageNum) || brokerageNum < 0) {
         return 8;
+      }
+
+      // Return error if flag is not valid
+      if (!(brokerFlag === 0 || brokerFlag === 1)) {
+        return 9;
       } else {
-        bkCost = brokerage;
+        flag = brokerFlag;
       }
     }
   }
   
+  const bkCost = brokerageNum;
   let resp = null;
   // Determine if buying or selling stocks
   if (option) {
     // Return result of buying stocks
-    resp = await database.addStocks(pid, stock, price, quantity, bkCost);
+    resp = await database.addStocks(pid, stock, price, quantity, bkCost, flag);
   }
   else {
     // Return result of selling stocks
-    resp = await database.sellStocks(pid, stock, price, quantity, bkCost);
+    resp = await database.sellStocks(pid, stock, price, quantity, bkCost, flag);
   }
   
   return resp;

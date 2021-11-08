@@ -54,13 +54,52 @@ export const postUserProfile = async (uid, token, userData, database, res) => {
   res.status(403).send({ message: 'Invalid uid given '});
 }
 
-export const setDefBroker = async (token, defBroker, database) => {
+/**
+ * Function for getting default brokerage fee
+ * @param {string} token 
+ * @param {Database} database 
+ * @returns  {Promise<float>}
+ */
+export const getDefBroker = async (token, database) => {
   // Return error if user not found
   const uid = await database.getTokenUid(token);
   if (uid === null) {
     return 2;
   }
 
-  const resp = await database.setDefBroker(uid, defBroker);
+  const resp = await database.getDefBroker(uid);
+  return resp.defBroker;
+}
+
+/**
+ * Function for setting default brokerage fee
+ *  brokerFlag:
+ *    0 - flat fee
+ *    1 - percentage
+ * @param {string} token 
+ * @param {float} defBroker 
+ * @param {int} brokerFlag 
+ * @param {Database} database 
+ * @returns {Promise<int>}
+ */
+export const setDefBroker = async (token, defBroker, brokerFlag, database) => {
+  // Return error if user not found
+  const uid = await database.getTokenUid(token);
+  if (uid === null) {
+    return 2;
+  }
+
+  // Return error if defBroker is not valid
+  if (isNaN(defBroker) || defBroker < 0) {
+    return 3;
+  }
+
+  // Return error if flag is wrong
+  const flag = parseInt(brokerFlag);
+  if (!(flag === 0 || flag === 1)) {
+    return 4;
+  }
+
+  const resp = await database.setDefBroker(uid, defBroker, brokerFlag);
   return resp;
 }
