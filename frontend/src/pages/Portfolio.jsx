@@ -38,6 +38,7 @@ const Portfolio = () => {
   const [isChanged, setChanged ] = React.useState(0);
   const [stocks, setStocks] = React.useState([]);
   const [stockArray, setStockArray ] = React.useState([{
+    open: null,
     stock: null,
     stockName: null,
     change: null,
@@ -67,7 +68,7 @@ const Portfolio = () => {
         setIsWatchlist(0);
       }
     } catch (e) {
-      alert(e.error);
+      alert(`Status Code ${e.response.status} : ${e.response.data.error}`);
     }
   }; 
 
@@ -89,7 +90,7 @@ const Portfolio = () => {
       await axios.delete(`${apiBaseUrl}/user/portfolios/delete`,{data: {token, pid}});
       history.push('/dashboard');
     } catch (e) {
-      alert(e);
+      alert(`Status Code ${e.response.status} : ${e.response.data.error}`);
     }
   }
   
@@ -97,33 +98,57 @@ const Portfolio = () => {
     let array = [];
     const token = localStorage.getItem('token');
     // get pid for the watchlist
-    const res = await axios.get(`${apiBaseUrl}/user/portfolios/getPid`, {
-      params: {
-        token: token,
-        name: 'Watchlist'
+    try {
+      const res = await axios.get(`${apiBaseUrl}/user/portfolios/getPid`, {
+        params: {
+          token: token,
+          name: 'Watchlist'
+        }
+      })
+      const pid = res.data;
+      const request = await axios.get(`${apiBaseUrl}/user/portfolios/open?pid=${pid}`);
+      
+      array = request.data['stocks'];
+      let propsArray = [];
+      for (let i = 0; i < array.length; i++) {
+        const data = await getStockDetails(array[i]['stock']);
+        propsArray.push(data);
       }
-    })
-    const pid = res.data;
-    const request = await axios.get(`${apiBaseUrl}/user/portfolios/open?pid=${pid}`);
-    
-    array = request.data['stocks'];
-    let propsArray = [];
-    for (let i = 0; i < array.length; i++) {
-      const data = await getStockDetails(array[i]['stock']);
-      propsArray.push(data);
+      // console.log(propsArray);
+      setStockArray(propsArray);
+    } catch (e){
+      alert(`Status Code ${e.response.status} : ${e.response.data.error}`);
     }
-    // console.log(propsArray);
-    setStockArray(propsArray);
   }
 
   async function getStockDetails(stockSymbol) {
     const resp = await api.stocksInfo(1, stockSymbol, null, null);
     const jsonResp = await resp.json();
-    let data = {
-      change: jsonResp.data.quotes.quote.change,
-      changePercentage: jsonResp.data.quotes.quote.change_percentage,
-      name: jsonResp.data.quotes.quote.description,
-      stock: jsonResp.data.quotes.quote.symbol
+    const respData = jsonResp.data.quotes.quote;
+    let data = null; 
+    if (respData.open === null){
+      const resp2 = await api.stocksInfo(2, stockSymbol, null, null);
+      const json2 = await resp2.json();
+      const prevDay = json2.data.history.day;
+      let latest = prevDay.length -1;
+      let difference = (respData.ask - prevDay[latest-1].close).toFixed(4);
+      let percentage = ((difference/respData.ask)*100).toFixed(2);
+
+      data = {
+        open: respData.ask,
+        change: difference,
+        changePercentage: percentage,
+        name: respData.description,
+        stock: respData.symbol,
+      }
+    } else {
+      data = {
+        open: respData.ask,
+        change: respData.change,
+        changePercentage: respData.change_percentage,
+        name: respData.description,
+        stock: respData.symbol
+      }
     }
     return data;
   }
@@ -179,7 +204,10 @@ const Portfolio = () => {
                 </Button>
               </div>
               </PfBar>
-              <PfTable stocks={stocks}/>
+              <PfTable 
+                stocks={stocks}
+                load={loadPorfolioData}
+              />
               < AddStock 
                 token={token}
                 pid={pid}

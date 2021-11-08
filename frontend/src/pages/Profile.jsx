@@ -5,6 +5,8 @@ import { useContext, useState } from 'react';
 import { NavBar } from '../styles/styling';
 import { Link } from 'react-router-dom';
 import { Logo } from '../styles/styling';
+import { apiBaseUrl } from '../comp/const';
+import axios from 'axios';
 
 import { Grid,Paper, Avatar, TextField, Button, Container } from '@material-ui/core'
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
@@ -24,36 +26,51 @@ export default function Profile() {
 
   // handle delete user
   const onDeleteUser = async () => {
-    const resp = await api.authDelete(token);
-    if (resp.status === 403) alert('Invalid token');
-    if (resp.status === 200) {
-        alert('Account has been delted');
-        history.push('/');
-    } else {
-        alert(`Server returned unexpected status code of ${resp.status}`);
+    console.log(token);
+    // const resp = await api.authDelete(token);
+    // if (resp.status === 403) alert('Invalid token');
+    // if (resp.status === 200) {
+    //     alert('Account has been delted');
+    //     history.push('/');
+    // } else {
+    //     alert(`Server returned unexpected status code of ${resp.status}`);
+    // }
+    try {
+      const resp = await axios.delete(`${apiBaseUrl}/auth/delete`, {data: {token}});
+      alert('Account has been deleted');
+      history.push('/');
+    } catch (e){
+      alert(`Status Code ${e.response.status} : ${e.response.data.message}`);
     }
   }
 
   // handle edit submit 
   const onEditUser = async() => {
-    const resp = await api.post('user/profile', {
-      body: JSON.stringify({
-        uid: uid,
-        token: token,
-        userData: {
-          "username": username,
-        }
-      })
-    })
+    // const resp = await api.post('user/profile', {
+    //   body: JSON.stringify({
+    //     uid: uid,
+    //     token: token,
+    //     userData: {
+    //       "username": username,
+    //     }
+    //   })
+    // })
 
-    if (resp.status === 403) {
-      alert('invalid data given')
+    // if (resp.status === 403) {
+    //   alert('invalid data given')
+    //   history.push('/');
+    // } else if (resp.status === 200) {
+    //     alert('username changed')
+    //     history.push('/');
+    // } else {
+    //     alert(`Server returned unexpected status code of ${resp.status}`);
+    // }
+    try {
+      const resp = await axios.post(`${apiBaseUrl}/user/profile`, {uid, token, userData: {username}})
+      alert('username changed');
       history.push('/');
-    } else if (resp.status === 200) {
-        alert('username changed')
-        history.push('/');
-    } else {
-        alert(`Server returned unexpected status code of ${resp.status}`);
+    } catch (e){
+      alert(`Status Code ${e.response.status} : ${e.response.data.message}`);
     }
   }
 

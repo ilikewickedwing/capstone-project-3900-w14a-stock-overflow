@@ -16,14 +16,17 @@ import Paper from "@mui/material/Paper";
 import Checkbox from "@mui/material/Checkbox";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
-import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
-
 import { visuallyHidden } from "@mui/utils";
-
+import Modal from '@mui/material/Modal';
+import TextField from '@mui/material/TextField';
+import Button from '@material-ui/core/Button';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
 
 import axios from "axios";
 import { apiBaseUrl } from '../comp/const';
+import { useParams } from 'react-router-dom';
 
 function createData(code, name, buyPrice, currPrice, changePer, units, value, profitLoss) {
   return {
@@ -165,18 +168,66 @@ EnhancedTableHead.propTypes = {
   rowCount: PropTypes.number.isRequired
 };
 
+const style = {
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: 400,
+  bgcolor: 'background.paper',
+  border: '2px solid #000',
+  boxShadow: 24,
+  p: 4,
+};
+
 const EnhancedTableToolbar = (props) => {
-  const { numSelected } = props;
+  const { numSelected, selected, load } = props;
+  const { pid } = useParams();
+  const token = localStorage.getItem('token');
+
+  const [price, setPrice] = React.useState("");
+  const [quantity, setQuantity] = React.useState(0);
+
+
+  // modal states 
+  const [open, setOpen] = React.useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
+  // select options : sell or buy ; default sell
+  const [option, setOption] = React.useState(0);
+
+  const handleChange = (e) => {
+    setOption(e.target.value);
+  }
 
   React.useEffect(() => {
     
   },[])
 
+
   const editClick = async () => {
-
+    handleOpen();
   }
-  const deleteClick = async () => {
 
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    console.log(option);
+    console.log(selected[0]);
+    try {
+      await axios.put(`${apiBaseUrl}/user/stocks/edit`, {
+        token,
+        pid,
+        stock: selected[0],
+        price: parseInt(price),
+        quantity:parseInt(quantity),
+        option: option
+      })
+      load();
+    } catch (e){
+      alert(`Status Code ${e.response.status} : ${e.response.data.error}`);
+    }
+    handleClose();
   }
 
   return (
@@ -209,7 +260,6 @@ const EnhancedTableToolbar = (props) => {
           id="tableTitle"
           component="div"
         >
-          Insert Portfolio name
         </Typography>
       )}
       {numSelected === 1 &&
@@ -219,22 +269,56 @@ const EnhancedTableToolbar = (props) => {
           </IconButton>
         </Tooltip>
       }
-      {numSelected > 0 &&
-        <Tooltip title="Delete">
-          <IconButton onClick={deleteClick}>
-            <DeleteIcon />
-          </IconButton>
-        </Tooltip>
-      }
+      <Modal
+          open={open}
+          onClose={handleClose}
+          aria-labelledby="modal-modal-title"
+          aria-describedby="modal-modal-description"
+      >
+          <Box sx={style}>
+              <Typography id="modal-modal-title" variant="h6" component="h2">
+                  Edit Stock: {selected[0]}
+              </Typography>
+              <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+              <Select
+                style={{width: '100%'}}
+                value={option}
+                onChange={handleChange}
+                label="Select Buy or Sell"
+                displayEmpty
+              >
+                <MenuItem style={{width:"100%"}} value={1}>Buy</MenuItem>
+                <MenuItem style={{width:"100%"}} value={0}>Sell</MenuItem>
+              </Select>
+                <TextField type="number" required variant="standard" label="price"
+                    onChange={e => setPrice(e.target.value)}/>
+                <TextField type="number" required variant="standard" label="quantity"
+                onChange={e => setQuantity(e.target.value)}/>
+                <br />
+                {
+                  option?   
+                  <Button style={{margin: "10px 0", width: "100%"}} type='submit' onClick={handleEditSubmit}>
+                    Buy Stock
+                  </Button>:
+                  <Button style={{margin: "10px 0", width: "100%"}} type='submit' onClick={handleEditSubmit}>
+                    Sell Stock
+                  </Button>
+                }
+
+              </Typography>
+          </Box>
+      </Modal>
     </Toolbar>
   );
 };
 
 EnhancedTableToolbar.propTypes = {
-  numSelected: PropTypes.number.isRequired
+  numSelected: PropTypes.number.isRequired,
+  selected: PropTypes.array.isRequired,
+  load: PropTypes.func.isRequired
 };
 
-export default function PfTable({stocks}) {
+export default function PfTable({stocks, load}) {
   const [order, setOrder] = React.useState("asc");
   const [orderBy, setOrderBy] = React.useState("prices");
   const [selected, setSelected] = React.useState([]);
@@ -242,12 +326,13 @@ export default function PfTable({stocks}) {
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   const [rows, setRows] = React.useState([]);
 
+
   React.useEffect(() => {
     loadStocks();
   },[stocks]);
 
   const loadStocks = async () => {
-    console.log(stocks);
+    // console.log(stocks);
     if (stocks.length === 0) {
       setRows([]);
       return;
@@ -273,8 +358,7 @@ export default function PfTable({stocks}) {
       setRows(stockRows);
       
     } catch (e) {
-      console.log(e);
-      alert(e.error);
+      alert(`Status Code ${e.response.status} : ${e.response.data.error}`);;
     }
 
   };
@@ -333,7 +417,11 @@ export default function PfTable({stocks}) {
   return (
     <Box sx={{ width: "100%" }}>
       <Paper sx={{ width: "100%", mb: 2 }}>
-        <EnhancedTableToolbar numSelected={selected.length} />
+        <EnhancedTableToolbar 
+          numSelected={selected.length}
+          selected={selected} 
+          load = {load}
+        />
         <TableContainer>
           <Table
             sx={{ minWidth: 750 }}

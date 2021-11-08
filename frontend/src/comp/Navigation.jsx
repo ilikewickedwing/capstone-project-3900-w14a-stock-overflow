@@ -10,6 +10,8 @@ import IconButton from '@mui/material/IconButton';
 import SearchIcon from '@mui/icons-material/Search';
 import Switch from '@mui/material/Switch';
 import Autocomplete from '@mui/material/Autocomplete';
+import { apiBaseUrl } from '../comp/const';
+import axios from 'axios';
 
 const label = { inputProps: { 'aria-label': 'toggle' } };
 
@@ -23,27 +25,27 @@ const Navigation = () => {
     const [search, setSearch ] = React.useState("");
     const [currCode, setCode] = React.useState("");
 
-    var request = require('request');
-
+    
+    
+    // handle logout
+    const onLogOut = async () => {
+        const token = localStorage.getItem('token');
+        try {
+            await axios.post(`${apiBaseUrl}/auth/logout`,{token});
+            history.push('/');
+        } catch (e) {
+            alert(`Status Code ${e.response.status} : ${e.response.data.message}`);
+        }
+    }
+    
     // replace the "demo" apikey below with your own key from https://www.alphavantage.co/support/#api-key
     var url = `https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${search}&apikey=59SO8FIM49NYQS21`;
-
-   // handle logout
-   const onLogOut = async () => {
-    const token = localStorage.getItem('token');
-    const resp = await api.authLogout(token);
-    if (resp.status === 403) alert('Invalid token');
-    if (resp.status === 200) {
-        alert('Token has been invalidated');
-        history.push('/');
-    } else {
-        alert(`Server returned unexpected status code of ${resp.status}`);
-    }
-  }
-
+    var request = require('request');
+    
     // handle search submission 
     const searchBar = async(e) =>{
         e.preventDefault(); 
+        
         request.get({
             url: url,
             json: true,

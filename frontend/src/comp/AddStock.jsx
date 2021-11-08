@@ -72,7 +72,7 @@ const AddStock = ({token, pid, onAddCallback, load = () => {}, name}) => {
             onAddCallback();
             load();
         } catch (e){
-            alert(e);
+            alert(`Status Code ${e.response.status} : ${e.response.data.error}`);
         }
     }
 
@@ -104,7 +104,6 @@ const AddStock = ({token, pid, onAddCallback, load = () => {}, name}) => {
                   }}
             />)}
         />
-        <form>
         {
             name === 'Watchlist' ? (
                 <div>
@@ -125,7 +124,6 @@ const AddStock = ({token, pid, onAddCallback, load = () => {}, name}) => {
             <Button type='submit' onClick={handleAddStock}>
                 Add Stock
             </Button>
-        </form>
         </FlexColumns>
         </AccordionDetails>
       </Accordion>
