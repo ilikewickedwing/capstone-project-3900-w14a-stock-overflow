@@ -85,6 +85,14 @@ export const WatchlistCardContainer = styled(BoxShadow)`
     }
 `;
 // component styling
+export const Welcome = styled.div`
+    font-size: 3em;
+    font-weight:bold;
+    padding: 1%; 
+    margin: 5%;
+    color: #FAE1DD;
+`;
+
 export const TabButton = styled(Button)
 `
 &&{

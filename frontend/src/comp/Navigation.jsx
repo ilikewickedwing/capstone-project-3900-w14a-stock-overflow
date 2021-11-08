@@ -10,6 +10,7 @@ import IconButton from '@mui/material/IconButton';
 import SearchIcon from '@mui/icons-material/Search';
 import Switch from '@mui/material/Switch';
 import Autocomplete from '@mui/material/Autocomplete';
+import {Paper} from '@material-ui/core';
 
 const label = { inputProps: { 'aria-label': 'toggle' } };
 

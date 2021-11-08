@@ -84,8 +84,8 @@ const Stock = () => {
   },[stockCode])
 
   function calculatePerc(a,b){
-    let res = (a/b)*100; 
-    return `${res.toFixed(2)}%`;
+    let res = ((a-b)/a)*100; 
+    return `${res.toFixed(2)}`;
   }
 
   const fetchPortfolios = async () => {
@@ -124,7 +124,7 @@ const Stock = () => {
         if (string1.indexOf('-') !== -1){
           setToggle(1);
         }
-
+        console.log(reqInfo.ask, prevDay[latest-1].close);
         setPercentage(calculatePerc(reqInfo.ask, prevDay[latest-1].close));
         
         // if the markets currently open 
