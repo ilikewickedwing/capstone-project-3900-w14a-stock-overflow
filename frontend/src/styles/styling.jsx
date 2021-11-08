@@ -151,7 +151,7 @@ export const ConfirmCancel = styled(FlexRows)`
 
 
 export const RightCard = styled(BoxShadow)`
-    padding: 2%;
+    padding: 4%;
     margin: 1%; 
     background-color: white;
 
