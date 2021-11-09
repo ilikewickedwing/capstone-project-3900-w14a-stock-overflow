@@ -44,7 +44,7 @@ const StockSelect = ({stockCode, name,pid, setClose}) => {
                 handleOpen();
             }
         } catch (e){
-            alert(e);
+            alert(`Status Code ${e.response.status} : ${e.response.data.error}`);;
         }   
     }
 
@@ -58,13 +58,13 @@ const StockSelect = ({stockCode, name,pid, setClose}) => {
             handleClose();
             setClose();
         } catch (e){
-            alert(e);
+            alert(`Status Code ${e.response.status} : ${e.response.data.error}`);;
         }   
     }
 
     return (
         <div>
-            <MenuItem onClick={handleAddStock} style={{width:"10em"}}>
+            <MenuItem onClick={handleAddStock} style={{padding:"5px"}}>
                 {name}
             </MenuItem>
             <Modal
@@ -78,15 +78,14 @@ const StockSelect = ({stockCode, name,pid, setClose}) => {
                         Add New Stock
                     </Typography>
                     <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-                    <form>
                         <TextField type="text" required variant="standard" label="price"
                             onChange={e => setPrice(e.target.value)}/>
                         <TextField type="text" required variant="standard" label="quantity"
                         onChange={e => setQuantity(e.target.value)}/>
-                        <Button type='submit' onClick={handleSubmit}>
+                         <br />
+                        <Button style={{margin: "10px 0", width: "100%"}} type='submit' onClick={handleSubmit}>
                             Add Stock
                         </Button>
-                    </form>
                     </Typography>
                 </Box>
             </Modal>

@@ -12,6 +12,4 @@ export const getUserNotifications = async (token, database, res) => {
   res.status(200).send({
     notifications: notifs
   })
-  // Delete notifications from database
-  await database.clearAllUserNotifications(uid);
 }

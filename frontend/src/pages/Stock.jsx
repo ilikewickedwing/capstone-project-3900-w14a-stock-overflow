@@ -84,13 +84,17 @@ const Stock = () => {
   },[stockCode])
 
   function calculatePerc(a,b){
-    let res = (a/b)*100; 
-    return `${res.toFixed(2)}%`;
+    let res = ((a-b)/a)*100; 
+    return `${res.toFixed(2)}`;
   }
 
   const fetchPortfolios = async () => {
-    const request = await axios.get(`${apiBaseUrl}/user/portfolios?token=${token}`);
-    setPortfolios(request.data);
+    try {
+      const request = await axios.get(`${apiBaseUrl}/user/portfolios?token=${token}`);
+      setPortfolios(request.data);
+    } catch (e) {
+      alert(`Status Code ${e.response.status} : ${e.response.data.error}`);
+    }
   };
   
   const loadStockInfo = async () => {
@@ -145,7 +149,7 @@ const Stock = () => {
         }
     }}
     catch (e) {
-      alert(e);
+      alert(`Status Code ${e.response.status} : ${e.response.data.error}`);;
     }
   }
 
@@ -195,6 +199,7 @@ const Stock = () => {
                   anchorEl={anchorEl}
                   open={isOpen}
                   onClose={handleClose}
+                  autoWidth="true"
                 >
                   { portfolios && 
                     portfolios.map((a) => 
@@ -212,13 +217,13 @@ const Stock = () => {
               </PfBar>
               <StockHeading> {price} USD {toggle?(
                 <div style= {{color:'red'}}>
-                  <ArrowDropDownIcon style={{fontSize:'2em', margin:'-7% 0%'}}/>
-                  {change} {percentage}
+                  <ArrowDropDownIcon style={{fontSize:'2em', margin:'-10% 0%'}}/>
+                  {change} {percentage}%
                 </div>
               ):(
                 <div style={{color:'green'}}>
-                  <ArrowDropUpIcon style={{fontSize:'2em', margin:'-7% 0%'}}/>
-                  {change} {percentage}
+                  <ArrowDropUpIcon style={{fontSize:'2em', margin:'-10% 0%'}}/>
+                  {change} {percentage}%
                 </div>
               )} </StockHeading> 
               <StockOverview >
@@ -232,12 +237,15 @@ const Stock = () => {
             </LeftBody>
             <RightBody>
               <RightCard>
-                <p>previous close: {prevClose}</p>
-                <p>day range: {dayRange}</p>
+                previous close: {prevClose}
+                <br />
+                day range: {dayRange}
+                <br />
               </RightCard>
               <RightCard>
                 <h3 style={{textAlign:'center'}}>Business Summary</h3>
-                <p>{description}</p>
+                {description}
+                <br />
               </RightCard>
             </RightBody>
           </PfBody>

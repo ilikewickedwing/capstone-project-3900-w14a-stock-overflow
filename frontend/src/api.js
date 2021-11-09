@@ -1,6 +1,6 @@
 import { createContext } from "react";
 
-const ENDPOINT = 'http://localhost:5051'
+const ENDPOINT = 'http://localhost:5050'
 
 export const ApiContext = createContext();
 
