@@ -19,20 +19,20 @@ export default function Dashboard() {
       <Navigation />
       <Tabs />
       <PfBody>
-              <LeftBody>
+              <LeftBody elevation={10}>
               <PfBar>
                 <Heading>Dashboard</Heading> 
               </PfBar>
                 print the list of stocks in this 
               </LeftBody>
-              <RightBody> Right Body: contains the 3 side cards 
-                <RightCard>
+              <RightBody elevation={10}> Right Body: contains the 3 side cards 
+                <RightCard elevation={5}>
                   First card
                 </RightCard>
-                <RightCard>
+                <RightCard elevation={5}>
                   2nd card
                 </RightCard>
-                <RightCard>
+                <RightCard elevation={5}>
                   3rd
                 </RightCard>
               </RightBody>

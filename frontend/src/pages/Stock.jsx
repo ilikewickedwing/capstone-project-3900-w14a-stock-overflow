@@ -4,6 +4,7 @@ import axios from "axios";
 import Navigation from '../comp/Navigation'; 
 import Tabs from '../comp/Tabs'; 
 import StockSelect from '../comp/StockSelect';
+import VoteBar from '../comp/VoteBar';
 
 import StocksGraph from "../graph/StocksGraph";
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
@@ -64,6 +65,10 @@ const Stock = () => {
   // dropdown options
   const [anchorEl, setAnchorEl] = React.useState(null);
   const isOpen = Boolean(anchorEl);
+
+  // sentiment: set the bullish %
+  const [sentiment, setSentiment] = React.useState(60);
+
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -180,7 +185,7 @@ const Stock = () => {
           <Tabs />
           <ContentBody>
           <PfBody>
-            <LeftBody>
+            <LeftBody elevation={10}>
               <PfBar>
                 <Heading>{stockCode} {name}</Heading>
                 <div>
@@ -226,7 +231,7 @@ const Stock = () => {
                   {change} {percentage}%
                 </div>
               )} </StockHeading> 
-              <StockOverview >
+              <StockOverview elevation={5} >
               open: {open} &nbsp;
               low: {low} &nbsp;
               high: {high} &nbsp;
@@ -235,14 +240,20 @@ const Stock = () => {
               </ StockOverview >
               <StocksGraph companyId={stockCode} height={300}/>
             </LeftBody>
-            <RightBody>
-              <RightCard>
+            <RightBody elevation={10}>
+              <RightCard elevation={5}>
                 previous close: {prevClose}
                 <br />
                 day range: {dayRange}
                 <br />
               </RightCard>
-              <RightCard>
+              <RightCard elevation={5}>
+              <h3 style={{textAlign:'center'}}>Community Sentiment</h3>
+              <VoteBar 
+                percentage={sentiment}
+              /> 
+              </RightCard>
+              <RightCard elevation={5}>
                 <h3 style={{textAlign:'center'}}>Business Summary</h3>
                 {description}
                 <br />
