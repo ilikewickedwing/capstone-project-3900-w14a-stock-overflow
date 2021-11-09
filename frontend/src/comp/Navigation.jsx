@@ -25,8 +25,6 @@ const Navigation = () => {
     const [search, setSearch ] = React.useState("");
     const [currCode, setCode] = React.useState("");
 
-    
-    
     // handle logout
     const onLogOut = async () => {
         const token = localStorage.getItem('token');
@@ -38,42 +36,7 @@ const Navigation = () => {
         }
     }
     
-    // // replace the "demo" apikey below with your own key from https://www.alphavantage.co/support/#api-key
-    // var url = `https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${search}&apikey=59SO8FIM49NYQS21`;
-    // var request = require('request');
-    
-    // // handle search submission 
-    // const searchBar = async(e) =>{
-    //     e.preventDefault(); 
-        
-    //     request.get({
-    //         url: url,
-    //         json: true,
-    //         headers: {'User-Agent': 'request'}
-    //     }, (err, res, data) => {
-    //         if (err) {
-    //         console.log('Error:', err);
-    //         } else if (res.statusCode !== 200) {
-    //         console.log('Status:', res.statusCode);
-    //         } else {
-    //         // data is successfully parsed as a JSON object:
-    //         const response =  data.bestMatches;
-
-    //         if (response){
-    //             const newList = []; 
-    //             response.forEach((obj) => {
-    //                 newList.push({
-    //                     code: obj["1. symbol"],
-    //                     name: obj["2. name"]
-    //                 });
-    //             })
-    //             setRes(newList);
-    //         }
-    //         }
-    //     });
-    // }
-      // on first load 
-    
+      // on first load, cache the stock list 
     React.useEffect(() => {   
         fetchStockList();
     },[]);
@@ -81,11 +44,17 @@ const Navigation = () => {
     const fetchStockList = async () => {
         try {
           const request = await axios.get(`${apiBaseUrl}/stocks/all`);
-          console.log(request); 
-          // map it so its autocorrect friendly 
-          setRes(request);
+          // map it so its MUI autocorrect friendly 
+          const newList = [];
+          request.data.forEach(obj => {
+              newList.push({
+                  code: obj["symbol"],
+                  name: obj["name"]
+              })
+          })
+          setRes(newList);
         } catch (e) {
-          alert(`Status Code ${e.response.status} : ${e.response.data.error}`);
+          alert(`Status Code ${e.status} : ${e.response.data.error}`);
         }
       };
 
@@ -120,11 +89,6 @@ const Navigation = () => {
                 <TextInput 
                     {...params} 
                     label="Search Stock" 
-                    // onKeyDown={e => {
-                    //     if (e.keyCode === 13 && e.target.value) {
-                    //         searchBar(e);
-                    //     }
-                    // }}
                 />)}
             />
             <IconButton type="submit" sx={{p:'10px'}} onClick={submitQuery}>

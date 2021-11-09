@@ -80,7 +80,7 @@ const Portfolio = () => {
       setAnchorEl(null);
       setChanged(isChanged + 1);
     } catch (e) {
-      alert(e.error);
+      alert(`Status Code ${e.response.status} : ${e.response.data.error}`);
     }
   }
 
