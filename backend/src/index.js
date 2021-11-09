@@ -9,6 +9,7 @@ import { getDefBroker, getUserProfile, postUserProfile, setDefBroker } from "./u
 import { addStock, modifyStock, getAllStocks, checkStock, getStock } from "./stocks";
 import { getAdminCelebrityRequests, postAdminCelebrityHandlerequest, postCelebrityMakeRequest } from "./admin";
 import { getUserNotifications, deleteUserNotifications } from "./notifications";
+import fileUpload from 'express-fileupload';
 
 // Make the server instance
 export const app = express();
@@ -26,6 +27,9 @@ app.use(express.json())
 
 // Middleware used to generate automatic REST API documentation
 app.use('/docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
+
+// Middleware for file uploads
+app.use(fileUpload());
 
 // Intialise database
 export const database = new Database();
@@ -1066,4 +1070,50 @@ app.get('/admin/celebrity/requests', async (req, res) => {
 app.post('/admin/celebrity/handlerequest', async (req, res) => {
   const { token, approve, rid } = req.body;
   await postAdminCelebrityHandlerequest(token, approve, rid, database, res);
+})
+
+// Post endpoint for uploading files
+/**
+ * @swagger
+ * /file/upload:
+ *   post:
+ *     tags: [File]
+ *     description: Post endpoint for uploading file
+ *     parameters:
+ *      - name: token
+ *        description: The token of the user uploading
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: data
+ *        description: The data of the object
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Everything went okay
+ *       401:
+ *         description: Invalid token
+ */
+app.post('/file/upload', async (req, res) => {
+  if(!req.files || !('upload' in req.files)) {
+    res.send({
+      status: false,
+      message: 'You must include a file in your upload'
+    })
+  } else {
+    const fData = req.files.upload;
+
+    //return response
+    res.send({
+        status: true,
+        message: 'File have been successfully uploaded',
+        data: {
+          name: fData.name,
+          mimetype: fData.mimetype,
+          size: fData.size
+        }
+    });
+  }
 })

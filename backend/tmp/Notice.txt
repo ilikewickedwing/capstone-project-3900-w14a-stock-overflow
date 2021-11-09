@@ -1,0 +1,3 @@
+Please dont delete this "tmp" folder.
+This folder is used as a temporary folder for the file upload process
+before it is stored into the database.
