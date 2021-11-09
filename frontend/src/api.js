@@ -1,6 +1,6 @@
 import { createContext } from "react";
 
-const ENDPOINT = 'http://localhost:5050'
+const ENDPOINT = 'http://localhost:5051'
 
 export const ApiContext = createContext();
 
@@ -15,8 +15,8 @@ export default class API {
    * @param {string} uid 
    * @returns {Promise}
    */
-  userProfile(uid) {
-    return fetch(`${ENDPOINT}/user/profile?uid=${uid}`)
+  userProfile(uid, token) {
+    return fetch(`${ENDPOINT}/user/profile?uid=${uid}&token=${token}`);
   }
 
   /**

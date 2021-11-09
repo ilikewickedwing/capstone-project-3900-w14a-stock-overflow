@@ -18,8 +18,15 @@ function Login() {
             alert('Log in successful');
             console.log(jsondata);
             localStorage.setItem('token', jsondata.token);
-            localStorage.setItem('uid', jsondata.uid); 
-            history.push('/dashboard');
+            localStorage.setItem('uid', jsondata.uid);
+            // Get user type to see whether to go to dashboard or admin page
+            const userResp = await api.userProfile(jsondata.uid, jsondata.token);
+            const userRespData = await userResp.json();
+            if (userRespData.userType === 'admin') {
+                history.push('/admin');
+            } else {
+                history.push('/dashboard');
+            }
         } else {
             alert(`Server returned unexpected status code of ${resp.status}`);
         }

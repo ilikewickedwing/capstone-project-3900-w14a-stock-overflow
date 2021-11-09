@@ -6,40 +6,6 @@ import profileImg from '../assets/profile.png';
 import { LogoutButton } from "../styles/styling";
 import ExitToAppRoundedIcon from '@material-ui/icons/ExitToAppRounded';
 
-const mockResponse = {
-  requests: [
-    {
-      rid: '341324132',
-      ownerUid: '1',
-      info: 'I want to be a celebrity I want to be a celebrityI want to be a celebrityI want to be a celebrityI want to be a celebrityI want to be a celebrityI want to be a celebrityI want to be a celebrityI want to be a celebrityI want to be a celebrityI want to be a celebrityI want to be a celebrityI want to be a celebrityI want to be a celebrityI want to be a celebrityI want to be a celebrityI want to be a celebrityI want to be a celebrityI want to be a celebrityI want to be a celebrityI want to be a celebrityI want to be a celebrityI want to be a celebrityI want to be a celebrity',
-    },
-    {
-      rid: '3413241asdf32',
-      ownerUid: '2',
-      info: 'Im tony sasdfasdfasdtark',
-    },
-    {
-      rid: '341324132asdf',
-      ownerUid: '3',
-      info: 'Pls give it sdfadsfasdfasdfsadfsadfasfto me',
-    },
-  ],
-  users: {
-    '1': {
-      username: 'Bob',
-      userType: 'user'
-    },
-    '2': {
-      username: 'Dave',
-      userType: 'user'
-    },
-    '3': {
-      username: 'Blake',
-      userType: 'user'
-    }
-  }
-}
-
 const callApi = async (api, token, setResponse) => {
   const resp = await api.getAdminCelebrityRequests(token);
   const respJson = await resp.json();
@@ -47,8 +13,7 @@ const callApi = async (api, token, setResponse) => {
     alert(respJson.error);
     return
   }
-  setResponse(mockResponse);
-  // setResponse(respJson.requests);
+  setResponse(respJson);
 }
 
 export default function AdminPage() {
@@ -89,20 +54,34 @@ export default function AdminPage() {
       border: '1px solid grey',
       padding: '5px',
       borderRadius: '5px',
-      width: '100%'
+      width: '100%',
+      wordWrap: 'break-word',
     }
     const usernameStyle = {
       fontSize: '2rem'
     }
     if ('requests' in response && 'users' in response) {
+      if (response.requests.length === 0) {
+        const noRequestsStyle = { 
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '1.2rem',
+          height: '100%',
+        }
+        return (
+          <div style={noRequestsStyle}>
+            There are currently no celebrity requests
+          </div>
+        )
+      }
       return response.requests.map((r, i) => {
         const userData = response.users[r.ownerUid];
         const token = localStorage.getItem('token');
         const onApprove = async () => {
           const resp = await api.postAdminCelebrityHandlerequest(token, true, r.rid)
-          const respJson = await resp.json();
-          if (resp !== 200) {
-            alert(respJson.error);
+          if (resp.status !== 200) {
+            alert(`Server responded with ${resp.status}`);
             return;
           }
           // Get updated data
@@ -110,9 +89,8 @@ export default function AdminPage() {
         }
         const onReject = async () => {
           const resp = await api.postAdminCelebrityHandlerequest(token, false, r.rid)
-          const respJson = await resp.json();
-          if (resp !== 200) {
-            alert(respJson.error);
+          if (resp.status !== 200) {
+            alert(`Server responded with ${resp.status}`);
             return;
           }
           // Get updated data
@@ -120,21 +98,13 @@ export default function AdminPage() {
         }
         return (
           <div style={requestWrapStyle} key={i}>
-            <div style={{ display: 'flex', flexDirection: 'column',
-              alignItems: 'center' }}>
-              <img style={dpStyle} src={profileImg} alt='logo'/>
-              <div style={usernameStyle}>{ userData.username }</div>
-            </div>
-            <div style={{ display: 'flex', 
-              padding: '1rem',
-              flexDirection: 'column',
-              justifyContent: 'space-evenly' }}>
-              <div style={infoStyle}>{ r.info }</div>
+            <img style={dpStyle} src={profileImg} alt='logo'/>
+            <div style={usernameStyle}>{ userData.username }</div>
+            <div style={infoStyle}>{ r.info }</div>
               <div style={{ display: 'flex', justifyContent: 'center' }}>
                 <Button style={{ backgroundColor: '#05BE70', marginRight: '1rem' }} onClick={onApprove} color='primary' variant="contained">Approve</Button>
                 <Button style={{ backgroundColor: '#F14423', marginLeft: '1rem' }} onClick={onReject} color='primary' variant="contained">Reject</Button>
               </div>
-            </div>
           </div>
         )
       })
