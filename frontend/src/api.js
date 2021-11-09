@@ -18,7 +18,23 @@ export default class API {
   userProfile(uid, token) {
     return fetch(`${ENDPOINT}/user/profile?uid=${uid}&token=${token}`);
   }
-
+  
+  userNotifications(token) {
+    return fetch(`${ENDPOINT}/user/notifications?token=${token}`);
+  }
+  
+  userNotificationsClear(token) {
+    return fetch(`${ENDPOINT}/user/notifications/clear`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type' : 'application/json'
+      },
+      body: JSON.stringify({
+        token: token,
+      })
+    });
+  }
+  
   /**
    * Calls the login endpoint
    * @param {string} username 

@@ -12,6 +12,7 @@ import Switch from '@mui/material/Switch';
 import Autocomplete from '@mui/material/Autocomplete';
 import { apiBaseUrl } from '../comp/const';
 import axios from 'axios';
+import NotificationButton from '../notifications/Notifications';
 
 const label = { inputProps: { 'aria-label': 'toggle' } };
 
@@ -116,6 +117,7 @@ const Navigation = () => {
             </IconButton>
             </ FlexRows> 
             <FlexRows style={{padding:"1%"}}>
+                <NotificationButton/>
                 <Link to="/profile">
                     <Button>
                         Edit Profile

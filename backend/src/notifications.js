@@ -13,3 +13,15 @@ export const getUserNotifications = async (token, database, res) => {
     notifications: notifs
   })
 }
+
+export const deleteUserNotifications = async (token, database, res) => {
+  // Validate token
+  const uid = await database.getTokenUid(token);
+  if (uid === null) {
+    res.status(401).send({ error: "Invalid token" });
+    return;
+  }
+  // Delete notifications from database
+  await database.clearAllUserNotifications(uid);
+  res.status(200).send()
+}
