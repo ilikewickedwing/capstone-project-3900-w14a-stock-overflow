@@ -75,7 +75,7 @@ export default function Profile() {
   }
 
   return(
-    <div className="font-two">
+    <div style={{backgroundColor:"#FAE1DD", height:"100vh"}} className="font-two">
       <NavBar>
         <Link to="/dashboard">
             <Logo>

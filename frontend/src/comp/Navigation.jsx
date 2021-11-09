@@ -38,41 +38,57 @@ const Navigation = () => {
         }
     }
     
-    // replace the "demo" apikey below with your own key from https://www.alphavantage.co/support/#api-key
-    var url = `https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${search}&apikey=59SO8FIM49NYQS21`;
-    var request = require('request');
+    // // replace the "demo" apikey below with your own key from https://www.alphavantage.co/support/#api-key
+    // var url = `https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${search}&apikey=59SO8FIM49NYQS21`;
+    // var request = require('request');
     
-    // handle search submission 
-    const searchBar = async(e) =>{
-        e.preventDefault(); 
+    // // handle search submission 
+    // const searchBar = async(e) =>{
+    //     e.preventDefault(); 
         
-        request.get({
-            url: url,
-            json: true,
-            headers: {'User-Agent': 'request'}
-        }, (err, res, data) => {
-            if (err) {
-            console.log('Error:', err);
-            } else if (res.statusCode !== 200) {
-            console.log('Status:', res.statusCode);
-            } else {
-            // data is successfully parsed as a JSON object:
-            const response =  data.bestMatches;
+    //     request.get({
+    //         url: url,
+    //         json: true,
+    //         headers: {'User-Agent': 'request'}
+    //     }, (err, res, data) => {
+    //         if (err) {
+    //         console.log('Error:', err);
+    //         } else if (res.statusCode !== 200) {
+    //         console.log('Status:', res.statusCode);
+    //         } else {
+    //         // data is successfully parsed as a JSON object:
+    //         const response =  data.bestMatches;
 
-            if (response){
-                const newList = []; 
-                response.forEach((obj) => {
-                    newList.push({
-                        code: obj["1. symbol"],
-                        name: obj["2. name"]
-                    });
-                })
-                setRes(newList);
-            }
-            }
-        });
-    }
+    //         if (response){
+    //             const newList = []; 
+    //             response.forEach((obj) => {
+    //                 newList.push({
+    //                     code: obj["1. symbol"],
+    //                     name: obj["2. name"]
+    //                 });
+    //             })
+    //             setRes(newList);
+    //         }
+    //         }
+    //     });
+    // }
+      // on first load 
     
+    React.useEffect(() => {   
+        fetchStockList();
+    },[]);
+    
+    const fetchStockList = async () => {
+        try {
+          const request = await axios.get(`${apiBaseUrl}/stocks/all`);
+          console.log(request); 
+          // map it so its autocorrect friendly 
+          setRes(request);
+        } catch (e) {
+          alert(`Status Code ${e.response.status} : ${e.response.data.error}`);
+        }
+      };
+
     const submitQuery = () => {
         history.push(`/stock/${currCode}`);
     }
@@ -104,11 +120,11 @@ const Navigation = () => {
                 <TextInput 
                     {...params} 
                     label="Search Stock" 
-                    onKeyDown={e => {
-                        if (e.keyCode === 13 && e.target.value) {
-                            searchBar(e);
-                        }
-                    }}
+                    // onKeyDown={e => {
+                    //     if (e.keyCode === 13 && e.target.value) {
+                    //         searchBar(e);
+                    //     }
+                    // }}
                 />)}
             />
             <IconButton type="submit" sx={{p:'10px'}} onClick={submitQuery}>

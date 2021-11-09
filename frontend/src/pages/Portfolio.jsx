@@ -171,7 +171,7 @@ const Portfolio = () => {
           <Tabs isChanged={isChanged}/>
               {isWatchlist 
               ? (<PfBody>
-                    <WatchlistBody>
+                    <WatchlistBody elevation={10}>
                       <PfBar>
                         <Heading>{name}</Heading> 
                         {/* <Button onClick={handleReload}>Update Data</Button> */}
@@ -192,7 +192,7 @@ const Portfolio = () => {
                 </PfBody>)
               :
             (<PfBody>
-              <LeftBody>
+              <LeftBody elevation={10}>
               <PfBar>
               <Heading>{name}</Heading> 
               <div>
@@ -216,11 +216,11 @@ const Portfolio = () => {
                 name={name}
               />
               </LeftBody>
-            <RightBody>
-              <RightCard>
+            <RightBody elevation={10}>
+              <RightCard elevation={5}>
                 <h3 style={{textAlign:'center'}}>Daily Estimated Earnings</h3>
               </RightCard>
-              <RightCard>
+              <RightCard elevation={5}>
                 2nd card
               </RightCard>
             </RightBody>
