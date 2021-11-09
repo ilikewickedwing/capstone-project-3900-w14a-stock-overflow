@@ -167,7 +167,7 @@ export default function Profile() {
                     style={{width: '100%'}}
                     value={option}
                     onChange={handleChange}
-                    label="Select Buy or Sell"
+                    label="Select Option"
                     displayEmpty
                   >
                     <MenuItem style={{width:"100%"}} value={1}>Percentage (_%) </MenuItem>

@@ -3,14 +3,15 @@ import React from 'react';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
-
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-
-import {FlexColumns} from "../styles/styling"; 
-
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import Button from '@material-ui/core/Button';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+
+
+import {FlexColumns} from "../styles/styling"; 
 import axios from 'axios';
 import { apiBaseUrl } from './const';
 
@@ -45,7 +46,13 @@ const AddStock = ({token, pid, onAddCallback, load = () => {}, name}) => {
         alert(`Status Code ${e.status} : ${e.response.data.message}`);
         }
     }
+    
+    // handle flag change 
+    const handleChange = (e) => {
+        setFlag(e.target.value);
+      }
 
+    // fetch the stock list for the search bar 
     const fetchStockList = async () => {
         try {
           const request = await axios.get(`${apiBaseUrl}/stocks/all`);
@@ -62,8 +69,8 @@ const AddStock = ({token, pid, onAddCallback, load = () => {}, name}) => {
           alert(`Status Code ${e.status} : ${e.response.data.error}`);
         }
       };
-    var request = require('request');
 
+    // on add stock submission 
     const handleAddStock = async (e) => {
         e.preventDefault(); 
         try {
@@ -110,10 +117,20 @@ const AddStock = ({token, pid, onAddCallback, load = () => {}, name}) => {
                     <TextField type="text" required variant="standard" label="Price (USD$)"
                      onChange={e => setPrice(e.target.value)}/>
                      <br/>
-                    <TextField type="text" required variant="standard" label="Quantity"
+                    <TextField style = {{marginBottom:'5%'}} type="text" required variant="standard" label="Quantity"
                      onChange={e => setQuantity(e.target.value)}/>
                       <br/>
-                    <TextField type="text" required variant="standard" label="Brokerage fee (USD$)"
+                    <Select
+                        style={{marginRight:"3%"}}
+                        value={flag}
+                        onChange={handleChange}
+                        label="Select Option"
+                        displayEmpty
+                    >
+                        <MenuItem style={{width:"100%"}} value={1}>Percentage (_%) </MenuItem>
+                        <MenuItem style={{width:"100%"}} value={0}>Flat Fee ($USD)</MenuItem>
+                    </Select>
+                    <TextField  type="text" required variant="standard" label="Brokerage fee (USD$)"
                      onChange={e => setBroker(e.target.value)}/>
                 </div>
             )
