@@ -1,14 +1,16 @@
 import { Grid,Paper, Avatar, TextField, Button, Typography,Link } from '@material-ui/core'
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Welcome } from '../styles/styling';
 import axios from 'axios';
 import { apiBaseUrl } from '../comp/const';
+import { ApiContext } from '../api';
 
 function Login() {
     const [ username, setUsername ] = useState('');
     const [ password, setPassword ] = useState('');
+    const api = useContext(ApiContext);
     let history = useHistory();
     const onLogIn = async () => {
         try {
@@ -16,7 +18,7 @@ function Login() {
                 {username, password});
             localStorage.setItem('token', res.data.token);
             localStorage.setItem('uid', res.data.uid); 
-            history.push('/dashboard');
+            directToPage(api, res.data.uid, res.data.token, history);
         } catch (e) {
             alert(`Status Code ${e.response.status} : ${e.response.data.message}`);
         }
@@ -64,3 +66,15 @@ function Login() {
 }
 
 export default Login
+
+// Direct to dashboard if it is a user, else to admin page if an admin
+const directToPage = async (api, uid, token, history) => {
+    // Get user type to see whether to go to dashboard or admin page
+    const userResp = await api.userProfile(uid, token);
+    const userRespData = await userResp.json();
+    if (userRespData.userType === 'admin') {
+        history.push('/admin');
+    } else {
+        history.push('/dashboard');
+    }
+}

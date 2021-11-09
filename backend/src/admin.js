@@ -45,9 +45,15 @@ export const getAdminCelebrityRequests = async (token, database, res) => {
     return;
   }
   const requests = await database.getAllCelebrityRequests();
+  const users = {};
+  for (const r of requests) {
+    const userdata = await database.getUser(r.ownerUid);
+    users[r.ownerUid] = userdata;
+  }
   // Return data
   res.status(200).send({
-    requests: requests
+    requests: requests,
+    users: users,
   })
 }
 

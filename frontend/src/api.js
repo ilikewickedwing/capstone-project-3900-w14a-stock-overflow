@@ -15,10 +15,26 @@ export default class API {
    * @param {string} uid 
    * @returns {Promise}
    */
-  userProfile(uid) {
-    return fetch(`${ENDPOINT}/user/profile?uid=${uid}`)
+  userProfile(uid, token) {
+    return fetch(`${ENDPOINT}/user/profile?uid=${uid}&token=${token}`);
   }
-
+  
+  userNotifications(token) {
+    return fetch(`${ENDPOINT}/user/notifications?token=${token}`);
+  }
+  
+  userNotificationsClear(token) {
+    return fetch(`${ENDPOINT}/user/notifications/clear`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type' : 'application/json'
+      },
+      body: JSON.stringify({
+        token: token,
+      })
+    });
+  }
+  
   /**
    * Calls the login endpoint
    * @param {string} username 
@@ -121,6 +137,20 @@ export default class API {
   getAdminCelebrityRequests(token) {
     let queryStr = `${ENDPOINT}/admin/celebrity/requests?token=${token}`;
     return fetch(queryStr);
+  }
+  
+  postAdminCelebrityHandlerequest(token, approve, rid) {
+    return fetch(`${ENDPOINT}/admin/celebrity/handlerequest`, {
+      method: 'POST',
+      headers: {
+        'Content-Type' : 'application/json'
+      },
+      body: JSON.stringify({
+        token: token,
+        approve: approve,
+        rid: rid,
+      })
+    });
   }
   
   post(path, options){

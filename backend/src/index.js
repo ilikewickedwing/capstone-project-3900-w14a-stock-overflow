@@ -8,7 +8,7 @@ import { authDelete, authLogin, authLogout, authRegister } from "./auth";
 import { getDefBroker, getUserProfile, postUserProfile, setDefBroker } from "./user";
 import { addStock, modifyStock, getAllStocks, checkStock, getStock } from "./stocks";
 import { getAdminCelebrityRequests, postAdminCelebrityHandlerequest, postCelebrityMakeRequest } from "./admin";
-import { getUserNotifications } from "./notifications";
+import { getUserNotifications, deleteUserNotifications } from "./notifications";
 
 // Make the server instance
 export const app = express();
@@ -953,6 +953,11 @@ app.get('/user/notifications', async (req, res) => {
   getUserNotifications(token, database, res);
 })
 
+app.delete('/user/notifications/clear', async (req, res) => {
+  const { token } = req.body;
+  deleteUserNotifications(token, database, res);
+})
+
 // Get endpoint for user to request to be a celebrity
 /**
  * @swagger
@@ -1012,6 +1017,9 @@ app.post('/celebrity/makerequest', async (req, res) => {
  *              requests:
  *                type: array
  *                description: An array of the celebrity requests
+ *              users:
+ *                type: object
+ *                description: An object mapping the uid to the user data
  *       401:
  *         description: Invalid token
  *       403:
