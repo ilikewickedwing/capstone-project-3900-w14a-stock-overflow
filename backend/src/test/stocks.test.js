@@ -27,7 +27,28 @@ describe('Check stock', () => {
   })
 })
 
-/* describe('Add stock', () => {
+describe('Get all stocks', () => {
+  beforeAll(async () => {
+    await database.connect();
+  })
+
+  jest.setTimeout(30000);
+  const today = new Date();
+  const now = new Date(today);
+
+  it('200 on successful get all stocks', async () => {
+    const resp = await request(app).get(`/stocks/all`).send();
+    expect(resp.statusCode).toBe(200);
+    console.log(resp.body);
+  })
+  
+
+  afterAll(async() => {
+    await database.disconnect();
+  })
+})
+/* 
+describe('Add stock', () => {
 	const d = new Database(true);
   beforeAll(async () => {
     await d.connect();
