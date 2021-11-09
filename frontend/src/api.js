@@ -123,6 +123,20 @@ export default class API {
     return fetch(queryStr);
   }
   
+  postAdminCelebrityHandlerequest(token, approve, rid) {
+    return fetch(`${ENDPOINT}/admin/celebrity/handlerequest`, {
+      method: 'POST',
+      headers: {
+        'Content-Type' : 'application/json'
+      },
+      body: JSON.stringify({
+        token: token,
+        approve: approve,
+        rid: rid,
+      })
+    });
+  }
+  
   post(path, options){
     return fetch(`${ENDPOINT}/${path}`,{
       ...options,

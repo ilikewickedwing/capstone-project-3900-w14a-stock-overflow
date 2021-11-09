@@ -20,7 +20,6 @@ function App() {
         <div className="App">
           <Switch>
             <Route path="/stocks/:companyId" component={StocksPage}/>
-            <Route exact path="/" component={Login} />
             <Route path="/signup" component={SignUp} />
             <Route path="/dashboard" component={Dashboard} />
             <Route path="/portfolio/:pid" component={Portfolio} />
@@ -28,6 +27,7 @@ function App() {
             <Route path="/stock/:stockCode" component={Stock} />
             <Route path="/performance/:pid" component={ExamplePerformancePage}/>
             <Route path="/admin" component={AdminPage} />
+            <Route path="/" component={Login} />
           </Switch>  
         </div>
       </BrowserRouter>

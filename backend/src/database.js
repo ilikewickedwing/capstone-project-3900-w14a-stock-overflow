@@ -93,6 +93,7 @@ const COLLECTIONS = [
   /**
     Stores all the notifications for a given user
     {
+      rid: string,
       ownerUid: string,
       // Info of the notification
       info: string,
