@@ -3,7 +3,7 @@ import { useHistory } from 'react-router';
 import {Link} from 'react-router-dom';
 import { ApiContext } from '../api';
 import ExitToAppRoundedIcon from '@material-ui/icons/ExitToAppRounded';
-import {NavBar, Logo, LogoutButton, FlexRows, SearchToggle } from '../styles/styling';
+import {NavBar, Logo, LogoutButton, FlexRows, SearchToggle, SearchDiv } from '../styles/styling';
 import { Button } from '@material-ui/core';
 import {TextInput} from "../styles/styling"; 
 import IconButton from '@mui/material/IconButton';
@@ -77,7 +77,7 @@ const Navigation = () => {
                 <Switch {...label}/>
                 friends
             </SearchToggle>
-            <FlexRows style={{margin:'1%', justifyContent:'center', borderRadius: "8px", backgroundColor:"white", width:'30%' }}>
+            <SearchDiv>
             <Autocomplete
                 disablePortal
                 options={queryRes.map((e)=> e.code+" "+ e.name)}
@@ -97,7 +97,7 @@ const Navigation = () => {
             <IconButton type="submit" sx={{p:'10px'}} onClick={submitQuery}>
                 <SearchIcon />
             </IconButton>
-            </ FlexRows> 
+            </ SearchDiv> 
             <FlexRows style={{padding:"1%"}}>
                 <NotificationButton/>
                 <Link to="/profile">

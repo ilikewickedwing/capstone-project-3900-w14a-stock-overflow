@@ -107,6 +107,14 @@ export const TabBar = styled.div`
     margin: 1%;
 `;
 
+export const SearchDiv = styled.div`
+    padding: 1%;
+    display: flex;
+    border-radius: 8px; 
+    background-color: white;
+    width:30%;
+    align-items:center;
+`;
 // Text Styles 
 export const Welcome = styled.div`
     font-size: 3em;
