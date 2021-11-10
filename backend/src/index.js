@@ -981,6 +981,11 @@ app.delete('/user/notifications/clear', async (req, res) => {
  *        in: body
  *        required: true
  *        type: string
+ *      - name: fids
+ *        description: An array of the file ids uploaded with the request
+ *        in: body
+ *        required: true
+ *        type: array
  *     responses:
  *       200:
  *         description: Returns the rid
@@ -990,13 +995,15 @@ app.delete('/user/notifications/clear', async (req, res) => {
  *              rid:
  *                type: string
  *                description: rid of request
+ *       400:
+ *         description: fids contain an invalid fid
  *       401:
  *         description: Invalid token
  *       403:
  *         description: Request has already been made
  */
 app.post('/celebrity/makerequest', async (req, res) => {
-  const { token, info } = req.body;
+  const { token, info, fids } = req.body;
   await postCelebrityMakeRequest(token, info, database, res);
 })
 

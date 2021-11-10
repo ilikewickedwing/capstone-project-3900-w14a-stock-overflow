@@ -5,7 +5,7 @@ export const DEFAULTADMIN = {
   password: 'admin'
 }
 
-export const postCelebrityMakeRequest = async (token, info, database, res) => {
+export const postCelebrityMakeRequest = async (token, info, fids, database, res) => {
   // Validate token
   const uid = await database.getTokenUid(token);
   if (uid === null) {
@@ -24,8 +24,16 @@ export const postCelebrityMakeRequest = async (token, info, database, res) => {
     res.status(403).send({ error: "You have already made a request" });
     return;
   }
+  // Check that all the file ids are valid
+  for (const fid of fids) {
+    const f = await database.getFile(fid);
+    if (f === null) {
+      res.status(400).send({ error: `File with id ${fid} does not exist` });
+      return;
+    }
+  }
   // Make a request
-  const rid = await database.insertCelebrityRequest(uid, info);
+  const rid = await database.insertCelebrityRequest(uid, info, fids);
   res.status(200).send({
     rid: rid
   });

@@ -98,6 +98,8 @@ const COLLECTIONS = [
       ownerUid: string,
       // Info of the notification
       info: string,
+      // An array of the file ids of all the files uploaded
+      fids: array
     }
   */
   'notifications',
@@ -361,14 +363,15 @@ export class Database {
    * @param {string} ownerUid 
    * @param {string} info 
    */
-  async insertCelebrityRequest(ownerUid, info) {
+  async insertCelebrityRequest(ownerUid, info, fids) {
     // Generate a new unique rid
     const rid = nanoid();
     const celebrityRequests = this.database.collection('celebrityRequests');
     await celebrityRequests.insertOne({
       rid: rid,
       ownerUid: ownerUid,
-      info: info
+      info: info,
+      fids: fids
     });
     return rid;
   }
