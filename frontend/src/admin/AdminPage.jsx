@@ -98,13 +98,19 @@ export default function AdminPage() {
               console.log("Clciked");
               const resp = await api.fileDownload(token, fid)
               if (resp.status === 200) {
+                /**
+                
+                TO DO: Implement the downloading from base64 string!!!
+                It currently doesnt work!!
+                
+                */
                 console.log("Called");
                 const respJson = await resp.json();
-                console.log(respJson.data);
+                console.log(respJson);
                 const link = document.createElement('a');
                 // Download the file
                 document.body.appendChild(link);
-                link.setAttribute('href', `base64,${respJson.data}`);
+                link.setAttribute('href', `data:${respJson.mimetype};base64,${respJson.data}`);
                 link.setAttribute('download', respJson.filename);
                 link.click();
                 document.body.removeChild(link);
