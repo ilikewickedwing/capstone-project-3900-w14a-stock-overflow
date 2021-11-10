@@ -57,5 +57,7 @@ Week 9
 - during standup at the beginning of the week, we delegated work for the report. (Mison absent)
 - put every api call into try/catch wrapper
 - DONE:
+  - US 2.4: multistocks ported on the page
+  - all the stub and placeholders for US 5.1
 - TODO:
   - final report, commenting code, cleaning up code 
