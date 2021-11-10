@@ -13,6 +13,7 @@ import Autocomplete from '@mui/material/Autocomplete';
 import { apiBaseUrl } from '../comp/const';
 import axios from 'axios';
 import NotificationButton from '../notifications/Notifications';
+import SettingsIcon from '@mui/icons-material/Settings';
 
 const label = { inputProps: { 'aria-label': 'toggle' } };
 
@@ -63,6 +64,7 @@ const Navigation = () => {
         history.push(`/stock/${currCode}`);
     }
 
+
     return (
         <NavBar className="font-two">
             <Link to="/dashboard">
@@ -71,11 +73,11 @@ const Navigation = () => {
                 </Logo>
             </Link>
             <SearchToggle>
-                friends
-                <Switch {...label} defaultChecked />
                 stocks
+                <Switch {...label}/>
+                friends
             </SearchToggle>
-            <FlexRows style={{margin:'1%', justifyContent:'center'}}>
+            <FlexRows style={{margin:'1%', justifyContent:'center', borderRadius: "8px", backgroundColor:"white", width:'30%' }}>
             <Autocomplete
                 disablePortal
                 options={queryRes.map((e)=> e.code+" "+ e.name)}
@@ -99,9 +101,7 @@ const Navigation = () => {
             <FlexRows style={{padding:"1%"}}>
                 <NotificationButton/>
                 <Link to="/profile">
-                    <Button>
-                        Edit Profile
-                    </Button>
+                    <SettingsIcon style={{color:"white", fontSize:"2em", marginTop:'50%'}}/>
                 </Link>
                 <LogoutButton 
                     name="logOut"

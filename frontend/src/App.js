@@ -11,6 +11,7 @@ import { StocksPage } from "./graph/StocksPage";
 import AdminPage from "./admin/AdminPage";
 import { ExamplePerformancePage } from "./graph/ExamplePerformancePage";
 import FileUpload from "./files/FileUpload";
+import Friend from "./pages/Friend";
 
 function App() {
   const api = new API();
@@ -20,6 +21,7 @@ function App() {
       <BrowserRouter>
         <div className="App">
           <Switch>
+            <Route path="/user" component={Friend} /> 
             <Route path="/stocks/:companyId" component={StocksPage}/>
             <Route path="/signup" component={SignUp} />
             <Route path="/dashboard" component={Dashboard} />

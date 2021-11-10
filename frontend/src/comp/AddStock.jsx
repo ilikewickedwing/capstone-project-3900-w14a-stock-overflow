@@ -33,9 +33,10 @@ const AddStock = ({token, pid, onAddCallback, load = () => {}, name}) => {
        React.useEffect(() => {   
         fetchStockList();
         getDefaultBrokerage();
+        //
     },[]);
     
-      // grab the current default
+      // grab the current default brokerage fee
     const getDefaultBrokerage = async ()=> {
         try {
         const res = await axios.get(`${apiBaseUrl}/user/getDefBroker?token=${token}`);
@@ -114,10 +115,10 @@ const AddStock = ({token, pid, onAddCallback, load = () => {}, name}) => {
                 </div>
             ) : (
                 <div>
-                    <TextField type="text" required variant="standard" label="Price (USD$)"
+                    <TextField type="number" required variant="standard" label="Price (USD$)"
                      onChange={e => setPrice(e.target.value)}/>
                      <br/>
-                    <TextField style = {{marginBottom:'5%'}} type="text" required variant="standard" label="Quantity"
+                    <TextField style = {{marginBottom:'5%'}} type="number" required variant="standard" label="Quantity"
                      onChange={e => setQuantity(e.target.value)}/>
                       <br/>
                     <Select
@@ -130,7 +131,7 @@ const AddStock = ({token, pid, onAddCallback, load = () => {}, name}) => {
                         <MenuItem style={{width:"100%"}} value={1}>Percentage (_%) </MenuItem>
                         <MenuItem style={{width:"100%"}} value={0}>Flat Fee ($USD)</MenuItem>
                     </Select>
-                    <TextField  type="text" required variant="standard" label="Brokerage fee (USD$)"
+                    <TextField  type="number" required variant="standard" label="Brokerage fee (USD$)"
                      onChange={e => setBroker(e.target.value)}/>
                 </div>
             )
