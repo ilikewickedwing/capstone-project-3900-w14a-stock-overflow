@@ -33,7 +33,6 @@ export default function AdminPage() {
   }, [history, api]);
   
   const renderRequests = () => {
-    console.log(response);
     const requestWrapStyle = {
       backgroundColor: '#ffffff',
       boxShadow: "0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)",
@@ -82,6 +81,35 @@ export default function AdminPage() {
         const userData = response.users[r.ownerUid];
         const token = localStorage.getItem('token');
         
+        const download = async (fid) => {
+          const resp = await api.fileDownload(token, fid)
+          if (resp.status === 200) {
+            /**
+            
+            TO DO: Implement the downloading from base64 string!!!
+            It currently doesnt work!!
+            
+            */
+            const respJson = await resp.json();
+            const link = document.createElement('a');
+            // Download the file
+            document.body.appendChild(link);
+            link.setAttribute('href', `data:${respJson.mimetype};base64,${respJson.data}`);
+            link.setAttribute('download', respJson.filename);
+            link.click();
+            document.body.removeChild(link);
+            
+          } else {
+            alert(`Server returned with status of ${resp.status}`)
+          }
+        }
+        
+        const downloadAll = async () => {
+          for (const fid of r.fids) {
+            await download(fid);
+          }
+        }
+        
         // Render a list of the files included in the request
         const renderFiles = () => {
           const fileItemStyle = {
@@ -94,35 +122,10 @@ export default function AdminPage() {
             alignItems: 'center',
           }
           return r.fids.map((fid, i) => {
-            const download = async () => {
-              console.log("Clciked");
-              const resp = await api.fileDownload(token, fid)
-              if (resp.status === 200) {
-                /**
-                
-                TO DO: Implement the downloading from base64 string!!!
-                It currently doesnt work!!
-                
-                */
-                console.log("Called");
-                const respJson = await resp.json();
-                console.log(respJson);
-                const link = document.createElement('a');
-                // Download the file
-                document.body.appendChild(link);
-                link.setAttribute('href', `data:${respJson.mimetype};base64,${respJson.data}`);
-                link.setAttribute('download', respJson.filename);
-                link.click();
-                document.body.removeChild(link);
-                
-              } else {
-                alert(`Server returned with status of ${resp.status}`)
-              }
-            }
             return (
               <div key={i} style={fileItemStyle}>
                 <div>{response.files[fid]}</div>
-                <IconButton onClick={download} color="primary">
+                <IconButton onClick={() => download(fid)} color="primary">
                   <DownloadIcon/>
                 </IconButton>
               </div>
@@ -168,13 +171,16 @@ export default function AdminPage() {
             <div style={infoStyle}>{ r.info }</div>
             <Accordion style={ accordionStyle }>
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                { `${r.fids.length} included files` }
+                <div>{ `${r.fids.length} included files` }</div>
               </AccordionSummary>
               <AccordionDetails>
                 <div style={fileItemsWrapperStyle}>{ renderFiles() }</div>
               </AccordionDetails>
             </Accordion>
-            <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-end' }}>
+              <Button onClick={downloadAll} color="primary">Download All</Button>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1rem' }}>
               <Button style={{ backgroundColor: '#05BE70', marginRight: '1rem' }} onClick={onApprove} color='primary' variant="contained">Approve</Button>
               <Button style={{ backgroundColor: '#F14423', marginLeft: '1rem' }} onClick={onReject} color='primary' variant="contained">Reject</Button>
             </div>
