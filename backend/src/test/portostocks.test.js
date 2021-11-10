@@ -37,7 +37,7 @@ describe('Create and delete', () => {
     const resp = await setDefBroker(token, '0', '0', d);
     expect(resp).toBe(1);
     const broker = await getDefBroker(token, d);
-    expect(broker).toBe(0);
+    expect(broker.defBroker).toBe(0);
   })
   it('Add first stock to portfolio', async () => {
     const add = await addStock(token, pid1, 'IBM', 1, 2, null, null, d);
@@ -64,7 +64,7 @@ describe('Create and delete', () => {
       ],
       quantity: 2,
     }]
-    const pf = await openPf(pid1, d);
+    const pf = await openPf(token, pid1, d);
     expect(pf).toMatchObject({
       pid: pid1,
       name: 'pf1',
@@ -133,7 +133,7 @@ describe('Create and delete', () => {
         quantity: 1
       }
     ]
-    const pf = await openPf(pid1, d);
+    const pf = await openPf(token, pid1, d);
     expect(pf).toMatchObject({
       pid: pid1,
       name: 'pf1',
@@ -200,7 +200,7 @@ describe('Create and delete', () => {
         quantity: 1
       }
     ]
-    const pf = await openPf(pid1, d);
+    const pf = await openPf(token, pid1, d);
     expect(pf).toMatchObject({
       pid: pid1,
       name: 'pf1',
@@ -282,7 +282,7 @@ describe('Create and delete', () => {
         quantity: 0
       }
     ]
-    const pf = await openPf(pid1, d);
+    const pf = await openPf(token, pid1, d);
     expect(pf).toMatchObject({
       pid: pid1,
       name: 'pf1',
@@ -340,7 +340,7 @@ describe('Editing portfolio doesn\'t affect stocks', () => {
     const resp = await setDefBroker(token, '0', '0', d);
     expect(resp).toBe(1);
     const broker = await getDefBroker(token, d);
-    expect(broker).toBe(0);
+    expect(broker.defBroker).toBe(0);
   })
   it('Add stocks to portfolio', async () => {
     const add1 = await addStock(token, pid, 'AAPL', 2, 2, null, null, d);
@@ -388,7 +388,7 @@ describe('Editing portfolio doesn\'t affect stocks', () => {
     const pfs = await userPfs(token, d);
     pfArray = [{ name: 'pf', pid: pid }];
     expect(pfs).toEqual(expect.arrayContaining(pfArray));
-    const stocks = await openPf(pid, d);
+    const stocks = await openPf(token, pid, d);
     stArray = [
       {
         stock: 'AAPL',
@@ -446,7 +446,7 @@ describe('Editing portfolio doesn\'t affect stocks', () => {
     const check1 = await userPfs(token, d);
     pfArray = [{ name: 'newpf', pid: pid }];
     expect(check1).toEqual(expect.arrayContaining(pfArray));
-    const check2 = await openPf(pid, d);
+    const check2 = await openPf(token, pid, d);
     expect(check2).toMatchObject({
       name: 'newpf',
       pid: pid,
@@ -468,7 +468,7 @@ describe('Editing portfolio doesn\'t affect stocks', () => {
     expect(del).toBe(1);
     const check1 = await userPfs(token, d);
     expect(check1).toEqual(expect.not.arrayContaining(pfArray));
-    const check2 = await openPf(pid, d);
+    const check2 = await openPf(token, pid, d);
     expect(check2).toBe(null);
   })
 
@@ -505,7 +505,7 @@ describe('Editing stocks doesn\'t affect portfolios', () => {
     const resp = await setDefBroker(token, '0', '0', d);
     expect(resp).toBe(1);
     const broker = await getDefBroker(token, d);
-    expect(broker).toBe(0);
+    expect(broker.defBroker).toBe(0);
   })
   it('Add stocks to portfolio', async () => {
     const add1 = await addStock(token, pid, 'AAPL', 2, 2, null, null, d);
@@ -553,7 +553,7 @@ describe('Editing stocks doesn\'t affect portfolios', () => {
     const pfs = await userPfs(token, d);
     pfArray = [{ name: 'pf', pid: pid }];
     expect(pfs).toEqual(expect.arrayContaining(pfArray));
-    const stocks = await openPf(pid, d);
+    const stocks = await openPf(token, pid, d);
     stArray = [
       {
         stock: 'AAPL',
@@ -623,7 +623,7 @@ describe('Editing stocks doesn\'t affect portfolios', () => {
     expect(stock).toMatchObject(newStock)
     const pfs = await userPfs(token, d);
     expect(pfs).toEqual(expect.arrayContaining(pfArray));
-    const pf = await openPf(pid, d);
+    const pf = await openPf(token, pid, d);
     stArray[0] = newStock;
     expect(pf).toMatchObject({
       pid: pid,
@@ -674,7 +674,7 @@ describe('Editing stocks doesn\'t affect portfolios', () => {
     expect(stock2).toMatchObject(newStock2);
     const pfs = await userPfs(token, d);
     expect(pfs).toEqual(expect.arrayContaining(pfArray));
-    const pf = await openPf(pid, d);
+    const pf = await openPf(token, pid, d);
     stArray[1] = newStock1;
     stArray[2] = newStock2;
     expect(pf).toMatchObject({
@@ -711,7 +711,7 @@ describe('Editing stocks doesn\'t affect portfolios', () => {
     expect(stock).toMatchObject(newStock)
     const pfs = await userPfs(token, d);
     expect(pfs).toEqual(expect.arrayContaining(pfArray));
-    const pf = await openPf(pid, d);
+    const pf = await openPf(token, pid, d);
     stArray[0] = newStock;
     expect(pf).toMatchObject({
       pid: pid,
@@ -762,7 +762,7 @@ describe('Editing stocks doesn\'t affect portfolios', () => {
     expect(stock2).toMatchObject(newStock2);
     const pfs = await userPfs(token, d);
     expect(pfs).toEqual(expect.arrayContaining(pfArray));
-    const pf = await openPf(pid, d);
+    const pf = await openPf(token, pid, d);
     stArray[1] = newStock1;
     stArray[2] = newStock2;
     expect(pf).toMatchObject({
@@ -799,7 +799,7 @@ describe('Editing stocks doesn\'t affect portfolios', () => {
     expect(stock).toMatchObject(newStock);
     const pfs = await userPfs(token, d);
     expect(pfs).toEqual(expect.arrayContaining(pfArray));
-    const pf = await openPf(pid, d);
+    const pf = await openPf(token, pid, d);
     stArray[0] = newStock;
     expect(pf).toMatchObject({
       pid: pid,
@@ -850,7 +850,7 @@ describe('Editing stocks doesn\'t affect portfolios', () => {
     expect(stock2).toMatchObject(newStock2);
     const pfs = await userPfs(token, d);
     expect(pfs).toEqual(expect.arrayContaining(pfArray));
-    const pf = await openPf(pid, d);
+    const pf = await openPf(token, pid, d);
     stArray[1] = newStock1;
     stArray[2] = newStock2;
     expect(pf).toMatchObject({
@@ -919,7 +919,7 @@ describe('Portfolio and stocks endpoint test', () => {
   it('200 on valid get default brokerage value', async() => {
     const check = await request(app).get(`/user/getDefBroker?token=${token}`).send();    
     expect(check.statusCode).toBe(200);
-    expect(check.body.defBroker).toBe(0);
+    expect(check.body.defBroker.defBroker).toBe(0);
   })
   it('200 on first valid stock addition', async () => {
     const add = await request(app).post(`/user/stocks/add`).send({
@@ -946,7 +946,7 @@ describe('Portfolio and stocks endpoint test', () => {
       ],
       quantity: 2,
     }]
-    const pf = await openPf(pid1, database);
+    const pf = await openPf(token, pid1, database);
     expect(pf).toMatchObject({
       pid: pid1,
       name: 'myPf',
@@ -1019,7 +1019,7 @@ describe('Portfolio and stocks endpoint test', () => {
         quantity: 1
       }
     ]
-    const pf = await openPf(pid1, database);
+    const pf = await openPf(token, pid1, database);
     expect(pf).toMatchObject({
       pid: pid1,
       name: 'myPf',
@@ -1062,7 +1062,7 @@ describe('Portfolio and stocks endpoint test', () => {
 
     stArray[0] = newStock;
     
-    const pf = await openPf(pid1, database);
+    const pf = await openPf(token, pid1, database);
     expect(pf).toMatchObject({
       pid: pid1,
       name: 'myPf',
@@ -1128,7 +1128,7 @@ describe('Portfolio and stocks endpoint test', () => {
     stArray[1] = newStock1;
     stArray[2] = newStock2;
 
-    const pf = await openPf(pid1, database);
+    const pf = await openPf(token, pid1, database);
     expect(pf).toMatchObject({
       pid: pid1,
       name: 'myPf',
@@ -1194,7 +1194,7 @@ describe('Adding stocks to watchlist', () => {
     pfArray = [{ name: 'Watchlist', pid: pid}];
     const pfs = await userPfs(token, d);
     expect(pfs).toEqual(expect.arrayContaining(pfArray));
-    const pf = await openPf(pid, d);
+    const pf = await openPf(token, pid, d);
     expect(pf).toMatchObject({
       pid: pid,
       name: 'Watchlist',
@@ -1219,7 +1219,7 @@ describe('Adding stocks to watchlist', () => {
     const pfs = await userPfs(token, d);
     pfArray = [{ name: 'Watchlist', pid: pid }];
     expect(pfs).toEqual(expect.arrayContaining(pfArray));
-    const stocks = await openPf(pid, d);
+    const stocks = await openPf(token, pid, d);
     stArray = [
       {
         stock: 'AAPL',
@@ -1258,7 +1258,7 @@ describe('Adding stocks to watchlist', () => {
     })
     const pfs = await userPfs(token, d);
     expect(pfs).toEqual(expect.arrayContaining(pfArray));
-    const stocks = await openPf(pid, d);
+    const stocks = await openPf(token, pid, d);
     stArray = [
       {
         stock: 'AAPL',
@@ -1307,7 +1307,7 @@ describe('Adding stocks to watchlist', () => {
   it('Remove first stock from watchlist', async () => {
     const rem = await modifyStock(token, pid, 'AAPL', null, null, 0, null, null, d);
     expect(rem).toBe(-1);
-    const pf = await openPf(pid, d);
+    const pf = await openPf(token, pid, d);
     stArray.splice(0, 1);
     expect(pf).toMatchObject({
       pid: pid,
@@ -1320,7 +1320,7 @@ describe('Adding stocks to watchlist', () => {
     expect(rem1).toBe(-1);
     const rem2 = await modifyStock(token, pid, 'IBM', null, null, 0, null, null, d);
     expect(rem2).toBe(-1);
-    const pf = await openPf(pid, d);
+    const pf = await openPf(token, pid, d);
     stArray.splice(0, 2);
     expect(pf).toMatchObject({
       pid: pid,

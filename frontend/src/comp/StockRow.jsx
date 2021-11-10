@@ -59,7 +59,7 @@ const StockRow = ({data, onDeleteCallback = () => {}}) => {
   //   setChangePercentage(jsonResp.data.quotes.quote.change_percentage);
   // }
   return (
-    <WatchlistCardContainer>
+    <WatchlistCardContainer elevation={5}>
       <div style={{display:'flex', flexDirection:'column', padding:'1%', textAlign:'left'}} onClick={handleCardClick}>
         <div style={{fontWeight:'bold'}}>
           {data.stock}: {data.name} 

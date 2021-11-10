@@ -4,6 +4,7 @@ import { checkStock, addStock, modifyStock } from "../stocks";
 import { Database } from "../database";
 import request from 'supertest';
 import { app, database } from "../index";
+import { setDefBroker, getDefBroker } from "../user";
 
 describe('Check stock', () => {
 	const d = new Database(true);
@@ -27,7 +28,27 @@ describe('Check stock', () => {
   })
 })
 
-/* describe('Add stock', () => {
+describe('Get all stocks', () => {
+  beforeAll(async () => {
+    await database.connect();
+  })
+
+  jest.setTimeout(30000);
+  const today = new Date();
+  const now = new Date(today);
+
+  it('200 on successful get all stocks', async () => {
+    const resp = await request(app).get(`/stocks/all`).send();
+    expect(resp.statusCode).toBe(200);
+  })
+  
+
+  afterAll(async() => {
+    await database.disconnect();
+  })
+})
+
+describe('Add stock', () => {
 	const d = new Database(true);
   beforeAll(async () => {
     await d.connect();
@@ -43,8 +64,14 @@ describe('Check stock', () => {
     pid = getPid.pid;
     expect(pid).not.toBe(null);
   })
+  it('Set default brokerage cost to flat fee 0', async () => {
+    const resp = await setDefBroker(token, '0', '0', d);
+    expect(resp).toBe(1);
+    const broker = await getDefBroker(token, d);
+    expect(broker.defBroker).toBe(0);
+  })
   it('Adding valid stock', async () => {
-    const resp = await addStock(token, pid, 'IBM', 1.00, 2, d);
+    const resp = await addStock(token, pid, 'IBM', 1.00, 2, null, null, d);
     expect(resp).toBe(-1);
     const stock = await d.getStock(pid, 'IBM');
     expect(stock).toMatchObject({
@@ -54,39 +81,39 @@ describe('Check stock', () => {
     })
   })
   it('Adding invalid stock', async () => {
-    const resp = await addStock(token, pid, 'Jono', 1.00 , 5, d);
+    const resp = await addStock(token, pid, 'Jono', 1.00 , 5, null, null, d);
     expect(resp).toBe(2);
     const stock = await d.getStock(pid, 'Jono');
     expect(stock).toBe(null);
   })
   it('Invalid token', async () => {
-    const resp = await addStock('yep', pid, 'IBM', 1.00 , 5, d);
+    const resp = await addStock('yep', pid, 'IBM', 1.00 , 5, null, null, d);
     expect(resp).toBe(1);
   })
   it('Invalid pid', async () => {
-    const resp = await addStock(token, 'pid', 'IBM', 1.00 , 5, d);
+    const resp = await addStock(token, 'pid', 'IBM', 1.00 , 5, null, null, d);
     expect(resp).toBe(3);
   })
   it('Invalid quantity', async () => {
-    const check1 = await addStock(token, pid, 'IBM', 1.00, 0, d);
+    const check1 = await addStock(token, pid, 'IBM', 1.00, 0, null, null, d);
     expect(check1).toBe(4);
-    const check2 = await addStock(token, pid, 'IBM', 1.00, -2, d);
+    const check2 = await addStock(token, pid, 'IBM', 1.00, -2, null, null, d);
     expect(check2).toBe(4);
-    const check3 = await addStock(token, pid, 'IBM', 1.00, 2.4, d);
+    const check3 = await addStock(token, pid, 'IBM', 1.00, 2.4, null, null, d);
     expect(check3).toBe(4);
-    const check4 = await addStock(token, pid, 'IBM', 1.00, 'fakequantity', d);
+    const check4 = await addStock(token, pid, 'IBM', 1.00, 'fakequantity', null, null, d);
     expect(check4).toBe(4);
-    const check5 = await addStock(token, pid, 'IBM', 1.00, null, d);
+    const check5 = await addStock(token, pid, 'IBM', 1.00, null, null, null, d);
     expect(check5).toBe(4);
   })
   it('Invalid price', async () => {
-    const check1 = await addStock(token, pid, 'IBM', -2.00, 1, d);
+    const check1 = await addStock(token, pid, 'IBM', -2.00, 1, null, null, d);
     expect(check1).toBe(5);
-    const check2 = await addStock(token, pid, 'IBM', 0.00, 1, d);
+    const check2 = await addStock(token, pid, 'IBM', 0.00, 1, null, null, d);
     expect(check2).toBe(5);
-    const check3 = await addStock(token, pid, 'IBM', 'fakeprice', 1, d);
+    const check3 = await addStock(token, pid, 'IBM', 'fakeprice', 1, null, null, d);
     expect(check3).toBe(5);
-    const check4 = await addStock(token, pid, 'IBM', null, 1, d);
+    const check4 = await addStock(token, pid, 'IBM', null, 1, null, null, d);
     expect(check4).toBe(5);
   })
 
@@ -106,6 +133,14 @@ describe('Add stock endpoint test', () => {
   it('200 on valid stock adding', async () => {
     const rego = await authRegister('Ashley', 'strongpassword', database);
     token = rego.token;
+
+    const set = await request(app).post(`/user/setDefBroker`).send({
+      token: token,
+      defBroker: '0',
+      brokerFlag: '0'
+    })
+    expect(set.statusCode).toBe(200);
+
     const resp = await request(app).post(`/user/portfolios/create`).send({
       token: token,
       name: 'myPf'
@@ -122,6 +157,7 @@ describe('Add stock endpoint test', () => {
       stock: 'IBM',
       price: 1.00,
       quantity: 2,
+      brokerage: null
     })
     expect(add.statusCode).toBe(200);
   })
@@ -261,12 +297,18 @@ describe('Modify stock', () => {
   it('Create new user and portfolio and adding a stock', async () => {
     const rego = await authRegister('Ashley', 'strongpassword', d);
     token = rego.token;
+
+    const resp = await setDefBroker(token, '0', '0', d);
+    expect(resp).toBe(1);
+    const broker = await getDefBroker(token, d);
+    expect(broker.defBroker).toBe(0);
+
     const getPid = await createPf(token, 'myPf', d);
     pid = getPid.pid;
-    await addStock(token, pid, 'IBM', 1.00, 2, d);
+    await addStock(token, pid, 'IBM', 1.00, 2, null, null, d);
   })
   it('Adding to existing stock', async () => {
-    const resp = await modifyStock(token, pid, 'IBM', .5, 2, 1, d);
+    const resp = await modifyStock(token, pid, 'IBM', .5, 2, 1, null, null, d);
     expect(resp).toBe(-1);
     const stock = await d.getStock(pid, 'IBM');
     expect(stock).toMatchObject({
@@ -276,7 +318,7 @@ describe('Modify stock', () => {
     })
   })
   it('Selling part of a stock', async () => {
-    const resp = await modifyStock(token, pid, 'IBM', .5, 2, 0, d);
+    const resp = await modifyStock(token, pid, 'IBM', .5, 2, 0, null, null, d);
     expect(resp).toBe(-1);
     const stock = await d.getStock(pid, 'IBM');
     expect(stock).toMatchObject({
@@ -286,7 +328,7 @@ describe('Modify stock', () => {
     })
   })
   it('Selling more stock than owned', async () => {
-    const resp = await modifyStock(token, pid, 'IBM', 1, 555, 0, d);
+    const resp = await modifyStock(token, pid, 'IBM', 1, 555, 0, null, null, d);
     expect(resp).toBe(4);
     const stock = await d.getStock(pid, 'IBM');
     expect(stock).toMatchObject({
@@ -296,47 +338,51 @@ describe('Modify stock', () => {
     })
   })
   it('Invalid stock', async () => {
-    const resp = await modifyStock(token, pid, 'Jono', 1, 2, 0, d);
+    const resp = await modifyStock(token, pid, 'Jono', 1, 2, 0, null, null, d);
     expect(resp).toBe(2);
   })
   it('Selling whole stock', async () => {
-    const resp = await modifyStock(token, pid, 'IBM', 1, 2, 0, d);
+    const resp = await modifyStock(token, pid, 'IBM', 1, 2, 0, null, null, d);
     expect(resp).toBe(-1);
     const stock = await d.getStock(pid, 'IBM');
-    expect(stock).toBe(null);
+    expect(stock).toMatchObject({
+      stock: 'IBM',
+      avgPrice: .75,
+      quantity: 0,
+    })  
   })
   it('Stock is valid but not in portfolio', async () => {
-    const resp = await modifyStock(token, pid, 'IBM', 1, 2, 0, d);
+    const resp = await modifyStock(token, pid, 'AAPL', 1, 2, 0, null, null, d);
     expect(resp).toBe(5);
   })
   it('Invalid token', async () => {
-    const resp = await modifyStock('token', pid, 'IBM', 1, 2, 0, d);
+    const resp = await modifyStock('token', pid, 'IBM', 1, 2, 0, null, null, d);
     expect(resp).toBe(1);
   })
   it('Invalid pid', async () => {
-    const resp = await modifyStock(token, 'pid', 'IBM', 1, 2, 0, d);
+    const resp = await modifyStock(token, 'pid', 'IBM', 1, 2, 0, null, null, d);
     expect(resp).toBe(3);
   })
   it('Invalid quantity', async () => {
-    const check1 = await modifyStock(token, pid, 'IBM', 1.00, 0, 0, d);
+    const check1 = await modifyStock(token, pid, 'IBM', 1.00, 0, 0, null, null, d);
     expect(check1).toBe(6);
-    const check2 = await modifyStock(token, pid, 'IBM', 1.00, -2, 0, d);
+    const check2 = await modifyStock(token, pid, 'IBM', 1.00, -2, 0, null, null, d);
     expect(check2).toBe(6);
-    const check3 = await modifyStock(token, pid, 'IBM', 1.00, 2.4, 0, d);
+    const check3 = await modifyStock(token, pid, 'IBM', 1.00, 2.4, 0, null, null, d);
     expect(check3).toBe(6);
-    const check4 = await modifyStock(token, pid, 'IBM', 1.00, 'fakequantity', 0, d);
+    const check4 = await modifyStock(token, pid, 'IBM', 1.00, 'fakequantity', 0, null, null, d);
     expect(check4).toBe(6);
-    const check5 = await modifyStock(token, pid, 'IBM', 1.00, null, 0, d);
+    const check5 = await modifyStock(token, pid, 'IBM', 1.00, null, 0, null, null, d);
     expect(check5).toBe(6);
   })
   it('Invalid price', async () => {
-    const check1 = await modifyStock(token, pid, 'IBM', -2.00, 1, 0, d);
+    const check1 = await modifyStock(token, pid, 'IBM', -2.00, 1, 0, null, null, d);
     expect(check1).toBe(7);
-    const check2 = await modifyStock(token, pid, 'IBM', 0.00, 1, 0, d);
+    const check2 = await modifyStock(token, pid, 'IBM', 0.00, 1, 0, null, null, d);
     expect(check2).toBe(7);
-    const check3 = await modifyStock(token, pid, 'IBM', 'fakeprice', 1, 0, d);
+    const check3 = await modifyStock(token, pid, 'IBM', 'fakeprice', 1, 0, null, null, d);
     expect(check3).toBe(7);
-    const check4 = await modifyStock(token, pid, 'IBM', null, 1, 0, d);
+    const check4 = await modifyStock(token, pid, 'IBM', null, 1, 0, null, null, d);
     expect(check4).toBe(7);
   })
 
@@ -356,6 +402,14 @@ describe('Modify stock endpoint test', () => {
   it('200 on valid stock modifying and adding', async () => {
     const rego = await authRegister('Ashley', 'strongpassword', database);
     token = rego.token;
+
+    const set = await request(app).post(`/user/setDefBroker`).send({
+      token: token,
+      defBroker: '0',
+      brokerFlag: '0'
+    })
+    expect(set.statusCode).toBe(200);
+
     const resp = await request(app).post(`/user/portfolios/create`).send({
       token: token,
       name: 'myPf'
@@ -372,6 +426,7 @@ describe('Modify stock endpoint test', () => {
       stock: 'IBM',
       price: 1.00,
       quantity: 2,
+      brokerage: null
     })
     expect(add.statusCode).toBe(200);
 
@@ -382,6 +437,7 @@ describe('Modify stock endpoint test', () => {
       price: .5,
       quantity: 2,
       option: 1,
+      brokerage: null
     })
     expect(mod.statusCode).toBe(200);
 
@@ -400,6 +456,7 @@ describe('Modify stock endpoint test', () => {
       price: .5,
       quantity: 2,
       option: 0,
+      brokerage: null
     })
     expect(sell.statusCode).toBe(200);
 
@@ -418,6 +475,7 @@ describe('Modify stock endpoint test', () => {
       price: 1.00,
       quantity: 2,
       option: 1,
+      brokerage: null
     })
     expect(add.statusCode).toBe(401);
     expect(add.body.error).toBe("Invalid token");
@@ -430,6 +488,7 @@ describe('Modify stock endpoint test', () => {
       price: 1.00,
       quantity: 2,
       option: 1,
+      brokerage: null
     })
     expect(add.statusCode).toBe(403);
     expect(add.body.error).toBe("Invalid stock");
@@ -442,6 +501,7 @@ describe('Modify stock endpoint test', () => {
       price: 1.00,
       quantity: 2,
       option: 1,
+      brokerage: null
     })
     expect(add.statusCode).toBe(403);
     expect(add.body.error).toBe("Invalid pid");
@@ -454,6 +514,7 @@ describe('Modify stock endpoint test', () => {
       price: 1.00,
       quantity: 155,
       option: 0,
+      brokerage: null
     })
     expect(mod.statusCode).toBe(403);
     expect(mod.body.error).toBe("Quantity to sell too high");
@@ -466,19 +527,20 @@ describe('Modify stock endpoint test', () => {
       price: 1.00,
       quantity: 2.00,
       option: 0,
+      brokerage: null
     })
     expect(mod.statusCode).toBe(200);
     const stock = await database.getStock(pid, 'IBM');
-    expect(stock).toBe(null);
   })
   it('404 on valid stock not in portfolio', async() => {
     const mod = await request(app).put(`/user/stocks/edit`).send({
       token: token,
       pid: pid,
-      stock: 'IBM',
+      stock: 'AAPL',
       price: 1.00,
       quantity: 2,
       option: 0,
+      brokerage: null
     })
     expect(mod.statusCode).toBe(404);
     expect(mod.body.error).toBe("Stock is not in portfolio");
@@ -491,9 +553,10 @@ describe('Modify stock endpoint test', () => {
       price: 1.00,
       quantity: 0,
       option: 0,
+      brokerage: null
     })
     expect(add1.statusCode).toBe(400);
-    expect(add1.body.error).toBe('Must include valid quantity purchased')
+    expect(add1.body.error).toBe('Must include valid quantity sold')
     const add2 = await request(app).put(`/user/stocks/edit`).send({
       token: token,
       pid: pid,
@@ -501,9 +564,10 @@ describe('Modify stock endpoint test', () => {
       price: 1.00,
       quantity: -2,
       option: 0,
+      brokerage: null
     })
     expect(add2.statusCode).toBe(400);
-    expect(add2.body.error).toBe('Must include valid quantity purchased')
+    expect(add2.body.error).toBe('Must include valid quantity sold')
     const add3 = await request(app).put(`/user/stocks/edit`).send({
       token: token,
       pid: pid,
@@ -511,9 +575,10 @@ describe('Modify stock endpoint test', () => {
       price: 1.00,
       quantity: 2.4,
       option: 0,
+      brokerage: null
     })
     expect(add3.statusCode).toBe(400);
-    expect(add3.body.error).toBe('Must include valid quantity purchased')
+    expect(add3.body.error).toBe('Must include valid quantity sold')
     const add4 = await request(app).put(`/user/stocks/edit`).send({
       token: token,
       pid: pid,
@@ -521,9 +586,10 @@ describe('Modify stock endpoint test', () => {
       price: 1.00,
       quantity: 'fakequantity',
       option: 0,
+      brokerage: null
     })
     expect(add4.statusCode).toBe(400);
-    expect(add4.body.error).toBe('Must include valid quantity purchased')
+    expect(add4.body.error).toBe('Must include valid quantity sold')
     const add5 = await request(app).put(`/user/stocks/edit`).send({
       token: token,
       pid: pid,
@@ -531,9 +597,10 @@ describe('Modify stock endpoint test', () => {
       price: 1.00,
       quantity: null,
       option: 0,
+      brokerage: null
     })
     expect(add5.statusCode).toBe(400);
-    expect(add5.body.error).toBe('Must include valid quantity purchased')
+    expect(add5.body.error).toBe('Must include valid quantity sold')
   })
   it('400 on invalid price', async () => {
     const add1 = await request(app).put(`/user/stocks/edit`).send({
@@ -543,9 +610,10 @@ describe('Modify stock endpoint test', () => {
       price: -2.00,
       quantity: 1,
       option: 0,
+      brokerage: null
     })
     expect(add1.statusCode).toBe(400);
-    expect(add1.body.error).toBe('Must include valid price purchased at');
+    expect(add1.body.error).toBe('Must include valid price sold at');
     const add2 = await request(app).put(`/user/stocks/edit`).send({
       token: token,
       pid: pid,
@@ -553,9 +621,10 @@ describe('Modify stock endpoint test', () => {
       price: -2.00,
       quantity: 1,
       option: 0,
+      brokerage: null
     })
     expect(add2.statusCode).toBe(400);
-    expect(add2.body.error).toBe('Must include valid price purchased at');
+    expect(add2.body.error).toBe('Must include valid price sold at');
     const add3 = await request(app).put(`/user/stocks/edit`).send({
       token: token,
       pid: pid,
@@ -563,9 +632,10 @@ describe('Modify stock endpoint test', () => {
       price: -2.00,
       quantity: 1,
       option: 0,
+      brokerage: null
     })
     expect(add3.statusCode).toBe(400);
-    expect(add3.body.error).toBe('Must include valid price purchased at');
+    expect(add3.body.error).toBe('Must include valid price sold at');
     const add4 = await request(app).put(`/user/stocks/edit`).send({
       token: token,
       pid: pid,
@@ -573,12 +643,13 @@ describe('Modify stock endpoint test', () => {
       price: -2.00,
       quantity: 1,
       option: 0,
+      brokerage: null
     })
     expect(add4.statusCode).toBe(400);
-    expect(add4.body.error).toBe('Must include valid price purchased at');
+    expect(add4.body.error).toBe('Must include valid price sold at');
   })
 
   afterAll(async () => {
     await database.disconnect();
   })
-}) */
+})

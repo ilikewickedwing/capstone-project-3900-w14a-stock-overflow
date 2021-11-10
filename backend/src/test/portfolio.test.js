@@ -28,14 +28,14 @@ describe('Porfolio create', () => {
   })
   it('Creating a new portfolio returns a valid portfolio id', async () => {
     const resp = await createPf(token, 'myPf2', d);
-    const pf = await openPf(resp.pid, d);
+    const pf = await openPf(token, resp.pid, d);
     expect(pf).toMatchObject({
       pid: expect.any(String)
     })
   })
   it('Creating a new portfolio returns a valid portfolio name', async () => {
     const resp = await createPf(token, 'myPf3', d);
-    const pf = await openPf(resp.pid, d);
+    const pf = await openPf(token, resp.pid, d);
     expect(pf).toMatchObject({
       name: 'myPf3'
     })
@@ -231,7 +231,7 @@ describe('Portfolio open', () => {
     expect(pid).toBe(myPid);
   })
   it('Open portfolio', async () => {
-    const resp = await openPf(myPid, d);
+    const resp = await openPf(token, myPid, d);
     expect(resp).toMatchObject({
       name: "myPf",
       pid: myPid,
@@ -241,7 +241,7 @@ describe('Portfolio open', () => {
   it('Create new portfolio and open', async () => {
     const getpid = await createPf(token, 'myPf2', d);
     const newPid = getpid.pid;
-    const resp = await openPf(newPid, d);
+    const resp = await openPf(token, newPid, d);
     expect(resp).toMatchObject({
       name: "myPf2",
       pid: newPid,
@@ -265,7 +265,7 @@ describe('Portfolio open endpoint test', () => {
     const rego = await authRegister('Ashley', 'strongpassword', database);
     token = rego.token;
     const pid = await getPid(token, "Watchlist", database);
-    const resp = await request(app).get(`/user/portfolios/open?pid=${pid}`).send()
+    const resp = await request(app).get(`/user/portfolios/open?token=${token}&pid=${pid}`).send()
     expect(resp.statusCode).toBe(200);
     expect(resp.body).toMatchObject({ 
       name: "Watchlist",
@@ -283,7 +283,7 @@ describe('Portfolio open endpoint test', () => {
       pid: expect.any(String)
     });
     const pid = await getPid(token, "myPf", database);
-    const resp = await request(app).get(`/user/portfolios/open?pid=${pid}`).send()
+    const resp = await request(app).get(`/user/portfolios/open?token=${token}&pid=${pid}`).send()
     expect(resp.statusCode).toBe(200);
     expect(resp.body).toMatchObject({
       name: "myPf",
@@ -292,7 +292,7 @@ describe('Portfolio open endpoint test', () => {
     })
   })
   it('403 on invalid pid', async () => {
-    const resp = await request(app).get(`/user/portfolios/open?pid=fakepid`).send()
+    const resp = await request(app).get(`/user/portfolios/open?token=${token}&pid=fakepid`).send()
     expect(resp.statusCode).toBe(403);
   })
 
@@ -329,7 +329,7 @@ describe('Portfolio edit', () => {
     expect(resp).toBe(1);
   })
   it('Edited portfolio name shows up in database', async () => {
-    const resp = await openPf(myPid, d);
+    const resp = await openPf(token, myPid, d);
     expect(resp).toMatchObject({
       name: "updatedPf",
       pid: myPid,
@@ -350,7 +350,7 @@ describe('Portfolio edit', () => {
     const edit = await editPf(token, newPid, 'updatedPf2', d);
     expect(edit).not.toBe(null);
     expect(edit).toBe(1);
-    const dbPf = await openPf(newPid, d);
+    const dbPf = await openPf(token, newPid, d);
     expect(dbPf).toMatchObject({
       name: "updatedPf2",
       pid: newPid,
@@ -433,7 +433,7 @@ describe('Portfolio edit endpoint test', () => {
     // expect(pid1).toBe(pid);
     const pid2 = await getPid(token, 'myPf', database);
     // expect(pid2).toBe(null);
-    const resp1 = await request(app).get(`/user/portfolios/open?pid=${pid}`).send()
+    const resp1 = await request(app).get(`/user/portfolios/open?token=${token}&pid=${pid}`).send()
     expect(resp1.statusCode).toBe(200);
     expect(resp1.body).toMatchObject({
       name: "updatedPf",
@@ -574,7 +574,7 @@ describe('Porfolio delete', () => {
   it('Check for portfolio in database', async () => {
     const delResp = await deletePf(token, myPid, d);
     expect(delResp).toBe(1);
-    const pf = await openPf(myPid, d);
+    const pf = await openPf(token, myPid, d);
     expect(pf).toBe(null);
   })
   it('Check for portfolio in users portfolios', async () => {
@@ -592,7 +592,7 @@ describe('Porfolio delete', () => {
     expect(myPid1).toBe(create);
     const delResp = await deletePf(token, create, d);
     expect(delResp).toBe(1);
-    const pf = await openPf(create, d);
+    const pf = await openPf(token, create, d);
     expect(pf).toBe(null);
     myPid1 = await getPid(token, 'myPf', d);
     expect(myPid1).toBe(null);
@@ -648,7 +648,7 @@ describe('Portfolio delete endpoint test', () => {
       pid: pid
     });
     expect(resp.statusCode).toBe(200);
-    const resp1 = await request(app).get(`/user/portfolios/open?pid=${pid}`).send()
+    const resp1 = await request(app).get(`/user/portfolios/open?token=${token}&pid=${pid}`).send()
     expect(resp1.statusCode).toBe(403);
   })
   it('400 on invalid pid', async () => {

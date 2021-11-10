@@ -71,7 +71,7 @@ export const getDefBroker = async (token, database) => {
   }
 
   const resp = await database.getDefBroker(uid);
-  return resp.defBroker;
+  return resp;
 }
 
 /**
