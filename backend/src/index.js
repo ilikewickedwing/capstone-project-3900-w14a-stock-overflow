@@ -3,7 +3,8 @@ import cors from 'cors';
 import { Database } from "./database";
 import swaggerUI from 'swagger-ui-express';
 import { swaggerDocs } from "./docs";
-import { createPf, deletePf, openPf, userPfs, getPid, editPf, calcPf } from "./portfolio";
+import { createPf, deletePf, openPf, userPfs, getPid, editPf } from "./portfolio";
+import { calcPf } from "./performance";
 import { authDelete, authLogin, authLogout, authRegister } from "./auth";
 import { getDefBroker, getUserProfile, postUserProfile, setDefBroker } from "./user";
 import { addStock, modifyStock, getAllStocks, checkStock, getStock } from "./stocks";
@@ -475,13 +476,17 @@ app.get('/user/portfolios', async (req, res) => {
  *         description: Invalid pid
  */
 app.get('/user/portfolios/open', async (req, res) => {
-  const { pid } = req.query;
-  const resp = await openPf(pid, database);
-  if (resp !== null) {
+  const { token, pid } = req.query;
+  const resp = await openPf(token, pid, database);
+  if (resp === null) {
+    res.status(403).send({ error: "Invalid pid" });
+  } else if (resp === 1) {
+    res.status(401).send({ error: "Invalid token" });
+  } else if (resp === 2) {
+    res.status(401).send({ error: "You do not have access to this portfolio" });
+  } else {
     res.status(200).send(resp);
-    return;
   }
-  res.status(403).send({ error: "Invalid pid" });
 })
 
 
