@@ -37,6 +37,8 @@ export const addStock = async (token, pid, stock, price, quantity, brokerage, br
     return 1;
   }
 
+  if (stock === '') return 2;
+
   // Return error if stock is not valid
   if (!await checkStock(stock)) {
     return 2;
