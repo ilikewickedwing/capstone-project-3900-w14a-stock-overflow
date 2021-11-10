@@ -115,7 +115,11 @@ export default class API {
     }
     return fetch(`${ENDPOINT}/file/upload`, options);
   }
-
+  
+  fileDownload(token, fid) {
+    return fetch(`${ENDPOINT}/file/download?token=${token}&fid=${fid}`);
+  }
+  
   /**
    * 
    * @param {int} type
