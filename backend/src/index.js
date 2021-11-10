@@ -10,6 +10,7 @@ import { addStock, modifyStock, getAllStocks, checkStock, getStock } from "./sto
 import { getAdminCelebrityRequests, postAdminCelebrityHandlerequest, postCelebrityMakeRequest } from "./admin";
 import { getUserNotifications, deleteUserNotifications } from "./notifications";
 import fileUpload from 'express-fileupload';
+import { handleFileDownload, handleFileUpload } from "./file";
 
 // Make the server instance
 export const app = express();
@@ -29,7 +30,7 @@ app.use(express.json())
 app.use('/docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
 
 // Middleware for file uploads
-app.use(fileUpload());
+app.use(fileUpload({ createParentPath: true }));
 
 // Intialise database
 export const database = new Database();
@@ -1082,14 +1083,14 @@ app.post('/admin/celebrity/handlerequest', async (req, res) => {
  *     parameters:
  *      - name: token
  *        description: The token of the user uploading
- *        in: body
+ *        in: header
  *        required: true
  *        type: string
- *      - name: data
+ *      - name: upload
  *        description: The data of the object
  *        in: body
  *        required: true
- *        type: string
+ *        type: form-data-file
  *     responses:
  *       200:
  *         description: Everything went okay
@@ -1097,23 +1098,44 @@ app.post('/admin/celebrity/handlerequest', async (req, res) => {
  *         description: Invalid token
  */
 app.post('/file/upload', async (req, res) => {
-  if(!req.files || !('upload' in req.files)) {
-    res.send({
-      status: false,
-      message: 'You must include a file in your upload'
-    })
-  } else {
-    const fData = req.files.upload;
+  await handleFileUpload(req, res, database);
+})
 
-    //return response
-    res.send({
-        status: true,
-        message: 'File have been successfully uploaded',
-        data: {
-          name: fData.name,
-          mimetype: fData.mimetype,
-          size: fData.size
-        }
-    });
-  }
+/**
+ * @swagger
+ * /file/download:
+ *   get:
+ *     tags: [File]
+ *     description: Get endpoint for downloading a file
+ *     parameters:
+ *      - name: token
+ *        description: The token of the user
+ *        in: header
+ *        required: true
+ *        type: string
+ *      - name: fid
+ *        description: The file id
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Everything went okay
+ *         schema:
+ *            type: object
+ *            properties:
+ *              filename:
+ *                type: string
+ *                description: Name of file
+ *              data:
+ *                type: string
+ *                description: Base64 encoding of the file
+ *       401:
+ *         description: Invalid token
+ *       403:
+ *         description: Invalid permissions
+ */
+app.get('/file/download', async (req, res) => {
+  const { token, fid } = req.query;
+  await handleFileDownload(token, fid, res, database);
 })
