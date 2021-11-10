@@ -5,15 +5,51 @@ import PropTypes from 'prop-types';
 import { ApiContext } from "../api";
 import { transformTimeStr } from "./StocksGraph";
 
+// Used for testing
+const makeMockResponse = () => {
+  return {
+    name: `Porfolio ${Math.floor(Math.random() * 100)}`,
+    value: {
+      performance: [
+        {
+          date: '2014-5-5',
+          performance: Math.random() * 100
+        },
+        {
+          date: '2014-5-6',
+          performance: Math.random() * 100
+        },
+        {
+          date: '2014-5-7',
+          performance: Math.random() * 100
+        },
+        {
+          date: '2014-5-8',
+          performance: Math.random() * 100
+        },
+        {
+          date: '2014-5-9',
+          performance: Math.random() * 100
+        },
+        {
+          date: '2014-5-10',
+          performance: Math.random() * 100
+        }
+      ]
+    }
+  }
+}
 
 export default function PerformanceGraph(props) {
   const [ dataCache, setDataCache ] = useState({});
+  const [ pidToName, setPidToName ] = useState({});
   const api = useContext(ApiContext);
   useEffect(() => {
     const token = localStorage.getItem('token');
     // Fetch the portfolio performance for each of the portfolios that arent cached
     const callApi = async () => {
       const dataCacheCopy = Object.assign({}, dataCache);
+      const pidToNameCopy = Object.assign({}, pidToName);
       // Loop through each of the pids
       for (const pid of props.pids.split(",")) {
         const resp = await api.userPortfoliosOpen(pid, token);
@@ -21,11 +57,15 @@ export default function PerformanceGraph(props) {
           const respJson = await resp.json();
           // Store in datacache
           dataCacheCopy[pid] = respJson.value.performance;
+          pidToNameCopy[pid] = respJson.name;
         }
       }
       setDataCache(dataCacheCopy);
+      setPidToName(pidToNameCopy);
     }
     callApi();
+    // Note: Please dont put dataCache or pidToName in the dependency list or it
+    // leads to a continuous loop
   }, [api, props.pids]);
   
   const renderLines = () => {
@@ -33,7 +73,7 @@ export default function PerformanceGraph(props) {
     const hasAllPData = pids.every(pid => pid in dataCache);
     if (hasAllPData) {
       return pids.map(pid => (
-        <Line unit="%" dot={false} type="monotone" dataKey={pid}
+        <Line key={pid} unit="%" dot={false} type="monotone" dataKey={pidToName[pid]}
           stroke={randomColor({ luminosity: 'dark' })}>
         </Line>
       ))
@@ -44,7 +84,7 @@ export default function PerformanceGraph(props) {
   return (
     <ResponsiveContainer width={'99%'} height={props.height}>
       <LineChart
-        data={transformDataCache(props.pids.split(","), dataCache)}
+        data={transformDataCache(props.pids.split(","), dataCache, pidToName)}
         margin={{ top: 25, bottom: 25, left: 25 }}
       >
         <XAxis minTickGap={25} dataKey="date" dy={15}></XAxis>
@@ -56,7 +96,7 @@ export default function PerformanceGraph(props) {
         ></YAxis>
         <Tooltip/>
         { renderLines() }
-        <Legend/>
+        <Legend wrapperStyle={{bottom: 0, right: 0}}/>
       </LineChart>
     </ResponsiveContainer>
   )
@@ -69,7 +109,11 @@ PerformanceGraph.propTypes = {
 }
 
 // Transform the datacache into a format that can be displayed
-const transformDataCache = (pids, dataCache) => {
+const transformDataCache = (pids, dataCache, pidToName) => {
+  const hasAllPData = pids.every(pid => pid in dataCache);
+  if (!hasAllPData) {
+    return [];
+  }
   const dateNum = dataCache[pids[0]].length;
   const output = [];
   for (let i = 0; i < dateNum; i++) {
@@ -77,7 +121,7 @@ const transformDataCache = (pids, dataCache) => {
       date: transformTimeStr(dataCache[pids[0]][i].date)
     };
     for (const pid of pids) {
-      datePoint[pid] = dataCache[pid][i].performance;
+      datePoint[pidToName[pid]] = dataCache[pid][i].performance;
     }
     output.push(datePoint);
   }
