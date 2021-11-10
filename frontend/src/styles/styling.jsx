@@ -18,15 +18,16 @@ export const FlexColumns = styled.div`
 `;
 
 export const BoxShadow = styled(Paper)`
-// box-shadow: 2px 1px 8px 1px rgba(181,177,177,0.72);
-// -webkit-box-shadow: 2px 1px 8px 1px rgba(181,177,177,0.72);
-// -moz-box-shadow: 2px 1px 8px 1px rgba(181,177,177,0.72);
 border-radius: 8px;
 `;
-export const NavBar = styled(FlexRows)`
-justify-content: space-between;
-padding: 1% 3%;
-background-color: #6d6875;
+
+export const NavBar = styled.div`
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1% 3%;
+    background-color: #6d6875;
+    height:7%;
 `;
 
 // body containers
@@ -80,12 +81,41 @@ export const WatchlistCardContainer = styled(BoxShadow)`
     justify-content: space-between;
     border-radius: 5px;
     font-size: 1.3em;
+    cursor: pointer;
     &: hover {
         background-color: #edf6f9;
         transition: 0.3s;
     }
 `;
-// component styling
+
+export const ReqCardContainer = styled(BoxShadow)`
+    padding: 3%;
+    margin: 3%;
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+`;
+
+export const FriendCardContainer = styled(ReqCardContainer)`
+    &: hover {
+        background-color: #edf6f9;
+        transition: 0.3s;
+    }
+`;
+
+export const TabBar = styled.div`
+    margin: 1%;
+`;
+
+export const SearchDiv = styled.div`
+    padding: 1%;
+    display: flex;
+    border-radius: 8px; 
+    background-color: white;
+    width:30%;
+    align-items:center;
+`;
+// Text Styles 
 export const Welcome = styled.div`
     font-size: 3em;
     font-weight:bold;
@@ -142,9 +172,6 @@ export const LogoutButton = styled(Button)`
     }
 `;
 
-export const TabBar = styled.div`
-    margin: 1%;
-`;
 
 export const ConfirmCancel = styled(FlexRows)`
     justify-content: space-between; 
@@ -202,4 +229,3 @@ export const StockHeading = styled(FlexRows)`
     padding: 2% 0%;
     position: relative;
 `
-
