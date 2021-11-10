@@ -18,7 +18,8 @@ export default function FileUpload(props) {
       const respJson = await resp.json()
       fids.push(respJson.fid);
     }
-    props.setFids(fids);
+    console.log(fids);
+    // props.setFids(fids);
   }
   const wrapperStyle = {
   

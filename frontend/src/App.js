@@ -28,7 +28,7 @@ function App() {
             <Route path="/portfolio/:pid" component={Portfolio} />
             <Route path="/profile" component={Profile} />
             <Route path="/stock/:stockCode" component={Stock} />
-            <Route path="/performance/:pid" component={ExamplePerformancePage}/>
+            <Route path="/performance/:pids" component={ExamplePerformancePage}/>
             <Route path="/admin" component={AdminPage} />
             <Route path="/upload" component={FileUpload}/>
             <Route path="/" component={Login} />

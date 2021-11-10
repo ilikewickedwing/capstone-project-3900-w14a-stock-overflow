@@ -115,7 +115,11 @@ export default class API {
     }
     return fetch(`${ENDPOINT}/file/upload`, options);
   }
-
+  
+  fileDownload(token, fid) {
+    return fetch(`${ENDPOINT}/file/download?token=${token}&fid=${fid}`);
+  }
+  
   /**
    * 
    * @param {int} type
@@ -146,8 +150,8 @@ export default class API {
     return fetch(queryStr);
   }
   
-  userPortfoliosOpen(pid) {
-    return fetch(`${ENDPOINT}/user/portfolios/open?pid=${pid}`);
+  userPortfoliosOpen(pid, token) {
+    return fetch(`${ENDPOINT}/user/portfolios/open?pid=${pid}&token=${token}`);
   }
   
   getAdminCelebrityRequests(token) {
