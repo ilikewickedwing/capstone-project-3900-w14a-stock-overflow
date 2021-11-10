@@ -37,7 +37,7 @@ describe('Create and delete', () => {
     const resp = await setDefBroker(token, '0', '0', d);
     expect(resp).toBe(1);
     const broker = await getDefBroker(token, d);
-    expect(broker).toBe(0);
+    expect(broker.defBroker).toBe(0);
   })
   it('Add first stock to portfolio', async () => {
     const add = await addStock(token, pid1, 'IBM', 1, 2, null, null, d);
@@ -340,7 +340,7 @@ describe('Editing portfolio doesn\'t affect stocks', () => {
     const resp = await setDefBroker(token, '0', '0', d);
     expect(resp).toBe(1);
     const broker = await getDefBroker(token, d);
-    expect(broker).toBe(0);
+    expect(broker.defBroker).toBe(0);
   })
   it('Add stocks to portfolio', async () => {
     const add1 = await addStock(token, pid, 'AAPL', 2, 2, null, null, d);
@@ -505,7 +505,7 @@ describe('Editing stocks doesn\'t affect portfolios', () => {
     const resp = await setDefBroker(token, '0', '0', d);
     expect(resp).toBe(1);
     const broker = await getDefBroker(token, d);
-    expect(broker).toBe(0);
+    expect(broker.defBroker).toBe(0);
   })
   it('Add stocks to portfolio', async () => {
     const add1 = await addStock(token, pid, 'AAPL', 2, 2, null, null, d);
@@ -919,7 +919,7 @@ describe('Portfolio and stocks endpoint test', () => {
   it('200 on valid get default brokerage value', async() => {
     const check = await request(app).get(`/user/getDefBroker?token=${token}`).send();    
     expect(check.statusCode).toBe(200);
-    expect(check.body.defBroker).toBe(0);
+    expect(check.body.defBroker.defBroker).toBe(0);
   })
   it('200 on first valid stock addition', async () => {
     const add = await request(app).post(`/user/stocks/add`).send({
