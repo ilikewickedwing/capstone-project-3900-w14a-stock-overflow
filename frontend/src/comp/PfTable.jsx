@@ -187,7 +187,8 @@ const EnhancedTableToolbar = (props) => {
 
   const [price, setPrice] = React.useState("");
   const [quantity, setQuantity] = React.useState(0);
-
+  const [brokerage, setBroker] = React.useState('');
+  const [flag, setFlag] = React.useState(0);
 
   // modal states 
   const [open, setOpen] = React.useState(false);
@@ -200,11 +201,27 @@ const EnhancedTableToolbar = (props) => {
   const handleChange = (e) => {
     setOption(e.target.value);
   }
+  
+  // handle flag change 
+  const handleFlag = (e) => {
+    setFlag(e.target.value);
+  }
 
   React.useEffect(() => {
-    
+    getDefaultBrokerage();
   },[])
 
+    // grab the current default brokerage fee
+    const getDefaultBrokerage = async ()=> {
+      try {
+      const res = await axios.get(`${apiBaseUrl}/user/getDefBroker?token=${token}`);
+      setBroker(res.data.defBroker.defBroker); 
+      setFlag(res.data.defBroker.brokerFlag);
+      
+      } catch (e) {
+      alert(`Status Code ${e.status} : ${e.response.data.message}`);
+      }
+  }
 
   const editClick = async () => {
     handleOpen();
@@ -212,8 +229,6 @@ const EnhancedTableToolbar = (props) => {
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
-    console.log(option);
-    console.log(selected[0]);
     try {
       await axios.put(`${apiBaseUrl}/user/stocks/edit`, {
         token,
@@ -221,7 +236,9 @@ const EnhancedTableToolbar = (props) => {
         stock: selected[0],
         price: parseInt(price),
         quantity:parseInt(quantity),
-        option: option
+        option: option,
+        brokerage,
+        flag
       })
       load();
     } catch (e){
@@ -279,31 +296,46 @@ const EnhancedTableToolbar = (props) => {
               <Typography id="modal-modal-title" variant="h6" component="h2">
                   Edit Stock: {selected[0]}
               </Typography>
+              <div style={{display:'flex', flexDirection:'column'}}>
+                <Select
+                  style={{width: '100%'}}
+                  value={option}
+                  onChange={handleChange}
+                  label="Select Buy or Sell"
+                  displayEmpty
+                >
+                  <MenuItem style={{width:"100%"}} value={1}>Buy</MenuItem>
+                  <MenuItem style={{width:"100%"}} value={0}>Sell</MenuItem>
+                </Select>
+                  <TextField type="number" required variant="standard" label="price"
+                      onChange={e => setPrice(e.target.value)}/>
+                  <TextField type="number" required variant="standard" label="quantity"
+                  onChange={e => setQuantity(e.target.value)}/>
+                  <br />
+                  <Select
+                          style={{marginRight:"3%"}}
+                          value={flag}
+                          onChange={handleFlag}
+                          label="Select Option"
+                          displayEmpty
+                      >
+                          <MenuItem style={{width:"100%"}} value={1}>Percentage (_%) </MenuItem>
+                          <MenuItem style={{width:"100%"}} value={0}>Flat Fee ($USD)</MenuItem>
+                      </Select>
+                      <TextField  type="number" required variant="standard" label="Brokerage fee (USD$)"
+                      onChange={e => setBroker(e.target.value)}/>
+                  {
+                    option?   
+                    <Button style={{margin: "10px 0", width: "100%"}} type='submit' onClick={handleEditSubmit}>
+                      Buy Stock
+                    </Button>:
+                    <Button style={{margin: "10px 0", width: "100%"}} type='submit' onClick={handleEditSubmit}>
+                      Sell Stock
+                    </Button>
+                  }
+              </div> 
               <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-              <Select
-                style={{width: '100%'}}
-                value={option}
-                onChange={handleChange}
-                label="Select Buy or Sell"
-                displayEmpty
-              >
-                <MenuItem style={{width:"100%"}} value={1}>Buy</MenuItem>
-                <MenuItem style={{width:"100%"}} value={0}>Sell</MenuItem>
-              </Select>
-                <TextField type="number" required variant="standard" label="price"
-                    onChange={e => setPrice(e.target.value)}/>
-                <TextField type="number" required variant="standard" label="quantity"
-                onChange={e => setQuantity(e.target.value)}/>
-                <br />
-                {
-                  option?   
-                  <Button style={{margin: "10px 0", width: "100%"}} type='submit' onClick={handleEditSubmit}>
-                    Buy Stock
-                  </Button>:
-                  <Button style={{margin: "10px 0", width: "100%"}} type='submit' onClick={handleEditSubmit}>
-                    Sell Stock
-                  </Button>
-                }
+              
 
               </Typography>
           </Box>
@@ -318,13 +350,16 @@ EnhancedTableToolbar.propTypes = {
   load: PropTypes.func.isRequired
 };
 
-export default function PfTable({stocks, load}) {
+export default function PfTable({stocks, load, setGraphSelected}) {
   const [order, setOrder] = React.useState("asc");
   const [orderBy, setOrderBy] = React.useState("prices");
   const [selected, setSelected] = React.useState([]);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   const [rows, setRows] = React.useState([]);
+
+  const [totalProf, setProf] = React.useState(0);
+  const [totalValue, setValue] =React.useState(0);
 
 
   React.useEffect(() => {
@@ -347,15 +382,20 @@ export default function PfTable({stocks, load}) {
       }
       
       let stockRows = [];
-      
+      let totalProfit = 0; 
+      let totalVal = 0; 
       for (let i = 0; i < stocks.length; i++) {
         const inf = apiInfo[i];
         const totalPrice = stocks[i].quantity * inf.last;
         const profitLoss = totalPrice - (stocks[i].avgPrice * stocks[i].quantity);
         const changePer = (inf.last - stocks[i].avgPrice) / stocks[i].avgPrice * 100;
         stockRows.push(createData(stocks[i].stock, inf.description, stocks[i].avgPrice, inf.last.toFixed(2), changePer.toFixed(2),stocks[i].quantity, totalPrice.toFixed(2), profitLoss.toFixed(2)));
+        totalProfit = totalProfit + profitLoss;
+        totalVal = totalValue + totalPrice;
       }
       setRows(stockRows);
+      setProf(totalProfit);
+      setValue(totalVal);
       
     } catch (e) {
       alert(`Status Code ${e.response.status} : ${e.response.data.error}`);;
@@ -373,9 +413,11 @@ export default function PfTable({stocks, load}) {
     if (event.target.checked) {
       const newSelecteds = rows.map((n) => n.code);
       setSelected(newSelecteds);
+      setGraphSelected(newSelecteds);
       return;
     }
     setSelected([]);
+    setGraphSelected([]);
   };
 
   const handleClick = (event, name) => {
@@ -396,6 +438,7 @@ export default function PfTable({stocks, load}) {
     }
 
     setSelected(newSelected);
+    setGraphSelected(newSelected);
   };
 
   const handleChangePage = (event, newPage) => {
@@ -444,7 +487,6 @@ export default function PfTable({stocks, load}) {
                 .map((row, index) => {
                   const isItemSelected = isSelected(row.code);
                   const labelId = `enhanced-table-checkbox-${index}`;
-
                   return (
                     <TableRow
                       hover
@@ -482,6 +524,17 @@ export default function PfTable({stocks, load}) {
                     </TableRow>
                   );
                 })}
+               <TableRow hover>
+                      <TableCell>Total:</TableCell>
+                      <TableCell></TableCell>
+                      <TableCell></TableCell>
+                      <TableCell></TableCell>
+                      <TableCell align="center"></TableCell>
+                      <TableCell align="center" ></TableCell>
+                      <TableCell></TableCell>
+                      <TableCell>${totalValue.toFixed(2)}</TableCell>
+                      <TableCell align="center" >${totalProf.toFixed(2)}</TableCell>
+                    </TableRow>
               {emptyRows > 0 && (
                 <TableRow
                 >

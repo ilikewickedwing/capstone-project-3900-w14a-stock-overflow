@@ -44,7 +44,7 @@ const StockSelect = ({stockCode, name,pid, setClose}) => {
                 handleOpen();
             }
         } catch (e){
-            alert(`Status Code ${e.response.status} : ${e.response.data.error}`);;
+            alert(`Status Code ${e.response.status} : ${e.response.data.error}`);
         }   
     }
 
@@ -58,7 +58,7 @@ const StockSelect = ({stockCode, name,pid, setClose}) => {
             handleClose();
             setClose();
         } catch (e){
-            alert(`Status Code ${e.response.status} : ${e.response.data.error}`);;
+            alert(`Status Code ${e.response.status} : ${e.response.data.error}`);
         }   
     }
 
@@ -78,9 +78,10 @@ const StockSelect = ({stockCode, name,pid, setClose}) => {
                         Add New Stock
                     </Typography>
                     <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-                        <TextField type="text" required variant="standard" label="price"
+                        <TextField type="number" required variant="standard" label="price"
                             onChange={e => setPrice(e.target.value)}/>
-                        <TextField type="text" required variant="standard" label="quantity"
+                        <br />
+                        <TextField type="number" required variant="standard" label="quantity"
                         onChange={e => setQuantity(e.target.value)}/>
                          <br />
                         <Button style={{margin: "10px 0", width: "100%"}} type='submit' onClick={handleSubmit}>

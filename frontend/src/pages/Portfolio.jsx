@@ -3,6 +3,13 @@ import { useHistory, useParams } from 'react-router-dom';
 import axios from "axios";
 import Navigation from '../comp/Navigation'; 
 import Tabs from '../comp/Tabs'; 
+import StockRow from '../comp/StockRow';
+import AddStock from '../comp/AddStock';
+import { apiBaseUrl } from '../comp/const';
+import { ApiContext } from '../api';
+import PfTable from '../comp/PfTable';
+import StocksGraph from "../graph/StocksGraph";
+
 import Popover from '@mui/material/Popover';
 import {
   CreatePortField, 
@@ -17,18 +24,14 @@ import {
   PfBar,
   WatchlistBody,
 } from '../styles/styling';
-import Button from '@mui/material/Button';
-import StockRow from '../comp/StockRow';
-import AddStock from '../comp/AddStock';
-import { apiBaseUrl } from '../comp/const';
-import { ApiContext } from '../api';
 
-import PfTable from '../comp/PfTable';
+import Button from '@mui/material/Button';
 
 const Portfolio = () => {
   const history = useHistory();
   const { pid } = useParams();
   const token = localStorage.getItem('token');
+  console.log(token);
 
   // popover code 
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -44,6 +47,8 @@ const Portfolio = () => {
     change: null,
     changePercentage: null
   }]);
+
+  const [selected, setGraphSelected] = React.useState([]);
   const api = useContext(ApiContext);
 
   const open = Boolean(anchorEl);
@@ -57,7 +62,7 @@ const Portfolio = () => {
   
   const loadPorfolioData = async () => {
     try {
-      const request = await axios.get(`${apiBaseUrl}/user/portfolios/open?pid=${pid}`);
+      const request = await axios.get(`${apiBaseUrl}/user/portfolios/open?token=${token}&pid=${pid}`);
       const portfolioData = request.data;
       setName(portfolioData.name);
 
@@ -106,7 +111,7 @@ const Portfolio = () => {
         }
       })
       const pid = res.data;
-      const request = await axios.get(`${apiBaseUrl}/user/portfolios/open?pid=${pid}`);
+      const request = await axios.get(`${apiBaseUrl}/user/portfolios/open?token=${token}&pid=${pid}`);
       
       array = request.data['stocks'];
       let propsArray = [];
@@ -204,9 +209,14 @@ const Portfolio = () => {
                 </Button>
               </div>
               </PfBar>
+              {
+                selected.length !== 0 &&
+                  <StocksGraph companyId={selected.toString()} height={300}/>
+              }
               <PfTable 
                 stocks={stocks}
                 load={loadPorfolioData}
+                setGraphSelected={setGraphSelected}
               />
               < AddStock 
                 token={token}
