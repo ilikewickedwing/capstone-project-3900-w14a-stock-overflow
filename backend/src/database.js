@@ -87,7 +87,7 @@ const COLLECTIONS = [
   */
   'friends',
     /**
-    Stores all the portfolios of a user in the following form:
+    Stores all the user's activities in the following form:
     {
       ownerUid: string,
       activities: [string],
@@ -95,7 +95,7 @@ const COLLECTIONS = [
    */
     'userActivity',
   /**
-    This stores all the friends in the following form:
+    This stores all activities in the following form:
     {
       ownerUid: string,
       aid: string,
@@ -107,6 +107,15 @@ const COLLECTIONS = [
     }
   */
     'activity',
+  /**
+    This stores all bearish/bullish in the following form:
+    {
+      stock: string,
+      bear: [string],
+      bull: [string],
+    }
+  */
+    'stocks',
 ]
 
 /**
@@ -617,7 +626,7 @@ export class Database {
     // Updating database
     await pfs.updateOne(query, { $set: { stocks: stockList, value: pfValue } } );
     // Creating activity
-    const message = `has bought ${quantity} ${stock} at $${price}`;
+    const message = `bought ${quantity} ${stock} at $${price}`;
     this.createActivity(uid, message);
     return -1;
   }
@@ -670,7 +679,7 @@ export class Database {
     await pfs.updateOne(query, { $set: { stocks: stockList, value: pfValue } } );
 
     // Creating activity
-    const message = `has sold ${quantity} ${stock} at $${price}`;
+    const message = `sold ${quantity} ${stock} at $${price}`;
     this.createActivity(uid, message);
     
     return -1;
@@ -718,13 +727,13 @@ export class Database {
     if (friendsResp == null) {
       return -3;
     }
-
     let friendRequests = friendsResp.requests;
-    console.log(friendsResp);
+
     const requestIndex = friendRequests.indexOf(uid);
     if (requestIndex === -1) { // other user has not sent a friend request
       let userRequests = userResp.requests;
       userRequests.push(friend);
+
       await friends.updateOne({ownerUid : uid}, {$set: {requests: userRequests}});
     } else { // other user has already sent a friend request
       friendRequests.splice(requestIndex, 1);
@@ -732,6 +741,7 @@ export class Database {
       let userList = userResp.friends;
       friendList.push(uid);
       userList.push(friend);
+
       await friends.updateOne({ownerUid: friend}, {$set: {friends: friendList, requests: friendRequests}});
       await friends.updateOne({ownerUid: uid}, {$set: {friends: userList}});
     }
@@ -748,7 +758,6 @@ export class Database {
     let userList = userResp.friends;
 
     if (friendsResp == null) {
-      console.log("asdsadaaaaaaaaaa");
       return -3;
     }
 
@@ -780,6 +789,19 @@ export class Database {
     }
     
     return friendsResp.friends;
+  }
+
+  async getFriendReq(uid) {
+    // Find the friend request list for the given uid
+    const friends = this.database.collection('friends');
+    const query = {ownerUid: uid};
+    const friendsResp = await friends.findOne(query);
+
+    if (friendsResp == null) {
+      return -2;
+    }
+    
+    return friendsResp.requests;
   }
 
   async checkFriend(uid, friend) {
@@ -818,7 +840,7 @@ export class Database {
     const activity = this.database.collection('activity');
     const query = { ownerUid: uid };
     const userActivityResp = await userActivity.findOne(query);
-    const activities = userActivityResp.activities;
+    let activities = userActivityResp.activities;
     activities.push(aid);
 
     await activity.insertOne(obj);
@@ -842,7 +864,7 @@ export class Database {
     const activity = this.database.collection('activity');
     const query = { aid: aid };
     const activityResp = await activity.findOne(query);
-    const userComments = activityResp.userComments;
+    let userComments = activityResp.userComments;
     userComments.push(cid);
 
     await activity.insertOne(obj);
@@ -851,23 +873,88 @@ export class Database {
     // Creating activity
     const users = this.database.collection('users');
     const userResp = await users.findOne({uid: activityResp.ownerUid});
-    await this.createActivity(uid, `has commented on ${userResp.username}'s post`);
+    await this.createActivity(uid, `commented on ${userResp.username}'s post`);
 
     return aid;
   }
 
   async like(uid, id) {
+    const users = this.database.collection('users');
+    const userResp = await users.findOne({uid: activityResp.ownerUid});
     const activity = this.database.collection('activity');
     const activityResp = await activity.findOne({aid : id});
-    const likes = activityResp.likes;
-    const likedUsers = activityResp.likedUsers;
-    likedUsers.push(uid);
-    likes += 1;
+    let likes = activityResp.likes;
+    let likedUsers = activityResp.likedUsers;
+    const index = likedUsers.indexOf(uid);
+    let message = '';
+    if (index === -1) {
+      likedUsers.push(uid);
+      message = `has liked ${userResp.username}'s post`;
+    } else {
+      likedUsers.splice(index, 1);
+      message = `has unliked ${userResp.username}'s post`;
+    }
+    likes = likedUsers.length;
     await activity.updateOne({aid: aid}, {$set: {likes: likes, likedUsers:likedUsers}});
+
+    // Creating activity
+    await this.createActivity(uid, message);
 
     return cid;
   }
 
+  // type: 0 = bear, 1 = bull
+  async voteStock(uid, stock, type) {
+    const stocks = this.database.collection('stocks');
+    const stocksResp = await stocks.findOne({stock : stock});
+    let bear = stocksResp.bear;
+    let bull = stocksResp.bull;
+    let message = '';
+
+    if (type) { // Voted bullish
+      index = bull.indexOf(uid);
+      if (index !== -1) {
+        return;
+      }
+
+      let index = bear.indexOf(uid);
+      if (index !== -1) {
+        bear.splice(index, 1);
+      }
+      bull.push(uid);
+      message = `voted ${stock} as bullish`;
+    } else { // Voted bearish
+      index = bear.indexOf(uid);
+      if (index !== -1) {
+      }
+
+      let index = bull.indexOf(uid);
+      if (index !== -1) {
+        bull.splice(index, 1);
+      }
+      bear.push(uid);
+      message = `voted ${stock} as bearish`;
+    }
+    
+    await stocks.updateOne({stock: stock}, {$set: {bull: bull, bear: bear}});
+
+    // Creating activity
+    if (message !== '') {
+      await this.createActivity(uid, message);
+    }
+
+    return cid;
+  }
+
+  async getVotes(stock) {
+    const stocks = this.database.collection('stocks');
+    const stocksResp = await stocks.findOne({stock : stock});
+
+    return {
+      bear: stocksResp.bear.length,
+      bull: stocksResp.bull.length,
+    };
+  }
 
   /**
    * Connect to the database
