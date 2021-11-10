@@ -146,8 +146,8 @@ export default class API {
     return fetch(queryStr);
   }
   
-  userPortfoliosOpen(pid) {
-    return fetch(`${ENDPOINT}/user/portfolios/open?pid=${pid}`);
+  userPortfoliosOpen(pid, token) {
+    return fetch(`${ENDPOINT}/user/portfolios/open?pid=${pid}&token=${token}`);
   }
   
   getAdminCelebrityRequests(token) {

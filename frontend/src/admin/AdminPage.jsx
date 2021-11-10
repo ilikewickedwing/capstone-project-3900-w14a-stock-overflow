@@ -78,6 +78,21 @@ export default function AdminPage() {
       return response.requests.map((r, i) => {
         const userData = response.users[r.ownerUid];
         const token = localStorage.getItem('token');
+        
+        // Render a list of the files included in the request
+        const renderFiles = () => {
+          const fileItemStyle = {
+            backgroundColor: 'green',
+            padding: '1rem',
+            width: '100%',
+          }
+          return r.fids.map((fid, i) => {
+            return (
+              <div key={i} style={fileItemStyle}>{response.files[fid]}</div>
+            )
+          })
+        }
+        
         const onApprove = async () => {
           const resp = await api.postAdminCelebrityHandlerequest(token, true, r.rid)
           if (resp.status !== 200) {
@@ -87,6 +102,7 @@ export default function AdminPage() {
           // Get updated data
           callApi(api, token, setResponse);
         }
+        
         const onReject = async () => {
           const resp = await api.postAdminCelebrityHandlerequest(token, false, r.rid)
           if (resp.status !== 200) {
@@ -96,15 +112,26 @@ export default function AdminPage() {
           // Get updated data
           callApi(api, token, setResponse);
         }
+        
+        const attachedFilesHeaderStyle = {
+        
+        }
+        
+        const fileItemsWrapperStyle = {
+        
+        }
+        
         return (
           <div style={requestWrapStyle} key={i}>
             <img style={dpStyle} src={profileImg} alt='logo'/>
             <div style={usernameStyle}>{ userData.username }</div>
             <div style={infoStyle}>{ r.info }</div>
-              <div style={{ display: 'flex', justifyContent: 'center' }}>
-                <Button style={{ backgroundColor: '#05BE70', marginRight: '1rem' }} onClick={onApprove} color='primary' variant="contained">Approve</Button>
-                <Button style={{ backgroundColor: '#F14423', marginLeft: '1rem' }} onClick={onReject} color='primary' variant="contained">Reject</Button>
-              </div>
+            <div style={attachedFilesHeaderStyle}>Attached Files</div>
+            <div style={fileItemsWrapperStyle}>{ renderFiles() }</div>
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <Button style={{ backgroundColor: '#05BE70', marginRight: '1rem' }} onClick={onApprove} color='primary' variant="contained">Approve</Button>
+              <Button style={{ backgroundColor: '#F14423', marginLeft: '1rem' }} onClick={onReject} color='primary' variant="contained">Reject</Button>
+            </div>
           </div>
         )
       })
