@@ -1,4 +1,4 @@
-import { useContext, useRef, useEffect, useState } from "react";
+import { useContext, useRef, useEffect, useState, forwardRef } from "react";
 import { ApiContext } from "../api";
 import ErrorIcon from '@mui/icons-material/Error';
 import { IconButton } from "@material-ui/core";
@@ -30,6 +30,10 @@ export default function NotificationButton() {
   const [ notifications, setNotifications ]= useState([]);
   const api = useContext(ApiContext);
   
+  const wrapperRef = useRef(null);
+  
+  const notifRef = useRef(null);
+  
   // Get notifications from backend
   useEffect(() => {
     const getNotifications = async () => {
@@ -37,12 +41,44 @@ export default function NotificationButton() {
       const resp = await api.userNotifications(token);
       const respJson = await resp.json();
       if (resp.status === 200) {
-        // setNotifications(respJson.notifications);
-        setNotifications(mockNotifs);
+        setNotifications(respJson.notifications);
+        // setNotifications(mockNotifs);
       }
     }
     getNotifications();
   }, [api])
+  
+  // Detect when outside click
+  useEffect(() => {
+    const sendClearApiCall = () => {
+      const token = localStorage.getItem('token');
+      if (token !== null) {
+        api.userNotificationsClear(token);
+      }
+    }
+    const handleClick = e => {
+      if (wrapperRef.current !== null && notifRef.current !== null) {
+        const isOpen = notifRef.current.style.display !== 'none';
+        if (wrapperRef.current.contains(e.target)) {
+          if (!isOpen) {
+            setOpen(true);
+          } else {
+            setOpen(false);
+            sendClearApiCall();
+          }
+        } else {
+          if (isOpen) {
+            setOpen(false)
+            sendClearApiCall();
+          }
+        }
+      }
+    }
+    document.addEventListener('click', handleClick);
+    return () => {
+      document.removeEventListener('click', handleClick);
+    }
+  }, [])
   
   const wrapperStyle = {
     position: 'relative',
@@ -51,10 +87,6 @@ export default function NotificationButton() {
   }
   const notifContainStyle = {
     position: 'relative'
-  }
-  // Only click if the state change wasnt too fase
-  const onClick = () => {
-    setOpen(true);
   }
   const renderIcon = () => {
     if (notifications.length === 0) {
@@ -67,20 +99,20 @@ export default function NotificationButton() {
     )
   }
   return (
-    <div style={wrapperStyle}>
-      <IconButton onClick={onClick} color="primary">
+    <div ref={wrapperRef} style={wrapperStyle}>
+      <IconButton color="primary">
         {renderIcon()}
       </IconButton>
       <div style={notifContainStyle}>
-        <Notifications notifications={notifications} open={open} setOpen={setOpen}/>
+        <Notifications ref={notifRef} notifications={notifications} open={open} setOpen={setOpen}/>
       </div>
     </div>
   )
 }
 
-function Notifications(props) {
+const Notifications = forwardRef((props, ref) => {
   const api = useContext(ApiContext);
-  const wrapperRef = useRef(null);
+  // const wrapperRef = useRef(null);
   // Tell api that all notifications are read when opened
   useEffect(() => {
     if (props.open) {
@@ -88,18 +120,7 @@ function Notifications(props) {
       api.userNotificationsClear(token);
     }
   }, [props.open, api])
-  // Detect when outside click
-  useEffect(() => {
-    const handleClick = e => {
-      if (wrapperRef.current !== null && !wrapperRef.current.contains(e.target) && props.open) {
-        props.setOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClick);
-    return () => {
-      document.removeEventListener('mousedown', handleClick);
-    }
-  }, [props])
+  
   const renderNotifs = () => {
     const notifPanelStyle = {
       display: 'flex',
@@ -127,10 +148,7 @@ function Notifications(props) {
       )
     })
   }
-  if (!props.open) {
-    return null;
-  }
-  const panelWrapperStyle = {
+  let panelWrapperStyle = {
     position: 'absolute',
     top: '0px',
     right: '0px',
@@ -141,6 +159,9 @@ function Notifications(props) {
     marginTop: '2rem',
     borderRadius: '5px',
   }
+  if (!props.open) {
+    panelWrapperStyle = { display: 'none' }
+  }
   const notifHeaderStyle = {
     display: 'flex',
     justifyContent: 'center',
@@ -148,12 +169,12 @@ function Notifications(props) {
     padding: '0.5rem',
   }
   return (
-    <div ref={wrapperRef} style={panelWrapperStyle}>
+    <div ref={ref} style={panelWrapperStyle}>
       <div style={notifHeaderStyle}>Notifications</div>
       { renderNotifs() }
     </div>
   )
-}
+});
 
 Notifications.propTypes = {
   open: PropTypes.bool,

@@ -10,6 +10,8 @@ import { getDefBroker, getUserProfile, postUserProfile, setDefBroker } from "./u
 import { addStock, modifyStock, getAllStocks, checkStock, getStock } from "./stocks";
 import { getAdminCelebrityRequests, postAdminCelebrityHandlerequest, postCelebrityMakeRequest } from "./admin";
 import { getUserNotifications, deleteUserNotifications } from "./notifications";
+import fileUpload from 'express-fileupload';
+import { handleFileDownload, handleFileUpload } from "./file";
 
 // Make the server instance
 export const app = express();
@@ -27,6 +29,9 @@ app.use(express.json())
 
 // Middleware used to generate automatic REST API documentation
 app.use('/docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
+
+// Middleware for file uploads
+app.use(fileUpload({ createParentPath: true }));
 
 // Intialise database
 export const database = new Database();
@@ -981,6 +986,11 @@ app.delete('/user/notifications/clear', async (req, res) => {
  *        in: body
  *        required: true
  *        type: string
+ *      - name: fids
+ *        description: An array of the file ids uploaded with the request
+ *        in: body
+ *        required: true
+ *        type: array
  *     responses:
  *       200:
  *         description: Returns the rid
@@ -990,14 +1000,16 @@ app.delete('/user/notifications/clear', async (req, res) => {
  *              rid:
  *                type: string
  *                description: rid of request
+ *       400:
+ *         description: fids contain an invalid fid
  *       401:
  *         description: Invalid token
  *       403:
  *         description: Request has already been made
  */
 app.post('/celebrity/makerequest', async (req, res) => {
-  const { token, info } = req.body;
-  await postCelebrityMakeRequest(token, info, database, res);
+  const { token, info, fids } = req.body;
+  await postCelebrityMakeRequest(token, info, fids, database, res);
 })
 
 // Get endpoint for admin to fetch a list of all requests to be a celebrity
@@ -1071,4 +1083,71 @@ app.get('/admin/celebrity/requests', async (req, res) => {
 app.post('/admin/celebrity/handlerequest', async (req, res) => {
   const { token, approve, rid } = req.body;
   await postAdminCelebrityHandlerequest(token, approve, rid, database, res);
+})
+
+// Post endpoint for uploading files
+/**
+ * @swagger
+ * /file/upload:
+ *   post:
+ *     tags: [File]
+ *     description: Post endpoint for uploading file
+ *     parameters:
+ *      - name: token
+ *        description: The token of the user uploading
+ *        in: header
+ *        required: true
+ *        type: string
+ *      - name: upload
+ *        description: The data of the object
+ *        in: body
+ *        required: true
+ *        type: form-data-file
+ *     responses:
+ *       200:
+ *         description: Everything went okay
+ *       401:
+ *         description: Invalid token
+ */
+app.post('/file/upload', async (req, res) => {
+  await handleFileUpload(req, res, database);
+})
+
+/**
+ * @swagger
+ * /file/download:
+ *   get:
+ *     tags: [File]
+ *     description: Get endpoint for downloading a file
+ *     parameters:
+ *      - name: token
+ *        description: The token of the user
+ *        in: header
+ *        required: true
+ *        type: string
+ *      - name: fid
+ *        description: The file id
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Everything went okay
+ *         schema:
+ *            type: object
+ *            properties:
+ *              filename:
+ *                type: string
+ *                description: Name of file
+ *              data:
+ *                type: string
+ *                description: Base64 encoding of the file
+ *       401:
+ *         description: Invalid token
+ *       403:
+ *         description: Invalid permissions
+ */
+app.get('/file/download', async (req, res) => {
+  const { token, fid } = req.query;
+  await handleFileDownload(token, fid, res, database);
 })

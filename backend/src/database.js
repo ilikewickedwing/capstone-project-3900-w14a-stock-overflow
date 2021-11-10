@@ -98,9 +98,21 @@ const COLLECTIONS = [
       ownerUid: string,
       // Info of the notification
       info: string,
+      // An array of the file ids of all the files uploaded
+      fids: array
     }
   */
   'notifications',
+  /**
+    Stores all the files uploaded
+    {
+      fid: string // id of the file
+      ownerUid: string // person who uploaded the file
+      filename: string
+      data: string // the contents of the file in base64 encoding
+    }
+  */
+  'files',
 ]
 
 /**
@@ -351,14 +363,15 @@ export class Database {
    * @param {string} ownerUid 
    * @param {string} info 
    */
-  async insertCelebrityRequest(ownerUid, info) {
+  async insertCelebrityRequest(ownerUid, info, fids) {
     // Generate a new unique rid
     const rid = nanoid();
     const celebrityRequests = this.database.collection('celebrityRequests');
     await celebrityRequests.insertOne({
       rid: rid,
       ownerUid: ownerUid,
-      info: info
+      info: info,
+      fids: fids
     });
     return rid;
   }
@@ -444,6 +457,37 @@ export class Database {
     const query = { ownerUid: ownerUid };
     const result = await notifications.deleteMany(query);
     return result.deletedCount;
+  }
+  
+  /**
+   * Inserts a file into the database
+   * @param {string} ownerUid 
+   * @param {string} data // The contents of the file in base 64 encoding 
+   * @returns 
+   */
+  async insertFile(ownerUid, filename, data) {
+    // Generate a new unique rid
+    const fid = nanoid();
+    const files = this.database.collection('files');
+    await files.insertOne({
+      fid: fid,
+      filename: filename,
+      ownerUid: ownerUid,
+      data: data
+    });
+    return fid;
+  }
+  
+  /**
+   * Returns a given file with the given file id
+   * @param {string} fid 
+   * @returns 
+   */
+  async getFile(fid) {
+    const files = this.database.collection('files');
+    const query = { fid: fid };
+    const request = await files.findOne(query);
+    return request;
   }
   
   /**
