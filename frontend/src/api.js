@@ -1,6 +1,5 @@
 import { createContext } from "react";
-
-const ENDPOINT = 'http://localhost:5050'
+import { apiBaseUrl as ENDPOINT } from "./comp/const";
 
 export const ApiContext = createContext();
 
@@ -98,6 +97,23 @@ export default class API {
         token: token,
       })
     });
+  }
+  /**
+   * 
+   * @param {string} token // Token of the user uploading 
+   * @param {File} file // File object of the file
+   */
+  fileUpload(token, file) {
+    const formData = new FormData();
+    formData.append('upload', file);
+    const options = {
+      method: 'POST',
+      body: formData,
+      headers: {
+        token: token
+      }
+    }
+    return fetch(`${ENDPOINT}/file/upload`, options);
   }
 
   /**

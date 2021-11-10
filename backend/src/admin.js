@@ -5,7 +5,7 @@ export const DEFAULTADMIN = {
   password: 'admin'
 }
 
-export const postCelebrityMakeRequest = async (token, info, database, res) => {
+export const postCelebrityMakeRequest = async (token, info, fids, database, res) => {
   // Validate token
   const uid = await database.getTokenUid(token);
   if (uid === null) {
@@ -24,8 +24,16 @@ export const postCelebrityMakeRequest = async (token, info, database, res) => {
     res.status(403).send({ error: "You have already made a request" });
     return;
   }
+  // Check that all the file ids are valid
+  for (const fid of fids) {
+    const f = await database.getFile(fid);
+    if (f === null) {
+      res.status(400).send({ error: `File with id ${fid} does not exist` });
+      return;
+    }
+  }
   // Make a request
-  const rid = await database.insertCelebrityRequest(uid, info);
+  const rid = await database.insertCelebrityRequest(uid, info, fids);
   res.status(200).send({
     rid: rid
   });
@@ -46,14 +54,22 @@ export const getAdminCelebrityRequests = async (token, database, res) => {
   }
   const requests = await database.getAllCelebrityRequests();
   const users = {};
+  const files = {};
   for (const r of requests) {
+    // Insert user data
     const userdata = await database.getUser(r.ownerUid);
     users[r.ownerUid] = userdata;
+    // Insert file data
+    for (const fid of r.fids) {
+      const fileData = await database.getFile(fid);
+      files[fileData.fid] = fileData.filename;
+    }
   }
   // Return data
   res.status(200).send({
     requests: requests,
     users: users,
+    files: files
   })
 }
 
@@ -79,6 +95,10 @@ export const postAdminCelebrityHandlerequest = async (token, approve, rid, datab
   // Handle the request
   if (approve) {
     database.updateUser(requestData.ownerUid, { userType: 'celebrity' });
+    // Add notification
+    await database.insertUserNotification(requestData.ownerUid, '🎉Congratulations🎉, your request to become a celebrity has been approved');
+  } else {
+    await database.insertUserNotification(requestData.ownerUid, 'Your request to become a celebrity has been rejected.');
   }
   // Remove request from database
   await database.deleteCelebrityRequest(rid);

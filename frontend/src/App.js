@@ -10,6 +10,7 @@ import './App.css';
 import { StocksPage } from "./graph/StocksPage";
 import AdminPage from "./admin/AdminPage";
 import { ExamplePerformancePage } from "./graph/ExamplePerformancePage";
+import FileUpload from "./files/FileUpload";
 
 function App() {
   const api = new API();
@@ -27,6 +28,7 @@ function App() {
             <Route path="/stock/:stockCode" component={Stock} />
             <Route path="/performance/:pid" component={ExamplePerformancePage}/>
             <Route path="/admin" component={AdminPage} />
+            <Route path="/upload" component={FileUpload}/>
             <Route path="/" component={Login} />
           </Switch>  
         </div>
