@@ -81,7 +81,8 @@ const COLLECTIONS = [
     This stores all the friends in the following form:
     {
       ownerUid: string,
-      friends: string,
+      friends: [string],
+      requests: [string],
     }
   */
   'friends',
@@ -101,13 +102,8 @@ const COLLECTIONS = [
       message: string,
       time: Date,
       likes: int,
-      comments: [{
-        cid: string,
-        user: string,
-        comment: string,
-        likes: string,
-        time: Date,
-      }],
+      likedUsers: [string],
+      userComments: [string],
     }
   */
     'activity',
@@ -226,6 +222,7 @@ export class Database {
     await friends.insertOne({
       ownerUid: uid,
       friends: [],
+      requests: [],
     })
 
     // Create an empty userActivity
@@ -715,36 +712,60 @@ export class Database {
 
     // Find the friendlist for the given uid
     const friends = this.database.collection('friends');
-    const query = {ownerUid: uid};
-    const friendsResp = await friends.findOne(query);
+    const friendsResp = await friends.findOne({ownerUid: friend});
+    const userResp = await friends.findOne({ownerUid: uid});
 
     if (friendsResp == null) {
       return -3;
     }
-    let friendList = friendResp.friends;
-    friendList.push(friend);
-    
-    await friends.updateOne( query, { $set : { friends: friendList } } );
+
+    let friendRequests = friendsResp.requests;
+    console.log(friendsResp);
+    const requestIndex = friendRequests.indexOf(uid);
+    if (requestIndex === -1) { // other user has not sent a friend request
+      let userRequests = userResp.requests;
+      userRequests.push(friend);
+      await friends.updateOne({ownerUid : uid}, {$set: {requests: userRequests}});
+    } else { // other user has already sent a friend request
+      friendRequests.splice(requestIndex, 1);
+      let friendList = friendsResp.friends;
+      let userList = userResp.friends;
+      friendList.push(uid);
+      userList.push(friend);
+      await friends.updateOne({ownerUid: friend}, {$set: {friends: friendList, requests: friendRequests}});
+      await friends.updateOne({ownerUid: uid}, {$set: {friends: userList}});
+    }
+
     return true;
   }
 
   async removeFriend(uid, friend) {
-    // Find the friendlist for the given uid
+    // Find the friendList for the given uid
     const friends = this.database.collection('friends');
-    const query = {ownerUid: uid};
-    const friendsResp = await friends.findOne(query);
+    const friendsResp = await friends.findOne({ownerUid: friend});
+    const userResp = await friends.findOne({ownerUid: uid});
+    let friendList = friendsResp.friends;
+    let userList = userResp.friends;
 
     if (friendsResp == null) {
+      console.log("asdsadaaaaaaaaaa");
       return -3;
     }
-    let friendList = friendResp.friends;
-    const index = friendList.indexOf(friend);
-    if (index === -1) {
+
+    // Remove from friend's friend list
+    const index1 = friendList.indexOf(uid);
+    if (index1 === -1) {
       return -1;
     }
-    friendList.splice(index,1);
-    
-    await friends.updateOne( query, { $set : { friends: friendList } } );
+    friendList.splice(index1,1);
+    await friends.updateOne({ownerUid: friend}, { $set : { friends: friendList}});
+
+    // Remove from user's friend list
+    const index2 = userList.indexOf(friend);
+    if (index2 === -1) {return -1}
+    userList.splice(index2,1);
+    await friends.updateOne({ownerUid: uid}, { $set : { friends: userList}});
+
     return true;
   }
 
@@ -757,8 +778,8 @@ export class Database {
     if (friendsResp == null) {
       return -2;
     }
-
-    return friendResp.friends;
+    
+    return friendsResp.friends;
   }
 
   async checkFriend(uid, friend) {
@@ -778,19 +799,75 @@ export class Database {
     }
     return true;
   }
+
   async createActivity(uid, message) {
     const userResp = await this.getUser(uid);
-    const userComment = user + ' ' + message;
-    return true;
+    const userComment = userResp + ' ' + message;
+    const aid = nanoid();
+    const obj = {
+      ownerUid: uid,
+      aid: aid,
+      message: userComment,
+      time: new Date(),
+      likes: 0,
+      likedUsers: [],
+      userComments: [],
+    }
+
+    const userActivity = this.database.collection('userActivity');
+    const activity = this.database.collection('activity');
+    const query = { ownerUid: uid };
+    const userActivityResp = await userActivity.findOne(query);
+    const activities = userActivityResp.activities;
+    activities.push(aid);
+
+    await activity.insertOne(obj);
+    await userActivity.updateOne( query, { $set : { activities: activities } } );
+
+    return aid;
   }
 
   async comment(uid, aid, message) {
-    return true;
+    const cid = nanoid();
+    const obj = {
+      ownerUid: uid,
+      aid: cid,
+      message: message,
+      time: new Date(),
+      likes: 0,
+      likedUsers: [],
+      userComments: [],
+    }
+
+    const activity = this.database.collection('activity');
+    const query = { aid: aid };
+    const activityResp = await activity.findOne(query);
+    const userComments = activityResp.userComments;
+    userComments.push(cid);
+
+    await activity.insertOne(obj);
+    await activity.updateOne( query, { $set : { userComments: userComments } } );
+
+    // Creating activity
+    const users = this.database.collection('users');
+    const userResp = await users.findOne({uid: activityResp.ownerUid});
+    await this.createActivity(uid, `has commented on ${userResp.username}'s post`);
+
+    return aid;
   }
 
-  async like(uid, aid) {
-    return true;
+  async like(uid, id) {
+    const activity = this.database.collection('activity');
+    const activityResp = await activity.findOne({aid : id});
+    const likes = activityResp.likes;
+    const likedUsers = activityResp.likedUsers;
+    likedUsers.push(uid);
+    likes += 1;
+    await activity.updateOne({aid: aid}, {$set: {likes: likes, likedUsers:likedUsers}});
+
+    return cid;
   }
+
 
   /**
    * Connect to the database
