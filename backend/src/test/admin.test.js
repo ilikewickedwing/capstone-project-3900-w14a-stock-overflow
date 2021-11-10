@@ -11,7 +11,8 @@ describe('Admin Celebrity make request endpoint tests', () => {
     const resp = await authRegister('Ashley', 'strongpassword', database);
     const response = await request(app).post(`/celebrity/makerequest`).send({
       token: resp.token,
-      info: "pls make me celeb"
+      info: "pls make me celeb",
+      fids: [],
     });
     expect(response.statusCode).toBe(200);
     expect(response.body).toMatchObject({
@@ -22,19 +23,22 @@ describe('Admin Celebrity make request endpoint tests', () => {
     const resp = await authRegister('Ashley2', 'strongpassword', database);
     const response1 = await request(app).post(`/celebrity/makerequest`).send({
       token: resp.token,
-      info: "pls make me celeb"
+      info: "pls make me celeb",
+      fids: [],
     });
     expect(response1.statusCode).toBe(200);
     const response2 = await request(app).post(`/celebrity/makerequest`).send({
       token: resp.token,
-      info: "pls make me celeb"
+      info: "pls make me celeb",
+      fids: [],
     });
     expect(response2.statusCode).toBe(403);
   })
   it('401 on invalid token', async () => {
     const response1 = await request(app).post(`/celebrity/makerequest`).send({
       token: 'randomtoken',
-      info: "pls make me celeb"
+      info: "pls make me celeb",
+      fids: [],
     });
     expect(response1.statusCode).toBe(401);
   })
@@ -43,7 +47,8 @@ describe('Admin Celebrity make request endpoint tests', () => {
     await database.updateUser(resp.uid, { userType: 'celebrity' })
     const response1 = await request(app).post(`/celebrity/makerequest`).send({
       token: resp.token,
-      info: "pls make me celeb"
+      info: "pls make me celeb",
+      fids: [],
     });
     expect(response1.statusCode).toBe(403);
   })
@@ -61,7 +66,8 @@ describe('Get admin celebrity requests endpoint test', () => {
     const resp = await authRegister('Ashley4', 'strongpassword', database);
     const response = await request(app).post(`/celebrity/makerequest`).send({
       token: resp.token,
-      info: "pls make me celeb"
+      info: "pls make me celeb",
+      fids: [],
     });
     expect(response.statusCode).toBe(200);
     await database.updateUser(resp.uid, { userType: 'admin' })
@@ -74,7 +80,8 @@ describe('Get admin celebrity requests endpoint test', () => {
     const resp = await authRegister('Ashley5', 'strongpassword', database);
     const response = await request(app).post(`/celebrity/makerequest`).send({
       token: resp.token,
-      info: "pls make me celeb"
+      info: "pls make me celeb",
+      fids: [],
     });
     expect(response.statusCode).toBe(200);
     await database.updateUser(resp.uid, { userType: 'admin' })
@@ -85,7 +92,8 @@ describe('Get admin celebrity requests endpoint test', () => {
     const resp = await authRegister('Ashley6', 'strongpassword', database);
     const response = await request(app).post(`/celebrity/makerequest`).send({
       token: resp.token,
-      info: "pls make me celeb"
+      info: "pls make me celeb",
+      fids: [],
     });
     expect(response.statusCode).toBe(200);
     const celebResp = await request(app).get(`/admin/celebrity/requests?token=${resp.token}`);
@@ -110,7 +118,8 @@ describe('Post Admin Celebrity Handle Request endpoint test', () => {
     // Make request
     const requestResponse = await request(app).post(`/celebrity/makerequest`).send({
       token: user.token,
-      info: "pls make me celeb"
+      info: "pls make me celeb",
+      fids: [],
     });
     // Approve request
     const approveResponse = await request(app)
@@ -136,7 +145,8 @@ describe('Post Admin Celebrity Handle Request endpoint test', () => {
     // Make request
     const requestResponse = await request(app).post(`/celebrity/makerequest`).send({
       token: user.token,
-      info: "pls make me celeb"
+      info: "pls make me celeb",
+      fids: [],
     });
     // Approve request
     const approveResponse = await request(app)
@@ -162,7 +172,8 @@ describe('Post Admin Celebrity Handle Request endpoint test', () => {
     // Make request
     const requestResponse = await request(app).post(`/celebrity/makerequest`).send({
       token: user.token,
-      info: "pls make me celeb"
+      info: "pls make me celeb",
+      fids: [],
     });
     // Approve request
     const approveResponse = await request(app)
@@ -184,7 +195,8 @@ describe('Post Admin Celebrity Handle Request endpoint test', () => {
     // Make request
     const requestResponse = await request(app).post(`/celebrity/makerequest`).send({
       token: user.token,
-      info: "pls make me celeb"
+      info: "pls make me celeb",
+      fids: [],
     });
     // Approve request
     const approveResponse = await request(app)
@@ -207,7 +219,8 @@ describe('Post Admin Celebrity Handle Request endpoint test', () => {
     // Make request
     const requestResponse = await request(app).post(`/celebrity/makerequest`).send({
       token: user.token,
-      info: "pls make me celeb"
+      info: "pls make me celeb",
+      fids: [],
     });
     // Approve request
     const approveResponse = await request(app)

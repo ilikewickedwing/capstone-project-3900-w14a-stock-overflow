@@ -1004,7 +1004,7 @@ app.delete('/user/notifications/clear', async (req, res) => {
  */
 app.post('/celebrity/makerequest', async (req, res) => {
   const { token, info, fids } = req.body;
-  await postCelebrityMakeRequest(token, info, database, res);
+  await postCelebrityMakeRequest(token, info, fids, database, res);
 })
 
 // Get endpoint for admin to fetch a list of all requests to be a celebrity

@@ -54,14 +54,22 @@ export const getAdminCelebrityRequests = async (token, database, res) => {
   }
   const requests = await database.getAllCelebrityRequests();
   const users = {};
+  const files = {};
   for (const r of requests) {
+    // Insert user data
     const userdata = await database.getUser(r.ownerUid);
     users[r.ownerUid] = userdata;
+    // Insert file data
+    for (const fid of r.fids) {
+      const fileData = await database.getFile(fid);
+      files[fileData.fid] = fileData.filename;
+    }
   }
   // Return data
   res.status(200).send({
     requests: requests,
     users: users,
+    files: files
   })
 }
 
