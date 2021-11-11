@@ -187,7 +187,6 @@ export const calcAll = async (database) => {
  */
 export const rankAll = async (database) => {
   let rankings = [];
-  let rank = 0;
   const users = await database.getAllUsers();
   for (let i = 0; i < users.length; i++) {
     // console.dir(users[i], {depth:null});
