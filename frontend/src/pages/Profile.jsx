@@ -1,20 +1,20 @@
 import React from 'react'; 
 import { useHistory } from 'react-router';
-import { ApiContext } from '../api';
-import { useContext, useState } from 'react';
-import { NavBar } from '../styles/styling';
-import { Link } from 'react-router-dom';
-import { Logo } from '../styles/styling';
-import { apiBaseUrl } from '../comp/const';
+import { useState } from 'react';
 import axios from 'axios';
 
-import { Grid,Paper, Avatar, TextField, Button, Container } from '@material-ui/core'
-import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
+import { apiBaseUrl } from '../comp/const';
+import Navigation from '../comp/Navigation';
+import FriendRequestCard from '../comp/FriendRequestCard';
+import FriendListCard from '../comp/FriendListCard';
+
+import { Grid,Paper, TextField, Button} from '@material-ui/core'
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import Modal from '@mui/material/Modal';
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
+import { PageBody } from '../styles/styling';
 
 // styling 
 const style = {
@@ -29,6 +29,36 @@ const style = {
   p: 4,
 };
 
+const mockInvs = [
+  {
+    handle: 'friend 1',
+  },
+  {
+    handle: 'friend 2',
+  },
+  {
+    handle: 'friend 3',
+  },
+  {
+    handle: 'friend 4',
+  },
+]
+const mockFriends = [
+  {
+    handle: 'friend a',
+  },
+  {
+    handle: 'friend b',
+  },
+  {
+    handle: 'friend c',
+  },
+  {
+    handle: 'friend d',
+  },
+]
+
+
 const paperStyle={padding :20,width:280, margin:'3em'}
 const avatarStyle={backgroundColor:'#1bbd7e'}
 const btnstyle={margin:'8px 0'}
@@ -38,16 +68,18 @@ export default function Profile() {
   const token = localStorage.getItem('token');
   const uid = localStorage.getItem('uid');
 
-
   const [ username, setUsername ] = useState('');
-  const [fee, setFee] = useState('');
   
   // states from get request of current default broker fee
   const [currDef, setDef] = useState('');
   const [flag, setFlag] = useState(0); 
-
+  
   // select options : flat fee - 0; percentage- 1 ; default flat fee
   const [option, setOption] = React.useState(0);
+  const [fee, setFee] = useState('');
+
+  const [invList, setInvList] = useState(mockInvs);
+  const [friendList, setFriendList] = useState(mockFriends);
 
   // modal states 
   const [open, setOpen] = React.useState(false);
@@ -57,6 +89,8 @@ export default function Profile() {
   // on first load grab the default brokerage cost
   React.useEffect(() => {   
     getDefaultBrokerage();
+    getFriendRequests();
+    getFriendList();
   },[]);
       
   const handleChange = (e) => {
@@ -117,27 +151,28 @@ export default function Profile() {
     }
   }
 
+  const getFriendRequests = async () => {
+    try {
+    } catch (e) {
+      alert(`Status Code ${e.status} : ${e.response.data.message}`);
+    }
+  }
+
+  const getFriendList = async () => {
+    try {
+    } catch (e) {
+      alert(`Status Code ${e.status} : ${e.response.data.message}`);
+    }
+  }
+
   return(
-    <div style={{backgroundColor:"#FAE1DD", height:"100vh"}} className="font-two">
-      <NavBar>
-        <Link to="/dashboard">
-            <Logo>
-                Stock Overflow 
-            </Logo>
-        </Link>
-        <Link to="/dashboard">
-            <Button>
-                Go back
-            </Button>
-        </Link>
-      </NavBar>
+    <PageBody className="font-two">
+      <Navigation />
       <Grid container direction="row" justifyContent="center">
         <Grid>
+          <Grid>
           <Paper elevation={10} style={paperStyle}>
-              <Grid align='center'>
-                    <Avatar style={avatarStyle}><LockOutlinedIcon/></Avatar>
-                  <h2>Change account details</h2>
-              </Grid>
+              <h2 style={{textAlign:'center'}}>Change account details</h2>
               <h3>Change Username</h3>
               <TextField style = {{marginBottom:'5%'}}
                   value = {username} onChange={e => setUsername(e.target.value)}
@@ -153,33 +188,82 @@ export default function Profile() {
                 Delete account
               </Button>
           </Paper>
+          </Grid>
+          <Grid>
+            <Paper elevation={10} style={paperStyle}>
+                  <h2 style={{textAlign:'center'}}>Set default brokerage fee</h2>
+                  <span style={{fontWeight:'bold'}}>
+                    Current Default Brokerage
+                  </span>
+                  {flag ? (
+                    <div>{currDef}%</div>
+                  ):(
+                    <div>${currDef}</div>
+                  ) }
+                  <h3>Set fee</h3>
+                    <Select
+                      style={{width: '100%'}}
+                      value={option}
+                      onChange={handleChange}
+                      label="Select Option"
+                      displayEmpty
+                    >
+                      <MenuItem style={{width:"100%"}} value={1}>Percentage (_%) </MenuItem>
+                      <MenuItem style={{width:"100%"}} value={0}>Flat Fee ($USD)</MenuItem>
+                    </Select>
+                    <TextField style = {{marginBottom:'5%'}}
+                    value = {fee} onChange={e => setFee(e.target.value)}
+                    label='Enter Fee' placeholder='Enter Flat Fee ' fullWidth/>
+                      <Button
+                      onClick={submitBrokerage}
+                      type='submit' color='primary' variant="contained" style={btnstyle} fullWidth>Save</Button>
+            </Paper>
+          </Grid>
         </Grid>
         <Grid>
+          <Grid>
           <Paper elevation={10} style={paperStyle}>
-                <h3>Current Default Brokerage </h3>
-                {flag ? (
-                  <div>{currDef}%</div>
-                ):(
-                  <div>${currDef}</div>
-                ) }
-                <h3>Set default brokerage fee</h3>
-                  <Select
-                    style={{width: '100%'}}
-                    value={option}
-                    onChange={handleChange}
-                    label="Select Option"
-                    displayEmpty
-                  >
-                    <MenuItem style={{width:"100%"}} value={1}>Percentage (_%) </MenuItem>
-                    <MenuItem style={{width:"100%"}} value={0}>Flat Fee ($USD)</MenuItem>
-                  </Select>
-                  <TextField style = {{marginBottom:'5%'}}
-                  value = {fee} onChange={e => setFee(e.target.value)}
-                  label='Enter Fee' placeholder='Enter Flat Fee ' fullWidth/>
-                    <Button
-                    onClick={submitBrokerage}
-                    type='submit' color='primary' variant="contained" style={btnstyle} fullWidth>Save</Button>
+              <h2 style={{textAlign:'center'}}>Friend Requests</h2>
+              {invList.length !== 0 ?
+              (
+                <div>
+                  { invList &&
+                    invList.map((a) => 
+                      <FriendRequestCard
+                        key={a.handle}
+                        name={a.handle}
+                        reload={getFriendRequests}
+                      />
+                    )
+                  }
+                </div>
+              ) :
+              (
+                <span>No pending friend requests</span>
+              )}
           </Paper>
+          </Grid>
+          <Grid>
+            <Paper elevation={10} style={paperStyle}>
+                <h2 style={{textAlign:'center'}}>Friends List</h2>
+                {friendList.length !== 0 ?
+                (
+                  <div>
+                    { friendList &&
+                      friendList.map((a) => 
+                        <FriendListCard
+                          key={a.handle}
+                          name={a.handle}
+                        />
+                      )
+                    }
+                  </div>
+                ) :
+                (
+                  <span>No pending friend requests</span>
+                )}
+            </Paper>
+          </Grid>
         </Grid>
       </Grid>
       <Modal
@@ -201,7 +285,7 @@ export default function Profile() {
               </Typography>
           </Box>
       </Modal>
-    </div>
+    </PageBody>
    
   )
 }

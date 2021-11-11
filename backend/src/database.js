@@ -48,7 +48,8 @@ const COLLECTIONS = [
         }
       ],
       defBroker: float,
-      brokerFlag: int
+      brokerFlag: int,
+      performance: float // Average performance based on all portfolios
     }
    */
   'userPortos',
@@ -115,6 +116,16 @@ const COLLECTIONS = [
     }
   */
   'files',
+  /**
+    Stores the global rankings
+    {
+      rank: int
+      uid: string
+      name: string
+      performance: float // stored as percentage
+    }
+  */
+  'rankings',
 ]
 
 /**
@@ -185,6 +196,26 @@ export class Database {
     }
     return null;
   }
+
+  /**
+   * Get all users
+   * @returns 
+   */
+   async getAllUsers() {
+    const users = this.database.collection('users');
+    const requests = await users.find().toArray();
+    return requests;
+  }
+
+  async setUserPerf(uid, performance) {
+    const users = this.database.collection('users');
+    const query = { uid: uid };
+    const user = await users.findOne(query);
+    user.performance = performance;
+    const result = await users.updateOne(query, { $set: { performance: performance }});
+    return result.modifiedCount !== 0;
+  }
+
   /**
    * Inserts a new user into the database and returns the uid.
    * This function does not check if the username already exists, so you must check
@@ -214,7 +245,8 @@ export class Database {
         }
       ],
       defBroker: null,
-      brokerFlag: null
+      brokerFlag: null,
+      performance: null
     })
     const pfs = this.database.collection('portfolios');
     await pfs.insertOne({
@@ -792,8 +824,8 @@ export class Database {
     }
 
     pfValue.spent += price * quantity;
-    if (flag === 0) pfValue.spent += brokerage;
-    else if (flag === 1) pfValue.spent += (brokerage * (quantity * price) / 100);
+    if (flag === '0') pfValue.spent += brokerage;
+    else if (flag === '1') pfValue.spent += (brokerage * (quantity * price) / 100);
 
     // Updating database
     await pfs.updateOne(query, { $set: { stocks: stockList, value: pfValue } } );
@@ -844,8 +876,8 @@ export class Database {
 
     pfValue.sold += price * quantity;
 
-    if (flag === 0) pfValue.spent += brokerage;
-    else if (flag === 1) pfValue.spent += (brokerage * (quantity * price) / 100);
+    if (flag === '0') pfValue.spent += brokerage;
+    else if (flag === '1') pfValue.spent += (brokerage * (quantity * price) / 100);
 
     // Updating database
     await pfs.updateOne(query, { $set: { stocks: stockList, value: pfValue } } );
@@ -878,6 +910,18 @@ export class Database {
       }
     }
     return null;
+  }
+
+  async updateRankings(newRankings) {
+    const rankings = this.database.collection('rankings');
+    await rankings.deleteMany({});
+    await rankings.insertMany(newRankings);
+  }
+
+  async getRankings() {
+    const rankings = this.database.collection('rankings');
+    const resp = await rankings.find().toArray();
+    return resp;
   }
 
   /**

@@ -3,7 +3,7 @@ import { useHistory } from 'react-router';
 import {Link} from 'react-router-dom';
 import { ApiContext } from '../api';
 import ExitToAppRoundedIcon from '@material-ui/icons/ExitToAppRounded';
-import {NavBar, Logo, LogoutButton, FlexRows, SearchToggle } from '../styles/styling';
+import {NavBar, Logo, LogoutButton, FlexRows, SearchToggle, SearchDiv } from '../styles/styling';
 import { Button } from '@material-ui/core';
 import {TextInput} from "../styles/styling"; 
 import IconButton from '@mui/material/IconButton';
@@ -13,6 +13,7 @@ import Autocomplete from '@mui/material/Autocomplete';
 import { apiBaseUrl } from '../comp/const';
 import axios from 'axios';
 import NotificationButton from '../notifications/Notifications';
+import SettingsIcon from '@mui/icons-material/Settings';
 
 const label = { inputProps: { 'aria-label': 'toggle' } };
 
@@ -63,6 +64,7 @@ const Navigation = () => {
         history.push(`/stock/${currCode}`);
     }
 
+
     return (
         <NavBar className="font-two">
             <Link to="/dashboard">
@@ -71,11 +73,11 @@ const Navigation = () => {
                 </Logo>
             </Link>
             <SearchToggle>
-                friends
-                <Switch {...label} defaultChecked />
                 stocks
+                <Switch {...label}/>
+                friends
             </SearchToggle>
-            <FlexRows style={{margin:'1%', justifyContent:'center'}}>
+            <SearchDiv>
             <Autocomplete
                 disablePortal
                 options={queryRes.map((e)=> e.code+" "+ e.name)}
@@ -95,13 +97,11 @@ const Navigation = () => {
             <IconButton type="submit" sx={{p:'10px'}} onClick={submitQuery}>
                 <SearchIcon />
             </IconButton>
-            </ FlexRows> 
+            </ SearchDiv> 
             <FlexRows style={{padding:"1%"}}>
                 <NotificationButton/>
                 <Link to="/profile">
-                    <Button>
-                        Edit Profile
-                    </Button>
+                    <SettingsIcon style={{color:"white", fontSize:"2em", marginTop:'50%'}}/>
                 </Link>
                 <LogoutButton 
                     name="logOut"

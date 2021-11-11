@@ -23,10 +23,10 @@ export class API {
   async getAllStocks() {
     // Return cached stocks if available
     if (this.fullCache !== null) {
-      console.log("returning cache")
+      // console.log("returning cache")
       return this.fullCache;
     }
-    console.log("fetching cache");
+    // console.log("fetching cache");
     // Else cache doesnt exist so fetch it
     const resp = await this._getAllStocks();
     return resp;

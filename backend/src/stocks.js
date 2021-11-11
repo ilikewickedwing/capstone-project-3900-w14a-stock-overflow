@@ -32,10 +32,13 @@ export const addStock = async (token, pid, stock, price, quantity, brokerage, br
   let flag = null;
   // Finding corresponding user for the given token
   const uid = await database.getTokenUid(token);
+  if (stock === '') return 2;
   // Return error if user not found
   if (uid === null) {
     return 1;
   }
+
+  if (stock === '') return 2;
 
   // Return error if stock is not valid
   if (!await checkStock(stock)) {
@@ -107,6 +110,7 @@ export const modifyStock = async (token, pid, stock, price, quantity, option, br
   let flag = null;
   // Finding corresponding user for the given token
   const uid = await database.getTokenUid(token);
+  if (stock === '') return 2;
   // Return error if user not found
   if (uid === null) {
     return 1;
