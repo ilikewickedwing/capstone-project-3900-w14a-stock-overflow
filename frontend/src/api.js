@@ -154,6 +154,20 @@ export default class API {
     return fetch(`${ENDPOINT}/user/portfolios/open?pid=${pid}&token=${token}`);
   }
   
+  postCelebrityMakeRequest(token, info, fids) {
+    return fetch(`${ENDPOINT}/celebrity/makerequest`, {
+      method: 'POST',
+      headers: {
+        'Content-Type' : 'application/json'
+      },
+      body: JSON.stringify({
+        token: token,
+        info: info,
+        fids: fids,
+      })
+    });
+  }
+  
   getAdminCelebrityRequests(token) {
     let queryStr = `${ENDPOINT}/admin/celebrity/requests?token=${token}`;
     return fetch(queryStr);

@@ -1,12 +1,11 @@
-import { Accordion, AccordionDetails, AccordionSummary, Button, IconButton } from "@material-ui/core";
+import { Button } from "@material-ui/core";
 import { useContext, useEffect, useState } from "react"
 import { useHistory } from "react-router";
 import { ApiContext } from "../api";
 import profileImg from '../assets/profile.png';
 import { LogoutButton } from "../styles/styling";
 import ExitToAppRoundedIcon from '@material-ui/icons/ExitToAppRounded';
-import DownloadIcon from '@mui/icons-material/Download';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import FileDownload from "../files/FileDownload";
 
 const callApi = async (api, token, setResponse) => {
   const resp = await api.getAdminCelebrityRequests(token);
@@ -81,58 +80,6 @@ export default function AdminPage() {
         const userData = response.users[r.ownerUid];
         const token = localStorage.getItem('token');
         
-        const download = async (fid) => {
-          const resp = await api.fileDownload(token, fid)
-          if (resp.status === 200) {
-            /**
-            
-            TO DO: Implement the downloading from base64 string!!!
-            It currently doesnt work!!
-            
-            */
-            const respJson = await resp.json();
-            const link = document.createElement('a');
-            // Download the file
-            document.body.appendChild(link);
-            link.setAttribute('href', `data:${respJson.mimetype};base64,${respJson.data}`);
-            link.setAttribute('download', respJson.filename);
-            link.click();
-            document.body.removeChild(link);
-            
-          } else {
-            alert(`Server returned with status of ${resp.status}`)
-          }
-        }
-        
-        const downloadAll = async () => {
-          for (const fid of r.fids) {
-            await download(fid);
-          }
-        }
-        
-        // Render a list of the files included in the request
-        const renderFiles = () => {
-          const fileItemStyle = {
-            borderTop: '1px solid grey',
-            paddingTop: '0.5rem',
-            paddingBottom: '0.5rem',
-            width: '100%',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }
-          return r.fids.map((fid, i) => {
-            return (
-              <div key={i} style={fileItemStyle}>
-                <div>{response.files[fid]}</div>
-                <IconButton onClick={() => download(fid)} color="primary">
-                  <DownloadIcon/>
-                </IconButton>
-              </div>
-            )
-          })
-        }
-        
         const onApprove = async () => {
           const resp = await api.postAdminCelebrityHandlerequest(token, true, r.rid)
           if (resp.status !== 200) {
@@ -153,33 +100,12 @@ export default function AdminPage() {
           callApi(api, token, setResponse);
         }
         
-        const accordionStyle = {
-          width: '100%',
-          marginBottom: '1rem',
-        }
-        
-        const fileItemsWrapperStyle = {
-          width: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-        }
-        
         return (
           <div style={requestWrapStyle} key={i}>
             <img style={dpStyle} src={profileImg} alt='logo'/>
             <div style={usernameStyle}>{ userData.username }</div>
             <div style={infoStyle}>{ r.info }</div>
-            <Accordion style={ accordionStyle }>
-              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                <div>{ `${r.fids.length} included files` }</div>
-              </AccordionSummary>
-              <AccordionDetails>
-                <div style={fileItemsWrapperStyle}>{ renderFiles() }</div>
-              </AccordionDetails>
-            </Accordion>
-            <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-end' }}>
-              <Button onClick={downloadAll} color="primary">Download All</Button>
-            </div>
+            <FileDownload fids={r.fids} fileMap={response.files}/>
             <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1rem' }}>
               <Button style={{ backgroundColor: '#05BE70', marginRight: '1rem' }} onClick={onApprove} color='primary' variant="contained">Approve</Button>
               <Button style={{ backgroundColor: '#F14423', marginLeft: '1rem' }} onClick={onReject} color='primary' variant="contained">Reject</Button>

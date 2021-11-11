@@ -9,6 +9,7 @@ export default function FileUpload(props) {
     const files = e.target.files;
     // Stores all the file ids of the uploaded files
     const fids = [];
+    const fileMap = {};
     for (let i = 0; i < files.length; i++) {
       const resp = await api.fileUpload(token, files[i]);
       if (resp.status !== 200) {
@@ -17,9 +18,10 @@ export default function FileUpload(props) {
       }
       const respJson = await resp.json()
       fids.push(respJson.fid);
+      fileMap[respJson.fid] = files[i].name;
     }
-    console.log(fids);
-    // props.setFids(fids);
+    props.setFids(fids);
+    props.setFileMap(fileMap);
   }
   const wrapperStyle = {
   
@@ -34,5 +36,6 @@ export default function FileUpload(props) {
 
 FileUpload.propTypes = {
   // Function called to return the fids of the files once uploaded
-  setFids: PropTypes.func
+  setFids: PropTypes.func,
+  setFileMap: PropTypes.func,
 }
