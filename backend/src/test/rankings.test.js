@@ -49,15 +49,13 @@ describe('Calculate portfolio performance', () => {
     pid2 = create2.pid;
 	})
 	it('Set default brokerage cost', async () => {
-	  const resp = await setDefBroker(token1, '0', '0', d);
+	  const resp = await setDefBroker(token1, '5', '1', d);
 	  expect(resp).toBe(1);
 	  const broker = await getDefBroker(token1, d);
-	  expect(broker.defBroker).toBe(0);
 
-    const resp2 = await setDefBroker(token2, '5', '1', d);
+    const resp2 = await setDefBroker(token2, '0', '1', d);
 	  expect(resp2).toBe(1);
 	  const broker2 = await getDefBroker(token2, d);
-	  expect(broker2.defBroker).toBe(5);
 	})
 	it('Add stocks to portfolio', async () => {
     daysCalced = 10;
