@@ -121,6 +121,15 @@ export default function DiscoverCelebrityPage () {
     height: '50vh',
   }
   
+  const subTitleStyle = {
+    fontSize: '2.5rem',
+    fontFamily: 'Arial, Helvetica, sans-serif',
+    fontWeight: '600',
+    display: 'flex',
+    justifyContent: 'center',
+    padding: '1rem',
+  }
+  
   return (
     <PageBody>
       <Navigation/>
@@ -136,6 +145,7 @@ export default function DiscoverCelebrityPage () {
         </div>
         <img style={titleImgStyle} src={TitleImg} alt="title"/>
       </div>
+      <div style={subTitleStyle}>Current celebrities</div>
       <div style={panelsContainStyle}>
         { renderCelebs() }
       </div>

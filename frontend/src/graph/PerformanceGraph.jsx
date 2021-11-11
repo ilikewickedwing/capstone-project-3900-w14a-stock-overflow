@@ -121,7 +121,11 @@ const transformDataCache = (pids, dataCache, pidToName) => {
       date: transformTimeStr(dataCache[pids[0]][i].date)
     };
     for (const pid of pids) {
-      datePoint[pidToName[pid]] = dataCache[pid][i].performance;
+      try {
+        datePoint[pidToName[pid]] = dataCache[pid][i].performance;
+      } catch (err) {
+      
+      }
     }
     output.push(datePoint);
   }

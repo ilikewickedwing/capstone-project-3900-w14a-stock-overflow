@@ -265,7 +265,11 @@ const transformMultiStockData = (companyIds, interval, dataCache) => {
       time: transformTimeStr(getDataTime(getTimeSeriesData(dataCache[companyIds[0]][interval])[i]))
     };
     for (const cid of companyIds) {
-      timePoint[cid] = getTimeSeriesData(dataCache[cid][interval])[i].close
+      try {
+        timePoint[cid] = getTimeSeriesData(dataCache[cid][interval])[i].close
+      } catch(err) {
+      
+      }
     }
     output.push(timePoint);
   }
