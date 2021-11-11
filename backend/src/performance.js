@@ -7,6 +7,7 @@ import { getStock } from "./stocks";
 import { verifyPf } from "./portfolio";
 import * as schedule from "node-schedule";
 import { API } from "./api";
+import { database } from ".";
 
 const api = new API(); 
 
@@ -259,4 +260,9 @@ const rankOne = async (pfs, database) => {
   }
 
   return (total/pfs.length);
+}
+
+const getRankings = async (database) => {
+  const rankings = await database.getRankings();
+  return rankings;
 }
