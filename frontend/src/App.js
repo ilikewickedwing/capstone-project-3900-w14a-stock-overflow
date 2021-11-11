@@ -27,7 +27,7 @@ function App() {
             <Route path="/profile" component={Profile} />
             <Route path="/stock/:stockCode" component={Stock} />
             <Route path="/admin" component={AdminPage} />
-            <Route path="/celebrityrequest" component={CelebrityRequestPage}/>
+            <Route path="/celebrity/request" component={CelebrityRequestPage}/>
             <Route path="/celebrity/discover" component={DiscoverCelebrityPage}/>
             <Route path="/" component={Login} />
           </Switch>  

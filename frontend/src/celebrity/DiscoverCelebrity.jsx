@@ -4,44 +4,20 @@ import Navigation from "../comp/Navigation";
 import { PageBody } from "../styles/styling";
 import profileImg from '../assets/dp.jpg';
 import { Button } from "@material-ui/core";
-
-const mockCelebrities = [
-  {
-    username: 'bob',
-  },
-  {
-    username: 'dave',
-  },
-  {
-    username: 'sam',
-  },
-  {
-    username: 'bobby',
-  },
-  {
-    username: 'bobob',
-  },
-  {
-    username: 'bruce',
-  },
-  {
-    username: 'sarah',
-  },
-  {
-    username: 'voldefart',
-  },
-]
+import TitleImg from '../assets/working.jpg';
+import { useHistory } from "react-router";
 
 export default function DiscoverCelebrityPage () {
   const [ celebrities, setCelebrities ] = useState([]);
   const api = useContext(ApiContext);
+  const history = useHistory();
   useEffect(() => {
     const callApi = async () => {
       const resp = await api.getCelebrityDiscover();
       if (resp.status === 200) {
         const respJson = await resp.json();
-        // setCelebrities(respJson.celebrities);
-        setCelebrities(mockCelebrities);
+        setCelebrities(respJson.celebrities);
+        // setCelebrities(mockCelebrities);
       } else {
         alert(`Server returned with status ${resp.status}`);
       }
@@ -52,10 +28,10 @@ export default function DiscoverCelebrityPage () {
   const renderCelebs = () => {
     if (celebrities.length === 0) {
       const msgStyle = {
-        position: 'fixed',
         fontFamily: 'Arial, Helvetica, sans-serif',
         fontSize: '2rem',
-        top: '50vh',
+        marginTop: '3rem',
+        color: 'grey',
       }
       return (
         <div style={msgStyle}>
@@ -124,9 +100,42 @@ export default function DiscoverCelebrityPage () {
     justifyContent: 'center',
   }
   
+  const titleStyle = {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    fontSize: '3rem',
+    fontFamily: 'Arial, Helvetica, sans-serif',
+    fontWeight: '600',
+    minHeight: '60vh',
+    backgroundColor: '#EAEEF7',
+    color: 'white',
+  }
+  
+  const titleTagStyle = {
+    color: '#6D6875',
+  }
+  
+  const titleImgStyle = {
+    width: 'auto',
+    height: '50vh',
+  }
+  
   return (
     <PageBody>
       <Navigation/>
+      <div style={titleStyle}>
+        <div>
+          <div style={titleTagStyle}>Discover 
+            <span style={{ color: '#F4C54F' }}> your </span>
+            favourite celebrities
+          </div>
+          <Button 
+            onClick={() => history.push('/celebrity/request')}
+            variant="contained" color="secondary">Become a celebrity now</Button>
+        </div>
+        <img style={titleImgStyle} src={TitleImg} alt="title"/>
+      </div>
       <div style={panelsContainStyle}>
         { renderCelebs() }
       </div>

@@ -12,6 +12,8 @@ import FileUpload from "../files/FileUpload";
 import FileDownload from "../files/FileDownload";
 import { ApiContext } from "../api";
 import { useHistory } from "react-router";
+import { PageBody } from "../styles/styling";
+import Navigation from "../comp/Navigation";
 
 const steps = ['Why become a celebrity?', 'Complete form', 'Verify your identity', 'Finish']
 
@@ -23,9 +25,8 @@ export default function CelebrityRequestPage() {
   const api = useContext(ApiContext);
   const token = localStorage.getItem('token');
   const pageStyle = {
-    backgroundColor: '#6D6875',
-    height: '100vh',
     display: 'flex',
+    marginTop: '5vh',
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
@@ -60,36 +61,39 @@ export default function CelebrityRequestPage() {
     return;
   }
   return (
-    <div style={pageStyle}>
-      <div style={widgetWrapperStyle}>
-        <Stepper activeStep={activeStep}>
-          { steps.map((label, i) => (
-            <Step key={i}>
-              <StepLabel>
-                <span style={{ fontWeight: '600' }}>
-                  {label}
-                </span>
-              </StepLabel>
-            </Step>
-          )) }
-        </Stepper>
-        <StepPage step={0} activeStep={activeStep} setActiveStep={setActiveStep}>
-          <StartPage/>
-        </StepPage>
-        <StepPage step={1} activeStep={activeStep} setActiveStep={setActiveStep}>
-          <FormPage info={info} setInfo={setInfo}/>
-        </StepPage>
-        <StepPage step={2} activeStep={activeStep} setActiveStep={setActiveStep}>
-          <VerifyIdentityPage setFileMap={setFileMap} setFids={setFids}/>
-        </StepPage>
-        <StepPage 
-          validateRequest={validateRequest}
-          makeApiRequest={makeApiRequest} step={3} activeStep={activeStep} setActiveStep={setActiveStep}>
-          <FinishPage info={info} fileMap={fileMap} fids={fids}/>
-        </StepPage>
-        <WhatNextPage step={4} activeStep={activeStep}/>
+    <PageBody>
+      <Navigation/>
+      <div style={pageStyle}>
+        <div style={widgetWrapperStyle}>
+          <Stepper activeStep={activeStep}>
+            { steps.map((label, i) => (
+              <Step key={i}>
+                <StepLabel>
+                  <span style={{ fontWeight: '600' }}>
+                    {label}
+                  </span>
+                </StepLabel>
+              </Step>
+            )) }
+          </Stepper>
+          <StepPage step={0} activeStep={activeStep} setActiveStep={setActiveStep}>
+            <StartPage/>
+          </StepPage>
+          <StepPage step={1} activeStep={activeStep} setActiveStep={setActiveStep}>
+            <FormPage info={info} setInfo={setInfo}/>
+          </StepPage>
+          <StepPage step={2} activeStep={activeStep} setActiveStep={setActiveStep}>
+            <VerifyIdentityPage setFileMap={setFileMap} setFids={setFids}/>
+          </StepPage>
+          <StepPage 
+            validateRequest={validateRequest}
+            makeApiRequest={makeApiRequest} step={3} activeStep={activeStep} setActiveStep={setActiveStep}>
+            <FinishPage info={info} fileMap={fileMap} fids={fids}/>
+          </StepPage>
+          <WhatNextPage step={4} activeStep={activeStep}/>
+        </div>
       </div>
-    </div>
+    </PageBody>
   )
 }
 
