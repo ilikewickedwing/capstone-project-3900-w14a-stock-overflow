@@ -153,8 +153,23 @@ export default class API {
   userPortfoliosOpen(pid, token) {
     return fetch(`${ENDPOINT}/user/portfolios/open?pid=${pid}&token=${token}`);
   }
+  
   getCelebrityDiscover() {
     return fetch(`${ENDPOINT}/celebrity/discover`);
+  }
+  
+  postCelebrityFollow(token, isFollow, celebUid) {
+    return fetch(`${ENDPOINT}/celebrity/follow`, {
+      method: 'POST',
+      headers: {
+        'Content-Type' : 'application/json'
+      },
+      body: JSON.stringify({
+        token: token,
+        isFollow: isFollow,
+        celebUid: celebUid,
+      })
+    });
   }
   
   postCelebrityMakeRequest(token, info, fids) {

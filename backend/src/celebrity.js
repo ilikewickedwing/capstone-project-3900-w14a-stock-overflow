@@ -41,6 +41,8 @@ export const postCelebrityFollow = async (token, isFollow, celebUid, res, databa
     await database.insertCelebrityFollowers(celebUid);
     followers = { followers: [] };
   }
+  // Get user request data
+  const userData = await database.getUser(uid);
   // Check if following or not
   if (isFollow) {
     // Make sure you arent already following the celebrity
@@ -52,6 +54,8 @@ export const postCelebrityFollow = async (token, isFollow, celebUid, res, databa
     followers.followers.push(uid);
     await database.updateCelebrityFollowers(celebUid, followers);
     res.status(200).send();
+    // Add notification to database
+    await database.insertUserNotification(celebUid, `${userData.username} started following you!🥳`)
     return;
   }
   // Otherwise it is to unfollow
