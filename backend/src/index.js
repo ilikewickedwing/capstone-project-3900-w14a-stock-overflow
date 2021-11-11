@@ -1169,3 +1169,10 @@ app.get('/file/download', async (req, res) => {
   const { token, fid } = req.query;
   await handleFileDownload(token, fid, res, database);
 })
+
+app.get('/rankings/global', async (req, res) => {
+  const resp = await getRankings(database);
+  if (rank !== null) {
+    res.status(200).send(resp);
+  } else res.status(404).send({ error: "A system error occurred" });
+})

@@ -7,6 +7,7 @@ import { getStock } from "./stocks";
 import { verifyPf } from "./portfolio";
 import * as schedule from "node-schedule";
 import { API } from "./api";
+import { database } from ".";
 
 const api = new API(); 
 
@@ -112,6 +113,7 @@ const Pf = await database.openPf(pid);
 
     // Get stocklist
     const stocks = Pf.stocks;
+    // console.log(stocks);
     let deetArray = [];
     for (let i = 0; i < stocks.length; i++) {
       const symbol = stocks[i].stock;
@@ -119,6 +121,7 @@ const Pf = await database.openPf(pid);
       const deets = values.data.history.day;
       deetArray.push(deets);
     }
+
     
     // For each day
     for (let k = 0; k < Math.min(deetArray[0].length, testDays); k++) {
@@ -193,11 +196,49 @@ export const rankAll = async (database) => {
       const avgPerf = await rankOne(pfs, database);
       await database.setUserPerf(users[i].uid, avgPerf);
       // console.log('rank is ' + (rank + 1) + ', uid is ' + users[i].uid + ', name is ' + users[i].username + ', avgPerf is ' + avgPerf);
-      rankings.push({ rank: rank + 1, uid: users[i].uid, name: users[i].username, performance: avgPerf });
+      rankings.push({ rank: null, uid: users[i].uid, name: users[i].username, performance: avgPerf });
       rank++;
     } 
   }
-  await database.updateRankings(rankings);
+
+  const newRank = mergeSort(rankings);
+
+  for (let i = 0; i < newRank.length; i++) {
+    newRank[i].rank = i + 1;
+  }
+
+  await database.updateRankings(newRank);
+}
+
+const mergeSort = (arr) => {
+    if (arr.length < 2)
+        return arr;
+
+    var middle = parseInt(arr.length / 2);
+    var left   = arr.slice(0, middle);
+    var right  = arr.slice(middle, arr.length);
+
+    return merge(mergeSort(left), mergeSort(right));
+}
+
+const merge = (left, right) => {
+  var result = [];
+
+  while (left.length && right.length) {
+      if (left[0].performance >= right[0].performance) {
+          result.push(left.shift());
+      } else {
+          result.push(right.shift());
+      }
+  }
+
+  while (left.length)
+      result.push(left.shift());
+
+  while (right.length)
+      result.push(right.shift());
+
+  return result;
 }
 
 /**
@@ -219,4 +260,9 @@ const rankOne = async (pfs, database) => {
   }
 
   return (total/pfs.length);
+}
+
+const getRankings = async (database) => {
+  const rankings = await database.getRankings();
+  return rankings;
 }
