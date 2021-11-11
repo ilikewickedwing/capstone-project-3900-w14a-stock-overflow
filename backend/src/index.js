@@ -12,6 +12,7 @@ import { getAdminCelebrityRequests, postAdminCelebrityHandlerequest, postCelebri
 import { getUserNotifications, deleteUserNotifications } from "./notifications";
 import fileUpload from 'express-fileupload';
 import { handleFileDownload, handleFileUpload } from "./file";
+import { getCelebrityDiscover } from "./celebrity";
 
 // Make the server instance
 export const app = express();
@@ -968,7 +969,6 @@ app.delete('/user/notifications/clear', async (req, res) => {
   deleteUserNotifications(token, database, res);
 })
 
-// Get endpoint for user to request to be a celebrity
 /**
  * @swagger
  * /celebrity/makerequest:
@@ -1012,7 +1012,26 @@ app.post('/celebrity/makerequest', async (req, res) => {
   await postCelebrityMakeRequest(token, info, fids, database, res);
 })
 
-// Get endpoint for admin to fetch a list of all requests to be a celebrity
+/**
+ * @swagger
+ * /admin/celebrity/requests:
+ *   get:
+ *     tags: [Celebrity]
+ *     description: Endpoint to return a list of celebrities to discover
+ *     responses:
+ *       200:
+ *         description: Returns the an array of celebrities
+ *         schema:
+ *            type: object
+ *            properties:
+ *              celebrities:
+ *                type: array
+ *                description: An array of the celebrities
+ */
+app.get('/celebrity/discover', async (req, res) => {
+  getCelebrityDiscover(res, database);
+})
+
 /**
  * @swagger
  * /admin/celebrity/requests:
@@ -1047,7 +1066,6 @@ app.get('/admin/celebrity/requests', async (req, res) => {
   await getAdminCelebrityRequests(token, database, res);
 })
 
-// Get endpoint for admin to fetch a list of all requests to be a celebrity
 /**
  * @swagger
  * /admin/celebrity/handlerequest:

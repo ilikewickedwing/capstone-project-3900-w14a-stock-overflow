@@ -10,6 +10,7 @@ import './App.css';
 import AdminPage from "./admin/AdminPage";
 import CelebrityRequestPage from "./celebrity/CelebrityRequestPage";
 import Friend from "./pages/Friend";
+import DiscoverCelebrityPage from "./celebrity/DiscoverCelebrity";
 
 function App() {
   const api = new API();
@@ -27,6 +28,7 @@ function App() {
             <Route path="/stock/:stockCode" component={Stock} />
             <Route path="/admin" component={AdminPage} />
             <Route path="/celebrityrequest" component={CelebrityRequestPage}/>
+            <Route path="/celebrity/discover" component={DiscoverCelebrityPage}/>
             <Route path="/" component={Login} />
           </Switch>  
         </div>

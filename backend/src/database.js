@@ -391,6 +391,13 @@ export class Database {
     return null;
   }
   
+  async getAllCelebrityUsers() {
+    const users = this.database.collection('users');
+    const query = { userType: 'celebrity' };
+    const requests = await users.find(query).toArray();
+    return requests;
+  }
+  
   /**
    * Inserts request into database. Does not check if ownerUid already exists
    * so make sure to check it with the getRequest

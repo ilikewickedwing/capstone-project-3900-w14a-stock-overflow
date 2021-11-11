@@ -153,6 +153,9 @@ export default class API {
   userPortfoliosOpen(pid, token) {
     return fetch(`${ENDPOINT}/user/portfolios/open?pid=${pid}&token=${token}`);
   }
+  getCelebrityDiscover() {
+    return fetch(`${ENDPOINT}/celebrity/discover`);
+  }
   
   postCelebrityMakeRequest(token, info, fids) {
     return fetch(`${ENDPOINT}/celebrity/makerequest`, {

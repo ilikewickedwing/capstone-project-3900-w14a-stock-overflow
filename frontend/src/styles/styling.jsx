@@ -32,8 +32,8 @@ export const NavBar = styled.div`
 
 // body containers
 export const PageBody = styled(FlexColumns)`
-    height:100vh;
-    width: 100vw;
+    min-height:100vh;
+    width: 100%;
     background-color: #FAE1DD;
 `;
 
@@ -182,7 +182,6 @@ export const RightCard = styled(BoxShadow)`
     padding: 4%;
     margin: 1%; 
     background-color: white;
-
 `;
 
 export const TextInput = styled(TextField)`
