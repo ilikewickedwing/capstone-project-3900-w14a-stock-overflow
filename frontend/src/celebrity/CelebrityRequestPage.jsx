@@ -29,16 +29,27 @@ export default function CelebrityRequestPage() {
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
+    boxSizing: 'border-box',
   }
   const widgetWrapperStyle = {
     backgroundColor: '#ffffff',
     padding: '2rem',
     borderRadius: '5px',
-    width: '75%',
-    height: '75%',
+    width: '75vw',
+    height: '75vh',
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
+  }
+  const validateRequest = () => {
+    if (info.length === 0) {
+      alert("You cannot leave your form blank");
+      return false;
+    } else if (fids.length === 0) {
+      alert("You must upload identification documents");
+      return false;
+    }
+    return true;
   }
   const makeApiRequest = async () => {
     const resp = await api.postCelebrityMakeRequest(token, info, fids);
@@ -71,7 +82,9 @@ export default function CelebrityRequestPage() {
         <StepPage step={2} activeStep={activeStep} setActiveStep={setActiveStep}>
           <VerifyIdentityPage setFileMap={setFileMap} setFids={setFids}/>
         </StepPage>
-        <StepPage makeApiRequest={makeApiRequest} step={3} activeStep={activeStep} setActiveStep={setActiveStep}>
+        <StepPage 
+          validateRequest={validateRequest}
+          makeApiRequest={makeApiRequest} step={3} activeStep={activeStep} setActiveStep={setActiveStep}>
           <FinishPage info={info} fileMap={fileMap} fids={fids}/>
         </StepPage>
         <WhatNextPage step={4} activeStep={activeStep}/>
@@ -103,7 +116,11 @@ function StepPage(props) {
   const onNext = async () => {
     // If it is finish button call api
     if (props.activeStep === steps.length - 1) {
-      await props.makeApiRequest();
+      if (props.validateRequest()) {
+        await props.makeApiRequest();
+      } else {
+        return;
+      }
     }
     props.setActiveStep(props.activeStep + 1)
   }
@@ -136,6 +153,7 @@ StepPage.propTypes = {
   setActiveStep: PropTypes.func,
   children: PropTypes.any,
   makeApiRequest: PropTypes.func,
+  validateRequest: PropTypes.func,
 }
 
 const headingStyle = {
@@ -160,7 +178,8 @@ const textStyle = {
 
 function StartPage() {
   const imgStyle = {
-    width: '100%',
+    width: '80%',
+    height: 'auto',
   }
   return (
     <React.Fragment>

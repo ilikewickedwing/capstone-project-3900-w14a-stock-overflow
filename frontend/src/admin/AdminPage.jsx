@@ -2,7 +2,7 @@ import { Button } from "@material-ui/core";
 import { useContext, useEffect, useState } from "react"
 import { useHistory } from "react-router";
 import { ApiContext } from "../api";
-import profileImg from '../assets/profile.png';
+import profileImg from '../assets/dp.jpg';
 import { LogoutButton } from "../styles/styling";
 import ExitToAppRoundedIcon from '@material-ui/icons/ExitToAppRounded';
 import FileDownload from "../files/FileDownload";
