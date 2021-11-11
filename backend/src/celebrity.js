@@ -2,8 +2,14 @@
 
 export const getCelebrityDiscover = async (res, database) => {
   const celebrities = await database.getAllCelebrityUsers();
+  const followersMap = {};
+  for (const celeb of celebrities) {
+    const followers = await database.getCelebrityFollowers(celeb.uid);
+    followersMap[celeb.uid] = (followers === null) ? [] : followers.followers;
+  }
   res.status(200).send({
-    celebrities: celebrities
+    celebrities: celebrities,
+    followers: followersMap,
   })
 }
 
@@ -12,6 +18,11 @@ export const postCelebrityFollow = async (token, isFollow, celebUid, res, databa
   const uid = await database.getTokenUid(token);
   if (uid === null) {
     res.status(401).send({ error: "Invalid token" });
+    return;
+  }
+  // Make sure you arent following/unfollowing your self
+  if (celebUid === uid) {
+    res.status(400).send({ error: "You can't follow/unfollow your self" });
     return;
   }
   // Check celebrity exists

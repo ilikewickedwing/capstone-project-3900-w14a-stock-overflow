@@ -86,6 +86,16 @@ describe('Celebrity Follow endpoint test', () => {
     });
     expect(resp.statusCode).toBe(400);
   })
+  it ('Cant follow yourself', async () => {
+    const userUid = await database.insertUser(nanoid(), 'celebrity');
+    const token = await database.insertToken(userUid);
+    const resp = await request(app).post(`/celebrity/follow`).send({
+      token: token,
+      isFollow: true,
+      celebUid: userUid,
+    });
+    expect(resp.statusCode).toBe(400);
+  })
   afterAll(async () => {
     await database.disconnect();
   })

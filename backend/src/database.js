@@ -402,8 +402,8 @@ export class Database {
   async getAllCelebrityUsers() {
     const users = this.database.collection('users');
     const query = { userType: 'celebrity' };
-    const requests = await users.find(query).toArray();
-    return requests;
+    const celebs = await users.find(query).toArray();
+    return celebs;
   }
   
   async getCelebrityFollowers(celebUid) {

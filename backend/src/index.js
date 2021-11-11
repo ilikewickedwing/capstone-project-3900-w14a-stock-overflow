@@ -1027,6 +1027,9 @@ app.post('/celebrity/makerequest', async (req, res) => {
  *              celebrities:
  *                type: array
  *                description: An array of the celebrities
+ *              followers:
+ *                type: object
+ *                description: Maps the celebrity uid to an array of followers (uid)
  */
 app.get('/celebrity/discover', async (req, res) => {
   getCelebrityDiscover(res, database);
