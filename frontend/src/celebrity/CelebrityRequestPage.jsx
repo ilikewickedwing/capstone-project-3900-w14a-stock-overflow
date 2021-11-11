@@ -182,7 +182,7 @@ const textStyle = {
 
 function StartPage() {
   const imgStyle = {
-    width: '80%',
+    width: '70%',
     height: 'auto',
   }
   return (
@@ -271,8 +271,7 @@ function FinishPage(props) {
     width: '100%',
     flexDirection: 'column',
     boxSizing: 'border-box',
-    margin: '1rem',
-    paddingTop: '1.5rem',
+    margin: '0.5rem',
   }
   return (
     <React.Fragment>
