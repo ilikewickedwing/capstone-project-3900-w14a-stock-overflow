@@ -110,6 +110,8 @@ const COLLECTIONS = [
       fid: string // id of the file
       ownerUid: string // person who uploaded the file
       filename: string
+      mimetype: string
+      size: string
       data: string // the contents of the file in base64 encoding
     }
   */
@@ -389,6 +391,13 @@ export class Database {
     return null;
   }
   
+  async getAllCelebrityUsers() {
+    const users = this.database.collection('users');
+    const query = { userType: 'celebrity' };
+    const requests = await users.find(query).toArray();
+    return requests;
+  }
+  
   /**
    * Inserts request into database. Does not check if ownerUid already exists
    * so make sure to check it with the getRequest
@@ -497,7 +506,7 @@ export class Database {
    * @param {string} data // The contents of the file in base 64 encoding 
    * @returns 
    */
-  async insertFile(ownerUid, filename, data) {
+  async insertFile(ownerUid, filename, mimetype, size, data) {
     // Generate a new unique rid
     const fid = nanoid();
     const files = this.database.collection('files');
@@ -505,6 +514,8 @@ export class Database {
       fid: fid,
       filename: filename,
       ownerUid: ownerUid,
+      mimetype: mimetype,
+      size: size,
       data: data
     });
     return fid;

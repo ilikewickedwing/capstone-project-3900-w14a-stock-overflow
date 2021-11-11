@@ -24,7 +24,7 @@ export const handleFileUpload = async (req, res, database) => {
     const contents = fData.data.toString('base64');
     
     // Add to database
-    const fid = await database.insertFile(uid, fData.name, contents);
+    const fid = await database.insertFile(uid, fData.name, fData.mimetype, fData.size, contents);
     
     res.send({
       fid: fid
