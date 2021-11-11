@@ -112,6 +112,7 @@ const Pf = await database.openPf(pid);
 
     // Get stocklist
     const stocks = Pf.stocks;
+    // console.log(stocks);
     let deetArray = [];
     for (let i = 0; i < stocks.length; i++) {
       const symbol = stocks[i].stock;
@@ -119,6 +120,7 @@ const Pf = await database.openPf(pid);
       const deets = values.data.history.day;
       deetArray.push(deets);
     }
+
     
     // For each day
     for (let k = 0; k < Math.min(deetArray[0].length, testDays); k++) {

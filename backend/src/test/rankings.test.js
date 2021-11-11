@@ -9,20 +9,23 @@ import { getDefBroker, setDefBroker } from "../user";
 
 
 
-describe('Calculate portfolio performance', () => {
+describe('Rank multiple user portfolio performances', () => {
 	const d = new Database(true);
 	beforeAll(async () => {
 	  await d.connect();
 	})
   
-	jest.setTimeout(10000);
+	jest.setTimeout(30000);
   
 	let token1 = null;
 	let pid1 = null;
-	let pfArray = null;
 
   let token2 = null;
   let pid2 = null;
+
+  let token3 = null;
+  let pid3 = null;
+  let pid4 = null;
   
 	const now = new Date();
 	const today = new Date(now);
@@ -31,7 +34,7 @@ describe('Calculate portfolio performance', () => {
 
   let daysCalced = 0;
   
-	it('Register user and create first portfolio', async () => {
+	it('Register user and create portfolios', async () => {
 	  const rego = await authRegister('Ashley', 'strongpassword', d);
 	  token1 = rego.token;
 	  const create = await createPf(token1, 'pf', d);
@@ -47,15 +50,30 @@ describe('Calculate portfolio performance', () => {
       pid: expect.any(String),
     })
     pid2 = create2.pid;
+
+    const rego3 = await authRegister('Jono', 'strongpassword', d);
+    token3 = rego3.token;
+    const create3 = await createPf(token3, 'pf', d);
+    expect(create3).toMatchObject({
+      pid: expect.any(String),
+    })
+    pid3 = create3.pid;
+    const create4 = await createPf(token3, 'pf2', d);
+    expect(create4).toMatchObject({
+      pid: expect.any(String),
+    })
+    pid4 = create4.pid;
+    // console.log(create4);
 	})
-	it('Set default brokerage cost', async () => {
+	it('Set default brokerage costs', async () => {
 	  const resp = await setDefBroker(token1, '5', '1', d);
 	  expect(resp).toBe(1);
-	  const broker = await getDefBroker(token1, d);
 
-    const resp2 = await setDefBroker(token2, '0', '1', d);
+    const resp2 = await setDefBroker(token2, '0', '0', d);
 	  expect(resp2).toBe(1);
-	  const broker2 = await getDefBroker(token2, d);
+
+    const resp3 = await setDefBroker(token3, '50', '0', d);
+    expect(resp3).toBe(1);
 	})
 	it('Add stocks to portfolio', async () => {
     daysCalced = 10;
@@ -71,6 +89,14 @@ describe('Calculate portfolio performance', () => {
     const add1_ = await addStock(token2, pid2, 'AAPL', price, 2, null, null, d);
 	  expect(add1_).toBe(-1);
 
+    const add1__ = await addStock(token3, pid3, 'AAPL', price, 2, null, null, d);
+	  expect(add1__).toBe(-1);
+
+    values = await getStock(2, 'NVDA', 'daily', testDate);
+    price = values.data.history.day[0].close;
+    const add1_1 = await addStock(token3, pid4, 'NVDA', price, 2, null, null, d);
+    expect(add1_1).toBe(-1);
+
     values = await getStock(2, 'AMZN', 'daily', testDate);
     price = values.data.history.day[0].close;
 	  const add2 = await addStock(token1, pid1, 'AMZN', price, 2, null, null, d);
@@ -79,6 +105,14 @@ describe('Calculate portfolio performance', () => {
     const add2_ = await addStock(token2, pid2, 'AMZN', price, 2, null, null, d);
 	  expect(add2_).toBe(-1);
 
+    const add2__ = await addStock(token3, pid3, 'AMZN', price, 2, null, null, d);
+	  expect(add2__).toBe(-1);
+
+    values = await getStock(2, 'MSFT', 'daily', testDate);
+    price = values.data.history.day[0].close;
+    const add2_1 = await addStock(token3, pid4, 'MSFT', price, 2, null, null, d);
+    expect(add2_1).toBe(-1);
+
     values = await getStock(2, 'IBM', 'daily', testDate);
     price = values.data.history.day[0].close;
 	  const add3 = await addStock(token1, pid1, 'IBM', price, 1, null, null, d);
@@ -86,6 +120,17 @@ describe('Calculate portfolio performance', () => {
 
     const add3_ = await addStock(token2, pid2, 'IBM', price, 1, null, null, d);
 	  expect(add3_).toBe(-1);
+
+    const add3__ = await addStock(token3, pid3, 'IBM', price, 1, null, null, d);
+	  expect(add3__).toBe(-1);
+
+    values = await getStock(2, 'FB', 'daily', testDate);
+    price = values.data.history.day[0].close;
+    const add3_1 = await addStock(token3, pid4, 'FB', price, 2, null, null, d);
+    expect(add3_1).toBe(-1);
+
+    // const check = await openPf(token3, pid4, d);
+    // console.dir(check, {depth:null});
 	})
 	it('Calculate portfolio performance first', async () => {
     const test = new Date();
@@ -93,9 +138,13 @@ describe('Calculate portfolio performance', () => {
     const testDate = test.getFullYear() + '-' + ('0' + (test.getMonth() + 1)).slice(-2) + '-' + ('0' + test.getDate()).slice(-2);
     const calc1 = await calcPf(token1, pid1, d, 'yes', 'yes', testDate, 3);
     const calc2 = await calcPf(token2, pid2, d, 'yes', 'yes', testDate, 3);
+    const calc3 = await calcPf(token3, pid3, d, 'yes', 'yes', testDate, 3);
+    const calc4 = await calcPf(token3, pid4, d, 'yes', 'yes', testDate, 3);
     daysCalced -= 4;
     expect(calc1).not.toBe(null);
-    expect(calc2).not.toBe(null);	  // const stocks = await openPf(token1, pid1, d);
+    expect(calc2).not.toBe(null);
+    expect(calc3).not.toBe(null);
+    expect(calc4).not.toBe(null);	  // const stocks = await openPf(token1, pid1, d);
     // const stocks1 = await openPf(token1, pid1, d);
     // const stocks2 = await openPf(token2, pid2, d);
     // console.dir(stocks1, { depth: null });
@@ -139,14 +188,22 @@ describe('Calculate portfolio performance', () => {
     const testDate = test.getFullYear() + '-' + ('0' + (test.getMonth() + 1)).slice(-2) + '-' + ('0' + test.getDate()).slice(-2);
     const calc1 = await calcPf(token1, pid1, d, 'yes', 'yes', testDate, 2);
     const calc2 = await calcPf(token2, pid2, d, 'yes', 'yes', testDate, 2);
+    const calc3 = await calcPf(token3, pid3, d, 'yes', 'yes', testDate, 2);
+    const calc4 = await calcPf(token3, pid4, d, 'yes', 'yes', testDate, 2);
     daysCalced -= 3;
     expect(calc1).not.toBe(null);
     expect(calc2).not.toBe(null);
+    expect(calc3).not.toBe(null);
+    expect(calc4).not.toBe(null);
 	  // console.log("calc is " + calc);
-	  // const stocks1 = await openPf(token1, pid1, d);
-    // const stocks2 = await openPf(token2, pid2, d);
-	  // console.dir(stocks1, { depth: null });
-    // console.dir(stocks2, { depth: null });
+	  const stocks1 = await openPf(token1, pid1, d);
+    const stocks2 = await openPf(token2, pid2, d);
+    const stocks3 = await openPf(token3, pid3, d);
+    const stocks4 = await openPf(token3, pid4, d);
+	  console.dir(stocks1, { depth: null });
+    console.dir(stocks2, { depth: null });
+    console.dir(stocks3, { depth: null });
+    console.dir(stocks4, { depth: null });
     // console.log(daysCalced);
 	})
   it('Rank portfolios', async () => {
