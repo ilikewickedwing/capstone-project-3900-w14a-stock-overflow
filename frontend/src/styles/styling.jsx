@@ -30,6 +30,11 @@ export const NavBar = styled.div`
     height:7%;
 `;
 
+export const NavBtnWrapper = styled.div`
+    display: flex;
+    align-items: center;
+`
+
 // body containers
 export const PageBody = styled(FlexColumns)`
     min-height:100vh;

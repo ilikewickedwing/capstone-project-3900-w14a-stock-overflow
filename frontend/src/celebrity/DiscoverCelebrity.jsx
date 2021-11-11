@@ -50,6 +50,19 @@ export default function DiscoverCelebrityPage () {
   }, [api])
   
   const renderCelebs = () => {
+    if (celebrities.length === 0) {
+      const msgStyle = {
+        position: 'fixed',
+        fontFamily: 'Arial, Helvetica, sans-serif',
+        fontSize: '2rem',
+        top: '50vh',
+      }
+      return (
+        <div style={msgStyle}>
+          There are currently no celebrities :c
+        </div>
+      )
+    }
     return celebrities.map(c => {
       const panelStyle = {
         backgroundColor: '#ffffff',
