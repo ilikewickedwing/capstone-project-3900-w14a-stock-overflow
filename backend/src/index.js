@@ -12,7 +12,7 @@ import { getAdminCelebrityRequests, postAdminCelebrityHandlerequest, postCelebri
 import { getUserNotifications, deleteUserNotifications } from "./notifications";
 import fileUpload from 'express-fileupload';
 import { handleFileDownload, handleFileUpload } from "./file";
-import { getCelebrityDiscover } from "./celebrity";
+import { getCelebrityDiscover, postCelebrityFollow } from "./celebrity";
 
 // Make the server instance
 export const app = express();
@@ -1030,6 +1030,43 @@ app.post('/celebrity/makerequest', async (req, res) => {
  */
 app.get('/celebrity/discover', async (req, res) => {
   getCelebrityDiscover(res, database);
+})
+
+/**
+ * @swagger
+ * /celebrity/follow:
+ *   post:
+ *     tags: [Celebrity]
+ *     description: User makes a request to follow a given celebrity
+ *     parameters:
+ *      - name: token
+ *        description: The token of the user
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: isFollow
+ *        description: Set to true when following. Set to false when unfollowing
+ *        in: body
+ *        required: true
+ *        type: boolean
+ *      - name: celebUid
+ *        description: The user id of the celeb to follow
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Everything went well
+ *       400:
+ *         description: You can't follow a celeb you already follow, 
+ *          or unfollow a celeb you arent following, or celebUid doesnt exist,
+ *          or uid is not a celebrity
+ *       401:
+ *         description: Invalid token
+ */
+app.post('/celebrity/follow', async (req, res) => {
+  const { token, isFollow, celebUid } = req.body;
+  await postCelebrityFollow(token, isFollow, celebUid, res, database);
 })
 
 /**
