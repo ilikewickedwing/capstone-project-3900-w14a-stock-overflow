@@ -557,6 +557,16 @@ export class Database {
   }
 
   /**
+   * Function to return array of all portfolios in database
+   * @returns {Promise<Array>}
+   */
+  async getAllPfs() {
+    const pfs = this.database.collection('portfolios');
+    const requests = await pfs.find().toArray();
+    return requests;
+  }
+
+  /**
    * Function to create new portfolio and returns the portfolio id
    * @param {string} uid 
    * @param {string} name 

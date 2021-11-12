@@ -3,6 +3,7 @@ import { createPf, userPfs, openPf } from "../portfolio";
 import { calcPf, rankAll } from "../performance";
 import { addStock, modifyStock, getStock } from "../stocks";
 import { Database } from "../database";
+import { calcAll } from "../performance";
 import request from 'supertest';
 import { app, database } from "../index";
 import { getDefBroker, setDefBroker } from "../user";
@@ -196,21 +197,26 @@ describe('Rank multiple user portfolio performances', () => {
     expect(calc3).not.toBe(null);
     expect(calc4).not.toBe(null);
 	  // console.log("calc is " + calc);
-	  const stocks1 = await openPf(token1, pid1, d);
-    const stocks2 = await openPf(token2, pid2, d);
-    const stocks3 = await openPf(token3, pid3, d);
-    const stocks4 = await openPf(token3, pid4, d);
-	  console.dir(stocks1, { depth: null });
-    console.dir(stocks2, { depth: null });
-    console.dir(stocks3, { depth: null });
-    console.dir(stocks4, { depth: null });
+	  // const stocks1 = await openPf(token1, pid1, d);
+    // const stocks2 = await openPf(token2, pid2, d);
+    // const stocks3 = await openPf(token3, pid3, d);
+    // const stocks4 = await openPf(token3, pid4, d);
+	  // console.dir(stocks1, { depth: null });
+    // console.dir(stocks2, { depth: null });
+    // console.dir(stocks3, { depth: null });
+    // console.dir(stocks4, { depth: null });
     // console.log(daysCalced);
 	})
-  it('Rank portfolios', async () => {
-    await rankAll(d);
+	it('Rank portfolios', async () => {
+		await rankAll(d);
+		const rankings = await d.getRankings();
+		console.dir(rankings, { depth: null });
+	})
+	it('CalcAll', async () => {
+		await calcAll(d, true);
     const rankings = await d.getRankings();
-    console.dir(rankings, { depth: null });
-  })
+		console.dir(rankings, { depth: null });
+	})
 	/* it('Sell some of first stock in portfolio', async () => {
 	  const add = await modifyStock(token1, pid1, 'AAPL', 2, 2, 0, null, null, d);
 	  expect(add).toBe(-1);
