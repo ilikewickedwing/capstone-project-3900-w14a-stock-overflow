@@ -197,14 +197,14 @@ describe('Rank multiple user portfolio performances', () => {
     expect(calc3).not.toBe(null);
     expect(calc4).not.toBe(null);
 	  // console.log("calc is " + calc);
-	  const stocks1 = await openPf(token1, pid1, d);
-    const stocks2 = await openPf(token2, pid2, d);
-    const stocks3 = await openPf(token3, pid3, d);
-    const stocks4 = await openPf(token3, pid4, d);
-	  console.dir(stocks1, { depth: null });
-    console.dir(stocks2, { depth: null });
-    console.dir(stocks3, { depth: null });
-    console.dir(stocks4, { depth: null });
+	  // const stocks1 = await openPf(token1, pid1, d);
+    // const stocks2 = await openPf(token2, pid2, d);
+    // const stocks3 = await openPf(token3, pid3, d);
+    // const stocks4 = await openPf(token3, pid4, d);
+	  // console.dir(stocks1, { depth: null });
+    // console.dir(stocks2, { depth: null });
+    // console.dir(stocks3, { depth: null });
+    // console.dir(stocks4, { depth: null });
     // console.log(daysCalced);
 	})
 	it('Rank portfolios', async () => {
