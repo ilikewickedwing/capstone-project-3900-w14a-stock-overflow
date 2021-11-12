@@ -4,7 +4,7 @@ import { Database } from "./database";
 import swaggerUI from 'swagger-ui-express';
 import { swaggerDocs } from "./docs";
 import { createPf, deletePf, openPf, userPfs, getPid, editPf } from "./portfolio";
-import { calcPf } from "./performance";
+import { calcPf, getAllRankings, getFriendRankings } from "./performance";
 import { authDelete, authLogin, authLogout, authRegister } from "./auth";
 import { getDefBroker, getUserProfile, getUserUid, postUserProfile, setDefBroker } from "./user";
 import { addStock, modifyStock, getAllStocks, checkStock, getStock } from "./stocks";
@@ -1240,8 +1240,16 @@ app.get('/file/download', async (req, res) => {
 })
 
 app.get('/rankings/global', async (req, res) => {
-  const resp = await getRankings(database);
-  if (rank !== null) {
+  await getAllRankings(database, res);
+  if (resp !== null) {
+    res.status(200).send(resp);
+  } else res.status(404).send({ error: "A system error occurred" });
+})
+
+app.get('/rankings/friends', async (req, res) => {
+  const { token } = req.query;
+  const resp = await getFriendRankings(token, database);
+  if (resp !== null) {
     res.status(200).send(resp);
   } else res.status(404).send({ error: "A system error occurred" });
 })
