@@ -1,4 +1,4 @@
-import React from 'react'; 
+import React, { useContext } from 'react'; 
 import { useHistory } from 'react-router';
 import {Link} from 'react-router-dom';
 import { ApiContext } from '../api';
@@ -14,11 +14,13 @@ import axios from 'axios';
 import NotificationButton from '../notifications/Notifications';
 import SettingsIcon from '@mui/icons-material/Settings';
 import ExploreIcon from '@mui/icons-material/Explore';
+import { AlertContext } from '../App';
 
 const label = { inputProps: { 'aria-label': 'toggle' } };
 
 const Navigation = () => {
     const api = React.useContext(ApiContext);
+    const alert = useContext(AlertContext)
     const history = useHistory();
 
     // const [query, setQuery] = React.useState('');

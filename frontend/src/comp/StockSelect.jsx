@@ -7,6 +7,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
 import Button from '@material-ui/core/Button';
+import { AlertContext } from '../App';
 
 const style = {
     position: 'absolute',
@@ -21,6 +22,7 @@ const style = {
   };
 
 const StockSelect = ({stockCode, name,pid, setClose}) => {
+    const alert = React.useContext(AlertContext);
     const token = localStorage.getItem('token');
 
     const [price, setPrice] = React.useState("");
