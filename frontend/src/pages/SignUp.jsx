@@ -16,10 +16,10 @@ function SignUp() {
     const onLogIn = async () => {
         try {
             await axios.post(`${apiBaseUrl}/auth/register`,{username, password});
-            alert('Sign up successful');
+            alert('Sign up successful','success');
             history.push('/');
         } catch (e){
-            alert(`Status Code ${e.response.status} : ${e.response.data.message}`);
+            alert(`Status Code ${e.response.status} : ${e.response.data.message}`,'error');
         }
     }
     const paperStyle={padding :'3%', width:'50%', margin:"20px auto"}

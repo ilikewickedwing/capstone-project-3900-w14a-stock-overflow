@@ -46,10 +46,10 @@ export default function CelebrityRequestPage() {
   }
   const validateRequest = () => {
     if (info.length === 0) {
-      alert("You cannot leave your form blank");
+      alert("You cannot leave your form blank",'error');
       return false;
     } else if (fids.length === 0) {
-      alert("You must upload identification documents");
+      alert("You must upload identification documents",'error');
       return false;
     }
     return true;
@@ -58,7 +58,7 @@ export default function CelebrityRequestPage() {
     const resp = await api.postCelebrityMakeRequest(token, info, fids);
     if (resp.status !== 200) {
       const respJson = await resp.json();
-      alert(respJson.error); 
+      alert(respJson.error,'error'); 
     }
     return;
   }

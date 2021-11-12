@@ -13,7 +13,7 @@ const callApi = async (api, token, setResponse) => {
   const resp = await api.getAdminCelebrityRequests(token);
   const respJson = await resp.json();
   if (resp.status !== 200) {
-    alert(respJson.error);
+    alert(respJson.error, 'error');
     return
   }
   setResponse(respJson);
@@ -28,7 +28,7 @@ export default function AdminPage() {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token === null) {
-      alert('No token saved. Please log in');
+      alert('No token saved. Please log in','error');
       history.push('/');
     }
     callApi(api, token, setResponse);
@@ -86,7 +86,7 @@ export default function AdminPage() {
         const onApprove = async () => {
           const resp = await api.postAdminCelebrityHandlerequest(token, true, r.rid)
           if (resp.status !== 200) {
-            alert(`Server responded with ${resp.status}`);
+            alert(`Server responded with ${resp.status}`,'error');
             return;
           }
           // Get updated data
@@ -96,7 +96,7 @@ export default function AdminPage() {
         const onReject = async () => {
           const resp = await api.postAdminCelebrityHandlerequest(token, false, r.rid)
           if (resp.status !== 200) {
-            alert(`Server responded with ${resp.status}`);
+            alert(`Server responded with ${resp.status}`,'error');
             return;
           }
           // Get updated data
@@ -122,12 +122,12 @@ export default function AdminPage() {
   const onLogOut = async () => {
     const token = localStorage.getItem('token');
     const resp = await api.authLogout(token);
-    if (resp.status === 403) alert('Invalid token');
+    if (resp.status === 403) alert('Invalid token','error');
     if (resp.status === 200) {
-        alert('Token has been invalidated');
+        alert('Token has been invalidated','success');
         history.push('/');
     } else {
-        alert(`Server returned unexpected status code of ${resp.status}`);
+        alert(`Server returned unexpected status code of ${resp.status}`,'error');
     }
   }
   const pageStyle = {
