@@ -1383,6 +1383,7 @@ export class Database {
   async getRankings() {
     const rankings = this.database.collection('rankings');
     const resp = await rankings.find().toArray();
+    if (resp == null) return [];
     return resp;
   }
 
