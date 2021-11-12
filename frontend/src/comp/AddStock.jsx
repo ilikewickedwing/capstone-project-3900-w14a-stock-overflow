@@ -1,4 +1,4 @@
-import React from 'react'; 
+import React, { useContext } from 'react'; 
 
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
@@ -14,10 +14,12 @@ import MenuItem from '@mui/material/MenuItem';
 import {FlexColumns} from "../styles/styling"; 
 import axios from 'axios';
 import { apiBaseUrl } from './const';
+import { AlertContext } from '../App';
 
 
 // add stock form 
 const AddStock = ({token, pid, onAddCallback, load = () => {}, name}) => {
+    const alert = useContext(AlertContext);
     // textinput state
     const [search, setSearch ] = React.useState("");
     // list of api return 
@@ -43,7 +45,7 @@ const AddStock = ({token, pid, onAddCallback, load = () => {}, name}) => {
         setFlag(res.data.defBroker.brokerFlag);
         
         } catch (e) {
-        alert(`Status Code ${e.status} : ${e.response.data.message}`);
+        alert(`Status Code ${e.status} : ${e.response.data.message}`,'error');
         }
     }
     
@@ -66,7 +68,7 @@ const AddStock = ({token, pid, onAddCallback, load = () => {}, name}) => {
           })
           setRes(newList);
         } catch (e) {
-          alert(`Status Code ${e.status} : ${e.response.data.error}`);
+          alert(`Status Code ${e.status} : ${e.response.data.error}`,'error');
         }
       };
 
@@ -81,7 +83,7 @@ const AddStock = ({token, pid, onAddCallback, load = () => {}, name}) => {
             onAddCallback();
             load();
         } catch (e){
-            alert(`Status Code ${e.response.status} : ${e.response.data.error}`);
+            alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
         }
     }
 

@@ -94,6 +94,14 @@ const COLLECTIONS = [
   */
   'celebrityRequests',
   /**
+    Stores all the followers of a given celebrity
+    {
+      celebUid: string // uid of the celebrity
+      followers: array // An array of uids of the followers
+    }
+  */
+  'celebrityFollowers',
+  /**
     Stores all the notifications for a given user
     {
       ownerUid: string,
@@ -110,6 +118,8 @@ const COLLECTIONS = [
       fid: string // id of the file
       ownerUid: string // person who uploaded the file
       filename: string
+      mimetype: string
+      size: string
       data: string // the contents of the file in base64 encoding
     }
   */
@@ -389,6 +399,53 @@ export class Database {
     return null;
   }
   
+  async getAllCelebrityUsers() {
+    const users = this.database.collection('users');
+    const query = { userType: 'celebrity' };
+    const celebs = await users.find(query).toArray();
+    return celebs;
+  }
+  
+  async getCelebrityFollowers(celebUid) {
+    const celebFollowers = this.database.collection('celebrityfollowers');
+    const query = { celebUid: celebUid };
+    const followers = await celebFollowers.findOne(query);
+    return followers;
+  }
+  /**
+   * Inserts a celebrity followers datastructure
+   *
+   * IMPORTANT:
+   * This method does not check that a datastructure with the same
+   * celebUid already exists so please check that before hand with
+   * getCelebrityFollowers
+   *
+   * @param {string} celebUid 
+   * @param {array} followers 
+   */
+  async insertCelebrityFollowers(celebUid, followers=[]) {
+    const celebFollowers = this.database.collection('celebrityfollowers');
+    await celebFollowers.insertOne({
+      celebUid: celebUid,
+      followers: followers
+    })
+  }
+  
+  /**
+   * Update celebrity followers
+   * 
+   * NOTE: followers is the datastructure rather than the array
+   * so you must wrap the array in an object
+   */
+  async updateCelebrityFollowers(celebUid, followers) {
+    const celebFollowers = this.database.collection('celebrityfollowers');
+    const query = { celebUid: celebUid };
+    const result = await celebFollowers.updateOne(query, {
+      $set: followers
+    })
+    return result.modifiedCount !== 0;
+  }
+  
   /**
    * Inserts request into database. Does not check if ownerUid already exists
    * so make sure to check it with the getRequest
@@ -497,7 +554,7 @@ export class Database {
    * @param {string} data // The contents of the file in base 64 encoding 
    * @returns 
    */
-  async insertFile(ownerUid, filename, data) {
+  async insertFile(ownerUid, filename, mimetype, size, data) {
     // Generate a new unique rid
     const fid = nanoid();
     const files = this.database.collection('files');
@@ -505,6 +562,8 @@ export class Database {
       fid: fid,
       filename: filename,
       ownerUid: ownerUid,
+      mimetype: mimetype,
+      size: size,
       data: data
     });
     return fid;

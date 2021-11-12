@@ -9,7 +9,7 @@ import { apiBaseUrl } from '../comp/const';
 import { ApiContext } from '../api';
 import PfTable from '../comp/PfTable';
 import StocksGraph from "../graph/StocksGraph";
-
+import { AlertContext } from '../App';
 import Popover from '@mui/material/Popover';
 import {
   CreatePortField, 
@@ -29,9 +29,9 @@ import Button from '@mui/material/Button';
 
 const Portfolio = () => {
   const history = useHistory();
+  const alert = useContext(AlertContext);
   const { pid } = useParams();
   const token = localStorage.getItem('token');
-  console.log(token);
 
   // popover code 
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -73,7 +73,7 @@ const Portfolio = () => {
         setIsWatchlist(0);
       }
     } catch (e) {
-      alert(`Status Code ${e.response.status} : ${e.response.data.error}`);
+      alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
     }
   }; 
 
@@ -85,7 +85,7 @@ const Portfolio = () => {
       setAnchorEl(null);
       setChanged(isChanged + 1);
     } catch (e) {
-      alert(`Status Code ${e.response.status} : ${e.response.data.error}`);
+      alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
     }
   }
 
@@ -95,7 +95,7 @@ const Portfolio = () => {
       await axios.delete(`${apiBaseUrl}/user/portfolios/delete`,{data: {token, pid}});
       history.push('/dashboard');
     } catch (e) {
-      alert(`Status Code ${e.response.status} : ${e.response.data.error}`);
+      alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
     }
   }
   
@@ -122,7 +122,7 @@ const Portfolio = () => {
       // console.log(propsArray);
       setStockArray(propsArray);
     } catch (e){
-      alert(`Status Code ${e.response.status} : ${e.response.data.error}`);
+      alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
     }
   }
 

@@ -4,25 +4,27 @@ import { ReqCardContainer} from '../styles/styling';
 import IconButton from '@mui/material/IconButton';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
+import { AlertContext } from '../App';
 
 const FriendRequestCard = ({name, reload}) => {
+  const alert = React.useContext(AlertContext);
   // handle accept
   const handleAccept = async() => {
     try {
-        alert(`You have accepted ${name}'s friend request`);
+        alert(`You have accepted ${name}'s friend request`,'success');
         reload();
     } catch (e){
-      alert(`Status Code ${e.response.status} : ${e.response.data.message}`);
+      alert(`Status Code ${e.response.status} : ${e.response.data.message}`,'error');
     }
   }
 
   // handle reject friend
   const handleReject = async() => {
     try {
-        alert(`You have rejected ${name}'s friend request`);
+        alert(`You have rejected ${name}'s friend request`,'info');
         reload(); 
     } catch (e){
-      alert(`Status Code ${e.response.status} : ${e.response.data.message}`);
+      alert(`Status Code ${e.response.status} : ${e.response.data.message}`,'error');
     }
   }
   

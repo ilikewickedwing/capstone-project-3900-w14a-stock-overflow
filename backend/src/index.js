@@ -6,12 +6,13 @@ import { swaggerDocs } from "./docs";
 import { createPf, deletePf, openPf, userPfs, getPid, editPf } from "./portfolio";
 import { calcPf, getAllRankings, getFriendRankings } from "./performance";
 import { authDelete, authLogin, authLogout, authRegister } from "./auth";
-import { getDefBroker, getUserProfile, postUserProfile, setDefBroker } from "./user";
+import { getDefBroker, getUserProfile, getUserUid, postUserProfile, setDefBroker } from "./user";
 import { addStock, modifyStock, getAllStocks, checkStock, getStock } from "./stocks";
 import { getAdminCelebrityRequests, postAdminCelebrityHandlerequest, postCelebrityMakeRequest } from "./admin";
 import { getUserNotifications, deleteUserNotifications } from "./notifications";
 import fileUpload from 'express-fileupload';
 import { handleFileDownload, handleFileUpload } from "./file";
+import { getCelebrityDiscover, postCelebrityFollow } from "./celebrity";
 
 // Make the server instance
 export const app = express();
@@ -91,6 +92,35 @@ export const database = new Database();
  */
 app.get('/', (req, res) => {
   res.status(200).send('This is the root page. Go to /docs for documentation.')
+})
+
+/**
+ * @swagger
+ * /user/profile:
+ *   get:
+ *     tags: [User]
+ *     description: Endpoint for fetching the uid of a user
+ *     parameters:
+ *      - name: username
+ *        description: The username of the user
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: uid of the user
+ *         schema:
+ *            type: object
+ *            properties:
+ *              uid:
+ *                type: string
+ *                description: The uid of the user
+ *       404:
+ *         description: Invalid user not found
+ */
+app.get('/user/uid', async (req, res) => {
+  const { username } = req.query;
+  getUserUid(username, database, res);
 })
 
 // Get endpoint for getting user data
@@ -968,7 +998,6 @@ app.delete('/user/notifications/clear', async (req, res) => {
   deleteUserNotifications(token, database, res);
 })
 
-// Get endpoint for user to request to be a celebrity
 /**
  * @swagger
  * /celebrity/makerequest:
@@ -1012,7 +1041,66 @@ app.post('/celebrity/makerequest', async (req, res) => {
   await postCelebrityMakeRequest(token, info, fids, database, res);
 })
 
-// Get endpoint for admin to fetch a list of all requests to be a celebrity
+/**
+ * @swagger
+ * /admin/celebrity/requests:
+ *   get:
+ *     tags: [Celebrity]
+ *     description: Endpoint to return a list of celebrities to discover
+ *     responses:
+ *       200:
+ *         description: Returns the an array of celebrities
+ *         schema:
+ *            type: object
+ *            properties:
+ *              celebrities:
+ *                type: array
+ *                description: An array of the celebrities
+ *              followers:
+ *                type: object
+ *                description: Maps the celebrity uid to an array of followers (uid)
+ */
+app.get('/celebrity/discover', async (req, res) => {
+  getCelebrityDiscover(res, database);
+})
+
+/**
+ * @swagger
+ * /celebrity/follow:
+ *   post:
+ *     tags: [Celebrity]
+ *     description: User makes a request to follow a given celebrity
+ *     parameters:
+ *      - name: token
+ *        description: The token of the user
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: isFollow
+ *        description: Set to true when following. Set to false when unfollowing
+ *        in: body
+ *        required: true
+ *        type: boolean
+ *      - name: celebUid
+ *        description: The user id of the celeb to follow
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Everything went well
+ *       400:
+ *         description: You can't follow a celeb you already follow, 
+ *          or unfollow a celeb you arent following, or celebUid doesnt exist,
+ *          or uid is not a celebrity
+ *       401:
+ *         description: Invalid token
+ */
+app.post('/celebrity/follow', async (req, res) => {
+  const { token, isFollow, celebUid } = req.body;
+  await postCelebrityFollow(token, isFollow, celebUid, res, database);
+})
+
 /**
  * @swagger
  * /admin/celebrity/requests:
@@ -1047,7 +1135,6 @@ app.get('/admin/celebrity/requests', async (req, res) => {
   await getAdminCelebrityRequests(token, database, res);
 })
 
-// Get endpoint for admin to fetch a list of all requests to be a celebrity
 /**
  * @swagger
  * /admin/celebrity/handlerequest:

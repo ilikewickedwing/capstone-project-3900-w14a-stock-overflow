@@ -14,6 +14,7 @@ import Button from '@mui/material/Button';
 import Navigation from '../comp/Navigation';
 import Tabs from '../comp/Tabs';
 import RankTable from '../comp/RankTable'; 
+import { AlertContext } from '../App';
 
 // stub data for rankings
 function createData(name, performance, rank) {
@@ -32,6 +33,7 @@ const myRanking = createData('dollalilz', 300, 99999);
 
 // note: friend is inclusive of celebrity profiles except celebrities are public profiles while friends are private 
 export default function Friend() {
+    const alert = React.useContext(AlertContext);
     // private: 0, public: 1
     const [isPublic, setPublic] = React.useState(1);
 
@@ -40,7 +42,7 @@ export default function Friend() {
       try {
         alert("Friend request has been sent"); 
       } catch (e){
-        alert(`Status Code ${e.response.status} : ${e.response.data.error}`);
+        alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
       }
     }
 
@@ -49,7 +51,7 @@ export default function Friend() {
       try {
 
       } catch (e){
-        alert(`Status Code ${e.response.status} : ${e.response.data.error}`);
+        alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
       }
     } 
 

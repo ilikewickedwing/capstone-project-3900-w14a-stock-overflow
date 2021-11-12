@@ -6,8 +6,10 @@ import { Welcome } from '../styles/styling';
 import axios from 'axios';
 import { apiBaseUrl } from '../comp/const';
 import { ApiContext } from '../api';
+import { AlertContext } from '../App';
 
 function Login() {
+    const alert = useContext(AlertContext);
     const [ username, setUsername ] = useState('');
     const [ password, setPassword ] = useState('');
     const api = useContext(ApiContext);
@@ -21,7 +23,7 @@ function Login() {
             console.log("token =" + localStorage.getItem('token'));
             directToPage(api, res.data.uid, res.data.token, history);
         } catch (e) {
-            alert(`Status Code ${e.response.status} : ${e.response.data.message}`);
+            alert(`Status Code ${e.response.status} : ${e.response.data.message}`,'error');
         }
     }
     const paperStyle={padding :'3%', width:'50%', margin:"20px auto"}
@@ -57,7 +59,7 @@ function Login() {
 
                 <Typography >
                     Don't have an account? &nbsp;
-                    <Link onClick={() => {history.push('/signup')}}>
+                    <Link style={{ cursor: 'pointer' }} onClick={() => {history.push('/signup')}}>
                     Sign Up Here
                     </Link>
                 </Typography>

@@ -27,6 +27,7 @@ import MenuItem from '@mui/material/MenuItem';
 import axios from "axios";
 import { apiBaseUrl } from '../comp/const';
 import { useParams } from 'react-router-dom';
+import { AlertContext } from "../App";
 
 function createData(code, name, buyPrice, currPrice, changePer, units, value, profitLoss) {
   return {
@@ -181,6 +182,7 @@ const style = {
 };
 
 const EnhancedTableToolbar = (props) => {
+  const alert = React.useContext(AlertContext);
   const { numSelected, selected, load } = props;
   const { pid } = useParams();
   const token = localStorage.getItem('token');
@@ -219,7 +221,7 @@ const EnhancedTableToolbar = (props) => {
       setFlag(res.data.defBroker.brokerFlag);
       
       } catch (e) {
-      alert(`Status Code ${e.status} : ${e.response.data.message}`);
+      alert(`Status Code ${e.status} : ${e.response.data.message}`,'error');
       }
   }
 
@@ -242,7 +244,7 @@ const EnhancedTableToolbar = (props) => {
       })
       load();
     } catch (e){
-      alert(`Status Code ${e.response.status} : ${e.response.data.error}`);
+      alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
     }
     handleClose();
   }
@@ -351,6 +353,7 @@ EnhancedTableToolbar.propTypes = {
 };
 
 export default function PfTable({stocks, load, setGraphSelected}) {
+  const alert = React.useContext(AlertContext);
   const [order, setOrder] = React.useState("asc");
   const [orderBy, setOrderBy] = React.useState("prices");
   const [selected, setSelected] = React.useState([]);
@@ -398,7 +401,7 @@ export default function PfTable({stocks, load, setGraphSelected}) {
       setValue(totalVal);
       
     } catch (e) {
-      alert(`Status Code ${e.response.status} : ${e.response.data.error}`);;
+      alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
     }
 
   };

@@ -1,23 +1,25 @@
 import { Grid,Paper, Avatar, TextField, Button } from '@material-ui/core'
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { useHistory, Link } from 'react-router-dom';
 import { Welcome } from '../styles/styling';
 import axios from 'axios';
 import { apiBaseUrl } from '../comp/const';
+import { AlertContext } from '../App';
 
 function SignUp() {
     const [ username, setUsername ] = useState('');
     const [ password, setPassword ] = useState('');
     const [ email, setEmail ] = useState('');
-
+    const alert = useContext(AlertContext);
     let history = useHistory();
     const onLogIn = async () => {
         try {
             await axios.post(`${apiBaseUrl}/auth/register`,{username, password});
+            alert('Sign up successful','success');
             history.push('/');
         } catch (e){
-            alert(`Status Code ${e.response.status} : ${e.response.data.message}`);
+            alert(`Status Code ${e.response.status} : ${e.response.data.message}`,'error');
         }
     }
     const paperStyle={padding :'3%', width:'50%', margin:"20px auto"}

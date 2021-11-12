@@ -1,4 +1,4 @@
-import React from 'react'; 
+import React, { useContext } from 'react'; 
 import { useHistory } from 'react-router';
 import axios from 'axios';
 import { apiBaseUrl } from './const';
@@ -11,8 +11,10 @@ import {
   WatchlistCardContainer,
 
 } from '../styles/styling';
+import { AlertContext } from '../App';
 
 const StockRow = ({data, onDeleteCallback = () => {}}) => {
+  const alert = useContext(AlertContext);
   const history = useHistory();
   const { pid } = useParams();
   const token = localStorage.getItem('token');
@@ -43,7 +45,7 @@ const StockRow = ({data, onDeleteCallback = () => {}}) => {
       })
       onDeleteCallback();
     } catch (e) {
-      alert(`Status Code ${e.response.status} : ${e.response.data.error}`);
+      alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
     }
   }
 

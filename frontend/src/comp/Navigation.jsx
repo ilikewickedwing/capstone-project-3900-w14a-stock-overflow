@@ -1,10 +1,9 @@
-import React from 'react'; 
+import React, { useContext } from 'react'; 
 import { useHistory } from 'react-router';
 import {Link} from 'react-router-dom';
 import { ApiContext } from '../api';
 import ExitToAppRoundedIcon from '@material-ui/icons/ExitToAppRounded';
-import {NavBar, Logo, LogoutButton, FlexRows, SearchToggle, SearchDiv } from '../styles/styling';
-import { Button } from '@material-ui/core';
+import {NavBar, Logo, LogoutButton, FlexRows, SearchToggle, SearchDiv, NavBtnWrapper } from '../styles/styling';
 import {TextInput} from "../styles/styling"; 
 import IconButton from '@mui/material/IconButton';
 import SearchIcon from '@mui/icons-material/Search';
@@ -14,11 +13,14 @@ import { apiBaseUrl } from '../comp/const';
 import axios from 'axios';
 import NotificationButton from '../notifications/Notifications';
 import SettingsIcon from '@mui/icons-material/Settings';
+import ExploreIcon from '@mui/icons-material/Explore';
+import { AlertContext } from '../App';
 
 const label = { inputProps: { 'aria-label': 'toggle' } };
 
 const Navigation = () => {
     const api = React.useContext(ApiContext);
+    const alert = useContext(AlertContext)
     const history = useHistory();
 
     // const [query, setQuery] = React.useState('');
@@ -34,7 +36,7 @@ const Navigation = () => {
             await axios.post(`${apiBaseUrl}/auth/logout`,{token});
             history.push('/');
         } catch (e) {
-            alert(`Status Code ${e.response.status} : ${e.response.data.message}`);
+            alert(`Status Code ${e.response.status} : ${e.response.data.message}`,'error');
         }
     }
     
@@ -56,7 +58,7 @@ const Navigation = () => {
           })
           setRes(newList);
         } catch (e) {
-          alert(`Status Code ${e.status} : ${e.response.data.error}`);
+          alert(`Status Code ${e.status} : ${e.response.data.error}`,'error');
         }
       };
 
@@ -100,9 +102,16 @@ const Navigation = () => {
             </ SearchDiv> 
             <FlexRows style={{padding:"1%"}}>
                 <NotificationButton/>
-                <Link to="/profile">
-                    <SettingsIcon style={{color:"white", fontSize:"2em", marginTop:'50%'}}/>
-                </Link>
+                <NavBtnWrapper>
+                    <IconButton onClick={() => history.push('/celebrity/discover') }>
+                        <ExploreIcon style={{ fontSize: '2rem', color: '#ffffff' }}/>
+                    </IconButton>
+                </NavBtnWrapper>
+                <NavBtnWrapper>
+                    <IconButton onClick={() => history.push('/profile') }>
+                        <SettingsIcon style={{ fontSize: '2rem', color: '#ffffff' }}/>
+                    </IconButton>
+                </NavBtnWrapper>
                 <LogoutButton 
                     name="logOut"
                     startIcon={<ExitToAppRoundedIcon />}

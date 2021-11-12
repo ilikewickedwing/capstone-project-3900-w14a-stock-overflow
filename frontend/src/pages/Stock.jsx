@@ -1,4 +1,4 @@
-import React from 'react'; 
+import React, { useContext } from 'react'; 
 import { useParams } from "react-router";
 import axios from "axios";
 import Navigation from '../comp/Navigation'; 
@@ -28,9 +28,11 @@ import {
   PfBar,
 } from '../styles/styling';
 import { apiBaseUrl } from '../comp/const';
+import { AlertContext } from '../App';
 
 
 const Stock = () => {
+  const alert = useContext(AlertContext);
   const { stockCode } = useParams();
   var request = require('request');
   var url = `https://www.alphavantage.co/query?function=OVERVIEW&symbol=${stockCode}&apikey=59SO8FIM49NYQS21`;
@@ -98,7 +100,7 @@ const Stock = () => {
       const request = await axios.get(`${apiBaseUrl}/user/portfolios?token=${token}`);
       setPortfolios(request.data);
     } catch (e) {
-      alert(`Status Code ${e.response.status} : ${e.response.data.error}`);
+      alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
     }
   };
   
@@ -154,7 +156,7 @@ const Stock = () => {
         }
     }}
     catch (e) {
-      alert(`Status Code ${e.response.status} : ${e.response.data.error}`);;
+      alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
     }
   }
 

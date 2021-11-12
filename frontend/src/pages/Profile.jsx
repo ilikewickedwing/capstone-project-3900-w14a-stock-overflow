@@ -1,4 +1,4 @@
-import React from 'react'; 
+import React, { useContext } from 'react'; 
 import { useHistory } from 'react-router';
 import { useState } from 'react';
 import axios from 'axios';
@@ -15,6 +15,7 @@ import Modal from '@mui/material/Modal';
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import { PageBody } from '../styles/styling';
+import { AlertContext } from '../App';
 
 // styling 
 const style = {
@@ -64,6 +65,7 @@ const avatarStyle={backgroundColor:'#1bbd7e'}
 const btnstyle={margin:'8px 0'}
 
 export default function Profile() {
+  const alert = useContext(AlertContext);
   const history = useHistory();
   const token = localStorage.getItem('token');
   const uid = localStorage.getItem('uid');
@@ -106,10 +108,10 @@ export default function Profile() {
     console.log(token);
     try {
       const resp = await axios.delete(`${apiBaseUrl}/auth/delete`, {data: {token}});
-      alert('Account has been deleted');
+      alert('Account has been deleted','success');
       history.push('/');
     } catch (e){
-      alert(`Status Code ${e.response.status} : ${e.response.data.message}`);
+      alert(`Status Code ${e.response.status} : ${e.response.data.message}`,'error');
     }
   }
 
@@ -117,10 +119,10 @@ export default function Profile() {
   const onEditUser = async() => {
     try {
       const resp = await axios.post(`${apiBaseUrl}/user/profile`, {uid, token, userData: {username}})
-      alert('username changed');
+      alert('username changed','success');
       history.push('/');
     } catch (e){
-      alert(`Status Code ${e.response.status} : ${e.response.data.message}`);
+      alert(`Status Code ${e.response.status} : ${e.response.data.message}`,'error');
     }
   }
 
@@ -129,13 +131,13 @@ export default function Profile() {
     try {
       await axios.post(`${apiBaseUrl}/user/setDefBroker`, {token, defBroker: fee, brokerFlag: option}); 
       if (option){
-        alert(`New fee has been set to ${fee} %`); 
+        alert(`New fee has been set to ${fee} %`,'success'); 
       } else {
-        alert(`New fee has been set to $${fee}`); 
+        alert(`New fee has been set to $${fee}`,'success'); 
       }
       getDefaultBrokerage();
     } catch (e) {
-      alert(`Status Code ${e.response.status} : ${e.response.data.message}`);
+      alert(`Status Code ${e.response.status} : ${e.response.data.message}`,'error');
     }
   }
 
@@ -147,21 +149,21 @@ export default function Profile() {
       setFlag(res.data.defBroker.brokerFlag);
       
     } catch (e) {
-      alert(`Status Code ${e.status} : ${e.response.data.message}`);
+      alert(`Status Code ${e.status} : ${e.response.data.message}`,'error');
     }
   }
 
   const getFriendRequests = async () => {
     try {
     } catch (e) {
-      alert(`Status Code ${e.status} : ${e.response.data.message}`);
+      alert(`Status Code ${e.status} : ${e.response.data.message}`,'error');
     }
   }
 
   const getFriendList = async () => {
     try {
     } catch (e) {
-      alert(`Status Code ${e.status} : ${e.response.data.message}`);
+      alert(`Status Code ${e.status} : ${e.response.data.message}`,'error');
     }
   }
 

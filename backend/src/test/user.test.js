@@ -4,6 +4,26 @@ import { postUserProfile, getUserProfile } from '../user';
 import { app, database } from '../index';
 import request from 'supertest';
 
+describe('Get uid endpoint test', () => {
+  beforeAll(async () => {
+    await database.connect();
+  })
+  it('200 on valid uid', async () => {
+    const resp = await authRegister('Ashleybob', 'strongpassword', database);
+    const response = await request(app).get(`/user/uid?username=Ashleybob`).send();
+    expect(response.statusCode).toBe(200);
+    expect(response.body.uid).toBe(resp.uid);
+  })
+  it('404 on invalid username', async () => {
+    const response = await request(app).get(`/user/uid?username=Ashleybasdfdsaob`).send();
+    expect(response.statusCode).toBe(404);
+  })
+  // Close the database after all tests
+  afterAll(async () => {
+    await database.disconnect();
+  })
+})
+
 describe('Get User profile', () => {
   const d = new Database(true);
   // Run this before all the tests
