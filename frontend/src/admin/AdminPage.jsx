@@ -6,6 +6,7 @@ import profileImg from '../assets/dp.jpg';
 import { LogoutButton } from "../styles/styling";
 import ExitToAppRoundedIcon from '@material-ui/icons/ExitToAppRounded';
 import FileDownload from "../files/FileDownload";
+import { AlertContext } from "../App";
 
 const callApi = async (api, token, setResponse) => {
   const resp = await api.getAdminCelebrityRequests(token);
@@ -20,6 +21,7 @@ const callApi = async (api, token, setResponse) => {
 export default function AdminPage() {
   const [ response, setResponse ] = useState({});
   const api = useContext(ApiContext);
+  const alert = useContext(AlertContext);
   const history = useHistory();
   // Get celebrity requests
   useEffect(() => {

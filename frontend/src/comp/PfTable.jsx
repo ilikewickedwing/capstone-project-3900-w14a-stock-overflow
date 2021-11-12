@@ -27,6 +27,7 @@ import MenuItem from '@mui/material/MenuItem';
 import axios from "axios";
 import { apiBaseUrl } from '../comp/const';
 import { useParams } from 'react-router-dom';
+import { AlertContext } from "../App";
 
 function createData(code, name, buyPrice, currPrice, changePer, units, value, profitLoss) {
   return {
@@ -181,6 +182,7 @@ const style = {
 };
 
 const EnhancedTableToolbar = (props) => {
+  const alert = React.useContext(AlertContext);
   const { numSelected, selected, load } = props;
   const { pid } = useParams();
   const token = localStorage.getItem('token');
@@ -351,6 +353,7 @@ EnhancedTableToolbar.propTypes = {
 };
 
 export default function PfTable({stocks, load, setGraphSelected}) {
+  const alert = React.useContext(AlertContext);
   const [order, setOrder] = React.useState("asc");
   const [orderBy, setOrderBy] = React.useState("prices");
   const [selected, setSelected] = React.useState([]);

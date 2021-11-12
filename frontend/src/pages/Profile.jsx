@@ -1,4 +1,4 @@
-import React from 'react'; 
+import React, { useContext } from 'react'; 
 import { useHistory } from 'react-router';
 import { useState } from 'react';
 import axios from 'axios';
@@ -15,6 +15,7 @@ import Modal from '@mui/material/Modal';
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import { PageBody } from '../styles/styling';
+import { AlertContext } from '../App';
 
 // styling 
 const style = {
@@ -64,6 +65,7 @@ const avatarStyle={backgroundColor:'#1bbd7e'}
 const btnstyle={margin:'8px 0'}
 
 export default function Profile() {
+  const alert = useContext(AlertContext);
   const history = useHistory();
   const token = localStorage.getItem('token');
   const uid = localStorage.getItem('uid');

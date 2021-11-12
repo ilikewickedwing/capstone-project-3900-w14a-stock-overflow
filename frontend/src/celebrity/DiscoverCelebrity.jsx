@@ -6,9 +6,10 @@ import profileImg from '../assets/dp.jpg';
 import { Button } from "@material-ui/core";
 import TitleImg from '../assets/working.jpg';
 import { useHistory } from "react-router";
+import { AlertContext } from "../App";
 
 
-const callApi = async (api, setDiscoverResp) => {
+const callApi = async (api, setDiscoverResp, alert) => {
   const resp = await api.getCelebrityDiscover();
   if (resp.status === 200) {
     const respJson = await resp.json();
@@ -22,10 +23,11 @@ export default function DiscoverCelebrityPage () {
   const [ discoverResp, setDiscoverResp ] = useState({});
   const uid = localStorage.getItem('uid');
   const api = useContext(ApiContext);
+  const alert = useContext(AlertContext);
   const history = useHistory();
   useEffect(() => {
-    callApi(api, setDiscoverResp);
-  }, [api])
+    callApi(api, setDiscoverResp, alert);
+  }, [api, alert])
   
   const renderCelebs = () => {
     if (!('celebrities' in discoverResp) || !('followers' in discoverResp)) {
@@ -49,7 +51,7 @@ export default function DiscoverCelebrityPage () {
         const token = localStorage.getItem('token');
         const resp = await api.postCelebrityFollow(token, !celebFollowers.includes(uid), c.uid);
         if (resp.status === 200) {
-          callApi(api, setDiscoverResp);
+          callApi(api, setDiscoverResp, alert);
         } else {
           const respJson = await resp.json()
           alert(respJson.error);

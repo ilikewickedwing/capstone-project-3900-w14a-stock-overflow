@@ -6,8 +6,10 @@ import { Welcome } from '../styles/styling';
 import axios from 'axios';
 import { apiBaseUrl } from '../comp/const';
 import { ApiContext } from '../api';
+import { AlertContext } from '../App';
 
 function Login() {
+    const alert = useContext(AlertContext);
     const [ username, setUsername ] = useState('');
     const [ password, setPassword ] = useState('');
     const api = useContext(ApiContext);

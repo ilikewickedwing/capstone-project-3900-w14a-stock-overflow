@@ -1,8 +1,10 @@
 import { useContext } from "react"
 import { ApiContext } from "../api"
 import PropTypes from "prop-types";
+import { AlertContext } from "../App";
 
 export default function FileUpload(props) {
+  const alert = useContext(AlertContext);
   const api = useContext(ApiContext);
   const token = localStorage.getItem('token');
   const onInputChange = async (e) => {

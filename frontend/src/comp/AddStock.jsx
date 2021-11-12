@@ -1,4 +1,4 @@
-import React from 'react'; 
+import React, { useContext } from 'react'; 
 
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
@@ -14,10 +14,12 @@ import MenuItem from '@mui/material/MenuItem';
 import {FlexColumns} from "../styles/styling"; 
 import axios from 'axios';
 import { apiBaseUrl } from './const';
+import { AlertContext } from '../App';
 
 
 // add stock form 
 const AddStock = ({token, pid, onAddCallback, load = () => {}, name}) => {
+    const alert = useContext(AlertContext);
     // textinput state
     const [search, setSearch ] = React.useState("");
     // list of api return 

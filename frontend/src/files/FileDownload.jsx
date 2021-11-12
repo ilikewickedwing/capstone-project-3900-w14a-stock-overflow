@@ -4,7 +4,9 @@ import { useContext } from "react";
 import { ApiContext } from "../api";
 import PropTypes from 'prop-types';
 import DownloadIcon from '@mui/icons-material/Download';
+import { AlertContext } from "../App";
 export default function FileDownload(props) {
+  const alert = useContext(AlertContext);
   const api = useContext(ApiContext);
   const download = async (fid) => {
     const token = localStorage.getItem('token');
