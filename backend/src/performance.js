@@ -318,8 +318,73 @@ export const getAllRankings = async (database) => {
   return rankings;
 }
 
-export const getFriendRankings = async (token, database) => {
-  const global = getAllRankings();
+// We tried and we failed
+// export const getFriendRankings1 = async (token, database) => {
+//   // console.log('FriendRankings1');
+//   const global = await getAllRankings(database);
+//   // console.dir(global, {depth:null});
+//   // Return error if user is not found
+//   const uid = await database.getTokenUid(token);
+//   if (uid == null) {
+//     return -2;
+//   }
+
+//   const friends = await database.getFriends(uid);
+//   // console.log('Friends are ' + friends);
+//   const friendRank = [];
+//   for (let i = 0; i < friends.length; i++) {
+//     // console.log('Now searching for ' + friends[i]);
+//     for (let j = 0; j < global.length; j++) {
+//       // console.log('Comparing against ' + global[j].uid);
+//       if (friends[i] === global[j].uid) {
+//         // console.log('Found!');
+//         friendRank.push({
+//           rank: i+1,
+//           uid: friends[i],
+//           name: global[j].name,
+//           performance: global[j].performance
+//         })
+//         // console.dir(friendRank, {depth:null});
+//       }
+//     }
+//   }
+
+//   for (let i = 0; i < friendRank.length; i++) {
+//     friendRank[i].rank = i + 1;
+//   }
+
+//   // Filter through friends list
+//   return friendRank;
+// }
+
+export const getFriendRankings2 = async (token, database) => {
+  // console.log('FriendRankings2');
+  // Return error if user is not found
+  const uid = await database.getTokenUid(token);
+  if (uid == null) {
+    return -2;
+  }
+  const friends = await database.getFriends(uid);
+  // console.log('Friends are ' + friends);
+  const friendPerf = [];
+  for (let i = 0; i < friends.length; i++) {
+    // console.log('Now searching for ' + friends[i]);
+    const friend = await database.getUserPerf(friends[i]);
+    // console.log(friend);
+    friendPerf.push({
+      rank: 0,
+      uid: friends[i],
+      name: friend.name,
+      performance: friend.performance
+    })
+    // console.dir(friendPerf, {depth:null});
+  }
+
+  const friendRank = mergeSort(friendPerf);
+  for (let i = 0; i < friendRank.length; i++) {
+    friendRank[i].rank = i + 1;
+  }
+
   // Filter through friends list
-  return global;
+  return friendRank;
 }
