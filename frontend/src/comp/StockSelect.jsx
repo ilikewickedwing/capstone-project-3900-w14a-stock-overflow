@@ -7,6 +7,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
 import Button from '@material-ui/core/Button';
+import { AlertContext } from '../App';
 
 const style = {
     position: 'absolute',
@@ -21,6 +22,7 @@ const style = {
   };
 
 const StockSelect = ({stockCode, name,pid, setClose}) => {
+    const alert = React.useContext(AlertContext);
     const token = localStorage.getItem('token');
 
     const [price, setPrice] = React.useState("");
@@ -44,7 +46,7 @@ const StockSelect = ({stockCode, name,pid, setClose}) => {
                 handleOpen();
             }
         } catch (e){
-            alert(e);
+            alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
         }   
     }
 
@@ -58,13 +60,13 @@ const StockSelect = ({stockCode, name,pid, setClose}) => {
             handleClose();
             setClose();
         } catch (e){
-            alert(e);
+            alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
         }   
     }
 
     return (
         <div>
-            <MenuItem onClick={handleAddStock} style={{width:"10em"}}>
+            <MenuItem onClick={handleAddStock} style={{padding:"5px"}}>
                 {name}
             </MenuItem>
             <Modal
@@ -78,15 +80,15 @@ const StockSelect = ({stockCode, name,pid, setClose}) => {
                         Add New Stock
                     </Typography>
                     <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-                    <form>
-                        <TextField type="text" required variant="standard" label="price"
+                        <TextField type="number" required variant="standard" label="price"
                             onChange={e => setPrice(e.target.value)}/>
-                        <TextField type="text" required variant="standard" label="quantity"
+                        <br />
+                        <TextField type="number" required variant="standard" label="quantity"
                         onChange={e => setQuantity(e.target.value)}/>
-                        <Button type='submit' onClick={handleSubmit}>
+                         <br />
+                        <Button style={{margin: "10px 0", width: "100%"}} type='submit' onClick={handleSubmit}>
                             Add Stock
                         </Button>
-                    </form>
                     </Typography>
                 </Box>
             </Modal>

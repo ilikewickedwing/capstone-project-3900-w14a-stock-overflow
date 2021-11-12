@@ -1,20 +1,26 @@
-import React from 'react'; 
+import React, { useContext } from 'react'; 
 import { useHistory } from 'react-router';
 import {Link} from 'react-router-dom';
 import { ApiContext } from '../api';
 import ExitToAppRoundedIcon from '@material-ui/icons/ExitToAppRounded';
-import {NavBar, Logo, LogoutButton, FlexRows, SearchToggle } from '../styles/styling';
-import { Button } from '@material-ui/core';
+import {NavBar, Logo, LogoutButton, FlexRows, SearchToggle, SearchDiv, NavBtnWrapper } from '../styles/styling';
 import {TextInput} from "../styles/styling"; 
 import IconButton from '@mui/material/IconButton';
 import SearchIcon from '@mui/icons-material/Search';
 import Switch from '@mui/material/Switch';
 import Autocomplete from '@mui/material/Autocomplete';
+import { apiBaseUrl } from '../comp/const';
+import axios from 'axios';
+import NotificationButton from '../notifications/Notifications';
+import SettingsIcon from '@mui/icons-material/Settings';
+import ExploreIcon from '@mui/icons-material/Explore';
+import { AlertContext } from '../App';
 
 const label = { inputProps: { 'aria-label': 'toggle' } };
 
 const Navigation = () => {
     const api = React.useContext(ApiContext);
+    const alert = useContext(AlertContext)
     const history = useHistory();
 
     // const [query, setQuery] = React.useState('');
@@ -23,57 +29,43 @@ const Navigation = () => {
     const [search, setSearch ] = React.useState("");
     const [currCode, setCode] = React.useState("");
 
-    var request = require('request');
-
-    // replace the "demo" apikey below with your own key from https://www.alphavantage.co/support/#api-key
-    var url = `https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${search}&apikey=59SO8FIM49NYQS21`;
-
-   // handle logout
-   const onLogOut = async () => {
-    const token = localStorage.getItem('token');
-    const resp = await api.authLogout(token);
-    if (resp.status === 403) alert('Invalid token');
-    if (resp.status === 200) {
-        alert('Token has been invalidated');
-        history.push('/');
-    } else {
-        alert(`Server returned unexpected status code of ${resp.status}`);
-    }
-  }
-
-    // handle search submission 
-    const searchBar = async(e) =>{
-        e.preventDefault(); 
-        request.get({
-            url: url,
-            json: true,
-            headers: {'User-Agent': 'request'}
-        }, (err, res, data) => {
-            if (err) {
-            console.log('Error:', err);
-            } else if (res.statusCode !== 200) {
-            console.log('Status:', res.statusCode);
-            } else {
-            // data is successfully parsed as a JSON object:
-            const response =  data.bestMatches;
-
-            if (response){
-                const newList = []; 
-                response.forEach((obj) => {
-                    newList.push({
-                        code: obj["1. symbol"],
-                        name: obj["2. name"]
-                    });
-                })
-                setRes(newList);
-            }
-            }
-        });
+    // handle logout
+    const onLogOut = async () => {
+        const token = localStorage.getItem('token');
+        try {
+            await axios.post(`${apiBaseUrl}/auth/logout`,{token});
+            history.push('/');
+        } catch (e) {
+            alert(`Status Code ${e.response.status} : ${e.response.data.message}`,'error');
+        }
     }
     
+      // on first load, cache the stock list 
+    React.useEffect(() => {   
+        fetchStockList();
+    },[]);
+    
+    const fetchStockList = async () => {
+        try {
+          const request = await axios.get(`${apiBaseUrl}/stocks/all`);
+          // map it so its MUI autocorrect friendly 
+          const newList = [];
+          request.data.forEach(obj => {
+              newList.push({
+                  code: obj["symbol"],
+                  name: obj["name"]
+              })
+          })
+          setRes(newList);
+        } catch (e) {
+          alert(`Status Code ${e.status} : ${e.response.data.error}`,'error');
+        }
+      };
+
     const submitQuery = () => {
         history.push(`/stock/${currCode}`);
     }
+
 
     return (
         <NavBar className="font-two">
@@ -83,11 +75,11 @@ const Navigation = () => {
                 </Logo>
             </Link>
             <SearchToggle>
-                friends
-                <Switch {...label} defaultChecked />
                 stocks
+                <Switch {...label}/>
+                friends
             </SearchToggle>
-            <FlexRows style={{margin:'1%', justifyContent:'center'}}>
+            <SearchDiv>
             <Autocomplete
                 disablePortal
                 options={queryRes.map((e)=> e.code+" "+ e.name)}
@@ -102,23 +94,24 @@ const Navigation = () => {
                 <TextInput 
                     {...params} 
                     label="Search Stock" 
-                    onKeyDown={e => {
-                        if (e.keyCode === 13 && e.target.value) {
-                            searchBar(e);
-                        }
-                    }}
                 />)}
             />
             <IconButton type="submit" sx={{p:'10px'}} onClick={submitQuery}>
                 <SearchIcon />
             </IconButton>
-            </ FlexRows> 
+            </ SearchDiv> 
             <FlexRows style={{padding:"1%"}}>
-                <Link to="/profile">
-                    <Button>
-                        Edit Profile
-                    </Button>
-                </Link>
+                <NotificationButton/>
+                <NavBtnWrapper>
+                    <IconButton onClick={() => history.push('/celebrity/discover') }>
+                        <ExploreIcon style={{ fontSize: '2rem', color: '#ffffff' }}/>
+                    </IconButton>
+                </NavBtnWrapper>
+                <NavBtnWrapper>
+                    <IconButton onClick={() => history.push('/profile') }>
+                        <SettingsIcon style={{ fontSize: '2rem', color: '#ffffff' }}/>
+                    </IconButton>
+                </NavBtnWrapper>
                 <LogoutButton 
                     name="logOut"
                     startIcon={<ExitToAppRoundedIcon />}

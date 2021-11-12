@@ -1,4 +1,4 @@
-import React from 'react'; 
+import React, { useContext } from 'react'; 
 import { useHistory } from 'react-router';
 import {TabBar, TabButton, CreatePortField, CreatePortContent} from '../styles/styling';
 import Popover from '@mui/material/Popover';
@@ -7,9 +7,11 @@ import TabName from './TabName';
 import axios from "axios";
 
 import { apiBaseUrl } from './const';
+import { AlertContext } from '../App';
 
 
 const Tabs = ({isChanged}) => {
+  const alert = useContext(AlertContext);
   const history = useHistory();
   const token = localStorage.getItem('token');
 
@@ -19,8 +21,12 @@ const Tabs = ({isChanged}) => {
 
 
   const fetchPortfolios = async () => {
-    const request = await axios.get(`${apiBaseUrl}/user/portfolios?token=${token}`);
-    setPortfolios(request.data);
+    try {
+      const request = await axios.get(`${apiBaseUrl}/user/portfolios?token=${token}`);
+      setPortfolios(request.data);
+    } catch (e) {
+      alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
+    }
   };
 
   // fetch the tabs on load 
@@ -50,11 +56,15 @@ const Tabs = ({isChanged}) => {
       
   const submitNewPort = async (e) => {
     e.preventDefault();      
-    const request = await axios.post(`${apiBaseUrl}/user/portfolios/create`, {token, name});
-    const newPid = request.data;
-    fetchPortfolios();
-    handleClose();
-    history.push(`/portfolio/${newPid.pid}`);
+    try {
+      const request = await axios.post(`${apiBaseUrl}/user/portfolios/create`, {token, name});
+      const newPid = request.data;
+      fetchPortfolios();
+      handleClose();
+      history.push(`/portfolio/${newPid.pid}`);
+    } catch (e) {
+      alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
+    }
   }
 
 // TODO IMPLEMENT PROFILE AND DELETE ACC

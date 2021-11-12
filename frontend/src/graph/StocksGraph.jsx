@@ -247,7 +247,7 @@ StocksGraph.propTypes = {
 }
 
 // Converts a time string to a nicely displayed one
-const transformTimeStr = (timeStr) => {
+export const transformTimeStr = (timeStr) => {
   const date = new Date(Date.parse(timeStr));
   if (timeStr.includes('T')) {
     return date.toLocaleTimeString('en-US',
@@ -265,7 +265,11 @@ const transformMultiStockData = (companyIds, interval, dataCache) => {
       time: transformTimeStr(getDataTime(getTimeSeriesData(dataCache[companyIds[0]][interval])[i]))
     };
     for (const cid of companyIds) {
-      timePoint[cid] = getTimeSeriesData(dataCache[cid][interval])[i].close
+      try {
+        timePoint[cid] = getTimeSeriesData(dataCache[cid][interval])[i].close
+      } catch(err) {
+      
+      }
     }
     output.push(timePoint);
   }

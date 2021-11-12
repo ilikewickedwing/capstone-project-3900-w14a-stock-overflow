@@ -1,26 +1,58 @@
 import { createContext } from "react";
-
-const ENDPOINT = 'http://localhost:5050'
+import { apiBaseUrl as ENDPOINT } from "./comp/const";
 
 export const ApiContext = createContext();
 
 const getToken = () => (`Bearer ${localStorage.getItem('token')}`);
 
-const APIKEY = "12G3IUEF5TUMERGL";
-
 /**
  * Wrapper class to make API calls
  */
 export default class API {
+  
+  userUid(username) {
+    return fetch(`${ENDPOINT}/user/uid?username=${username}`);
+  }
+
   /**
    * Fetches the user profile from the backend endpoint
    * @param {string} uid 
    * @returns {Promise}
    */
-  userProfile(uid) {
-    return fetch(`${ENDPOINT}/user/profile?uid=${uid}`)
+  userProfile(uid, token) {
+    return fetch(`${ENDPOINT}/user/profile?uid=${uid}&token=${token}`);
   }
-
+  
+  postUserProfile(uid, token, userData) {
+    return fetch(`${ENDPOINT}/user/profile`, {
+      method: 'POST',
+      headers: {
+        'Content-Type' : 'application/json'
+      },
+      body: JSON.stringify({
+        uid: uid,
+        token: token,
+        userData: userData,
+      })
+    });
+  }
+  
+  userNotifications(token) {
+    return fetch(`${ENDPOINT}/user/notifications?token=${token}`);
+  }
+  
+  userNotificationsClear(token) {
+    return fetch(`${ENDPOINT}/user/notifications/clear`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type' : 'application/json'
+      },
+      body: JSON.stringify({
+        token: token,
+      })
+    });
+  }
+  
   /**
    * Calls the login endpoint
    * @param {string} username 
@@ -85,7 +117,28 @@ export default class API {
       })
     });
   }
-
+  /**
+   * 
+   * @param {string} token // Token of the user uploading 
+   * @param {File} file // File object of the file
+   */
+  fileUpload(token, file) {
+    const formData = new FormData();
+    formData.append('upload', file);
+    const options = {
+      method: 'POST',
+      body: formData,
+      headers: {
+        token: token
+      }
+    }
+    return fetch(`${ENDPOINT}/file/upload`, options);
+  }
+  
+  fileDownload(token, fid) {
+    return fetch(`${ENDPOINT}/file/download?token=${token}&fid=${fid}`);
+  }
+  
   /**
    * 
    * @param {int} type
@@ -115,25 +168,60 @@ export default class API {
     }
     return fetch(queryStr);
   }
-
-  stockTimeSeriesIntraday(companySymbol, interval) {
-    const URL = 'https://www.alphavantage.co/query';
-    return fetch(`${URL}?function=TIME_SERIES_INTRADAY&symbol=${companySymbol}&interval=${interval}&apikey=${APIKEY}`);
+  
+  userPortfoliosOpen(pid, token) {
+    return fetch(`${ENDPOINT}/user/portfolios/open?pid=${pid}&token=${token}`);
   }
   
-  stockTimeSeriesDaily(companySymbol) {
-    const URL = 'https://www.alphavantage.co/query';
-    return fetch(`${URL}?function=TIME_SERIES_DAILY&symbol=${companySymbol}&apikey=${APIKEY}`);
+  getCelebrityDiscover() {
+    return fetch(`${ENDPOINT}/celebrity/discover`);
   }
   
-  stockTimeSeriesWeekly(companySymbol) {
-    const URL = 'https://www.alphavantage.co/query';
-    return fetch(`${URL}?function=TIME_SERIES_WEEKLY&symbol=${companySymbol}&apikey=${APIKEY}`);
+  postCelebrityFollow(token, isFollow, celebUid) {
+    return fetch(`${ENDPOINT}/celebrity/follow`, {
+      method: 'POST',
+      headers: {
+        'Content-Type' : 'application/json'
+      },
+      body: JSON.stringify({
+        token: token,
+        isFollow: isFollow,
+        celebUid: celebUid,
+      })
+    });
   }
   
-  stockTimeSeriesMonthly(companySymbol) {
-    const URL = 'https://www.alphavantage.co/query';
-    return fetch(`${URL}?function=TIME_SERIES_MONTHLY&symbol=${companySymbol}&apikey=${APIKEY}`);
+  postCelebrityMakeRequest(token, info, fids) {
+    return fetch(`${ENDPOINT}/celebrity/makerequest`, {
+      method: 'POST',
+      headers: {
+        'Content-Type' : 'application/json'
+      },
+      body: JSON.stringify({
+        token: token,
+        info: info,
+        fids: fids,
+      })
+    });
+  }
+  
+  getAdminCelebrityRequests(token) {
+    let queryStr = `${ENDPOINT}/admin/celebrity/requests?token=${token}`;
+    return fetch(queryStr);
+  }
+  
+  postAdminCelebrityHandlerequest(token, approve, rid) {
+    return fetch(`${ENDPOINT}/admin/celebrity/handlerequest`, {
+      method: 'POST',
+      headers: {
+        'Content-Type' : 'application/json'
+      },
+      body: JSON.stringify({
+        token: token,
+        approve: approve,
+        rid: rid,
+      })
+    });
   }
   
   post(path, options){

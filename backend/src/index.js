@@ -3,11 +3,17 @@ import cors from 'cors';
 import { Database } from "./database";
 import swaggerUI from 'swagger-ui-express';
 import { swaggerDocs } from "./docs";
-import { createPf, deletePf, openPf, userPfs, getPid, editPf, calcPf } from "./portfolio";
+import { createPf, deletePf, openPf, userPfs, getPid, editPf } from "./portfolio";
+import { calcPf, getAllRankings, getFriendRankings } from "./performance";
 import { authDelete, authLogin, authLogout, authRegister } from "./auth";
-import { getUserProfile, postUserProfile } from "./user";
+import { getDefBroker, getUserProfile, getUserUid, postUserProfile, setDefBroker } from "./user";
 import { addStock, modifyStock, getAllStocks, checkStock, getStock } from "./stocks";
 import { addFriend, removeFriend, getFriends } from "./social";
+import { getAdminCelebrityRequests, postAdminCelebrityHandlerequest, postCelebrityMakeRequest } from "./admin";
+import { getUserNotifications, deleteUserNotifications } from "./notifications";
+import fileUpload from 'express-fileupload';
+import { handleFileDownload, handleFileUpload } from "./file";
+import { getCelebrityDiscover, postCelebrityFollow } from "./celebrity";
 
 // Make the server instance
 export const app = express();
@@ -25,6 +31,9 @@ app.use(express.json())
 
 // Middleware used to generate automatic REST API documentation
 app.use('/docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
+
+// Middleware for file uploads
+app.use(fileUpload({ createParentPath: true }));
 
 // Intialise database
 export const database = new Database();
@@ -84,6 +93,35 @@ export const database = new Database();
  */
 app.get('/', (req, res) => {
   res.status(200).send('This is the root page. Go to /docs for documentation.')
+})
+
+/**
+ * @swagger
+ * /user/profile:
+ *   get:
+ *     tags: [User]
+ *     description: Endpoint for fetching the uid of a user
+ *     parameters:
+ *      - name: username
+ *        description: The username of the user
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: uid of the user
+ *         schema:
+ *            type: object
+ *            properties:
+ *              uid:
+ *                type: string
+ *                description: The uid of the user
+ *       404:
+ *         description: Invalid user not found
+ */
+app.get('/user/uid', async (req, res) => {
+  const { username } = req.query;
+  getUserUid(username, database, res);
 })
 
 // Get endpoint for getting user data
@@ -326,7 +364,36 @@ app.delete('/auth/delete', async (req, res) => {
     res.status(200).send();
     return;
   }
-  res.status(403).send({ mesage: 'Uid does not exist' });
+  res.status(403).send({ message: 'Uid does not exist' });
+})
+
+// Get endpoint for getting default broker price
+app.get('/user/getDefBroker', async (req, res) => {
+  const { token } = req.query;
+  const resp = await getDefBroker(token, database);
+  console.log
+  if (resp === 2) {
+    res.status(401).send({ error: "Invalid token" });
+  } else {
+    res.status(200).send({ defBroker: resp });
+  }
+})
+
+// Post endpoint for setting default broker price
+app.post('/user/setDefBroker', async (req, res) => {
+  const { token, defBroker, brokerFlag } = req.body;
+  const resp = await setDefBroker(token, defBroker, brokerFlag, database);
+  if (resp === 2) {
+    res.status(401).send({ error: "Invalid token" });
+  } else if (resp === 3) {
+    res.status(403).send({ error: "Invalid brokerage fee" });
+  } else if (resp === 4) {
+    res.status(403).send({ error: "Invalid brokerage type" });
+  } else if (resp === 0) {
+    res.status(404).send();
+  } else if (resp === 1) {
+    res.status(200).send();
+  }
 })
 
 // Post endpoint for creating a single portfolio
@@ -440,13 +507,17 @@ app.get('/user/portfolios', async (req, res) => {
  *         description: Invalid pid
  */
 app.get('/user/portfolios/open', async (req, res) => {
-  const { pid } = req.query;
-  const resp = await openPf(pid, database);
-  if (resp !== null) {
+  const { token, pid } = req.query;
+  const resp = await openPf(token, pid, database);
+  if (resp === null) {
+    res.status(403).send({ error: "Invalid pid" });
+  } else if (resp === 1) {
+    res.status(401).send({ error: "Invalid token" });
+  } else if (resp === 2) {
+    res.status(401).send({ error: "You do not have access to this portfolio" });
+  } else {
     res.status(200).send(resp);
-    return;
   }
-  res.status(403).send({ error: "Invalid pid" });
 })
 
 
@@ -542,7 +613,7 @@ app.get('/user/portfolios/calculate', async (req, res) => {
   } else if (resp === -5) {
     res.status(404).send({ error: "Could not update database" });
   } else {
-    res.status(200).send({ performance: resp.toString() });
+    res.status(200).send({ performance: resp });
   }
 
   return;
@@ -673,6 +744,16 @@ app.delete('/user/portfolios/delete', async (req, res) => {
  *        in: body
  *        required: true
  *        type: int
+ *      - name: brokerage
+ *        description: The price of the brokerage fee
+ *        in: body
+ *        required: true
+ *        type: float
+ *      - name: flag
+ *        description: The type of the brokerage fee; 0 for flat and 1 for percentage
+ *        in: body
+ *        required: true
+ *        type: int
  *     responses:
  *       200:
  *         description: Successfully added stock
@@ -684,8 +765,8 @@ app.delete('/user/portfolios/delete', async (req, res) => {
  *         description: Invalid pid or invalid stock
  */
 app.post('/user/stocks/add', async (req, res) => {
-  const { token, pid, stock, price, quantity } = req.body;
-  const resp = await addStock(token, pid, stock, price, quantity, database);
+  const { token, pid, stock, price, quantity, brokerage, flag } = req.body;
+  const resp = await addStock(token, pid, stock, price, quantity, brokerage, flag, database);
   if (resp === 1) {
     res.status(401).send({ error: "Invalid token" });
   } else if (resp === 2) {
@@ -698,6 +779,12 @@ app.post('/user/stocks/add', async (req, res) => {
     res.status(400).send({ error: "Must include valid price purchased at" });
   } else if (resp === 6) {
     res.status(403).send({ error: "Stock already in watchlist" });
+  } else if (resp === 7) {
+    res.status(403).send({ error: "Default brokerage cost not set" });
+  } else if (resp === 8) {
+    res.status(403).send({ error: "Invalid brokerage cost" });
+  } else if (resp === 9) {
+    res.status(403).send({ error: "Invalid brokerage type" });
   } else {
     res.status(200).send();
   }
@@ -742,6 +829,16 @@ app.post('/user/stocks/add', async (req, res) => {
  *        in: body
  *        required: true
  *        type: int
+ *      - name: brokerage
+ *        description: The price of the brokerage fee
+ *        in: body
+ *        required: true
+ *        type: float
+ *      - name: flag
+ *        description: The type of the brokerage fee; 0 for flat and 1 for percentage
+ *        in: body
+ *        required: true
+ *        type: int
  *     responses:
  *       200:
  *         description: Successfully deleted portfolio
@@ -753,8 +850,8 @@ app.post('/user/stocks/add', async (req, res) => {
  *         description: Stock not in portfolio
  */
 app.put('/user/stocks/edit', async (req, res) => {
-  const { token, pid, stock, price, quantity, option } = req.body;
-  const resp = await modifyStock(token, pid, stock, price, quantity, option, database);
+  const { token, pid, stock, price, quantity, option, brokerage, flag } = req.body;
+  const resp = await modifyStock(token, pid, stock, price, quantity, option, brokerage, flag, database);
   if (resp === -1) {
     res.status(200).send();
   } else if (resp === 1) {
@@ -768,9 +865,15 @@ app.put('/user/stocks/edit', async (req, res) => {
   } else if (resp === 5) {
     res.status(404).send({ error: "Stock is not in portfolio" });
   } else if (resp === 6) {
-    res.status(400).send({ error: "Must include valid quantity purchased" });
+    res.status(400).send({ error: "Must include valid quantity sold" });
   } else if (resp === 7) {
-    res.status(400).send({ error: "Must include valid price purchased at" });
+    res.status(400).send({ error: "Must include valid price sold at" });
+  } else if (resp === 8) {
+    res.status(403).send({ error: "Invalid brokerage cost" });
+  } else if (resp === 9) {
+    res.status(403).send({ error: "Default brokerage cost not set" });
+  } else if (resp === 10) {
+    res.status(403).send({ error: "Invalid brokerage type" });
   }
   return;
 })
@@ -843,7 +946,7 @@ app.get('/stocks/all', async (req, res) => {
  *       502:
  *         description: Could not connect to API
  */
- app.get('/stocks/info', async (req, res) => {
+app.get('/stocks/info', async (req, res) => {
   const { type, stocks, interval, start } = req.query;
   const resp = await getStock(type, stocks, interval, start);
 
@@ -862,45 +965,27 @@ app.get('/stocks/all', async (req, res) => {
   return;
 })
 
-// Get endpoint for searching for stock info
+// Post endpoint for adding friends
 /**
  * @swagger
- * /stocks/info:
- *   get:
- *     tags: [Stocks]
- *     description: endpoint for getting stock information - uses alphavantage for information, and tradier for prices
+ * /friends/add:
+ *   post:
+ *     tags: [Friends]
+ *     description: endpoint for adding friends
  *     parameters:
- *      - name: type
- *        description: The type of call being made;
- *          0. Information overview of stock;
- *          1. Current price of stock(s);
- *          2. History of one stock not intraday;
- *          3. History of one stock intraday
+ *      - name: token
+ *        description: token of user
  *        in: body
  *        required: true
  *        type: string
- *      - name: stocks
- *        description: The symbol of the stock or stocks
+ *      - name: FriendID
+ *        description: uid of friend that wants to be added
  *        in: body
  *        required: true
- *        type: string
- *      - name: interval
- *        description: The interval needed;
- *          For not intraday, options are daily, weekly, monthly;
- *          For intraday, options are 1min, 5min, 15min
- *        in: body
- *        required: false
- *        type: string
- *      - name: start
- *        description: The start of the time from when to get data;
- *          For not intraday, format is string as YYYY-MM-DD;
- *          For intraday, format is string as YYYY-MM-DD HH:MM
- *        in: body
- *        required: false
  *        type: string
  *     responses:
  *       200:
- *         description: Successfully returned information for single stock
+ *         description: Successfully added friend/ sent friend request
  *       401:
  *         description: Invalid token, user does not exist
  *       403:
@@ -947,4 +1032,293 @@ app.get('/friends/all', async (req, res) => {
   } else res.status(200).send(resp);
 
   return;
+})
+/**
+ * @swagger
+ * /user/notifications:
+ *   get:
+ *     tags: [User]
+ *     description: Get the recent notifications for the user
+ *     parameters:
+ *      - name: token
+ *        description: The token of the admin
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Returns the an array of notifications
+ *         schema:
+ *            type: object
+ *            properties:
+ *              requests:
+ *                type: array
+ *                description: An array of notifications
+ *       401:
+ *         description: Invalid token
+ */
+app.get('/user/notifications', async (req, res) => {
+  const { token } = req.query;
+  getUserNotifications(token, database, res);
+})
+
+app.delete('/user/notifications/clear', async (req, res) => {
+  const { token } = req.body;
+  deleteUserNotifications(token, database, res);
+})
+
+/**
+ * @swagger
+ * /celebrity/makerequest:
+ *   post:
+ *     tags: [Celebrity]
+ *     description: User makes a request to be a celebrity
+ *     parameters:
+ *      - name: token
+ *        description: The token of the user
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: info
+ *        description: The information the celebrity wants to provide to the user
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: fids
+ *        description: An array of the file ids uploaded with the request
+ *        in: body
+ *        required: true
+ *        type: array
+ *     responses:
+ *       200:
+ *         description: Returns the rid
+*         schema:
+ *            type: object
+ *            properties:
+ *              rid:
+ *                type: string
+ *                description: rid of request
+ *       400:
+ *         description: fids contain an invalid fid
+ *       401:
+ *         description: Invalid token
+ *       403:
+ *         description: Request has already been made
+ */
+app.post('/celebrity/makerequest', async (req, res) => {
+  const { token, info, fids } = req.body;
+  await postCelebrityMakeRequest(token, info, fids, database, res);
+})
+
+/**
+ * @swagger
+ * /admin/celebrity/requests:
+ *   get:
+ *     tags: [Celebrity]
+ *     description: Endpoint to return a list of celebrities to discover
+ *     responses:
+ *       200:
+ *         description: Returns the an array of celebrities
+ *         schema:
+ *            type: object
+ *            properties:
+ *              celebrities:
+ *                type: array
+ *                description: An array of the celebrities
+ *              followers:
+ *                type: object
+ *                description: Maps the celebrity uid to an array of followers (uid)
+ */
+app.get('/celebrity/discover', async (req, res) => {
+  getCelebrityDiscover(res, database);
+})
+
+/**
+ * @swagger
+ * /celebrity/follow:
+ *   post:
+ *     tags: [Celebrity]
+ *     description: User makes a request to follow a given celebrity
+ *     parameters:
+ *      - name: token
+ *        description: The token of the user
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: isFollow
+ *        description: Set to true when following. Set to false when unfollowing
+ *        in: body
+ *        required: true
+ *        type: boolean
+ *      - name: celebUid
+ *        description: The user id of the celeb to follow
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Everything went well
+ *       400:
+ *         description: You can't follow a celeb you already follow, 
+ *          or unfollow a celeb you arent following, or celebUid doesnt exist,
+ *          or uid is not a celebrity
+ *       401:
+ *         description: Invalid token
+ */
+app.post('/celebrity/follow', async (req, res) => {
+  const { token, isFollow, celebUid } = req.body;
+  await postCelebrityFollow(token, isFollow, celebUid, res, database);
+})
+
+/**
+ * @swagger
+ * /admin/celebrity/requests:
+ *   get:
+ *     tags: [Admin]
+ *     description: Get endpoint for admin to fetch a list of all requests to be a celebrity
+ *     parameters:
+ *      - name: token
+ *        description: The token of the admin
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Returns the an array of celebrity requests
+ *         schema:
+ *            type: object
+ *            properties:
+ *              requests:
+ *                type: array
+ *                description: An array of the celebrity requests
+ *              users:
+ *                type: object
+ *                description: An object mapping the uid to the user data
+ *       401:
+ *         description: Invalid token
+ *       403:
+ *         description: User is not an admin
+ */
+app.get('/admin/celebrity/requests', async (req, res) => {
+  const { token } = req.query;
+  await getAdminCelebrityRequests(token, database, res);
+})
+
+/**
+ * @swagger
+ * /admin/celebrity/handlerequest:
+ *   post:
+ *     tags: [Admin]
+ *     description: Get endpoint for admin to fetch a list of all requests to be a celebrity
+ *     parameters:
+ *      - name: token
+ *        description: The token of the admin
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: approve
+ *        description: Whether to approve or reject the request
+ *        in: body
+ *        required: true
+ *        type: boolean
+ *      - name: rid
+ *        description: The id of the request to approve or reject
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Everything went okay
+ *       401:
+ *         description: Invalid token
+ *       403:
+ *         description: Not an admin
+ *       400:
+ *         description: Invalid rid
+ */
+app.post('/admin/celebrity/handlerequest', async (req, res) => {
+  const { token, approve, rid } = req.body;
+  await postAdminCelebrityHandlerequest(token, approve, rid, database, res);
+})
+
+// Post endpoint for uploading files
+/**
+ * @swagger
+ * /file/upload:
+ *   post:
+ *     tags: [File]
+ *     description: Post endpoint for uploading file
+ *     parameters:
+ *      - name: token
+ *        description: The token of the user uploading
+ *        in: header
+ *        required: true
+ *        type: string
+ *      - name: upload
+ *        description: The data of the object
+ *        in: body
+ *        required: true
+ *        type: form-data-file
+ *     responses:
+ *       200:
+ *         description: Everything went okay
+ *       401:
+ *         description: Invalid token
+ */
+app.post('/file/upload', async (req, res) => {
+  await handleFileUpload(req, res, database);
+})
+
+/**
+ * @swagger
+ * /file/download:
+ *   get:
+ *     tags: [File]
+ *     description: Get endpoint for downloading a file
+ *     parameters:
+ *      - name: token
+ *        description: The token of the user
+ *        in: header
+ *        required: true
+ *        type: string
+ *      - name: fid
+ *        description: The file id
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Everything went okay
+ *         schema:
+ *            type: object
+ *            properties:
+ *              filename:
+ *                type: string
+ *                description: Name of file
+ *              data:
+ *                type: string
+ *                description: Base64 encoding of the file
+ *       401:
+ *         description: Invalid token
+ *       403:
+ *         description: Invalid permissions
+ */
+app.get('/file/download', async (req, res) => {
+  const { token, fid } = req.query;
+  await handleFileDownload(token, fid, res, database);
+})
+
+app.get('/rankings/global', async (req, res) => {
+  await getAllRankings(database, res);
+  if (resp !== null) {
+    res.status(200).send(resp);
+  } else res.status(404).send({ error: "A system error occurred" });
+})
+
+app.get('/rankings/friends', async (req, res) => {
+  const { token } = req.query;
+  const resp = await getFriendRankings(token, database);
+  if (resp !== null) {
+    res.status(200).send(resp);
+  } else res.status(404).send({ error: "A system error occurred" });
 })

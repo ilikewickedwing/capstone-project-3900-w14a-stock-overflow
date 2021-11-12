@@ -1,9 +1,10 @@
-import React from 'react'; 
+import React, { useContext } from 'react'; 
 import { useParams } from "react-router";
 import axios from "axios";
 import Navigation from '../comp/Navigation'; 
 import Tabs from '../comp/Tabs'; 
 import StockSelect from '../comp/StockSelect';
+import VoteBar from '../comp/VoteBar';
 
 import StocksGraph from "../graph/StocksGraph";
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
@@ -27,9 +28,11 @@ import {
   PfBar,
 } from '../styles/styling';
 import { apiBaseUrl } from '../comp/const';
+import { AlertContext } from '../App';
 
 
 const Stock = () => {
+  const alert = useContext(AlertContext);
   const { stockCode } = useParams();
   var request = require('request');
   var url = `https://www.alphavantage.co/query?function=OVERVIEW&symbol=${stockCode}&apikey=59SO8FIM49NYQS21`;
@@ -64,6 +67,10 @@ const Stock = () => {
   // dropdown options
   const [anchorEl, setAnchorEl] = React.useState(null);
   const isOpen = Boolean(anchorEl);
+
+  // sentiment: set the bullish %
+  const [sentiment, setSentiment] = React.useState(60);
+
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -84,13 +91,17 @@ const Stock = () => {
   },[stockCode])
 
   function calculatePerc(a,b){
-    let res = (a/b)*100; 
-    return `${res.toFixed(2)}%`;
+    let res = ((a-b)/a)*100; 
+    return `${res.toFixed(2)}`;
   }
 
   const fetchPortfolios = async () => {
-    const request = await axios.get(`${apiBaseUrl}/user/portfolios?token=${token}`);
-    setPortfolios(request.data);
+    try {
+      const request = await axios.get(`${apiBaseUrl}/user/portfolios?token=${token}`);
+      setPortfolios(request.data);
+    } catch (e) {
+      alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
+    }
   };
   
   const loadStockInfo = async () => {
@@ -145,7 +156,7 @@ const Stock = () => {
         }
     }}
     catch (e) {
-      alert(e);
+      alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
     }
   }
 
@@ -176,7 +187,7 @@ const Stock = () => {
           <Tabs />
           <ContentBody>
           <PfBody>
-            <LeftBody>
+            <LeftBody elevation={10}>
               <PfBar>
                 <Heading>{stockCode} {name}</Heading>
                 <div>
@@ -195,6 +206,7 @@ const Stock = () => {
                   anchorEl={anchorEl}
                   open={isOpen}
                   onClose={handleClose}
+                  autoWidth="true"
                 >
                   { portfolios && 
                     portfolios.map((a) => 
@@ -221,7 +233,7 @@ const Stock = () => {
                   {change} {percentage}%
                 </div>
               )} </StockHeading> 
-              <StockOverview >
+              <StockOverview elevation={5} >
               open: {open} &nbsp;
               low: {low} &nbsp;
               high: {high} &nbsp;
@@ -230,14 +242,23 @@ const Stock = () => {
               </ StockOverview >
               <StocksGraph companyId={stockCode} height={300}/>
             </LeftBody>
-            <RightBody>
-              <RightCard>
-                <p>previous close: {prevClose}</p>
-                <p>day range: {dayRange}</p>
+            <RightBody elevation={10}>
+              <RightCard elevation={5}>
+                previous close: {prevClose}
+                <br />
+                day range: {dayRange}
+                <br />
               </RightCard>
-              <RightCard>
+              <RightCard elevation={5}>
+              <h3 style={{textAlign:'center'}}>Community Sentiment</h3>
+              <VoteBar 
+                percentage={sentiment}
+              /> 
+              </RightCard>
+              <RightCard elevation={5}>
                 <h3 style={{textAlign:'center'}}>Business Summary</h3>
-                <p>{description}</p>
+                {description}
+                <br />
               </RightCard>
             </RightBody>
           </PfBody>
