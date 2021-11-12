@@ -59,7 +59,7 @@ function Login() {
 
                 <Typography >
                     Don't have an account? &nbsp;
-                    <Link onClick={() => {history.push('/signup')}}>
+                    <Link style={{ cursor: 'pointer' }} onClick={() => {history.push('/signup')}}>
                     Sign Up Here
                     </Link>
                 </Typography>

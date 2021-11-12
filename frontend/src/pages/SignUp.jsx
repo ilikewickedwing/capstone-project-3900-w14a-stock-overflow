@@ -16,6 +16,7 @@ function SignUp() {
     const onLogIn = async () => {
         try {
             await axios.post(`${apiBaseUrl}/auth/register`,{username, password});
+            alert('Sign up successful');
             history.push('/');
         } catch (e){
             alert(`Status Code ${e.response.status} : ${e.response.data.message}`);
