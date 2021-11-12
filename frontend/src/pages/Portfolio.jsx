@@ -31,7 +31,6 @@ const Portfolio = () => {
   const history = useHistory();
   const { pid } = useParams();
   const token = localStorage.getItem('token');
-  console.log(token);
 
   // popover code 
   const [anchorEl, setAnchorEl] = React.useState(null);
