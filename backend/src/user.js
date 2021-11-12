@@ -50,10 +50,17 @@ export const postUserProfile = async (uid, token, userData, database, res) => {
     res.status(403).send({ message: 'You do not have correct privileges to edit' });
     return;
   }
+  // Get the old userData
+  const oldUserData = await database.getUser(uid);
+  if (oldUserData === null) {
+    res.status(403).send({ message: 'Invalid uid given '});
+    return;
+  }
   // If editing username ensure you cant change to a username that already exists
+  // if the username isnt yours
   if ('username' in userData) {
     const hasUsername = await database.hasUsername(userData.username);
-    if (hasUsername) {
+    if (hasUsername && oldUserData.username !== userData.username) {
       res.status(400).send({ message: 'Username already exists' });
       return;
     } else if (userData.username.length === 0) {
@@ -61,13 +68,20 @@ export const postUserProfile = async (uid, token, userData, database, res) => {
       return;
     }
   }
+  // If usertype changed, make sure it is a valid type
+  if ('userType' in userData) {
+    if (!['user','celebrity', 'admin'].includes(userData.userType)) {
+      res.status(400).send({ message: 'Invalid user type' });
+      return;
+    }
+  }
+  // Make sure you cant change the _id parameter
+  if ('_id' in userData) {
+    delete userData['_id'];
+  }
   // Make change to userData
   const resp = await database.updateUser(uid, userData);
-  if (resp) {
-    res.status(200).send();
-    return;
-  }
-  res.status(403).send({ message: 'Invalid uid given '});
+  res.status(200).send();
 }
 
 /**

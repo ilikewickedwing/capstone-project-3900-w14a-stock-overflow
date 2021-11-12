@@ -23,6 +23,20 @@ export default class API {
     return fetch(`${ENDPOINT}/user/profile?uid=${uid}&token=${token}`);
   }
   
+  postUserProfile(uid, token, userData) {
+    return fetch(`${ENDPOINT}/user/profile`, {
+      method: 'POST',
+      headers: {
+        'Content-Type' : 'application/json'
+      },
+      body: JSON.stringify({
+        uid: uid,
+        token: token,
+        userData: userData,
+      })
+    });
+  }
+  
   userNotifications(token) {
     return fetch(`${ENDPOINT}/user/notifications?token=${token}`);
   }
