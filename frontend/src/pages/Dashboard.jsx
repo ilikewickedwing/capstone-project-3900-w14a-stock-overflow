@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+// styling imports 
 import { 
   PfBody, 
   LeftBody, 
@@ -9,13 +10,30 @@ import {
   Heading,
   PfBar,
 } from '../styles/styling';
+import leaderboard from '../assets/leaderboard.png';
 
+// component imports
 import Navigation from '../comp/Navigation';
 import Tabs from '../comp/Tabs';
-import leaderboard from '../assets/leaderboard.png';
+import axios from 'axios';
+import { apiBaseUrl } from '../comp/const';
 
 
 export default function Dashboard() {
+  // first load render 
+    React.useEffect(() => {   
+      getGlobalRanks();
+    },[]);
+      
+  const getGlobalRanks = async () => {
+    try {
+      const request = axios.get(`${apiBaseUrl}/rankings/global`);
+      console.log(request);
+    } catch (e) {
+      alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
+    }
+  }
+
   return (
     <PageBody className="font-two">
       <Navigation />
@@ -28,7 +46,7 @@ export default function Dashboard() {
               </LeftBody>
               <RightBody elevation={10}>
                 <RightCard elevation={5}>
-                  <h3 style={{textAlign:'center'}}>Top Performer Amongst Friends</h3>
+                  <h3 style={{textAlign:'center'}}>Today's Top Performer</h3>
                 </RightCard>
                 <RightCard elevation={5}>
                 <div style={{textAlign:'center'}}>

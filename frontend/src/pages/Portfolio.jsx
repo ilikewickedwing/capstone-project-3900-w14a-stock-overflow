@@ -57,7 +57,7 @@ const Portfolio = () => {
   // on first load 
   React.useEffect(() => {   
     loadPorfolioData();
-    getWatchlist()
+    getWatchlist();
   },[pid]);
   
   const loadPorfolioData = async () => {
@@ -189,7 +189,7 @@ const Portfolio = () => {
                       < AddStock 
                         token={token}
                         pid={pid}
-                        onAddCallback={() => { getWatchlist() }}
+                        onAddCallback={getWatchlist}
                         load={loadPorfolioData}
                         name={name}
                       />
@@ -221,7 +221,7 @@ const Portfolio = () => {
               < AddStock 
                 token={token}
                 pid={pid}
-                onAddCallback={() => { getWatchlist() }}
+                onAddCallback={getWatchlist}
                 load={loadPorfolioData}
                 name={name}
               />

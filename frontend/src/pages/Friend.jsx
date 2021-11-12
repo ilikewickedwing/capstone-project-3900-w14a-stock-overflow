@@ -38,7 +38,7 @@ export default function Friend() {
     // private: 0, public: 1
     const [isPublic, setPublic] = React.useState(1);
 
-    const sendRequest = (e) => {
+    const sendRequest = async (e) => {
       e.preventDefault();
       try {
         alert("Friend request has been sent"); 
