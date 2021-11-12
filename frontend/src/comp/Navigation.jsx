@@ -3,12 +3,11 @@ import { useHistory } from 'react-router';
 import {Link} from 'react-router-dom';
 import { ApiContext } from '../api';
 import ExitToAppRoundedIcon from '@material-ui/icons/ExitToAppRounded';
-import {NavBar, Logo, LogoutButton, FlexRows, SearchToggle, SearchDiv, NavBtnWrapper } from '../styles/styling';
+import {NavBar, Logo, LogoutButton, FlexRows, SearchDiv, NavBtnWrapper } from '../styles/styling';
 import {TextInput} from "../styles/styling"; 
 import IconButton from '@mui/material/IconButton';
 import SearchIcon from '@mui/icons-material/Search';
-import Switch from '@mui/material/Switch';
-import Autocomplete from '@mui/material/Autocomplete';
+import Autocomplete , { createFilterOptions }from '@mui/material/Autocomplete';
 import { apiBaseUrl } from '../comp/const';
 import axios from 'axios';
 import NotificationButton from '../notifications/Notifications';
@@ -17,6 +16,18 @@ import ExploreIcon from '@mui/icons-material/Explore';
 import { AlertContext } from '../App';
 
 const label = { inputProps: { 'aria-label': 'toggle' } };
+const filter = createFilterOptions();
+
+const stubFriends= [{
+    type: "Friends",
+    code: "handle_1",
+    name: "handle_1"
+},{
+    type: "Friends",
+    code: "handle_2",
+    name: "handle_2"
+    },
+]
 
 const Navigation = () => {
     const api = React.useContext(ApiContext);
@@ -52,10 +63,18 @@ const Navigation = () => {
           const newList = [];
           request.data.forEach(obj => {
               newList.push({
+                  type: "Stocks",
                   code: obj["symbol"],
                   name: obj["name"]
               })
           })
+          // TODO CALL ENPOINT TO PUSH FRIENDS 
+          const friendList =[];
+          newList.push(...stubFriends);
+
+          // TODO CALL ENDPOINT TO PUSH CELEBRITIES 
+          const celebList = [];
+
           setRes(newList);
         } catch (e) {
           alert(`Status Code ${e.status} : ${e.response.data.error}`,'error');
@@ -63,7 +82,12 @@ const Navigation = () => {
       };
 
     const submitQuery = () => {
-        history.push(`/stock/${currCode}`);
+        if (search.includes(' ')){
+            var code = search.split(" ")[0];
+            history.push(`/stock/${code}`);
+        } else {
+            history.push(`/user/${search}`);
+        }
     }
 
 
@@ -74,26 +98,28 @@ const Navigation = () => {
                     Stock Overflow 
                 </Logo>
             </Link>
-            <SearchToggle>
-                stocks
-                <Switch {...label}/>
-                friends
-            </SearchToggle>
             <SearchDiv>
             <Autocomplete
                 disablePortal
-                options={queryRes.map((e)=> e.code+" "+ e.name)}
+                options={queryRes}
                 sx={{ width: 300 }}
                 inputValue={search}
+                groupBy={(option) => option.type}
+                getOptionLabel={ (e) => {
+                    if (e.type === "Friends"){
+                        return e.code;
+                    }
+                return e.code+" "+ e.name;
+                }}
+
                 onInputChange={(e,v) => {
                     setSearch(v);
-                    var code = v.split(" ")[0];
-                    setCode(code); 
                 }}
+                freeSolo
                 renderInput={(params) => (
                 <TextInput 
                     {...params} 
-                    label="Search Stock" 
+                    label="Search stock/user" 
                 />)}
             />
             <IconButton type="submit" sx={{p:'10px'}} onClick={submitQuery}>
