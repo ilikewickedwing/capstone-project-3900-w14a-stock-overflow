@@ -14,7 +14,8 @@ function Login() {
     const [ password, setPassword ] = useState('');
     const api = useContext(ApiContext);
     let history = useHistory();
-    const onLogIn = async () => {
+    const onLogIn = async (e) => {
+        e.preventDefault();
         try {
             const res = await axios.post(`${apiBaseUrl}/auth/login`, 
                 {username, password});
@@ -44,6 +45,7 @@ function Login() {
                      <Avatar style={avatarStyle}><LockOutlinedIcon/></Avatar>
                     <h2>Log In</h2>
                 </Grid>
+                <form>
                 <TextField 
                     value = {username} onChange={e => setUsername(e.target.value)}
                     label='Username' placeholder='Enter username' fullWidth required/>
@@ -56,7 +58,7 @@ function Login() {
                 <Button 
                     onClick = {onLogIn}
                     type='submit' color='primary' variant="contained" style={btnstyle} fullWidth>Log in</Button>
-
+                </form>
                 <Typography >
                     Don't have an account? &nbsp;
                     <Link style={{ cursor: 'pointer' }} onClick={() => {history.push('/signup')}}>

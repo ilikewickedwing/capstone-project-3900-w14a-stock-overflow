@@ -31,7 +31,7 @@ export default function UserEditPage(props) {
   }
   
   return (
-    <div style={pageStyle}>
+    <div  className="font-two" style={pageStyle}>
       <div style={compWrapper}>
         <InputLabel>Username</InputLabel>
         <TextField

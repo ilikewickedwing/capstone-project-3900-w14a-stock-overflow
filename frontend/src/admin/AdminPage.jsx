@@ -104,7 +104,7 @@ export default function AdminPage() {
         }
         
         return (
-          <div style={requestWrapStyle} key={i}>
+          <div  className="font-two" style={requestWrapStyle} key={i}>
             <img style={dpStyle} src={profileImg} alt='logo'/>
             <div style={usernameStyle}>{ userData.username }</div>
             <div style={infoStyle}>{ r.info }</div>
