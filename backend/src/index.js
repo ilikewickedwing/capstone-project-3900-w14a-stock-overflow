@@ -8,6 +8,7 @@ import { calcPf, getAllRankings, getFriendRankings } from "./performance";
 import { authDelete, authLogin, authLogout, authRegister } from "./auth";
 import { getDefBroker, getUserProfile, getUserUid, postUserProfile, setDefBroker } from "./user";
 import { addStock, modifyStock, getAllStocks, checkStock, getStock } from "./stocks";
+import { addFriend, removeFriend, getFriends } from "./social";
 import { getAdminCelebrityRequests, postAdminCelebrityHandlerequest, postCelebrityMakeRequest } from "./admin";
 import { getUserNotifications, deleteUserNotifications } from "./notifications";
 import fileUpload from 'express-fileupload';
@@ -964,6 +965,74 @@ app.get('/stocks/info', async (req, res) => {
   return;
 })
 
+// Post endpoint for adding friends
+/**
+ * @swagger
+ * /friends/add:
+ *   post:
+ *     tags: [Friends]
+ *     description: endpoint for adding friends
+ *     parameters:
+ *      - name: token
+ *        description: token of user
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: FriendID
+ *        description: uid of friend that wants to be added
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Successfully added friend/ sent friend request
+ *       401:
+ *         description: Invalid token, user does not exist
+ *       403:
+ *         description: Invalid friend id
+ */
+app.post('/friends/add', async (req, res) => {
+  const { token, friendID } = req.body;
+  const resp = await addFriend(token, friendID);
+
+  if (resp === -1) {
+    res.status(403).send({ error: "Invalid friendID" });
+  } else if (resp === -2) {
+    res.status(401).send({ error: "Invalid token" });
+  } else if (resp === -3) {
+    res.status(401).send({ error: "User does not exist" });
+  } else res.status(200).send(resp);
+
+  return;
+})
+
+app.delete('/friends/remove', async (req, res) => {
+  const { token, friendID } = req.body;
+  const resp = await removeFriend(token, friendID);
+
+  if (resp === -1) {
+    res.status(403).send({ error: "Invalid friendID" });
+  } else if (resp === -2) {
+    res.status(401).send({ error: "Invalid token" });
+  } else if (resp === -3) {
+    res.status(401).send({ error: "User does not exist" });
+  } else res.status(200).send(resp);
+
+  return;
+})
+
+app.get('/friends/all', async (req, res) => {
+  const { token } = req.query;
+  const resp = await getFriends(token);
+
+  if (resp === -1) {
+    res.status(401).send({ error: "Invalid token" });
+  } else if (resp === -2) {
+    res.status(401).send({ error: "User does not exist" });
+  } else res.status(200).send(resp);
+
+  return;
+})
 /**
  * @swagger
  * /user/notifications:

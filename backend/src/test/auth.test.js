@@ -2,6 +2,7 @@ import { authDelete, authLogin, authLogout, authRegister } from "../auth";
 import { Database } from "../database";
 import request from 'supertest';
 import { app, database } from '../index';
+import { openPf, createPf } from "../portfolio";
 
 describe('Auth register', () => {
   const d = new Database(true);
@@ -124,6 +125,13 @@ describe('Auth Delete', () => {
     const delResp = await authDelete(resp.token, d);
     const tokenUid = await d.getTokenUid(resp.uid);
     expect(tokenUid).toBe(null);
+  })
+  it('Deleting the user will remove all portfolios', async () => {
+    const resp = await authRegister('Ashley5', 'bobiscool', d);
+    const pid = await createPf(resp.token,"test", d);
+    const delResp = await authDelete(resp.token, d);
+    const portfolioResp = await openPf(pid.pid, d);
+    expect(portfolioResp).toBe(null);
   })
   it('Deleting the user will not allow for login again', async () => {
     const resp = await authRegister('Ashley5', 'bobiscool', d);

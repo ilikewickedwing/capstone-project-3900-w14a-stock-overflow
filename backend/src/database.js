@@ -1,6 +1,7 @@
 import { MongoClient } from "mongodb";
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import { nanoid } from 'nanoid';
+import { calcAll } from './portfolio';
 import { insertDefaultAdmin } from "./admin";
 import { calcAll } from './performance';
 
@@ -82,6 +83,46 @@ const COLLECTIONS = [
     }
    */
   'portfolios',
+  /**
+    This stores all the friends in the following form:
+    {
+      ownerUid: string,
+      friends: [string],
+      requests: [string],
+    }
+  */
+  'friends',
+    /**
+    Stores all the user's activities in the following form:
+    {
+      ownerUid: string,
+      activities: [string],
+    }
+   */
+    'userActivity',
+  /**
+    This stores all activities in the following form:
+    {
+      ownerUid: string,
+      parentId: string,
+      aid: string,
+      message: string,
+      time: Date,
+      likes: int,
+      likedUsers: [string],
+      userComments: [string],
+    }
+  */
+    'activity',
+  /**
+    This stores all bearish/bullish in the following form:
+    {
+      stock: string,
+      bear: [string],
+      bull: [string],
+    }
+  */
+    'stocks',
   /**
     Stores all the requests made by ordinary users to become celebrity
     {
@@ -266,6 +307,21 @@ export class Database {
         sold: null,
         performance: null,
       }
+    })
+
+    // Create an empty friends list
+    const friends = this.database.collection('friends');
+    await friends.insertOne({
+      ownerUid: uid,
+      friends: [],
+      requests: [],
+    })
+
+    // Create an empty userActivity
+    const activities = this.database.collection('userActivity');
+    await activities.insertOne({
+      ownerUid: uid,
+      activities: [],
     })
 
     return uid;
@@ -894,6 +950,9 @@ export class Database {
 
     // Updating database
     await pfs.updateOne(query, { $set: { stocks: stockList, value: pfValue } } );
+    // Creating activity
+    const message = `bought ${quantity} ${stock} at $${price}`;
+    this.createActivity(uid, message, null);
     return -1;
   }
 
@@ -920,7 +979,7 @@ export class Database {
         break;
       }
     }
-
+    
     if (stkIndex != -1) { // If stock is in the portfolio
       if (pfResp.name !== 'Watchlist') {
           if (stockList[stkIndex].quantity - quantity < 0) {
@@ -946,6 +1005,11 @@ export class Database {
 
     // Updating database
     await pfs.updateOne(query, { $set: { stocks: stockList, value: pfValue } } );
+
+    // Creating activity
+    const message = `sold ${quantity} ${stock} at $${price}`;
+    this.createActivity(uid, message, null);
+    
     return -1;
   }
 
@@ -975,6 +1039,323 @@ export class Database {
       }
     }
     return null;
+  }
+  async addFriend(uid, friend) {
+    // Check whether given friend id is valid
+    const friendResp = await this.getUser(friend);
+    if (friendResp === null) {
+      return -1;
+    }
+
+    // Find the friendlist for the given uid
+    const friends = this.database.collection('friends');
+    const friendsResp = await friends.findOne({ownerUid: friend});
+    const userResp = await friends.findOne({ownerUid: uid});
+
+    if (friendsResp == null) {
+      return -3;
+    }
+    let friendRequests = friendsResp.requests;
+
+    const requestIndex = friendRequests.indexOf(uid);
+    if (requestIndex === -1) { // other user has not sent a friend request
+      let userRequests = userResp.requests;
+      userRequests.push(friend);
+
+      await friends.updateOne({ownerUid : uid}, {$set: {requests: userRequests}});
+    } else { // other user has already sent a friend request
+      friendRequests.splice(requestIndex, 1);
+      let friendList = friendsResp.friends;
+      let userList = userResp.friends;
+      friendList.push(uid);
+      userList.push(friend);
+
+      await friends.updateOne({ownerUid: friend}, {$set: {friends: friendList, requests: friendRequests}});
+      await friends.updateOne({ownerUid: uid}, {$set: {friends: userList}});
+    }
+
+    return true;
+  }
+
+  async removeFriend(uid, friend) {
+    // Find the friendList for the given uid
+    const friends = this.database.collection('friends');
+    const friendsResp = await friends.findOne({ownerUid: friend});
+    const userResp = await friends.findOne({ownerUid: uid});
+    let friendList = friendsResp.friends;
+    let userList = userResp.friends;
+
+    if (friendsResp == null) {
+      return -3;
+    }
+
+    // Remove from friend's friend list
+    const index1 = friendList.indexOf(uid);
+    if (index1 === -1) {
+      return -1;
+    }
+    friendList.splice(index1,1);
+    await friends.updateOne({ownerUid: friend}, { $set : { friends: friendList}});
+
+    // Remove from user's friend list
+    const index2 = userList.indexOf(friend);
+    if (index2 === -1) {return -1}
+    userList.splice(index2,1);
+    await friends.updateOne({ownerUid: uid}, { $set : { friends: userList}});
+
+    return true;
+  }
+
+  async getFriends(uid) {
+    // Find the friendlist for the given uid
+    const friends = this.database.collection('friends');
+    const query = {ownerUid: uid};
+    const friendsResp = await friends.findOne(query);
+
+    if (friendsResp == null) {
+      return -2;
+    }
+    
+    return friendsResp.friends;
+  }
+
+  async getFriendReq(uid) {
+    // Find the friend request list for the given uid
+    const friends = this.database.collection('friends');
+    const query = {ownerUid: uid};
+    const friendsResp = await friends.findOne(query);
+
+    if (friendsResp == null) {
+      return -2;
+    }
+    
+    return friendsResp.requests;
+  }
+
+  async checkFriend(uid, friend) {
+    // Find the friendlist for the given uid
+    const friends = this.database.collection('friends');
+    const query = {ownerUid: uid};
+    const friendsResp = await friends.findOne(query);
+
+    if (friendsResp == null) {
+      return false;
+    }
+
+    let friendList = friendsResp.friends;
+    const index = friendList.indexOf(friend);
+    if (index === -1) {
+      return false;
+    }
+    return true;
+  }
+
+  async createActivity(uid, message, parentId) {
+    const userResp = await this.getUser(uid);
+    const userComment = userResp.username + ' ' + message;
+    const aid = nanoid();
+    const obj = {
+      ownerUid: uid,
+      parentId: parentId,
+      aid: aid,
+      message: userComment,
+      time: new Date(),
+      likes: 0,
+      likedUsers: [],
+      userComments: [],
+    }
+
+    const userActivity = this.database.collection('userActivity');
+    const activity = this.database.collection('activity');
+    const query = { ownerUid: uid };
+    const userActivityResp = await userActivity.findOne(query);
+    let activities = userActivityResp.activities;
+    activities.push(aid);
+
+    await activity.insertOne(obj);
+    await userActivity.updateOne( query, { $set : { activities: activities } } );
+
+    return aid;
+  }
+
+  async comment(uid, aid, message) {
+    const cid = nanoid();
+    const obj = {
+      ownerUid: uid,
+      parentId: aid,
+      aid: cid,
+      message: message,
+      time: new Date(),
+      likes: 0,
+      likedUsers: [],
+      userComments: [],
+    }
+
+    const activity = this.database.collection('activity');
+    const query = { aid: aid };
+    const activityResp = await activity.findOne(query);
+    let userComments = activityResp.userComments;
+    userComments.push(cid);
+
+    await activity.insertOne(obj);
+    await activity.updateOne( query, { $set : { userComments: userComments } } );
+
+    // Creating activity
+    const users = this.database.collection('users');
+    const userResp = await users.findOne({uid: activityResp.ownerUid});
+    await this.createActivity(uid, `commented on ${userResp.username}'s post/comment`,aid);
+
+    return aid;
+  }
+
+  async getComments(aid) {
+    const activity = this.database.collection('activity');
+    const actResp = await activity.findOne({aid: aid});
+    if (!actResp) {
+      return -2;
+    }
+    let result = actResp;
+    let comments = [];
+
+    for (let i= 0; i < actResp.userComments.length; i++) {
+      const element = actResp.userComments[i];
+      comments.push(await this.getComments(element));
+    }
+
+    actResp.userComments = comments;
+
+    return result;
+  }
+
+  async like(uid, id) {
+    const users = this.database.collection('users');
+    const activity = this.database.collection('activity');
+    const activityResp = await activity.findOne({aid : id});
+    const userResp = await users.findOne({uid: activityResp.ownerUid});
+    let likes = activityResp.likes;
+    let likedUsers = activityResp.likedUsers;
+    const index = likedUsers.indexOf(uid);
+    let message = '';
+    if (index === -1) {
+      likedUsers.push(uid);
+      message = `has liked ${userResp.username}'s post`;
+    } else {
+      likedUsers.splice(index, 1);
+      message = `has unliked ${userResp.username}'s post`;
+    }
+    likes = likedUsers.length;
+    await activity.updateOne({aid: id}, {$set: {likes: likes, likedUsers:likedUsers}});
+
+    // Creating activity
+    await this.createActivity(uid, message, id);
+
+    return id;
+  }
+
+  async createStockColl(stock) {
+    const stocks = this.database.collection('stocks');
+    await stocks.insertOne({
+      stock: stock,
+      bear: [],
+      bull: [],
+    })
+  }
+
+  // type: 0 = bear, 1 = bull
+  async voteStock(uid, stock, type) {
+    const stocks = this.database.collection('stocks');
+    let stocksResp = await stocks.findOne({stock : stock});
+    if (!stocksResp) {
+      await this.createStockColl(stock);
+      stocksResp = await stocks.findOne({stock : stock});
+    }
+
+    let bear = stocksResp.bear;
+    let bull = stocksResp.bull;
+    let message = '';
+
+    if (type) { // Voted bullish
+      let index = bull.indexOf(uid);
+      if (index !== -1) {
+        bull.splice(index, 1);
+      } else {
+        index = bear.indexOf(uid);
+        if (index !== -1) {
+          bear.splice(index, 1);
+        }
+        bull.push(uid);
+        message = `voted ${stock} as bullish`;
+      }
+    } else { // Voted bearish
+      let index = bear.indexOf(uid);
+      if (index !== -1) {
+        bear.splice(index, 1);
+      } else {
+        index = bull.indexOf(uid);
+        if (index !== -1) {
+          bull.splice(index, 1);
+        }
+        bear.push(uid);
+        message = `voted ${stock} as bearish`;
+      }
+    }
+    
+    await stocks.updateOne({stock: stock}, {$set: {bull: bull, bear: bear}});
+
+    // Creating activity
+    if (message !== '') {
+      await this.createActivity(uid, message, null);
+    }
+
+    return true;
+  }
+
+  async getVotes(stock) {
+    const stocks = this.database.collection('stocks');
+    const stocksResp = await stocks.findOne({stock : stock});
+
+    return {
+      bear: stocksResp.bear.length,
+      bull: stocksResp.bull.length,
+    };
+  }
+
+  async getActivity(uid) {
+    let activities = [];
+    const userActivity = this.database.collection('userActivity');
+    const activity = this.database.collection('activity');
+
+    // Get friends' and user's activities
+    const friends = await this.getFriends(uid);
+    const everyone = [... friends, uid];
+    for (let i = 0; i < everyone.length; i++) {
+      const e = everyone[i];
+      const userActResp = await userActivity.findOne({ownerUid: e});
+      const userActs = userActResp.activities;
+      const poop = await activity.find({aid: {$in: userActs}}).toArray();
+      for (let index = 0; index < poop.length; index++) {
+        const i = poop[index];
+        if (await this.activityCanbeSeen(uid, i)){
+          activities.push(i);
+        }
+      }
+    }
+    
+    activities.sort((first, second) => first.time - second.time);
+    return activities;
+  }
+  
+  async activityCanbeSeen(uid, act) {
+    let currAct = act;
+    const activity = this.database.collection('activity');
+
+    while (currAct.parentId !== null) {
+      currAct = await activity.findOne({aid: currAct.parentId});
+    }
+    if (uid === currAct.ownerUid || await this.checkFriend(uid,currAct.ownerUid)) {
+      return true;
+    }
+    return false;
   }
 
   async updateRankings(newRankings) {
