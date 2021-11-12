@@ -74,7 +74,21 @@ export const comment = async (token, aid, message, database) => {
   if (resp === null) {
     return -3;
   }
-  return true;
+  return resp;
+}
+
+export const getComments = async (token, aid, database) => {
+  // Return error if user not found
+  const uid = await database.getTokenUid(token);
+  if (uid === null) {
+    return -1;
+  }
+
+  const resp = await database.getComments(aid);
+  if (resp === null) {
+    return -3;
+  }
+  return resp;
 }
 
 export const like = async (token, aid, database) => {
@@ -87,5 +101,41 @@ export const like = async (token, aid, database) => {
   if (resp === null) {
     return -2;
   }
-  return true;
+  return resp;
+}
+
+// type: 1 = bull, 0 = bear
+export const voteStock = async (token, stock, type, database) => {
+  // Return error if user not found
+  const uid = await database.getTokenUid(token);
+  if (uid === null) {
+    return -1;
+  }  
+  const resp = await database.voteStock(uid, stock, type);
+  if (resp === null) {
+    return -2;
+  }
+  return resp;
+}
+
+export const getVotes = async (stock, database) => {
+  const resp = await database.getVotes(stock);
+  if (resp === null) {
+    return -1;
+  }
+  return resp;
+}
+
+
+export const getActivity = async (token, database) => {
+  // Return error if user not found
+  const uid = await database.getTokenUid(token);
+  if (uid === null) {
+    return -1;
+  }  
+  const resp = await database.getActivity(uid);
+  if (resp === null) {
+    return -2;
+  }
+  return resp;
 }
