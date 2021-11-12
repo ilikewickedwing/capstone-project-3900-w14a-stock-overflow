@@ -6,7 +6,7 @@ import { swaggerDocs } from "./docs";
 import { createPf, deletePf, openPf, userPfs, getPid, editPf } from "./portfolio";
 import { calcPf } from "./performance";
 import { authDelete, authLogin, authLogout, authRegister } from "./auth";
-import { getDefBroker, getUserProfile, postUserProfile, setDefBroker } from "./user";
+import { getDefBroker, getUserProfile, getUserUid, postUserProfile, setDefBroker } from "./user";
 import { addStock, modifyStock, getAllStocks, checkStock, getStock } from "./stocks";
 import { getAdminCelebrityRequests, postAdminCelebrityHandlerequest, postCelebrityMakeRequest } from "./admin";
 import { getUserNotifications, deleteUserNotifications } from "./notifications";
@@ -92,6 +92,35 @@ export const database = new Database();
  */
 app.get('/', (req, res) => {
   res.status(200).send('This is the root page. Go to /docs for documentation.')
+})
+
+/**
+ * @swagger
+ * /user/profile:
+ *   get:
+ *     tags: [User]
+ *     description: Endpoint for fetching the uid of a user
+ *     parameters:
+ *      - name: username
+ *        description: The username of the user
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: uid of the user
+ *         schema:
+ *            type: object
+ *            properties:
+ *              uid:
+ *                type: string
+ *                description: The uid of the user
+ *       404:
+ *         description: Invalid user not found
+ */
+app.get('/user/uid', async (req, res) => {
+  const { username } = req.query;
+  getUserUid(username, database, res);
 })
 
 // Get endpoint for getting user data

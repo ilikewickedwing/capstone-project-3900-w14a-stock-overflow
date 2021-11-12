@@ -4,6 +4,15 @@
 
 import { Database } from "./database";
 
+export const getUserUid = async (username, database, res) => {
+  const uid = await database.getUid(username);
+  if (uid === null) {
+    res.status(404).send();
+    return
+  }
+  res.status(200).send({ uid: uid });
+}
+
 /**
  * 
  * @param {string} uid 
@@ -12,10 +21,13 @@ import { Database } from "./database";
  */
 export const getUserProfile = async (uid, token, database) => {
   const ownerUid = await database.getTokenUid(token);
-  if (ownerUid !== uid) {
+  const ownerData = await database.getUser(ownerUid);
+  const userData = await database.getUser(uid);
+  // Checks that either the person calling owns the profile or
+  // the person is an admin, or the user searched is a celebrity
+  if (ownerUid !== uid && ownerData.userType !== 'admin' && userData.userType !== 'celebrity') {
     return null;
   }
-  const userData = await database.getUser(uid);
   return userData;
 }
 
@@ -30,10 +42,11 @@ export const getUserProfile = async (uid, token, database) => {
 export const postUserProfile = async (uid, token, userData, database, res) => {
   // Check token is valid
   const adminUid = await database.getTokenUid(token);
+  const adminData = await database.getUser(adminUid);
   if (adminUid === null) {
     res.status(401).send({ message: 'Invalid token' });
     return;
-  } else if (adminUid !== uid) {
+  } else if (adminUid !== uid && adminData.userType !== 'admin') {
     res.status(403).send({ message: 'You do not have correct privileges to edit' });
     return;
   }

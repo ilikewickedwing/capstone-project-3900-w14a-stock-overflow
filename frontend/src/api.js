@@ -9,6 +9,11 @@ const getToken = () => (`Bearer ${localStorage.getItem('token')}`);
  * Wrapper class to make API calls
  */
 export default class API {
+  
+  userUid(username) {
+    return fetch(`${ENDPOINT}/user/uid?username=${username}`);
+  }
+
   /**
    * Fetches the user profile from the backend endpoint
    * @param {string} uid 
