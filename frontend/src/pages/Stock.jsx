@@ -18,9 +18,7 @@ import { SearchDiv } from '../styles/styling';
 import { Autocomplete } from '@mui/material';
 import { TextInput } from '../styles/styling';
 import { IconButton } from '@material-ui/core';
-import { useHistory } from 'react-router';
 import SearchIcon from '@mui/icons-material/Search';
-
 
 
 import {
@@ -37,7 +35,6 @@ import {
 } from '../styles/styling';
 import { apiBaseUrl } from '../comp/const';
 import { AlertContext } from '../App';
-import AddStock from '../comp/AddStock';
 
 
 const Stock = () => {
@@ -190,7 +187,6 @@ const Stock = () => {
     e.preventDefault();
   }
 
-  //console.log(typeof stockCode);
   // comparing stock
   // fetch stocklist
   const [queryRes, setRes] = React.useState([]);
@@ -220,12 +216,18 @@ const Stock = () => {
     }
   };
 
-  
   const submitQuery = () => {
     if (search.includes(' ')){
         var code = search.split(" ")[0];
         setStockList([...stockList, code]);
     } 
+  }
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    const stockName = e.target.firstChild.nodeValue;
+    const result = stockList.filter(stock => stock !== stockName);
+    setStockList(result);
   }
 
   return (
@@ -321,6 +323,14 @@ const Stock = () => {
 
             </LeftBody>
             <RightBody elevation={10}>
+              {stockList.slice(1).map((name)=>(
+              <RightCard elevation = {5}>
+              <form onSubmit={handleSubmit} key={name} style={{marginBottom: "5px", marginTop: "5px", display: "flex", alignItems: "center"}}>
+                {name}
+                <Button type="submit" variant="contained" color="error" style={{marginLeft: "290px", display: "flex", justifyContent: "flex-end"}}>Remove</Button>
+              </form>
+              </RightCard>))
+              }
               <RightCard elevation={5}>
                 previous close: {prevClose}
                 <br />
