@@ -248,7 +248,7 @@ describe('Rank multiple user portfolio performances', () => {
   //   console.dir(friendRank, {depth:null});
   // })
   it('Test friend ranks', async () => {
-    const friendRank = await getFriendRankings2(token1, d);
+    const friendRank = await getFriendRankings(token1, d);
     expect(friendRank).not.toBe(null);
     console.dir(friendRank, {depth:null});
   })
