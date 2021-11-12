@@ -54,10 +54,12 @@ Week 8
   - fixed the search bar to livesearch ( challenge: laggy cos the list is really big)
 
 Week 9 
-- during standup at the beginning of the week, we delegated work for the report. (Mison absent)
+- during standup at the beginning of the week, we delegated work for the report. (Mison absent).
+- Mison also informed the team and I that he cannot do his assigned part from sprint 3. 
 - put every api call into try/catch wrapper
 - DONE:
   - US 2.4: multistocks ported on the page
   - all the stub and placeholders for US 5.1
 - TODO:
-  - final report, commenting code, cleaning up code 
+  - final report, commenting code, encapsulating code 
+
