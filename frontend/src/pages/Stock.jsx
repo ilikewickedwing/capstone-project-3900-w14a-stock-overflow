@@ -100,7 +100,7 @@ const Stock = () => {
       const request = await axios.get(`${apiBaseUrl}/user/portfolios?token=${token}`);
       setPortfolios(request.data);
     } catch (e) {
-      alert(`Status Code ${e.response.status} : ${e.response.data.error}`);
+      alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
     }
   };
   
@@ -156,7 +156,7 @@ const Stock = () => {
         }
     }}
     catch (e) {
-      alert(`Status Code ${e.response.status} : ${e.response.data.error}`);;
+      alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
     }
   }
 

@@ -15,7 +15,7 @@ export default function FileUpload(props) {
     for (let i = 0; i < files.length; i++) {
       const resp = await api.fileUpload(token, files[i]);
       if (resp.status !== 200) {
-        alert(`Server returned with ${resp.status}`);
+        alert(`Server returned with ${resp.status}`,'error');
         continue;
       }
       const respJson = await resp.json()

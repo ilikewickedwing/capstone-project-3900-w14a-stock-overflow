@@ -36,7 +36,7 @@ const Navigation = () => {
             await axios.post(`${apiBaseUrl}/auth/logout`,{token});
             history.push('/');
         } catch (e) {
-            alert(`Status Code ${e.response.status} : ${e.response.data.message}`);
+            alert(`Status Code ${e.response.status} : ${e.response.data.message}`,'error');
         }
     }
     
@@ -58,7 +58,7 @@ const Navigation = () => {
           })
           setRes(newList);
         } catch (e) {
-          alert(`Status Code ${e.status} : ${e.response.data.error}`);
+          alert(`Status Code ${e.status} : ${e.response.data.error}`,'error');
         }
       };
 

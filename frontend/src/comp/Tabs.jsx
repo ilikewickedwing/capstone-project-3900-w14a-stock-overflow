@@ -25,7 +25,7 @@ const Tabs = ({isChanged}) => {
       const request = await axios.get(`${apiBaseUrl}/user/portfolios?token=${token}`);
       setPortfolios(request.data);
     } catch (e) {
-      alert(`Status Code ${e.response.status} : ${e.response.data.error}`);
+      alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
     }
   };
 
@@ -63,7 +63,7 @@ const Tabs = ({isChanged}) => {
       handleClose();
       history.push(`/portfolio/${newPid.pid}`);
     } catch (e) {
-      alert(`Status Code ${e.response.status} : ${e.response.data.error}`);
+      alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
     }
   }
 

@@ -11,20 +11,20 @@ const FriendRequestCard = ({name, reload}) => {
   // handle accept
   const handleAccept = async() => {
     try {
-        alert(`You have accepted ${name}'s friend request`);
+        alert(`You have accepted ${name}'s friend request`,'success');
         reload();
     } catch (e){
-      alert(`Status Code ${e.response.status} : ${e.response.data.message}`);
+      alert(`Status Code ${e.response.status} : ${e.response.data.message}`,'error');
     }
   }
 
   // handle reject friend
   const handleReject = async() => {
     try {
-        alert(`You have rejected ${name}'s friend request`);
+        alert(`You have rejected ${name}'s friend request`,'info');
         reload(); 
     } catch (e){
-      alert(`Status Code ${e.response.status} : ${e.response.data.message}`);
+      alert(`Status Code ${e.response.status} : ${e.response.data.message}`,'error');
     }
   }
   

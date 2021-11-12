@@ -15,7 +15,7 @@ const callApi = async (api, setDiscoverResp, alert) => {
     const respJson = await resp.json();
     setDiscoverResp(respJson);
   } else {
-    alert(`Server returned with status ${resp.status}`);
+    alert(`Server returned with status ${resp.status}`,'error');
   }
 }
 
@@ -54,7 +54,7 @@ export default function DiscoverCelebrityPage () {
           callApi(api, setDiscoverResp, alert);
         } else {
           const respJson = await resp.json()
-          alert(respJson.error);
+          alert(respJson.error,'error');
         }
       }
       const panelStyle = {

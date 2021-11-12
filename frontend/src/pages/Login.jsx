@@ -23,7 +23,7 @@ function Login() {
             console.log("token =" + localStorage.getItem('token'));
             directToPage(api, res.data.uid, res.data.token, history);
         } catch (e) {
-            alert(`Status Code ${e.response.status} : ${e.response.data.message}`);
+            alert(`Status Code ${e.response.status} : ${e.response.data.message}`,'error');
         }
     }
     const paperStyle={padding :'3%', width:'50%', margin:"20px auto"}
