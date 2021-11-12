@@ -28,7 +28,7 @@ export default function FileDownload(props) {
       document.body.removeChild(link);
       
     } else {
-      alert(`Server returned with status of ${resp.status}`)
+      alert(`Server returned with status of ${resp.status}`,'error')
     }
   }
   

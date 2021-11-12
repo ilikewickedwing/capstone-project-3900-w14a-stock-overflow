@@ -45,7 +45,7 @@ const AddStock = ({token, pid, onAddCallback, load = () => {}, name}) => {
         setFlag(res.data.defBroker.brokerFlag);
         
         } catch (e) {
-        alert(`Status Code ${e.status} : ${e.response.data.message}`);
+        alert(`Status Code ${e.status} : ${e.response.data.message}`,'error');
         }
     }
     
@@ -68,7 +68,7 @@ const AddStock = ({token, pid, onAddCallback, load = () => {}, name}) => {
           })
           setRes(newList);
         } catch (e) {
-          alert(`Status Code ${e.status} : ${e.response.data.error}`);
+          alert(`Status Code ${e.status} : ${e.response.data.error}`,'error');
         }
       };
 
@@ -83,7 +83,7 @@ const AddStock = ({token, pid, onAddCallback, load = () => {}, name}) => {
             onAddCallback();
             load();
         } catch (e){
-            alert(`Status Code ${e.response.status} : ${e.response.data.error}`);
+            alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
         }
     }
 

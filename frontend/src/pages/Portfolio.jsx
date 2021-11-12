@@ -73,7 +73,7 @@ const Portfolio = () => {
         setIsWatchlist(0);
       }
     } catch (e) {
-      alert(`Status Code ${e.response.status} : ${e.response.data.error}`);
+      alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
     }
   }; 
 
@@ -85,7 +85,7 @@ const Portfolio = () => {
       setAnchorEl(null);
       setChanged(isChanged + 1);
     } catch (e) {
-      alert(`Status Code ${e.response.status} : ${e.response.data.error}`);
+      alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
     }
   }
 
@@ -95,7 +95,7 @@ const Portfolio = () => {
       await axios.delete(`${apiBaseUrl}/user/portfolios/delete`,{data: {token, pid}});
       history.push('/dashboard');
     } catch (e) {
-      alert(`Status Code ${e.response.status} : ${e.response.data.error}`);
+      alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
     }
   }
   
@@ -122,7 +122,7 @@ const Portfolio = () => {
       // console.log(propsArray);
       setStockArray(propsArray);
     } catch (e){
-      alert(`Status Code ${e.response.status} : ${e.response.data.error}`);
+      alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
     }
   }
 

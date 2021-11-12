@@ -25,11 +25,11 @@ function App() {
   const api = new API();
   const [ alertMessage, setAlertMessage ] = useState('');
   const [ showAlert, setShowAlert ] = useState(false);
-  const [severity, setSeverity] = useState('info');
+  const [severity, setSeverity] = useState('');
   // Custom alert function
   const alert = (message,severity) => {
-    setAlertMessage(message);
     setSeverity(severity);
+    setAlertMessage(message);
     setShowAlert(true);
   }
   
