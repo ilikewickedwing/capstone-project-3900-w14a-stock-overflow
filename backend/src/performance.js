@@ -357,7 +357,7 @@ export const getAllRankings = async (database) => {
 //   return friendRank;
 // }
 
-export const getFriendRankings2 = async (token, database) => {
+export const getFriendRankings = async (token, database) => {
   // console.log('FriendRankings2');
   // Return error if user is not found
   const uid = await database.getTokenUid(token);
