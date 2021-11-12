@@ -98,7 +98,7 @@ const COLLECTIONS = [
       activities: [string],
     }
    */
-    'userActivity',
+  'userActivity',
   /**
     This stores all activities in the following form:
     {
@@ -112,7 +112,7 @@ const COLLECTIONS = [
       userComments: [string],
     }
   */
-    'activity',
+  'activity',
   /**
     This stores all bearish/bullish in the following form:
     {
@@ -121,7 +121,7 @@ const COLLECTIONS = [
       bull: [string],
     }
   */
-    'stocks',
+  'stocks',
   /**
     Stores all the requests made by ordinary users to become celebrity
     {
@@ -256,8 +256,8 @@ export class Database {
   }
 
   async setUserPerf(uid, performance) {
-    const users = this.database.collection('users');
-    const query = { uid: uid };
+    const users = this.database.collection('userPortos');
+    const query = { ownerUid: uid };
     const user = await users.findOne(query);
     user.performance = performance;
     const result = await users.updateOne(query, { $set: { performance: performance }});
@@ -670,6 +670,22 @@ export class Database {
     else return 0;
   }
 
+  async getUserPerf(uid) {
+    const userPortos = this.database.collection('userPortos');
+    const query = { ownerUid: uid };
+    const userPortoResp = await userPortos.findOne(query);
+
+    const users = this.database.collection('users');
+    const query2 = { uid: uid };
+    const userResp = await users.findOne(query2);
+    const perf = {
+      name: userResp.username,
+      performance: userPortoResp.performance,
+    };
+
+    return perf;
+  }
+
   /**
    * Function to return array of all portfolios in database
    * @returns {Promise<Array>}
@@ -949,9 +965,10 @@ export class Database {
 
     // Updating database
     await pfs.updateOne(query, { $set: { stocks: stockList, value: pfValue } } );
+    
     // Creating activity
-    const message = `bought ${quantity} ${stock} at $${price}`;
-    this.createActivity(uid, message, null);
+    // const message = `bought ${quantity} ${stock} at $${price}`;
+    // this.createActivity(uid, message, null);
     return -1;
   }
 
@@ -1006,8 +1023,8 @@ export class Database {
     await pfs.updateOne(query, { $set: { stocks: stockList, value: pfValue } } );
 
     // Creating activity
-    const message = `sold ${quantity} ${stock} at $${price}`;
-    this.createActivity(uid, message, null);
+    // const message = `sold ${quantity} ${stock} at $${price}`;
+    // this.createActivity(uid, message, null);
     
     return -1;
   }
