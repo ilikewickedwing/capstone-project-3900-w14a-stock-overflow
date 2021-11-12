@@ -19,11 +19,14 @@ const api = new API();
  * @returns 
  */
 export const calcPf = async (token, pid, database, admin, test, testDate, testDays) => {
-const now = new Date();
-const today = new Date(now);
-const time = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + today.getDate()).slice(-2);
-const date = time.toString();
-const Pf = await database.openPf(pid);
+  const now = new Date();
+  const today = new Date(now);
+  const time = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + today.getDate()).slice(-2);
+  const date = time.toString();
+  const Pf = await database.openPf(pid);
+  if (Pf.name == "Watchlist") {
+    return -4;
+  }
 
   // Check if command being issued by admin
   if (admin !== 'yes') {
@@ -37,8 +40,6 @@ const Pf = await database.openPf(pid);
     // Return error if pid belongs to watchlist
     if (Pf === null) {
     return -3;
-    } else if (Pf.name == "Watchlist") {
-    return -4;
     }
     
     // Return error if portfolio not owned by user
@@ -71,6 +72,7 @@ const Pf = await database.openPf(pid);
 
     // Get stocklist
     const stocks = Pf.stocks;
+    if (stocks === []) return 0;
     for (let i = 0; i < stocks.length; i++) {
       // Add up the current price of each stock to determine current value and add to stock list
       const symbol = stocks[i].stock;
@@ -109,6 +111,33 @@ const Pf = await database.openPf(pid);
   } else {
     // Date to be calculated is testDate
     // Amount of days to be calculated is testDays
+
+    if (testDate === 'today') {
+      let perf = 0;
+      let gain = Pf.value.sold;
+      
+      const stocks = Pf.stocks;
+      if (stocks === []) return 0;
+      for (let i = 0; i < stocks.length; i++) {
+        // Add up the current price of each stock to determine current value and add to stock list
+        const symbol = stocks[i].stock;
+        const values = await getStock(1, symbol);
+        const price = values.data.quotes.quote['last'];
+        const value = price * stocks[i].quantity;
+        const spent = stocks[i].avgPrice * stocks[i].quantity;
+        const amt = (value - spent)/spent;
+        stocks[i].performance.push({ date: date, performance: amt });
+        gain += value;
+      }
+
+      const profit = gain - Pf.value.spent;
+      perf = profit/Pf.value.spent;
+
+      // Add performance history to portfolio array
+      Pf.value.performance.push({ date: date, performance: perf });
+      await database.calcPf(pid, Pf.value, Pf.stocks);
+      return;
+    }
 
     // Get stocklist
     const stocks = Pf.stocks;
@@ -164,20 +193,34 @@ const Pf = await database.openPf(pid);
  * Function that calculates all portfolio performances for that day
  * @param {Database} database 
  */
-export const calcAll = async (database) => {
+export const calcAll = async (database, testmode) => {
   const rule = new schedule.RecurrenceRule();
   rule.hour = 16;
   rule.tz = 'US/Eastern';
 
-  const job = schedule.scheduleJob(rule, function() {
+  const job = schedule.scheduleJob(rule, async () => {
     console.log('Market is now closed. Portfolio calculation has begun.');
-    const portfolios = database.collection('portfolios');
+    const portfolios = await database.getAllPfs();
     for (let i = 0; i < portfolios.length; i++) {
-      calcPf(null, portfolios[i].pid, database, 'yes');
+      await calcPf(null, portfolios[i].pid, database, 'yes');
     }
 
-    rankAll(database);
+    await rankAll(database);
   })
+
+  if (testmode === true) {
+    console.log('Testing calcAll function.');
+
+    const portfolios = await database.getAllPfs();
+
+    for (let i = 0; i < portfolios.length; i++) {
+      await calcPf(null, portfolios[i].pid, database, 'yes', 'yes', 'today', 1);
+      // const stocks = await database.openPf(portfolios[i].pid);
+      // console.dir(stocks, { depth: null });
+    }
+
+    await rankAll(database);
+  }
 }
 
 /**
@@ -186,7 +229,6 @@ export const calcAll = async (database) => {
  */
 export const rankAll = async (database) => {
   let rankings = [];
-  let rank = 0;
   const users = await database.getAllUsers();
   for (let i = 0; i < users.length; i++) {
     // console.dir(users[i], {depth:null});
@@ -196,7 +238,6 @@ export const rankAll = async (database) => {
       await database.setUserPerf(users[i].uid, avgPerf);
       // console.log('rank is ' + (rank + 1) + ', uid is ' + users[i].uid + ', name is ' + users[i].username + ', avgPerf is ' + avgPerf);
       rankings.push({ rank: null, uid: users[i].uid, name: users[i].username, performance: avgPerf });
-      rank++;
     } 
   }
 
@@ -258,10 +299,16 @@ const rankOne = async (pfs, database) => {
     }
   }
 
-  return (total/pfs.length);
+  return (total/(pfs.length - 1));
 }
 
-const getRankings = async (database) => {
+export const getAllRankings = async (database) => {
   const rankings = await database.getRankings();
   return rankings;
+}
+
+export const getFriendRankings = async (token, database) => {
+  const global = getAllRankings();
+  // Filter through friends list
+  return global;
 }
