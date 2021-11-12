@@ -214,8 +214,12 @@ describe('Rank multiple user portfolio performances', () => {
 	})
 	it('CalcAll', async () => {
 		await calcAll(d, true);
-    const rankings = await d.getRankings();
-		console.dir(rankings, { depth: null });
+    let rankings = null;
+    // setTimeout(async () => {
+      rankings = await d.getRankings();
+    // }, 10000);
+    console.dir(rankings, { depth: null });
+    expect(rankings).not.toBe(null);
 	})
 	/* it('Sell some of first stock in portfolio', async () => {
 	  const add = await modifyStock(token1, pid1, 'AAPL', 2, 2, 0, null, null, d);
