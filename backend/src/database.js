@@ -2,7 +2,6 @@ import { MongoClient } from "mongodb";
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import { nanoid } from 'nanoid';
 import { calcAll } from './portfolio';
-import { getFriends } from "./social";
 import { insertDefaultAdmin } from "./admin";
 import { calcAll } from './performance';
 
