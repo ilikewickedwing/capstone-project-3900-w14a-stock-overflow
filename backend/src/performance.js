@@ -209,17 +209,28 @@ export const calcAll = async (database, testmode) => {
   })
 
   if (testmode === true) {
-    console.log('Testing calcAll function.');
+    console.log('Testing calcAll function');
 
-    const portfolios = await database.getAllPfs();
+    const now = new Date();
+    const test = new Date(now);
+    test.setSeconds(now.getSeconds() + 1);
+    console.log('Running at ' + now + ', with test scheduled for ' + test);
 
-    for (let i = 0; i < portfolios.length; i++) {
-      await calcPf(null, portfolios[i].pid, database, 'yes', 'yes', 'today', 1);
-      // const stocks = await database.openPf(portfolios[i].pid);
-      // console.dir(stocks, { depth: null });
-    }
-
-    await rankAll(database);
+    
+    const job = schedule.scheduleJob(test, async () => {
+      console.log('Test calcAll running');
+      const portfolios = await database.getAllPfs();
+      for (let i = 0; i < portfolios.length; i++) {
+        // const stocks = await database.openPf(portfolios[i].pid);
+        // console.dir(stocks, {depth:null});
+        await calcPf(null, portfolios[i].pid, database, 'yes', 'yes', 'today', 1);
+        // const stocks1 = await database.openPf(portfolios[i].pid);
+        // console.dir(stocks1, {depth:null});
+      }
+      
+      await rankAll(database);
+    })
+    await new Promise(resolve => setTimeout(resolve, 10000));
   }
 }
 

@@ -197,14 +197,14 @@ describe('Rank multiple user portfolio performances', () => {
     expect(calc3).not.toBe(null);
     expect(calc4).not.toBe(null);
 	  // console.log("calc is " + calc);
-	  // const stocks1 = await openPf(token1, pid1, d);
-    // const stocks2 = await openPf(token2, pid2, d);
-    // const stocks3 = await openPf(token3, pid3, d);
-    // const stocks4 = await openPf(token3, pid4, d);
-	  // console.dir(stocks1, { depth: null });
-    // console.dir(stocks2, { depth: null });
-    // console.dir(stocks3, { depth: null });
-    // console.dir(stocks4, { depth: null });
+	  const stocks1 = await openPf(token1, pid1, d);
+    const stocks2 = await openPf(token2, pid2, d);
+    const stocks3 = await openPf(token3, pid3, d);
+    const stocks4 = await openPf(token3, pid4, d);
+	  console.dir(stocks1, { depth: null });
+    console.dir(stocks2, { depth: null });
+    console.dir(stocks3, { depth: null });
+    console.dir(stocks4, { depth: null });
     // console.log(daysCalced);
 	})
 	it('Rank portfolios', async () => {
@@ -214,8 +214,12 @@ describe('Rank multiple user portfolio performances', () => {
 	})
 	it('CalcAll', async () => {
 		await calcAll(d, true);
-    const rankings = await d.getRankings();
-		console.dir(rankings, { depth: null });
+    let rankings = null;
+    // setTimeout(async () => {
+      rankings = await d.getRankings();
+    // }, 10000);
+    console.dir(rankings, { depth: null });
+    expect(rankings).not.toBe(null);
 	})
 	/* it('Sell some of first stock in portfolio', async () => {
 	  const add = await modifyStock(token1, pid1, 'AAPL', 2, 2, 0, null, null, d);

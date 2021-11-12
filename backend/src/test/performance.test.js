@@ -40,7 +40,7 @@ describe('Retrieve stock information', () => {
       data: expect.anything(),
       time: expect.any(Date)
     })
-    // console.log(resp.data);
+    // console.dir(resp.data, {depth:null});
   })
   it('Get multiple stock quotes', async () => {
     const resp = await getStock('1', 'AAPL,AMZN,IBM');
