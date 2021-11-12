@@ -14,6 +14,7 @@ import { ApiContext } from "../api";
 import { useHistory } from "react-router";
 import { PageBody } from "../styles/styling";
 import Navigation from "../comp/Navigation";
+import { AlertContext } from "../App";
 
 const steps = ['Why become a celebrity?', 'Complete form', 'Verify your identity', 'Finish']
 
@@ -22,6 +23,7 @@ export default function CelebrityRequestPage() {
   const [ info, setInfo ] = useState('');
   const [ fids, setFids ] = useState([]);
   const [ fileMap, setFileMap ] = useState({});
+  const alert = useContext(AlertContext);
   const api = useContext(ApiContext);
   const token = localStorage.getItem('token');
   const pageStyle = {

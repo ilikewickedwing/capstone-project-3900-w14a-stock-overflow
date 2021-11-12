@@ -6,6 +6,8 @@ import profileImg from '../assets/dp.jpg';
 import { LogoutButton } from "../styles/styling";
 import ExitToAppRoundedIcon from '@material-ui/icons/ExitToAppRounded';
 import FileDownload from "../files/FileDownload";
+import { AlertContext } from "../App";
+import AdminSearch from "./AdminSearch";
 
 const callApi = async (api, token, setResponse) => {
   const resp = await api.getAdminCelebrityRequests(token);
@@ -20,6 +22,7 @@ const callApi = async (api, token, setResponse) => {
 export default function AdminPage() {
   const [ response, setResponse ] = useState({});
   const api = useContext(ApiContext);
+  const alert = useContext(AlertContext);
   const history = useHistory();
   // Get celebrity requests
   useEffect(() => {
@@ -164,9 +167,14 @@ export default function AdminPage() {
             Log Out
         </LogoutButton >
       </div>
-      <div className='font-two' style={requestsHeaderStyle}>Celebrity Requests</div>
-      <div style={requestsWrapStyle}>
-        { renderRequests() }
+      <div style={{ display: 'flex' }}>
+        <div style={{ width: '100%' }} >
+          <div className='font-two' style={requestsHeaderStyle}>Celebrity Requests</div>
+          <div style={requestsWrapStyle}>
+            { renderRequests() }
+          </div>
+        </div>
+        <AdminSearch/>
       </div>
     </div>
   )

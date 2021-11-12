@@ -1,4 +1,4 @@
-import React from 'react'; 
+import React, { useContext } from 'react'; 
 import { useHistory } from 'react-router';
 import {TabBar, TabButton, CreatePortField, CreatePortContent} from '../styles/styling';
 import Popover from '@mui/material/Popover';
@@ -7,9 +7,11 @@ import TabName from './TabName';
 import axios from "axios";
 
 import { apiBaseUrl } from './const';
+import { AlertContext } from '../App';
 
 
 const Tabs = ({isChanged}) => {
+  const alert = useContext(AlertContext);
   const history = useHistory();
   const token = localStorage.getItem('token');
 

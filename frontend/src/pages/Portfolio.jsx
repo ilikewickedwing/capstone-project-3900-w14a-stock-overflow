@@ -9,7 +9,7 @@ import { apiBaseUrl } from '../comp/const';
 import { ApiContext } from '../api';
 import PfTable from '../comp/PfTable';
 import StocksGraph from "../graph/StocksGraph";
-
+import { AlertContext } from '../App';
 import Popover from '@mui/material/Popover';
 import {
   CreatePortField, 
@@ -29,6 +29,7 @@ import Button from '@mui/material/Button';
 
 const Portfolio = () => {
   const history = useHistory();
+  const alert = useContext(AlertContext);
   const { pid } = useParams();
   const token = localStorage.getItem('token');
 

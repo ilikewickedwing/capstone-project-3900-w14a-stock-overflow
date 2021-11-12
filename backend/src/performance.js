@@ -7,7 +7,6 @@ import { getStock } from "./stocks";
 import { verifyPf } from "./portfolio";
 import * as schedule from "node-schedule";
 import { API } from "./api";
-import { database } from ".";
 
 const api = new API(); 
 

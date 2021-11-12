@@ -6,27 +6,33 @@ import profileImg from '../assets/dp.jpg';
 import { Button } from "@material-ui/core";
 import TitleImg from '../assets/working.jpg';
 import { useHistory } from "react-router";
+import { AlertContext } from "../App";
+
+
+const callApi = async (api, setDiscoverResp, alert) => {
+  const resp = await api.getCelebrityDiscover();
+  if (resp.status === 200) {
+    const respJson = await resp.json();
+    setDiscoverResp(respJson);
+  } else {
+    alert(`Server returned with status ${resp.status}`);
+  }
+}
 
 export default function DiscoverCelebrityPage () {
-  const [ celebrities, setCelebrities ] = useState([]);
+  const [ discoverResp, setDiscoverResp ] = useState({});
+  const uid = localStorage.getItem('uid');
   const api = useContext(ApiContext);
+  const alert = useContext(AlertContext);
   const history = useHistory();
   useEffect(() => {
-    const callApi = async () => {
-      const resp = await api.getCelebrityDiscover();
-      if (resp.status === 200) {
-        const respJson = await resp.json();
-        setCelebrities(respJson.celebrities);
-        // setCelebrities(mockCelebrities);
-      } else {
-        alert(`Server returned with status ${resp.status}`);
-      }
-    }
-    callApi();
-  }, [api])
+    callApi(api, setDiscoverResp, alert);
+  }, [api, alert])
   
   const renderCelebs = () => {
-    if (celebrities.length === 0) {
+    if (!('celebrities' in discoverResp) || !('followers' in discoverResp)) {
+      return null;
+    } else if (discoverResp.celebrities.length === 0) {
       const msgStyle = {
         fontFamily: 'Arial, Helvetica, sans-serif',
         fontSize: '2rem',
@@ -39,7 +45,18 @@ export default function DiscoverCelebrityPage () {
         </div>
       )
     }
-    return celebrities.map(c => {
+    return discoverResp.celebrities.map(c => {
+      const celebFollowers = discoverResp.followers[c.uid];
+      const onFollow = async () => {
+        const token = localStorage.getItem('token');
+        const resp = await api.postCelebrityFollow(token, !celebFollowers.includes(uid), c.uid);
+        if (resp.status === 200) {
+          callApi(api, setDiscoverResp, alert);
+        } else {
+          const respJson = await resp.json()
+          alert(respJson.error);
+        }
+      }
       const panelStyle = {
         backgroundColor: '#ffffff',
         boxSizing: 'border-box',
@@ -80,13 +97,15 @@ export default function DiscoverCelebrityPage () {
         width: '100%',
       }
       return (
-        <div style={panelStyle}>
+        <div key={c.uid} style={panelStyle}>
           <img style={dpStyle} src={profileImg} alt="profile"/>
           <div style={contentWrapStyle}>
             <div style={usernameStyle}>{c.username}</div>
-            <div style={followerNumStyle}>{`${Math.floor(Math.random() * 100)} Followers`}</div>
+            <div style={followerNumStyle}>{`${celebFollowers.length} Followers`}</div>
             <div style={btnWrapStyle}>
-              <Button color="secondary">Follow</Button>
+              <Button onClick={onFollow} color="secondary">
+                {`${celebFollowers.includes(uid) ? 'Unfollow' : 'Follow'}`}
+              </Button>
             </div>
           </div>
         </div>

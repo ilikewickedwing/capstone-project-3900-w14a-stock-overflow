@@ -94,6 +94,14 @@ const COLLECTIONS = [
   */
   'celebrityRequests',
   /**
+    Stores all the followers of a given celebrity
+    {
+      celebUid: string // uid of the celebrity
+      followers: array // An array of uids of the followers
+    }
+  */
+  'celebrityFollowers',
+  /**
     Stores all the notifications for a given user
     {
       ownerUid: string,
@@ -394,8 +402,48 @@ export class Database {
   async getAllCelebrityUsers() {
     const users = this.database.collection('users');
     const query = { userType: 'celebrity' };
-    const requests = await users.find(query).toArray();
-    return requests;
+    const celebs = await users.find(query).toArray();
+    return celebs;
+  }
+  
+  async getCelebrityFollowers(celebUid) {
+    const celebFollowers = this.database.collection('celebrityfollowers');
+    const query = { celebUid: celebUid };
+    const followers = await celebFollowers.findOne(query);
+    return followers;
+  }
+  /**
+   * Inserts a celebrity followers datastructure
+   *
+   * IMPORTANT:
+   * This method does not check that a datastructure with the same
+   * celebUid already exists so please check that before hand with
+   * getCelebrityFollowers
+   *
+   * @param {string} celebUid 
+   * @param {array} followers 
+   */
+  async insertCelebrityFollowers(celebUid, followers=[]) {
+    const celebFollowers = this.database.collection('celebrityfollowers');
+    await celebFollowers.insertOne({
+      celebUid: celebUid,
+      followers: followers
+    })
+  }
+  
+  /**
+   * Update celebrity followers
+   * 
+   * NOTE: followers is the datastructure rather than the array
+   * so you must wrap the array in an object
+   */
+  async updateCelebrityFollowers(celebUid, followers) {
+    const celebFollowers = this.database.collection('celebrityfollowers');
+    const query = { celebUid: celebUid };
+    const result = await celebFollowers.updateOne(query, {
+      $set: followers
+    })
+    return result.modifiedCount !== 0;
   }
   
   /**
