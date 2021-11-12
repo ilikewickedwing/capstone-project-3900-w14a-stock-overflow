@@ -31,12 +31,12 @@ export default function AdminSearch() {
   
   const onSearch = async () => {
     if (username.length === 0) {
-      alert("Username cannot be empty");
+      alert("Username cannot be empty",'error');
       return;
     }
     const resp = await api.userUid(username);
     if (resp.status === 404) {
-      alert(`User ${username} does not exist`);
+      alert(`User ${username} does not exist`,'error');
       return;
     }
     const respJson = await resp.json();

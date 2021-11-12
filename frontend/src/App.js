@@ -12,7 +12,12 @@ import CelebrityRequestPage from "./celebrity/CelebrityRequestPage";
 import Friend from "./pages/Friend";
 import DiscoverCelebrityPage from "./celebrity/DiscoverCelebrity";
 import { Snackbar } from "@material-ui/core";
-import { createContext, useState } from "react";
+import MuiAlert from '@mui/material/Alert';
+import { createContext, useState,forwardRef } from "react";
+
+const Alert = forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 
 export const AlertContext = createContext();
 
@@ -20,8 +25,10 @@ function App() {
   const api = new API();
   const [ alertMessage, setAlertMessage ] = useState('');
   const [ showAlert, setShowAlert ] = useState(false);
+  const [severity, setSeverity] = useState('');
   // Custom alert function
-  const alert = (message) => {
+  const alert = (message,severity) => {
+    setSeverity(severity);
     setAlertMessage(message);
     setShowAlert(true);
   }
@@ -35,9 +42,12 @@ function App() {
             <Snackbar 
               open={showAlert}
               anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-              onClose={() => setShowAlert(false)}
-              message={alertMessage}
-            />
+              autoHideDuration={6000} 
+            >
+              <Alert onClose={() => setShowAlert(false)} severity={severity} sx={{ width: '100%' }}>
+                {alertMessage}
+              </Alert>
+            </Snackbar> 
             <Switch>
               <Route path="/user" component={Friend} /> 
               <Route path="/signup" component={SignUp} />

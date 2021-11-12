@@ -221,7 +221,7 @@ const EnhancedTableToolbar = (props) => {
       setFlag(res.data.defBroker.brokerFlag);
       
       } catch (e) {
-      alert(`Status Code ${e.status} : ${e.response.data.message}`);
+      alert(`Status Code ${e.status} : ${e.response.data.message}`,'error');
       }
   }
 
@@ -244,7 +244,7 @@ const EnhancedTableToolbar = (props) => {
       })
       load();
     } catch (e){
-      alert(`Status Code ${e.response.status} : ${e.response.data.error}`);
+      alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
     }
     handleClose();
   }
@@ -401,7 +401,7 @@ export default function PfTable({stocks, load, setGraphSelected}) {
       setValue(totalVal);
       
     } catch (e) {
-      alert(`Status Code ${e.response.status} : ${e.response.data.error}`);;
+      alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
     }
 
   };

@@ -46,7 +46,7 @@ const StockSelect = ({stockCode, name,pid, setClose}) => {
                 handleOpen();
             }
         } catch (e){
-            alert(`Status Code ${e.response.status} : ${e.response.data.error}`);
+            alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
         }   
     }
 
@@ -60,7 +60,7 @@ const StockSelect = ({stockCode, name,pid, setClose}) => {
             handleClose();
             setClose();
         } catch (e){
-            alert(`Status Code ${e.response.status} : ${e.response.data.error}`);
+            alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
         }   
     }
 

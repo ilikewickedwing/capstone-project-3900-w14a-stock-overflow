@@ -42,7 +42,7 @@ export default function Friend() {
       try {
         alert("Friend request has been sent"); 
       } catch (e){
-        alert(`Status Code ${e.response.status} : ${e.response.data.error}`);
+        alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
       }
     }
 
@@ -51,7 +51,7 @@ export default function Friend() {
       try {
 
       } catch (e){
-        alert(`Status Code ${e.response.status} : ${e.response.data.error}`);
+        alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
       }
     } 
 
