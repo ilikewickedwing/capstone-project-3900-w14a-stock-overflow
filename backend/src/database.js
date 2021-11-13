@@ -1,7 +1,7 @@
 import { MongoClient } from "mongodb";
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import { nanoid } from 'nanoid';
-import { calcAll } from './portfolio';
+// import { calcAll } from './portfolio';
 import { insertDefaultAdmin } from "./admin";
 import { calcAll } from './performance';
 
@@ -950,9 +950,7 @@ export class Database {
 
     // Updating database
     await pfs.updateOne(query, { $set: { stocks: stockList, value: pfValue } } );
-    // Creating activity
-    const message = `bought ${quantity} ${stock} at $${price}`;
-    this.createActivity(uid, message, null);
+    
     return -1;
   }
 
@@ -1005,10 +1003,6 @@ export class Database {
 
     // Updating database
     await pfs.updateOne(query, { $set: { stocks: stockList, value: pfValue } } );
-
-    // Creating activity
-    const message = `sold ${quantity} ${stock} at $${price}`;
-    this.createActivity(uid, message, null);
     
     return -1;
   }
@@ -1045,6 +1039,10 @@ export class Database {
     const friendResp = await this.getUser(friend);
     if (friendResp === null) {
       return -1;
+    }
+
+    if (await this.checkFriend(uid, friend)) {
+      return -4;
     }
 
     // Find the friendlist for the given uid
@@ -1194,6 +1192,11 @@ export class Database {
     const activity = this.database.collection('activity');
     const query = { aid: aid };
     const activityResp = await activity.findOne(query);
+
+    if (activityResp == null) {
+      return -3;
+    }
+
     let userComments = activityResp.userComments;
     userComments.push(cid);
 
@@ -1205,7 +1208,7 @@ export class Database {
     const userResp = await users.findOne({uid: activityResp.ownerUid});
     await this.createActivity(uid, `commented on ${userResp.username}'s post/comment`,aid);
 
-    return aid;
+    return cid;
   }
 
   async getComments(aid) {
@@ -1231,6 +1234,11 @@ export class Database {
     const users = this.database.collection('users');
     const activity = this.database.collection('activity');
     const activityResp = await activity.findOne({aid : id});
+
+    if (activityResp == null) {
+      return -2;
+    }
+
     const userResp = await users.findOne({uid: activityResp.ownerUid});
     let likes = activityResp.likes;
     let likedUsers = activityResp.likedUsers;
@@ -1307,13 +1315,17 @@ export class Database {
       await this.createActivity(uid, message, null);
     }
 
-    return true;
+    return message;
   }
 
   async getVotes(stock) {
     const stocks = this.database.collection('stocks');
-    const stocksResp = await stocks.findOne({stock : stock});
-
+    let stocksResp = await stocks.findOne({stock : stock});
+    if (!stocksResp) {
+      await this.createStockColl(stock);
+      stocksResp = await stocks.findOne({stock : stock});
+    }
+    
     return {
       bear: stocksResp.bear.length,
       bull: stocksResp.bull.length,
