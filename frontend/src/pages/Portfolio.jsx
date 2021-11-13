@@ -169,7 +169,7 @@ const Portfolio = () => {
     // history.push(`/dashboard`)
     history.push(`/portfolio/${pid}`)
   }
-
+  //console.log(selected)
   return (
       <PageBody className="font-two">
           <Navigation />

@@ -14,6 +14,7 @@ import Button from '@mui/material/Button';
 import Navigation from '../comp/Navigation';
 import Tabs from '../comp/Tabs';
 import RankTable from '../comp/RankTable'; 
+import leaderboard from '../assets/leaderboard.png';
 import { AlertContext } from '../App';
 
 // stub data for rankings
@@ -66,16 +67,17 @@ export default function Friend() {
                 <PfBar>
                   <Heading>Public Portfolio </Heading>
                 </PfBar>
-
               </LeftBody>
               <RightBody elevation={10}>
                 <RightCard elevation={5}>
+                  <div style={{textAlign:'center'}}>
+                    <img style={{height:"auto", width:"50px"}} src={leaderboard} alt="leaderboard icon"/>
+                  </div>
                   <h3 style={{textAlign:'center'}}>Ranking amongst friends</h3>
                   <RankTable
                     rows={rows}
                     myRanking={myRanking}
                   />
-                  
                 </RightCard>
                 <RightCard elevation={5}>
                   <h3 style={{textAlign:'center'}}>Friend Activity</h3>

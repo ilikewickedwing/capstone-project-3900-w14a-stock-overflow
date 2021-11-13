@@ -25,14 +25,14 @@ describe('Add freinds', () => {
     user2 = rego2.uid;
     token2 = rego2.token;
   })
-  it('Addign each otehr as friends', async () => {
+  it('Adding each other as friends', async () => {
     await addFriend(token1, user2, d);
     let friends1 = await getFriends(token1, d);
     let friends2 = await getFriends(token2, d);
     expect(friends1.friends).toStrictEqual([]);
     expect(friends2.friends).toStrictEqual([]);
   })
-  it('Addign each otehr as friends', async () => {
+  it('Adding each other as friends', async () => {
     await addFriend(token2, user1, d);
     let friends1 = await getFriends(token1, d);
     let friends2 = await getFriends(token2, d);

@@ -1,12 +1,13 @@
 import { authRegister } from "../auth";
 import { createPf, userPfs, openPf } from "../portfolio";
-import { calcPf, rankAll } from "../performance";
+import { calcPf, getFriendRankings2, rankAll } from "../performance";
 import { addStock, modifyStock, getStock } from "../stocks";
 import { Database } from "../database";
 import { calcAll } from "../performance";
 import request from 'supertest';
 import { app, database } from "../index";
 import { getDefBroker, setDefBroker } from "../user";
+import { addFriend } from "../social";
 
 
 
@@ -19,12 +20,15 @@ describe('Rank multiple user portfolio performances', () => {
 	jest.setTimeout(30000);
   
 	let token1 = null;
+  let uid1 = null;
 	let pid1 = null;
 
   let token2 = null;
+  let uid2 = null;
   let pid2 = null;
 
   let token3 = null;
+  let uid3 = null;
   let pid3 = null;
   let pid4 = null;
   
@@ -38,6 +42,7 @@ describe('Rank multiple user portfolio performances', () => {
 	it('Register user and create portfolios', async () => {
 	  const rego = await authRegister('Ashley', 'strongpassword', d);
 	  token1 = rego.token;
+    uid1 = rego.uid;
 	  const create = await createPf(token1, 'pf', d);
 	  expect(create).toMatchObject({
 		  pid: expect.any(String),
@@ -46,6 +51,7 @@ describe('Rank multiple user portfolio performances', () => {
 
     const rego2 = await authRegister('Richard', 'strongpassword', d);
     token2 = rego2.token;
+    uid2 = rego2.uid;
     const create2 = await createPf(token2, 'pf', d);
     expect(create2).toMatchObject({
       pid: expect.any(String),
@@ -54,6 +60,7 @@ describe('Rank multiple user portfolio performances', () => {
 
     const rego3 = await authRegister('Jono', 'strongpassword', d);
     token3 = rego3.token;
+    uid3 = rego3.uid;
     const create3 = await createPf(token3, 'pf', d);
     expect(create3).toMatchObject({
       pid: expect.any(String),
@@ -76,6 +83,20 @@ describe('Rank multiple user portfolio performances', () => {
     const resp3 = await setDefBroker(token3, '50', '0', d);
     expect(resp3).toBe(1);
 	})
+  it('Add friends', async () => {
+    const friend1 = await addFriend(token1, uid2, d);
+    expect(friend1).toBe(true);
+    const friend2 = await addFriend(token1, uid3, d);
+    expect(friend2).toBe(true);
+    const friend3 = await addFriend(token2, uid1, d);
+    expect(friend3).toBe(true);
+    const friend4 = await addFriend(token2, uid3, d);
+    expect(friend4).toBe(true);
+    const friend5 = await addFriend(token3, uid1, d);
+    expect(friend5).toBe(true);
+    const friend6 = await addFriend(token3, uid3, d);
+    expect(friend6).toBe(true);
+  })
 	it('Add stocks to portfolio', async () => {
     daysCalced = 10;
     const test = new Date();
@@ -214,9 +235,23 @@ describe('Rank multiple user portfolio performances', () => {
 	})
 	it('CalcAll', async () => {
 		await calcAll(d, true);
-    const rankings = await d.getRankings();
-		console.dir(rankings, { depth: null });
+    let rankings = null;
+    // setTimeout(async () => {
+      rankings = await d.getRankings();
+    // }, 10000);
+    console.dir(rankings, { depth: null });
+    expect(rankings).not.toBe(null);
 	})
+  // it('Test friend rank 1', async () => {
+  //   const friendRank = await getFriendRankings1(token1, d);
+  //   expect(friendRank).not.toBe(null);
+  //   console.dir(friendRank, {depth:null});
+  // })
+  it('Test friend ranks', async () => {
+    const friendRank = await getFriendRankings(token1, d);
+    expect(friendRank).not.toBe(null);
+    console.dir(friendRank, {depth:null});
+  })
 	/* it('Sell some of first stock in portfolio', async () => {
 	  const add = await modifyStock(token1, pid1, 'AAPL', 2, 2, 0, null, null, d);
 	  expect(add).toBe(-1);

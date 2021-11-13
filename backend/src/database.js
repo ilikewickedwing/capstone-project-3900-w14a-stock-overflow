@@ -1,7 +1,6 @@
 import { MongoClient } from "mongodb";
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import { nanoid } from 'nanoid';
-// import { calcAll } from './portfolio';
 import { insertDefaultAdmin } from "./admin";
 import { calcAll } from './performance';
 
@@ -99,7 +98,7 @@ const COLLECTIONS = [
       activities: [string],
     }
    */
-    'userActivity',
+  'userActivity',
   /**
     This stores all activities in the following form:
     {
@@ -113,7 +112,7 @@ const COLLECTIONS = [
       userComments: [string],
     }
   */
-    'activity',
+  'activity',
   /**
     This stores all bearish/bullish in the following form:
     {
@@ -122,7 +121,7 @@ const COLLECTIONS = [
       bull: [string],
     }
   */
-    'stocks',
+  'stocks',
   /**
     Stores all the requests made by ordinary users to become celebrity
     {
@@ -257,8 +256,8 @@ export class Database {
   }
 
   async setUserPerf(uid, performance) {
-    const users = this.database.collection('users');
-    const query = { uid: uid };
+    const users = this.database.collection('userPortos');
+    const query = { ownerUid: uid };
     const user = await users.findOne(query);
     user.performance = performance;
     const result = await users.updateOne(query, { $set: { performance: performance }});
@@ -669,6 +668,22 @@ export class Database {
 
     if (result.modifiedCount !== 0) return 1;
     else return 0;
+  }
+
+  async getUserPerf(uid) {
+    const userPortos = this.database.collection('userPortos');
+    const query = { ownerUid: uid };
+    const userPortoResp = await userPortos.findOne(query);
+
+    const users = this.database.collection('users');
+    const query2 = { uid: uid };
+    const userResp = await users.findOne(query2);
+    const perf = {
+      name: userResp.username,
+      performance: userPortoResp.performance,
+    };
+
+    return perf;
   }
 
   /**
@@ -1379,6 +1394,7 @@ export class Database {
   async getRankings() {
     const rankings = this.database.collection('rankings');
     const resp = await rankings.find().toArray();
+    if (resp == null) return [];
     return resp;
   }
 

@@ -12,6 +12,8 @@ import {
 
 import Navigation from '../comp/Navigation';
 import Tabs from '../comp/Tabs';
+import leaderboard from '../assets/leaderboard.png';
+
 
 export default function Dashboard() {
   return (
@@ -23,11 +25,13 @@ export default function Dashboard() {
               <PfBar>
                 <Heading>Dashboard</Heading> 
               </PfBar>
-                print the list of stocks in this 
               </LeftBody>
-              <RightBody elevation={10}> Right Body: contains the 3 side cards 
+              <RightBody elevation={10}>
                 <RightCard elevation={5}>
-                  First card
+                <div style={{textAlign:'center'}}>
+                    <img style={{height:"auto", width:"50px"}} src={leaderboard} alt="leaderboard icon"/>
+                  </div>
+                  <h3 style={{textAlign:'center'}}>Global Rankings</h3>
                 </RightCard>
                 <RightCard elevation={5}>
                   2nd card
