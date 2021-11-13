@@ -1309,7 +1309,7 @@ app.get('/file/download', async (req, res) => {
 })
 
 app.get('/rankings/global', async (req, res) => {
-  const resp = await getAllRankings(database, res);
+  const resp = await getAllRankings(database);
   if (resp !== null) {
     res.status(200).send(resp);
   } else res.status(404).send({ error: "A system error occurred" });
