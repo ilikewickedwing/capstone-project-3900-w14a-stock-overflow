@@ -993,7 +993,7 @@ app.get('/stocks/info', async (req, res) => {
  */
 app.post('/friends/add', async (req, res) => {
   const { token, friendID } = req.body;
-  const resp = await addFriend(token, friendID);
+  const resp = await addFriend(token, friendID, database);
 
   if (resp === -1) {
     res.status(403).send({ error: "Invalid friendID" });
@@ -1008,7 +1008,7 @@ app.post('/friends/add', async (req, res) => {
 
 app.delete('/friends/remove', async (req, res) => {
   const { token, friendID } = req.body;
-  const resp = await removeFriend(token, friendID);
+  const resp = await removeFriend(token, friendID, database);
 
   if (resp === -1) {
     res.status(403).send({ error: "Invalid friendID" });
@@ -1023,7 +1023,7 @@ app.delete('/friends/remove', async (req, res) => {
 
 app.get('/friends/all', async (req, res) => {
   const { token } = req.query;
-  const resp = await getFriends(token);
+  const resp = await getFriends(token, database);
 
   if (resp === -1) {
     res.status(401).send({ error: "Invalid token" });
