@@ -14,6 +14,12 @@ import MenuList from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 
+import { SearchDiv } from '../styles/styling';
+import { Autocomplete } from '@mui/material';
+import { TextInput } from '../styles/styling';
+import { IconButton } from '@material-ui/core';
+import SearchIcon from '@mui/icons-material/Search';
+
 
 import {
   PfBody, 
@@ -181,6 +187,49 @@ const Stock = () => {
     e.preventDefault();
   }
 
+  // comparing stock
+  // fetch stocklist
+  const [queryRes, setRes] = React.useState([]);
+  const [search, setSearch ] = React.useState("");
+  const [stockList, setStockList] = React.useState([stockCode]);
+
+  React.useEffect(() => {   
+    fetchStockList();
+    setStockList([stockCode])
+  },[stockCode]);
+
+  const fetchStockList = async () => {
+    try {
+      const request = await axios.get(`${apiBaseUrl}/stocks/all`);
+      // map it so its MUI autocorrect friendly 
+      const newList = [];
+      request.data.forEach(obj => {
+          newList.push({
+              type: "Stocks",
+              code: obj["symbol"],
+              name: obj["name"]
+          })
+      })
+      setRes(newList);
+    } catch (e) {
+      alert(`Status Code ${e.status} : ${e.response.data.error}`,'error');
+    }
+  };
+
+  const submitQuery = () => {
+    if (search.includes(' ')){
+        var code = search.split(" ")[0];
+        setStockList([...stockList, code]);
+    } 
+  }
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    const stockName = e.target.firstChild.nodeValue;
+    const result = stockList.filter(stock => stock !== stockName);
+    setStockList(result);
+  }
+
   return (
       <PageBody className="font-two">
           <Navigation />
@@ -240,9 +289,48 @@ const Stock = () => {
               volume: {volume} &nbsp;
               close:  {close} 
               </ StockOverview >
-              <StocksGraph companyId={stockCode} height={300}/>
+              
+              <SearchDiv style={{marginTop: '10px'}}>
+                <Autocomplete
+                    disablePortal
+                    options={queryRes}
+                    sx={{ width: 300 }}
+                    inputValue={search}
+                    groupBy={(option) => option.type}
+                    getOptionLabel={ (e) => {
+                        if (e.type === "Friends"){
+                            return e.code;
+                        }
+                    return e.code+" "+ e.name;
+                    }}
+
+                    onInputChange={(e,v) => {
+                        setSearch(v);
+                    }}
+                    freeSolo
+                    renderInput={(params) => (
+                    <TextInput 
+                        {...params} 
+                        label="Search stock to compare" 
+                    />)}
+                />
+                <IconButton type="submit" sx={{p:'10px'}} onClick={submitQuery}>
+                    <SearchIcon />
+                </IconButton>
+              </ SearchDiv> 
+              {stockList.length > 1 ? (
+              <StocksGraph companyId={stockList.toString()} height={300}/>): <StocksGraph companyId={stockCode} height={300}/>}
+
             </LeftBody>
             <RightBody elevation={10}>
+              {stockList.slice(1).map((name)=>(
+              <RightCard elevation = {5}>
+              <form onSubmit={handleSubmit} key={name} style={{marginBottom: "5px", marginTop: "5px", display: "flex", alignItems: "center"}}>
+                {name}
+                <Button type="submit" variant="contained" color="error" style={{marginLeft: "290px", display: "flex", justifyContent: "flex-end"}}>Remove</Button>
+              </form>
+              </RightCard>))
+              }
               <RightCard elevation={5}>
                 previous close: {prevClose}
                 <br />
