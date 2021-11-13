@@ -5,6 +5,7 @@
 import { Database } from "./database";
 import { getStock } from "./stocks";
 import * as schedule from "node-schedule";
+import { checkStock } from "./stocks";
 import { API } from "./api";
 
 const api = new API(); 
@@ -52,11 +53,27 @@ export const getFriends = async (token, database) => {
 
   // Create the portfolio and return the result
   const friendResp = await database.getFriends(uid);
-  if (friendResp !== -2) {
+  if (Array.isArray(friendResp)) {
     const obj = { friends: friendResp };
     return obj;
   }
   return friendResp;
+}
+
+export const getFriendReq = async (token, database) => {
+  // Return error if user not found
+const uid = await database.getTokenUid(token);
+if (uid === null) {
+  return -1;
+}
+
+// Create the portfolio and return the result
+const friendResp = await database.getFriendReq(uid);
+if (Array.isArray(friendResp)) {
+  const obj = { friendReq: friendResp };
+  return obj;
+}
+return friendResp;
 }
 
 export const comment = async (token, aid, message, database) => {
@@ -71,9 +88,7 @@ export const comment = async (token, aid, message, database) => {
   }
 
   const resp = await database.comment(uid, aid, message);
-  if (resp === null) {
-    return -3;
-  }
+
   return resp;
 }
 
@@ -98,9 +113,7 @@ export const like = async (token, aid, database) => {
     return -1;
   }  
   const resp = await database.like(uid, aid);
-  if (resp === null) {
-    return -2;
-  }
+  
   return resp;
 }
 
@@ -111,18 +124,18 @@ export const voteStock = async (token, stock, type, database) => {
   if (uid === null) {
     return -1;
   }  
-  const resp = await database.voteStock(uid, stock, type);
-  if (resp === null) {
+
+  // Return error if stock is not valid
+  if (!await checkStock(stock)) {
     return -2;
   }
+
+  const resp = await database.voteStock(uid, stock, type);
   return resp;
 }
 
 export const getVotes = async (stock, database) => {
   const resp = await database.getVotes(stock);
-  if (resp === null) {
-    return -1;
-  }
   return resp;
 }
 
