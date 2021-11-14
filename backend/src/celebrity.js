@@ -69,3 +69,15 @@ export const postCelebrityFollow = async (token, isFollow, celebUid, res, databa
   await database.updateCelebrityFollowers(celebUid, followers);
   res.status(200).send();
 }
+
+export const getUserCelebrities = async (token) => {
+  // Return error if user not found
+  const uid = await database.getTokenUid(token);
+  if (uid === null) {
+    return -1;
+  }
+  
+  // Create the portfolio and return the result
+  const celebResp = await database.getUserCelebrities(uid);
+  return celebResp;
+}

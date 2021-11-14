@@ -13,7 +13,7 @@ import { getAdminCelebrityRequests, postAdminCelebrityHandlerequest, postCelebri
 import { getUserNotifications, deleteUserNotifications } from "./notifications";
 import fileUpload from 'express-fileupload';
 import { handleFileDownload, handleFileUpload } from "./file";
-import { getCelebrityDiscover, postCelebrityFollow } from "./celebrity";
+import { getCelebrityDiscover, postCelebrityFollow, getUserCelebrities } from "./celebrity";
 
 // Make the server instance
 export const app = express();
@@ -1526,6 +1526,36 @@ app.get('/celebrity/discover', async (req, res) => {
 app.post('/celebrity/follow', async (req, res) => {
   const { token, isFollow, celebUid } = req.body;
   await postCelebrityFollow(token, isFollow, celebUid, res, database);
+})
+
+// Get endpoint for getting every celebrity a user follows
+/**
+ * @swagger
+ * /celebrity/following:
+ *   get:
+ *     tags: [Celebrity]
+ *     description: endpoint for getting every celebrity a user follows
+ *     parameters:
+ *      - name: token
+ *        description: token of user
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Returns a list of friend ids of the user
+ *       401:
+ *         description: Invalid token
+ */
+ app.get('/celebrity/following', async (req, res) => {
+  const { token } = req.query;
+  const resp = await getUserCelebrities(token, database);
+  
+  if (resp === -1) {
+    res.status(401).send({ error: "Invalid token" });
+  } else res.status(200).send(resp);
+
+  return;
 })
 
 /**
