@@ -72,7 +72,6 @@ const Navigation = () => {
           // append friends to the search pool 
           const friendList =[];
           const request2 = await axios.get(`${apiBaseUrl}/friends/all?token=${token}`);
-          console.log(request2.data.friends);
           request2.data.friends.forEach(obj => {
             friendList.push({
                 type: "Friends",
@@ -80,11 +79,18 @@ const Navigation = () => {
                 name: obj["uid"]
             })
           })
-          newList.push(...friendList);
           
-          // TODO CALL ENDPOINT TO PUSH CELEBRITIES 
+          // append celebrities to the pool
           const celebList = [];
-
+          const request3 = await axios.get(`${apiBaseUrl}/celebrity/discover`);
+          request3.data.celebrities.forEach(obj => {
+            celebList.push({
+                type: "Celebrities",
+                code: obj["username"],
+                name: obj["uid"]
+            })
+          })
+        newList.push(...friendList,...celebList);
           setRes(newList);
         } catch (e) {
           alert(`Status Code ${e.status} : ${e.response.data.error}`,'error');
@@ -138,7 +144,7 @@ const Navigation = () => {
                     if (e.inputValue) {
                         return e.inputValue;
                     }
-                    if (e.type === "Friends"){
+                    if (e.type === "Friends" ||e.type === "Celebrities" ){
                         return e.code;
                     }
                     return e.code+" "+ e.name;

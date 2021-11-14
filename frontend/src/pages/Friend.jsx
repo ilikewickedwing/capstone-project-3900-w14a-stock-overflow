@@ -41,36 +41,63 @@ export default function Friend() {
     const alert = React.useContext(AlertContext);
     const { handle } = useParams();
     const token = localStorage.getItem('token');
+    const uid = localStorage.getItem('uid');
 
-    const [uid, setUid] = React.useState('');
+    const [friendUid, setUid] = React.useState('');
+    
+    // list of portfolios of all the portfolios given a uid 
+    const [portData, setPortfolio ] = React.useState([]);
+
+    // private: 0, public: 1
+    const [isPublic, setPublic] = React.useState(0);
 
       // on first load 
     React.useEffect(() => {   
       getUid();
     },[]);
 
+    // load based on friendUId getting awaited 
+    React.useEffect(() => {   
+      loadPortfolios();
+    },[friendUid]);
+
+    
+
     const getUid = async() => {
       try {
         const resp = await axios.get(`${apiBaseUrl}/user/uid?username=${handle}`);
+        if (uid === resp.data.uid ){
+          history.push('/dashboard');
+          alert(`Cannot view your own portfolio, redirected to dashboard`,'error');
+        } 
         setUid(resp.data.uid); 
       } catch (e){
-        history.push('/oops');
         alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
       }
     }
-    // private: 0, public: 1
-    const [isPublic, setPublic] = React.useState(0);
 
     const sendRequest = async (e) => {
       e.preventDefault();
       try {
-        await axios.post(`${apiBaseUrl}/friends/add`, {token, friendID:uid});
+        await axios.post(`${apiBaseUrl}/friends/add`, {token, friendID:friendUid});
         alert("Friend request has been sent",'success'); 
       } catch (e){
         alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
       }
     }
 
+    const loadPortfolios = async () => {
+      console.log(friendUid);
+      try {
+        const resp = await axios.get(`${apiBaseUrl}/friends/portfolios?token=${token}&uid=${friendUid}`);
+        setPortfolio(resp.data);
+        if (resp.data.length > 0 ){
+          setPublic(1);
+        }
+      } catch (e) {
+        alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
+      }
+    }
     // calls the backend to check if the page is viewable from the current user 
     const checkPublic = async () => {
       try {
@@ -114,7 +141,7 @@ export default function Friend() {
             <PfBody>
               <WatchlistBody elevation={10}>
                 <PfBar>
-                  <Heading>{handle} (private) </Heading>
+                  <Heading>{handle} (private portfolio) </Heading>
                   <Button id="addFriend" onClick={sendRequest}> 
                       Send Friend Request
                   </Button>

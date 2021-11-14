@@ -1,4 +1,5 @@
-import * as React from 'react';
+import React, { useContext } from 'react'; 
+import { AlertContext } from '../App';
 // component imports
 import Navigation from '../comp/Navigation';
 import Tabs from '../comp/Tabs';
@@ -21,7 +22,9 @@ import leaderboard from '../assets/leaderboard.png';
 import star from '../assets/star.png';
 
 export default function Dashboard() {
-
+  console.log("uid =" +  localStorage.getItem('uid'));
+    const alert = useContext(AlertContext);
+    const [globalRank, setGlobal ] = React.useState([]);
     // first load render 
     React.useEffect(() => {  
       getGlobalRanks();
@@ -29,8 +32,8 @@ export default function Dashboard() {
 
   const getGlobalRanks = async () => {
     try {
-      const request = axios.get(`${apiBaseUrl}/rankings/global`);
-      console.log(request);
+      const request = await axios.get(`${apiBaseUrl}/rankings/global`);
+      setGlobal(request.data); 
     } catch (e) {
       alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
     }
@@ -60,9 +63,6 @@ export default function Dashboard() {
                   <img style={{height:"auto", width:"50px"}} src={leaderboard} alt="leaderboard icon"/>
                 </div>
                   <h3 style={{textAlign:'center'}}>Global Rankings</h3>
-                </RightCard>
-                <RightCard elevation={5}>
-                  3rd
                 </RightCard>
               </RightBody>
             </PfBody>
