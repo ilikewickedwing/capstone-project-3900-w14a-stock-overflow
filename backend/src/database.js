@@ -1128,8 +1128,10 @@ export class Database {
     if (friendsResp == null) {
       return -2;
     }
-    
-    return friendsResp.friends;
+
+    const usersResp = this.database.collection('users');
+    const userFriends = usersResp.find({uid : { $in : friendsResp.friends}})
+    return userFriends.toArray();
   }
 
   async getFriendReq(uid) {
@@ -1141,8 +1143,9 @@ export class Database {
     if (friendsResp == null) {
       return -2;
     }
-    
-    return friendsResp.requests;
+    const usersResp = this.database.collection('users');
+    const userFriends = usersResp.find({uid : { $in : friendsResp.requests}})
+    return userFriends.toArray();
   }
 
   async checkFriend(uid, friend) {
@@ -1333,17 +1336,29 @@ export class Database {
     return message;
   }
 
-  async getVotes(stock) {
+  async getVotes(uid, stock) {
     const stocks = this.database.collection('stocks');
     let stocksResp = await stocks.findOne({stock : stock});
     if (!stocksResp) {
       await this.createStockColl(stock);
       stocksResp = await stocks.findOne({stock : stock});
     }
-    
+    let vote = -1
+    if (stocksResp.bear.indexOf(uid) !== -1) {
+      vote = 0;
+    } else if (stocksResp.bull.indexOf(uid) !== -1) {
+      vote = 1;
+    }
+    let totalVotes = stocksResp.bear.length + stocksResp.bull.length;
+    if (totalVotes === 0) {
+      totalVotes = 1;
+    }
+    const bearPerc = stocksResp.bear.length / totalVotes;
+    const bullPerc = stocksResp.bull.length / totalVotes;
     return {
-      bear: stocksResp.bear.length,
-      bull: stocksResp.bull.length,
+      bear: (bearPerc.toFixed(2)) * 100,
+      bull: (bullPerc.toFixed(2))* 100,
+      vote: vote,
     };
   }
 
@@ -1354,9 +1369,9 @@ export class Database {
 
     // Get friends' and user's activities
     const friends = await this.getFriends(uid);
-    const everyone = [... friends, uid];
+    const everyone = [... friends, {uid : uid}];
     for (let i = 0; i < everyone.length; i++) {
-      const e = everyone[i];
+      const e = everyone[i].uid;
       const userActResp = await userActivity.findOne({ownerUid: e});
       const userActs = userActResp.activities;
       const poop = await activity.find({aid: {$in: userActs}}).toArray();

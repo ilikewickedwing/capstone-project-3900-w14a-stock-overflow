@@ -64,27 +64,30 @@ describe('stock voting', () => {
   })
   it('Voting bull', async () => {
     await voteStock(token, 'IBM', 1, d);
-    const votes = await getVotes('IBM', d);
+    const votes = await getVotes(token, 'IBM', d);
     expect(votes).toStrictEqual({
       bear: 0,
-      bull: 1,
+      bull: 100,
+      vote: 1,
     });
   })
   it('Unvoting bull', async () => {
     await voteStock(token, 'IBM', 1, d);
-    const votes = await getVotes('IBM', d);
+    const votes = await getVotes(token, 'IBM', d);
     expect(votes).toStrictEqual({
       bear: 0,
       bull: 0,
+      vote: -1,
     });
   })
   it('Changing from bull to bear', async () => {
     await voteStock(token, 'IBM', 1, d);
     await voteStock(token, 'IBM', 0, d);
-    const votes = await getVotes('IBM', d);
+    const votes = await getVotes(token, 'IBM', d);
     expect(votes).toStrictEqual({
-      bear: 1,
+      bear: 100,
       bull: 0,
+      vote: 0,
     });
   })
 })
