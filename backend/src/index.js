@@ -1017,6 +1017,11 @@ app.post('/stocks/vote', async (req, res) => {
  *     tags: [Stocks]
  *     description: endpoint getting all the votes on a stock
  *     parameters:
+ *      - name: token
+ *        description: token of user
+ *        in: body
+ *        required: true
+ *        type: string
  *      - name: stock
  *        description: name of the stock (the abbreviated name e.g. AAPL for Apple)
  *        in: body
@@ -1027,10 +1032,12 @@ app.post('/stocks/vote', async (req, res) => {
  *         description: Successfully got votes on a stock
  */
 app.get('/stocks/votes', async (req, res) => {
-  const { stock } = req.query;
-  const resp = await getVotes(stock, database);
+  const { token, stock } = req.query;
+  const resp = await getVotes(token, stock, database);
 
-  res.status(200).send(resp);
+  if (resp === -1) {
+    res.status(401).send({ error: "Invalid token" });
+  } else res.status(200).send(resp);
 
   return;
 })

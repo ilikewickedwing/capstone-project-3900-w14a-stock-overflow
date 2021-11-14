@@ -134,8 +134,13 @@ export const voteStock = async (token, stock, type, database) => {
   return resp;
 }
 
-export const getVotes = async (stock, database) => {
-  const resp = await database.getVotes(stock);
+export const getVotes = async (token, stock, database) => {
+  // Return error if user not found
+  const uid = await database.getTokenUid(token);
+  if (uid === null) {
+    return -1;
+  }  
+  const resp = await database.getVotes(uid, stock);
   return resp;
 }
 
