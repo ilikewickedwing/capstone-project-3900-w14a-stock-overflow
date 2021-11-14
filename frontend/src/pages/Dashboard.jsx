@@ -3,6 +3,8 @@ import * as React from 'react';
 import Navigation from '../comp/Navigation';
 import Tabs from '../comp/Tabs';
 import PerformanceTable from '../comp/PerformanceTable/PerformanceTable';
+import { apiBaseUrl } from '../comp/const';
+import axios from "axios";
 
 
 // styling imports 
@@ -19,19 +21,20 @@ import leaderboard from '../assets/leaderboard.png';
 import star from '../assets/star.png';
 
 export default function Dashboard() {
-  
+
     // first load render 
     React.useEffect(() => {  
+      getGlobalRanks();
     },[]);
 
-  // const getGlobalRanks = async () => {
-  //   try {
-  //     const request = axios.get(`${apiBaseUrl}/rankings/global`);
-  //     console.log(request);
-  //   } catch (e) {
-  //     alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
-  //   }
-  // }
+  const getGlobalRanks = async () => {
+    try {
+      const request = axios.get(`${apiBaseUrl}/rankings/global`);
+      console.log(request);
+    } catch (e) {
+      alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
+    }
+  }
   
   return (
     <PageBody className="font-two">

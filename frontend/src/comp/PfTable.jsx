@@ -353,7 +353,6 @@ EnhancedTableToolbar.propTypes = {
 };
 
 export default function PfTable({stocks, load, setGraphSelected}) {
-  console.log(stocks);
   const alert = React.useContext(AlertContext);
   const [order, setOrder] = React.useState("asc");
   const [orderBy, setOrderBy] = React.useState("prices");
