@@ -103,13 +103,35 @@ const Navigation = () => {
                 disablePortal
                 options={queryRes}
                 sx={{ width: 300 }}
+                filterOptions={(options, params) => {
+                const filtered = filter(options, params);
+        
+                const { inputValue } = params;
+                // Suggest the creation of a new value
+                const isExisting = options.some((option) => inputValue === option.code);
+                if (inputValue !== '' && !isExisting) {
+                    filtered.push({
+                    inputValue,
+                    code: `Add "${inputValue}"`,
+                    });
+                }
+                return filtered;
+                }}
                 inputValue={search}
                 groupBy={(option) => option.type}
                 getOptionLabel={ (e) => {
+                    // Value selected with enter, right from the input
+                    if (typeof e === 'string') {
+                        return e;
+                    }
+                    // Add "xxx" option created dynamically
+                    if (e.inputValue) {
+                        return e.inputValue;
+                    }
                     if (e.type === "Friends"){
                         return e.code;
                     }
-                return e.code+" "+ e.name;
+                    return e.code+" "+ e.name;
                 }}
 
                 onInputChange={(e,v) => {
