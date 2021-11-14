@@ -163,6 +163,8 @@ export const verifyPf = async (uid, pid, database) => {
       break;
     }
   }
+  
+  
 
   // Check that the user is an admin
   const user = await database.getUser(uid);

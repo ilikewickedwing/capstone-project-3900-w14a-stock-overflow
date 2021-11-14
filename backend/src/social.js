@@ -27,6 +27,23 @@ export const addFriend = async (token, friend, database) => {
   return friendResp;
 }
 
+export const declineFriend = async (token, friend, database) => {
+  // Return error if no friend given
+  if (friend == "") {
+    return -1;
+  }
+
+  // Return error if user not found
+  const uid = await database.getTokenUid(token);
+  if (uid === null) {
+    return -2;
+  }
+
+  // Create the portfolio and return the result
+  const friendResp = await database.declineFriend(uid, friend);
+  return friendResp;
+}
+
 export const removeFriend = async (token, friend, database) => {
       // Return error if no friend given
   if (friend == "") {
@@ -134,8 +151,13 @@ export const voteStock = async (token, stock, type, database) => {
   return resp;
 }
 
-export const getVotes = async (stock, database) => {
-  const resp = await database.getVotes(stock);
+export const getVotes = async (token, stock, database) => {
+  // Return error if user not found
+  const uid = await database.getTokenUid(token);
+  if (uid === null) {
+    return -1;
+  }  
+  const resp = await database.getVotes(uid, stock);
   return resp;
 }
 

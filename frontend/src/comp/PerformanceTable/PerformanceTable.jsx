@@ -31,26 +31,25 @@ function createData(code, name, buyPrice, currPrice, changePer, units, value, pr
 const PerformanceTable = () => {
   const token = localStorage.getItem('token');
   const [portfolios, setPortfolios] = React.useState([]);
-    // first load render 
-  React.useEffect(() => {   
-    fetchPortfolios();
-  },[]);
-  
+  const [selected, setSelected] = React.useState([]);
+  const isSelected = (name) => selected.indexOf(name) !== -1;
+
   const fetchPortfolios = async () => {
     try {
       const request1 = await axios.get(`${apiBaseUrl}/user/portfolios?token=${token}`);
       let newList = [];
       // iterate throught the portfolio names
       // for each name, gather data needed for display 
-      request1.data.forEach(async(e) => {
+      for (let i = 0; i < request1.data.length; i++) {
+        const e = request1.data[i];
         // grab the stock list for each portfolio 
         const request2 = await axios.get(`${apiBaseUrl}/user/portfolios/open?token=${token}&pid=${e.pid}`);
         const portfolioData = request2.data;
-
+        
         // plot the data if its not 'watchlist" or the stock list is empty
         if (portfolioData.name !== "Watchlist" && portfolioData.stocks.length !== 0){
-        const getNames = portfolioData.stocks.map(x=>x.stock);
-        const stockNames = getNames.join(',');
+          const getNames = portfolioData.stocks.map(x=>x.stock);
+          const stockNames = getNames.join(',');
           const request3 = await axios.get(`${apiBaseUrl}/stocks/info?type=1&stocks=${stockNames}`);
           let apiInfo = request3.data.data.quotes.quote;
           if (!Array.isArray(apiInfo)) {
@@ -65,17 +64,44 @@ const PerformanceTable = () => {
             stockRows.push(createData(portfolioData.stocks[i].stock, inf.description, portfolioData.stocks[i].avgPrice, inf.last.toFixed(2), changePer.toFixed(2),portfolioData.stocks[i].quantity, totalPrice.toFixed(2), profitLoss.toFixed(2)));
           }
           newList.push({
+            pid: e.pid,
             name: portfolioData.name,
             stocks: stockRows,
           });   
-        }
-      });
+      }
+    }
       setPortfolios(newList); 
-      console.log(newList);
     } catch (e) {
       alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
     }
   };
+    // first load render 
+  React.useEffect(() => {   
+    fetchPortfolios();
+  },[]);
+
+
+  const handleClick = (event, name) => {
+    console.log('handking click');
+    console.log(name);
+    const selectedIndex = selected.indexOf(name);
+    let newSelected = [];
+
+    if (selectedIndex === -1) {
+      newSelected = newSelected.concat(selected, name);
+    } else if (selectedIndex === 0) {
+      newSelected = newSelected.concat(selected.slice(1));
+    } else if (selectedIndex === selected.length - 1) {
+      newSelected = newSelected.concat(selected.slice(0, -1));
+    } else if (selectedIndex > 0) {
+      newSelected = newSelected.concat(
+        selected.slice(0, selectedIndex),
+        selected.slice(selectedIndex + 1)
+      );
+    }
+    setSelected(newSelected);
+  }
+
     return (
         <TableContainer component={Paper}>
         <Table aria-label="collapsible table">
@@ -83,15 +109,21 @@ const PerformanceTable = () => {
             <TableRow>
               <TableCell />
               <TableCell />
-              <TableCell>Portfolio Name</TableCell>
+              <TableCell align="left" style={{fontWeight:'bold'}}>Portfolio Name</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {portfolios &&
             portfolios.map((info) =>{
-              console.log(info);
+              const isItemSelected = isSelected(info.pid);
               return (
-                <PerformanceRow key={info.name} row={info} />
+                <PerformanceRow 
+                  key={info.name} 
+                  pid={info.pid} 
+                  rowName={info.name} 
+                  stocks={info.stocks} 
+                  isItemSelected={isItemSelected}
+                  handleClick = {handleClick} />
               )
             })}
           </TableBody>

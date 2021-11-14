@@ -467,6 +467,18 @@ export class Database {
     const followers = await celebFollowers.findOne(query);
     return followers;
   }
+
+  async getFollowingCelebrity(uid) {
+    const celebFollowers = this.database.collection('celebrityfollowers');
+    const query = { followers: uid };
+    const followers = await celebFollowers.find(query);
+    const celebs = (await followers.toArray()).map((e)=> {return e.celebUid})
+
+    const usersResp = this.database.collection('users');
+    const userCelebs = usersResp.find({uid : { $in : celebs}})
+    return userCelebs.toArray();
+  }
+
   /**
    * Inserts a celebrity followers datastructure
    *
@@ -1071,22 +1083,55 @@ export class Database {
       return -3;
     }
     let friendRequests = friendsResp.requests;
+    let userRequests = userResp.requests;
 
-    const requestIndex = friendRequests.indexOf(uid);
+    const requestIndex = userRequests.indexOf(friend);
     if (requestIndex === -1) { // other user has not sent a friend request
-      let userRequests = userResp.requests;
-      userRequests.push(friend);
+      friendRequests.push(uid);
 
-      await friends.updateOne({ownerUid : uid}, {$set: {requests: userRequests}});
+      await friends.updateOne({ownerUid : friend}, {$set: {requests: friendRequests}});
     } else { // other user has already sent a friend request
-      friendRequests.splice(requestIndex, 1);
+      userRequests.splice(requestIndex, 1);
+
       let friendList = friendsResp.friends;
       let userList = userResp.friends;
       friendList.push(uid);
       userList.push(friend);
 
-      await friends.updateOne({ownerUid: friend}, {$set: {friends: friendList, requests: friendRequests}});
-      await friends.updateOne({ownerUid: uid}, {$set: {friends: userList}});
+      await friends.updateOne({ownerUid: friend}, {$set: {friends: friendList}});
+      await friends.updateOne({ownerUid: uid}, {$set: {friends: userList, requests: userRequests}});
+    }
+
+    return true;
+  }
+
+  async declineFriend(uid, friend) {
+    // Check whether given friend id is valid
+    const friendResp = await this.getUser(friend);
+    if (friendResp === null) {
+      return -1;
+    }
+
+    if (await this.checkFriend(uid, friend)) {
+      return -4;
+    }
+
+    // Find the friendlist for the given uid
+    const friends = this.database.collection('friends');
+    const userResp = await friends.findOne({ownerUid: uid});
+
+    if (userResp == null) {
+      return -3;
+    }
+    let userRequests = userResp.requests;
+
+    const requestIndex = userRequests.indexOf(friend);
+    if (requestIndex === -1) { // other user has not sent a friend request
+      return -5;
+    } else { // other user has already sent a friend request
+      userRequests.splice(userRequests.indexOf(friend), 1);
+
+      await friends.updateOne({ownerUid: uid}, {$set: {requests: userRequests}});
     }
 
     return true;
@@ -1130,8 +1175,10 @@ export class Database {
     if (friendsResp == null) {
       return -2;
     }
-    
-    return friendsResp.friends;
+
+    const usersResp = this.database.collection('users');
+    const userFriends = usersResp.find({uid : { $in : friendsResp.friends}})
+    return userFriends.toArray();
   }
 
   async getFriendReq(uid) {
@@ -1143,8 +1190,9 @@ export class Database {
     if (friendsResp == null) {
       return -2;
     }
-    
-    return friendsResp.requests;
+    const usersResp = this.database.collection('users');
+    const userFriends = usersResp.find({uid : { $in : friendsResp.requests}})
+    return userFriends.toArray();
   }
 
   async checkFriend(uid, friend) {
@@ -1335,17 +1383,34 @@ export class Database {
     return message;
   }
 
-  async getVotes(stock) {
+  async getVotes(uid, stock) {
     const stocks = this.database.collection('stocks');
     let stocksResp = await stocks.findOne({stock : stock});
     if (!stocksResp) {
       await this.createStockColl(stock);
       stocksResp = await stocks.findOne({stock : stock});
     }
-    
+    let vote = "none"
+    if (stocksResp.bear.indexOf(uid) !== -1) {
+      vote = "bearish";
+    } else if (stocksResp.bull.indexOf(uid) !== -1) {
+      vote = "bullish";
+    }
+    let totalVotes = stocksResp.bear.length + stocksResp.bull.length;
+    if (totalVotes === 0) {
+      totalVotes = 1;
+    }
+    let bearPerc = stocksResp.bear.length / totalVotes;
+    let bullPerc = stocksResp.bull.length / totalVotes;
+
+    if ( bearPerc === 0 && bullPerc === 0) {
+      bearPerc = .5;
+      bullPerc = .5;
+    }
     return {
-      bear: stocksResp.bear.length,
-      bull: stocksResp.bull.length,
+      bear: (bearPerc.toFixed(2)) * 100,
+      bull: (bullPerc.toFixed(2))* 100,
+      vote: vote,
     };
   }
 
@@ -1356,9 +1421,10 @@ export class Database {
 
     // Get friends' and user's activities
     const friends = await this.getFriends(uid);
-    const everyone = [... friends, uid];
+    const celebs = await this. getFollowingCelebrity(uid);
+    const everyone = [... friends, ... celebs, {uid : uid}];
     for (let i = 0; i < everyone.length; i++) {
-      const e = everyone[i];
+      const e = everyone[i].uid;
       const userActResp = await userActivity.findOne({ownerUid: e});
       const userActs = userActResp.activities;
       const poop = await activity.find({aid: {$in: userActs}}).toArray();
