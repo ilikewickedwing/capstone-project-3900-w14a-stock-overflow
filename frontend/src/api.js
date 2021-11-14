@@ -224,6 +224,19 @@ export default class API {
     });
   }
   
+  adminUserDelete(token, uid) {
+    return fetch(`${ENDPOINT}/admin/user/delete`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type' : 'application/json'
+      },
+      body: JSON.stringify({
+        token: token,
+        uid: uid,
+      })
+    });
+  }
+  
   post(path, options){
     return fetch(`${ENDPOINT}/${path}`,{
       ...options,

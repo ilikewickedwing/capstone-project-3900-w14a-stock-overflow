@@ -4,7 +4,6 @@ import { ApiContext } from "../api";
 import { AlertContext } from "../App";
 import UserEditPage from "./UserEditPage";
 import PropTypes from 'prop-types';
-import { Alert } from "@mui/material";
 
 export default function AdminSearch() {
   const [ username, setUsername ] = useState('');
@@ -73,7 +72,16 @@ export default function AdminSearch() {
   
   const onDeleteConfirm = async (value) => {
     if (value === 'yes') {
-      alert("Deletion successful", "success");
+      const resp = await api.adminUserDelete(token, loadedUid);
+      if (resp.status !== 200) {
+        const respJson = resp.json();
+        alert(respJson.error, 'error');
+      } else {
+        alert("Deletion successful", "success");
+        // Reset user search
+        setUserData({});
+        setLoadedUid('');
+      }
     } else {
       alert("Deletion canceled due to wrong response", "error")
     }
