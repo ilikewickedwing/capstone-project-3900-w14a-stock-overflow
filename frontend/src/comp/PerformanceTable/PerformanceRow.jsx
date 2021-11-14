@@ -86,7 +86,7 @@ const PerformanceRow = ({row}) => {
                   <TableBody>
                     {row.stocks.map((e) => {
                     return (
-                      <TableRow key={e.stock}>
+                      <TableRow key={e.code}>
                         <TableCell align="center" >{e.code}</TableCell> 
                         <TableCell align="center" >${e.buyPrice}</TableCell>
                         <TableCell align="center" >${e.currPrice}</TableCell>
