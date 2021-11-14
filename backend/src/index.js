@@ -9,7 +9,7 @@ import { authDelete, authLogin, authLogout, authRegister } from "./auth";
 import { getDefBroker, getUserProfile, getUserUid, postUserProfile, setDefBroker } from "./user";
 import { addStock, modifyStock, getAllStocks, checkStock, getStock } from "./stocks";
 import { addFriend, declineFriend, removeFriend, getFriends, getFriendReq, comment, getComments, like, voteStock, getVotes, getActivity } from "./social";
-import { getAdminCelebrityRequests, postAdminCelebrityHandlerequest, postCelebrityMakeRequest } from "./admin";
+import { adminUserDelete, getAdminCelebrityRequests, postAdminCelebrityHandlerequest, postCelebrityMakeRequest } from "./admin";
 import { getUserNotifications, deleteUserNotifications } from "./notifications";
 import fileUpload from 'express-fileupload';
 import { handleFileDownload, handleFileUpload } from "./file";
@@ -1673,6 +1673,37 @@ app.get('/admin/celebrity/requests', async(req, res) => {
 app.post('/admin/celebrity/handlerequest', async(req, res) => {
     const { token, approve, rid } = req.body;
     await postAdminCelebrityHandlerequest(token, approve, rid, database, res);
+})
+/**
+ * @swagger
+ * /admin/user/delete:
+ *   delete:
+ *     tags: [Admin]
+ *     description: Deletes a given user
+ *     parameters:
+ *      - name: token
+ *        description: The token of the admin
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: uid
+ *        description: The id of the user
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Everything went okay
+ *       401:
+ *         description: Invalid token
+ *       403:
+ *         description: Not an admin
+ *       400:
+ *         description: User of uid does not exist
+ */
+app.delete('/admin/user/delete', async (req, res) => {
+  const { token, uid } = req.body;
+  adminUserDelete(token, uid, database, res);
 })
 
 // Post endpoint for uploading files

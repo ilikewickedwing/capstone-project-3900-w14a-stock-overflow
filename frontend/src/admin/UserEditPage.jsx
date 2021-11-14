@@ -52,11 +52,21 @@ export default function UserEditPage(props) {
       </div>
       <div style={compWrapper}>
         <Button 
+          style={{ backgroundColor: '#58BF71' }}
           color="secondary"
           variant="contained"
           onClick={() => props.saveChanges()}
         >
           Save Changes
+        </Button>
+      </div>
+      <div style={compWrapper}>
+        <Button 
+          color="secondary"
+          variant="contained"
+          onClick={() => props.onDelete()}
+        >
+          Delete Account
         </Button>
       </div>
     </div>
@@ -67,4 +77,5 @@ UserEditPage.propTypes = {
   userData: PropTypes.object,
   setUserData: PropTypes.func,
   saveChanges: PropTypes.func,
+  onDelete: PropTypes.func,
 }
