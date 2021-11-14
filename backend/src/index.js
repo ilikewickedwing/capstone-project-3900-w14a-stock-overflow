@@ -515,8 +515,10 @@ app.get('/user/portfolios/open', async (req, res) => {
     res.status(401).send({ error: "Invalid token" });
   } else if (resp === 2) {
     res.status(401).send({ error: "You do not have access to this portfolio" });
+  } else if (resp === 3) {
+    res.status(200).send({ flag: 1 }, resp);
   } else {
-    res.status(200).send(resp);
+    res.status(200).send({ flag: 0 }, resp);
   }
 })
 
@@ -1196,7 +1198,7 @@ app.delete('/friends/remove', async (req, res) => {
 app.get('/friends/all', async (req, res) => {
   const { token } = req.query;
   const resp = await getFriends(token, database);
-  
+
   if (resp === -1) {
     res.status(401).send({ error: "Invalid token" });
   } else if (resp === -2) {

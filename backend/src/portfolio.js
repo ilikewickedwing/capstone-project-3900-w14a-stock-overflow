@@ -103,6 +103,9 @@ export const openPf = async (token, pid, database) => {
   const verify = await verifyPf(uid, pid, database);
   if (!verify) return 2;
 
+  const friend = await checkAccess(uid, pid, database);
+  if (friend) return 3;
+
   // Return result of database function
   return Pf;
 }
@@ -168,6 +171,18 @@ export const verifyPf = async (uid, pid, database) => {
   if (user.userType === 'admin') check = 1;
 
   return (check === 1);
+}
+
+export const checkAccess = async (uid, pid, database) => {
+  const friends = await database.getFriends(uid);
+  for (let i = 0; i < friends.length; i++) {
+    const pfs = await database.getPfs(friends[i]);
+    for (let j = 0; j < pfs.length; j++) {
+      if (pfs[j].pid === pid) return true;
+    }
+  }
+
+  return false;
 }
 
 /**
