@@ -36,8 +36,8 @@ describe('Add friends', () => {
     await addFriend(token2, user1, d);
     let friends1 = await getFriends(token1, d);
     let friends2 = await getFriends(token2, d);
-    expect(friends1.friends).not.toBe([]);
-    expect(friends2.friends).not.toBe([]);
+    expect(friends1.friends[0].uid).toBe(user2);
+    expect(friends2.friends[0].uid).toBe(user1);
   })
   it('Removing friends', async () => {
     await removeFriend(token1, user2, d);
