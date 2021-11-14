@@ -703,7 +703,9 @@ export class Database {
    * @returns {Promise<Array>}
    */
   async getAllPfs() {
+    console.log('getAllPfs');
     const pfs = this.database.collection('portfolios');
+    if (pfs.countDocuments() == 0) return [];
     const requests = await pfs.find().toArray();
     return requests;
   }
