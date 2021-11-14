@@ -109,7 +109,7 @@ const PerformanceTable = () => {
             <TableRow>
               <TableCell />
               <TableCell />
-              <TableCell>Portfolio Name</TableCell>
+              <TableCell align="left" style={{fontWeight:'bold'}}>Portfolio Name</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
