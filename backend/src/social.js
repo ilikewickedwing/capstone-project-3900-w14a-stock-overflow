@@ -68,10 +68,11 @@ export const getFriends = async (token, database) => {
     return -1;
   }
 
-  // Create the portfolio and return the result
+  // get friend list and celeb list of the user
   const friendResp = await database.getFriends(uid);
-  if (Array.isArray(friendResp)) {
-    const obj = { friends: friendResp };
+  const celebResp = await database.getUserCelebrities(uid);
+  if (Array.isArray(friendResp) || Array.isArray(celebResp)) {
+    const obj = { friends: [... friendResp, ... celebResp] };
     return obj;
   }
   return friendResp;
@@ -84,7 +85,7 @@ if (uid === null) {
   return -1;
 }
 
-// Create the portfolio and return the result
+// get friend requests of the user 
 const friendResp = await database.getFriendReq(uid);
 if (Array.isArray(friendResp)) {
   const obj = { friendReq: friendResp };
