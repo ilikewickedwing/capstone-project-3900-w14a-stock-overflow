@@ -1509,7 +1509,6 @@ export class Database {
   */
   async onDatabaseConnect() {
     await insertDefaultAdmin(this);
-    await new Promise(resolve => setTimeout(resolve, 10000));
     calcAll(this.database);
   }
   /**
