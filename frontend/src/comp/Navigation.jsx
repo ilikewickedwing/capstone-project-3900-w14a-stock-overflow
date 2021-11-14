@@ -31,8 +31,9 @@ const stubFriends= [{
 
 const Navigation = () => {
     const api = React.useContext(ApiContext);
-    const alert = useContext(AlertContext)
+    const alert = useContext(AlertContext);
     const history = useHistory();
+    const token = localStorage.getItem('token');
 
     // const [query, setQuery] = React.useState('');
     const [queryRes, setRes] = React.useState([]);
@@ -42,7 +43,6 @@ const Navigation = () => {
 
     // handle logout
     const onLogOut = async () => {
-        const token = localStorage.getItem('token');
         try {
             await axios.post(`${apiBaseUrl}/auth/logout`,{token});
             history.push('/');
@@ -70,8 +70,10 @@ const Navigation = () => {
           })
           // TODO CALL ENPOINT TO PUSH FRIENDS 
           const friendList =[];
+          const request2 = await axios.get(`${apiBaseUrl}/friends/all?token=${token}`);
+          console.log(request2.data);
           newList.push(...stubFriends);
-
+          
           // TODO CALL ENDPOINT TO PUSH CELEBRITIES 
           const celebList = [];
 

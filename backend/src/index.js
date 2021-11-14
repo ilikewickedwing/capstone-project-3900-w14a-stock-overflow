@@ -8,7 +8,7 @@ import { calcPf, getAllRankings, getFriendRankings } from "./performance";
 import { authDelete, authLogin, authLogout, authRegister } from "./auth";
 import { getDefBroker, getUserProfile, getUserUid, postUserProfile, setDefBroker } from "./user";
 import { addStock, modifyStock, getAllStocks, checkStock, getStock } from "./stocks";
-import { addFriend, removeFriend, getFriends, getFriendReq, comment, getComments, like, voteStock, getVotes, getActivity } from "./social";
+import { addFriend, declineFriend, removeFriend, getFriends, getFriendReq, comment, getComments, like, voteStock, getVotes, getActivity } from "./social";
 import { getAdminCelebrityRequests, postAdminCelebrityHandlerequest, postCelebrityMakeRequest } from "./admin";
 import { getUserNotifications, deleteUserNotifications } from "./notifications";
 import fileUpload from 'express-fileupload';
@@ -1113,7 +1113,7 @@ app.post('/friends/add', async (req, res) => {
  */
  app.delete('/friends/decline', async (req, res) => {
   const { token, friendID } = req.body;
-  const resp = await addFriend(token, friendID, database);
+  const resp = await declineFriend(token, friendID, database);
 
   if (resp === -1) {
     res.status(400).send({ error: "Invalid friendID" });

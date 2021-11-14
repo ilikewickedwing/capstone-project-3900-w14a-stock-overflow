@@ -75,7 +75,7 @@ const Stock = () => {
   const isOpen = Boolean(anchorEl);
 
   // sentiment: set the bullish %
-  const [sentiment, setSentiment] = React.useState(60);
+  const [sentiment, setSentiment] = React.useState({});
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -88,13 +88,8 @@ const Stock = () => {
   React.useEffect(() => {
     loadStockInfo();
     fetchPortfolios();
+    fetchSentiment();
   },[]);
-
-  // rerender of the page in searchbar query 
-  React.useEffect(() => {
-    loadStockInfo();
-    fetchPortfolios();
-  },[stockCode])
 
   function calculatePerc(a,b){
     let res = ((a-b)/a)*100; 
@@ -110,6 +105,16 @@ const Stock = () => {
     }
   };
   
+  const fetchSentiment = async () => {
+    try {
+      const request = await axios.get(`${apiBaseUrl}/stocks/votes?token=${token}&stock=${stockCode}`);
+      setSentiment(request.data);
+    } catch (e) {
+      alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
+    }
+
+  };
+
   const loadStockInfo = async () => {
     try {
       const request = await axios.get(`${apiBaseUrl}/stocks/info?type=1&stocks=${stockCode}`);
@@ -325,10 +330,10 @@ const Stock = () => {
             <RightBody elevation={10}>
               {stockList.slice(1).map((name)=>(
               <RightCard elevation = {5}>
-              <form onSubmit={handleSubmit} key={name} style={{marginBottom: "5px", marginTop: "5px", display: "flex", alignItems: "center"}}>
-                {name}
-                <Button type="submit" variant="contained" color="error" style={{marginLeft: "290px", display: "flex", justifyContent: "flex-end"}}>Remove</Button>
-              </form>
+                <form onSubmit={handleSubmit} key={name} style={{display: "flex", alignItems: "center", justifyContent:'space-between'}}>
+                  {name}
+                  <Button type="submit" variant="contained" color="error">Remove</Button>
+                </form>
               </RightCard>))
               }
               <RightCard elevation={5}>
@@ -339,8 +344,11 @@ const Stock = () => {
               </RightCard>
               <RightCard elevation={5}>
               <h3 style={{textAlign:'center'}}>Community Sentiment</h3>
+              You have voted {sentiment.vote}
               <VoteBar 
-                percentage={sentiment}
+                percentage={sentiment.bull}
+                stock={stockCode}
+                reload={fetchSentiment}
               /> 
               </RightCard>
               <RightCard elevation={5}>

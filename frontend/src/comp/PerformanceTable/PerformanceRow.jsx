@@ -38,7 +38,7 @@ const PerformanceRow = ({pid, rowName,stocks, isItemSelected, handleClick}) => {
               {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
             </IconButton>
           </TableCell>
-          <TableCell component="th" scope="row">
+          <TableCell align="left" component="th" scope="row">
             {rowName}
           </TableCell>
         </TableRow>
