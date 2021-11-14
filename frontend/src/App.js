@@ -1,7 +1,8 @@
+import API, { ApiContext } from "./api";
 import Login from "./pages/Login";
 import {BrowserRouter, Route, Switch} from 'react-router-dom'; 
+import NotFound from "./pages/NotFound";
 import Dashboard from "./pages/Dashboard";
-import API, { ApiContext } from "./api";
 import SignUp from "./pages/SignUp";
 import Portfolio from "./pages/Portfolio";
 import Profile from "./pages/Profile";
@@ -49,6 +50,7 @@ function App() {
               </Alert>
             </Snackbar> 
             <Switch>
+              <Route path="/oops" component={NotFound} />
               <Route path="/user/:handle" component={Friend} /> 
               <Route path="/signup" component={SignUp} />
               <Route path="/dashboard" component={Dashboard} />

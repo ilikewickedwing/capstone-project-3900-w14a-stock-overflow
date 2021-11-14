@@ -22,6 +22,7 @@ function Login() {
             localStorage.setItem('token', res.data.token);
             localStorage.setItem('uid', res.data.uid); 
             console.log("token =" + localStorage.getItem('token'));
+            console.log("uid =" +  localStorage.getItem('uid'));
             directToPage(api, res.data.uid, res.data.token, history);
         } catch (e) {
             alert(`Status Code ${e.response.status} : ${e.response.data.message}`,'error');

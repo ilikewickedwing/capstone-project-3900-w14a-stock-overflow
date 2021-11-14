@@ -10,16 +10,21 @@ import { AlertContext } from '../App';
 function SignUp() {
     const [ username, setUsername ] = useState('');
     const [ password, setPassword ] = useState('');
+    const [ confPassword, setConfirmPassword] = useState('');
     const [ email, setEmail ] = useState('');
     const alert = useContext(AlertContext);
     let history = useHistory();
-    const onLogIn = async () => {
-        try {
-            await axios.post(`${apiBaseUrl}/auth/register`,{username, password});
-            alert('Sign up successful','success');
-            history.push('/');
-        } catch (e){
-            alert(`Status Code ${e.response.status} : ${e.response.data.message}`,'error');
+    const onSignUp = async () => {
+        if (password === confPassword){
+            try {
+                await axios.post(`${apiBaseUrl}/auth/register`,{username, password});
+                alert('Sign up successful','success');
+                history.push('/');
+            } catch (e){
+                alert(`Status Code ${e.response.status} : ${e.response.data.message}`,'error');
+            }
+        } else {
+            alert(`Passwords does not match`, 'error');
         }
     }
     const paperStyle={padding :'3%', width:'50%', margin:"20px auto"}
@@ -50,13 +55,17 @@ function SignUp() {
                   <TextField 
                    style={{marginTop: "1em"}}
                     value = {email} onChange={e => setEmail(e.target.value)}
-                    label='Email' placeholder='Enter Email' fullWidth required/>
+                    label='Email' placeholder='Enter Email' fullWidth/>
                 <TextField
                     style={{margin: "1em 0"}}
                     value = {password} onChange={e => setPassword(e.target.value)}
                     label='Password' placeholder='Enter password' type='password' fullWidth required/>
+                       <TextField
+                    style={{marginBottom: "1em"}}
+                    value = {confPassword} onChange={e => setConfirmPassword(e.target.value)}
+                    label='Confirm Password' placeholder='Confirm Password' type='password' fullWidth required/>
                 <Button 
-                    onClick = {onLogIn}
+                    onClick = {onSignUp}
                     type='submit' color='primary' variant="contained" style={btnstyle} fullWidth>
                     Sign Up
                 </Button>

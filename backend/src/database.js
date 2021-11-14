@@ -468,7 +468,7 @@ export class Database {
     return followers;
   }
 
-  async getFollowingCelebrity(uid) {
+  async getUserCelebrities(uid) {
     const celebFollowers = this.database.collection('celebrityfollowers');
     const query = { followers: uid };
     const followers = await celebFollowers.find(query);
@@ -1087,6 +1087,10 @@ export class Database {
 
     const requestIndex = userRequests.indexOf(friend);
     if (requestIndex === -1) { // other user has not sent a friend request
+      if (friendRequests.indexOf(uid) !== -1) {
+        return -5;
+      }
+
       friendRequests.push(uid);
 
       await friends.updateOne({ownerUid : friend}, {$set: {requests: friendRequests}});
@@ -1421,7 +1425,7 @@ export class Database {
 
     // Get friends' and user's activities
     const friends = await this.getFriends(uid);
-    const celebs = await this. getFollowingCelebrity(uid);
+    const celebs = await this.getUserCelebrities(uid);
     const everyone = [... friends, ... celebs, {uid : uid}];
     for (let i = 0; i < everyone.length; i++) {
       const e = everyone[i].uid;
