@@ -6,7 +6,7 @@ import { app, database } from "../index";
 import { GridFSBucket } from "mongodb";
 import {addFriend, removeFriend, getFriends, voteStock, getVotes, getActivity, like, comment, getComments} from "../social";
 
-describe('Add freinds', () => {
+describe('Add friends', () => {
 	const d = new Database(true);
   beforeAll(async () => {
     await d.connect();

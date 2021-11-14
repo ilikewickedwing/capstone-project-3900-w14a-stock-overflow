@@ -1143,7 +1143,7 @@ app.delete('/friends/remove', async (req, res) => {
 app.get('/friends/all', async (req, res) => {
   const { token } = req.query;
   const resp = await getFriends(token, database);
-
+  
   if (resp === -1) {
     res.status(401).send({ error: "Invalid token" });
   } else if (resp === -2) {
