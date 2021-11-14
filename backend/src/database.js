@@ -691,7 +691,9 @@ export class Database {
    * @returns {Promise<Array>}
    */
   async getAllPfs() {
+    console.log('getAllPfs');
     const pfs = this.database.collection('portfolios');
+    if (pfs.countDocuments() == 0) return [];
     const requests = await pfs.find().toArray();
     return requests;
   }
@@ -1441,6 +1443,7 @@ export class Database {
   */
   async onDatabaseConnect() {
     await insertDefaultAdmin(this);
+    await new Promise(resolve => setTimeout(resolve, 10000));
     calcAll(this.database);
   }
   /**

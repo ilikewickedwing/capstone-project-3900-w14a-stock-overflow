@@ -255,7 +255,7 @@ describe('Rank multiple user portfolio performances', () => {
 	})
 })
 
-describe('Rank multiple user portfolios performances endpoint test', () => {
+/* describe('Rank multiple user portfolios performances endpoint test', () => {
   beforeAll(async () => {
     await database.connect();
   })
@@ -643,7 +643,7 @@ describe('Rank multiple user portfolios performances endpoint test', () => {
   afterAll(async() => {
     await database.disconnect();
   })
-})
+}) */
 
 /* describe('Calling rankAll early', () => {
   beforeAll(async () => {
@@ -654,6 +654,22 @@ describe('Rank multiple user portfolios performances endpoint test', () => {
     const resp = await request(app).get(`/rankings/global`).send()
     expect(resp).not.toBe(null);
     console.log(resp.body);
+  })
+
+  afterAll(async() => {
+    await database.disconnect();
+  })
+}) */
+
+/* describe('Calcing calcAll instantly', () => {
+  beforeAll(async () => {
+    await database.connect();
+  })
+
+  jest.setTimeout(30000);
+
+  it('Call calcAll', async () => {
+    await calcAll(database, true);
   })
 
   afterAll(async() => {
