@@ -1,10 +1,15 @@
-import React from 'react'; 
+import React, { useContext } from 'react'; 
 import { FlexRows } from '../styles/styling';
 import { Button } from "@material-ui/core";
+import { apiBaseUrl } from './const';
+import { AlertContext } from '../App';
+import axios from 'axios';
 
 
 // feed in percentage as an int
-const VoteBar = ({percentage}) => {
+const VoteBar = ({percentage, stock, reload}) => {
+    const alert = useContext(AlertContext);
+    const token = localStorage.getItem('token');
     const containerStyles = {
         height: 40,
         width: '100%',
@@ -35,6 +40,17 @@ const VoteBar = ({percentage}) => {
         borderColor: 'red',
         color:'red'
       }
+      
+      //num => 0: bearish, 1: bullish 
+      const vote = async (e,num) => {
+        e.preventDefault();
+        try {
+          await axios.post(`${apiBaseUrl}/stocks/vote`,{token, stock, type: num});
+          reload();
+        } catch (e) {
+            alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
+        }
+      }
 
     return (
         <div>
@@ -52,10 +68,10 @@ const VoteBar = ({percentage}) => {
             </div>
             </div>
             <FlexRows style={{justifyContent:'space-between'}}>
-            <Button style={bullButton} variant="outlined">
+            <Button onClick={(e) => vote(e, 1)} style={bullButton} variant="outlined">
                 Vote Bullish
             </Button>
-            <Button style={bearButton} variant="outlined">
+            <Button onClick={(e) => vote(e, 0)} style={bearButton} variant="outlined">
                 Vote Bearish
             </Button>
             </FlexRows>

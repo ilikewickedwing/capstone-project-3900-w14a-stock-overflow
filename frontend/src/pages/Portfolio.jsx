@@ -1,12 +1,13 @@
-import React, {useContext, useState} from 'react'; 
+import React, {useContext} from 'react'; 
 import { useHistory, useParams } from 'react-router-dom';
 import axios from "axios";
+import { apiBaseUrl } from '../comp/const';
+import { ApiContext } from '../api';
+
 import Navigation from '../comp/Navigation'; 
 import Tabs from '../comp/Tabs'; 
 import StockRow from '../comp/StockRow';
 import AddStock from '../comp/AddStock';
-import { apiBaseUrl } from '../comp/const';
-import { ApiContext } from '../api';
 import PfTable from '../comp/PfTable';
 import StocksGraph from "../graph/StocksGraph";
 import { AlertContext } from '../App';
@@ -57,7 +58,7 @@ const Portfolio = () => {
   // on first load 
   React.useEffect(() => {   
     loadPorfolioData();
-    getWatchlist()
+    getWatchlist();
   },[pid]);
   
   const loadPorfolioData = async () => {
@@ -169,7 +170,7 @@ const Portfolio = () => {
     // history.push(`/dashboard`)
     history.push(`/portfolio/${pid}`)
   }
-
+  //console.log(selected)
   return (
       <PageBody className="font-two">
           <Navigation />
@@ -189,7 +190,7 @@ const Portfolio = () => {
                       < AddStock 
                         token={token}
                         pid={pid}
-                        onAddCallback={() => { getWatchlist() }}
+                        onAddCallback={getWatchlist}
                         load={loadPorfolioData}
                         name={name}
                       />
@@ -221,7 +222,7 @@ const Portfolio = () => {
               < AddStock 
                 token={token}
                 pid={pid}
-                onAddCallback={() => { getWatchlist() }}
+                onAddCallback={getWatchlist}
                 load={loadPorfolioData}
                 name={name}
               />

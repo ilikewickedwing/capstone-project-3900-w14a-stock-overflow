@@ -2,7 +2,6 @@ import React, { useContext } from 'react';
 import { useHistory } from 'react-router';
 import { useState } from 'react';
 import axios from 'axios';
-
 import { apiBaseUrl } from '../comp/const';
 import Navigation from '../comp/Navigation';
 import FriendRequestCard from '../comp/FriendRequestCard';
@@ -30,35 +29,6 @@ const style = {
   p: 4,
 };
 
-const mockInvs = [
-  {
-    handle: 'friend 1',
-  },
-  {
-    handle: 'friend 2',
-  },
-  {
-    handle: 'friend 3',
-  },
-  {
-    handle: 'friend 4',
-  },
-]
-const mockFriends = [
-  {
-    handle: 'friend a',
-  },
-  {
-    handle: 'friend b',
-  },
-  {
-    handle: 'friend c',
-  },
-  {
-    handle: 'friend d',
-  },
-]
-
 
 const paperStyle={padding :20,width:280, margin:'3em'}
 const avatarStyle={backgroundColor:'#1bbd7e'}
@@ -80,8 +50,8 @@ export default function Profile() {
   const [option, setOption] = React.useState(0);
   const [fee, setFee] = useState('');
 
-  const [invList, setInvList] = useState(mockInvs);
-  const [friendList, setFriendList] = useState(mockFriends);
+  const [reqList, setReqlist] = useState([]);
+  const [friendList, setFriendList] = useState([]);
 
   // modal states 
   const [open, setOpen] = React.useState(false);
@@ -105,7 +75,6 @@ export default function Profile() {
   }
   // handle delete user
   const onDeleteUser = async () => {
-    console.log(token);
     try {
       const resp = await axios.delete(`${apiBaseUrl}/auth/delete`, {data: {token}});
       alert('Account has been deleted','success');
@@ -137,7 +106,7 @@ export default function Profile() {
       }
       getDefaultBrokerage();
     } catch (e) {
-      alert(`Status Code ${e.response.status} : ${e.response.data.message}`,'error');
+      alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
     }
   }
 
@@ -149,21 +118,25 @@ export default function Profile() {
       setFlag(res.data.defBroker.brokerFlag);
       
     } catch (e) {
-      alert(`Status Code ${e.status} : ${e.response.data.message}`,'error');
+      alert(`Status Code ${e.status} : ${e.response.data.error}`,'error');
     }
   }
 
   const getFriendRequests = async () => {
     try {
+      const res = await axios.get(`${apiBaseUrl}/friends/requests?token=${token}`);
+      setReqlist(res.data.friendReq);
     } catch (e) {
-      alert(`Status Code ${e.status} : ${e.response.data.message}`,'error');
+      alert(`Status Code ${e.status} : ${e.response.data.error}`,'error');
     }
   }
 
   const getFriendList = async () => {
     try {
+      const req = await axios.get(`${apiBaseUrl}/friends/all?token=${token}`);
+      setFriendList(req.data.friends);
     } catch (e) {
-      alert(`Status Code ${e.status} : ${e.response.data.message}`,'error');
+      alert(`Status Code ${e.status} : ${e.response.data.error}`,'error');
     }
   }
 
@@ -226,14 +199,15 @@ export default function Profile() {
           <Grid>
           <Paper elevation={10} style={paperStyle}>
               <h2 style={{textAlign:'center'}}>Friend Requests</h2>
-              {invList.length !== 0 ?
+              {reqList.length !== 0 ?
               (
                 <div>
-                  { invList &&
-                    invList.map((a) => 
+                  {
+                    reqList.map((a) => 
                       <FriendRequestCard
-                        key={a.handle}
-                        name={a.handle}
+                        key={a.uid}
+                        name={a.username}
+                        uid={a.uid}
                         reload={getFriendRequests}
                       />
                     )
@@ -254,15 +228,15 @@ export default function Profile() {
                     { friendList &&
                       friendList.map((a) => 
                         <FriendListCard
-                          key={a.handle}
-                          name={a.handle}
+                          key={a.uid}
+                          name={a.username}
                         />
                       )
                     }
                   </div>
                 ) :
                 (
-                  <span>No pending friend requests</span>
+                  <span>You currently have no friends</span>
                 )}
             </Paper>
           </Grid>

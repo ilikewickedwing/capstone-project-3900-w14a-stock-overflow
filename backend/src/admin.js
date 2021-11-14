@@ -94,7 +94,7 @@ export const postAdminCelebrityHandlerequest = async (token, approve, rid, datab
   }
   // Handle the request
   if (approve) {
-    database.updateUser(requestData.ownerUid, { userType: 'celebrity' });
+    await database.updateUser(requestData.ownerUid, { userType: 'celebrity' });
     // Add notification
     await database.insertUserNotification(requestData.ownerUid, '🎉Congratulations🎉, your request to become a celebrity has been approved');
   } else {

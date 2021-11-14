@@ -3,12 +3,11 @@ import { useHistory } from 'react-router';
 import {Link} from 'react-router-dom';
 import { ApiContext } from '../api';
 import ExitToAppRoundedIcon from '@material-ui/icons/ExitToAppRounded';
-import {NavBar, Logo, LogoutButton, FlexRows, SearchToggle, SearchDiv, NavBtnWrapper } from '../styles/styling';
+import {NavBar, Logo, LogoutButton, FlexRows, SearchDiv, NavBtnWrapper } from '../styles/styling';
 import {TextInput} from "../styles/styling"; 
 import IconButton from '@mui/material/IconButton';
 import SearchIcon from '@mui/icons-material/Search';
-import Switch from '@mui/material/Switch';
-import Autocomplete from '@mui/material/Autocomplete';
+import Autocomplete , { createFilterOptions }from '@mui/material/Autocomplete';
 import { apiBaseUrl } from '../comp/const';
 import axios from 'axios';
 import NotificationButton from '../notifications/Notifications';
@@ -17,11 +16,24 @@ import ExploreIcon from '@mui/icons-material/Explore';
 import { AlertContext } from '../App';
 
 const label = { inputProps: { 'aria-label': 'toggle' } };
+const filter = createFilterOptions();
+
+const stubFriends= [{
+    type: "Friends",
+    code: "handle_1",
+    name: "handle_1"
+},{
+    type: "Friends",
+    code: "handle_2",
+    name: "handle_2"
+    },
+]
 
 const Navigation = () => {
     const api = React.useContext(ApiContext);
-    const alert = useContext(AlertContext)
+    const alert = useContext(AlertContext);
     const history = useHistory();
+    const token = localStorage.getItem('token');
 
     // const [query, setQuery] = React.useState('');
     const [queryRes, setRes] = React.useState([]);
@@ -31,7 +43,6 @@ const Navigation = () => {
 
     // handle logout
     const onLogOut = async () => {
-        const token = localStorage.getItem('token');
         try {
             await axios.post(`${apiBaseUrl}/auth/logout`,{token});
             history.push('/');
@@ -52,10 +63,34 @@ const Navigation = () => {
           const newList = [];
           request.data.forEach(obj => {
               newList.push({
+                  type: "Stocks",
                   code: obj["symbol"],
                   name: obj["name"]
               })
           })
+
+          // append friends to the search pool 
+          const friendList =[];
+          const request2 = await axios.get(`${apiBaseUrl}/friends/all?token=${token}`);
+          request2.data.friends.forEach(obj => {
+            friendList.push({
+                type: "Friends",
+                code: obj["username"],
+                name: obj["uid"]
+            })
+          })
+          
+          // append celebrities to the pool
+          const celebList = [];
+          const request3 = await axios.get(`${apiBaseUrl}/celebrity/discover`);
+          request3.data.celebrities.forEach(obj => {
+            celebList.push({
+                type: "Celebrities",
+                code: obj["username"],
+                name: obj["uid"]
+            })
+          })
+        newList.push(...friendList,...celebList);
           setRes(newList);
         } catch (e) {
           alert(`Status Code ${e.status} : ${e.response.data.error}`,'error');
@@ -63,7 +98,12 @@ const Navigation = () => {
       };
 
     const submitQuery = () => {
-        history.push(`/stock/${currCode}`);
+        if (search.includes(' ')){
+            var code = search.split(" ")[0];
+            history.push(`/stock/${code}`);
+        } else {
+            history.push(`/user/${search}`);
+        }
     }
 
 
@@ -74,26 +114,50 @@ const Navigation = () => {
                     Stock Overflow 
                 </Logo>
             </Link>
-            <SearchToggle>
-                stocks
-                <Switch {...label}/>
-                friends
-            </SearchToggle>
             <SearchDiv>
             <Autocomplete
                 disablePortal
-                options={queryRes.map((e)=> e.code+" "+ e.name)}
+                options={queryRes}
                 sx={{ width: 300 }}
+                filterOptions={(options, params) => {
+                const filtered = filter(options, params);
+        
+                const { inputValue } = params;
+                // Suggest the creation of a new value
+                const isExisting = options.some((option) => inputValue === option.code);
+                if (inputValue !== '' && !isExisting) {
+                    filtered.push({
+                    inputValue,
+                    code: `Add "${inputValue}"`,
+                    });
+                }
+                return filtered;
+                }}
                 inputValue={search}
+                groupBy={(option) => option.type}
+                getOptionLabel={ (e) => {
+                    // Value selected with enter, right from the input
+                    if (typeof e === 'string') {
+                        return e;
+                    }
+                    // Add "xxx" option created dynamically
+                    if (e.inputValue) {
+                        return e.inputValue;
+                    }
+                    if (e.type === "Friends" ||e.type === "Celebrities" ){
+                        return e.code;
+                    }
+                    return e.code+" "+ e.name;
+                }}
+
                 onInputChange={(e,v) => {
                     setSearch(v);
-                    var code = v.split(" ")[0];
-                    setCode(code); 
                 }}
+                freeSolo
                 renderInput={(params) => (
                 <TextInput 
                     {...params} 
-                    label="Search Stock" 
+                    label="Search stock/user" 
                 />)}
             />
             <IconButton type="submit" sx={{p:'10px'}} onClick={submitQuery}>

@@ -14,7 +14,11 @@ import Button from '@mui/material/Button';
 import Navigation from '../comp/Navigation';
 import Tabs from '../comp/Tabs';
 import RankTable from '../comp/RankTable'; 
+import leaderboard from '../assets/leaderboard.png';
 import { AlertContext } from '../App';
+import { useHistory, useParams } from 'react-router-dom';
+import axios from "axios";
+import { apiBaseUrl } from '../comp/const';
 
 // stub data for rankings
 function createData(name, performance, rank) {
@@ -33,23 +37,72 @@ const myRanking = createData('dollalilz', 300, 99999);
 
 // note: friend is inclusive of celebrity profiles except celebrities are public profiles while friends are private 
 export default function Friend() {
+    let history = useHistory();
     const alert = React.useContext(AlertContext);
-    // private: 0, public: 1
-    const [isPublic, setPublic] = React.useState(1);
+    const { handle } = useParams();
+    const token = localStorage.getItem('token');
+    const uid = localStorage.getItem('uid');
 
-    const sendRequest = (e) => {
-      e.preventDefault();
+    const [friendUid, setUid] = React.useState('');
+    
+    // list of portfolios of all the portfolios given a uid 
+    const [portData, setPortfolio ] = React.useState([]);
+
+    // private: 0, public: 1
+    const [isPublic, setPublic] = React.useState(0);
+
+      // on first load 
+    React.useEffect(() => {   
+      getUid();
+    },[]);
+
+    // load based on friendUId getting awaited 
+    React.useEffect(() => {   
+      loadPortfolios();
+    },[friendUid]);
+
+    
+
+    const getUid = async() => {
       try {
-        alert("Friend request has been sent"); 
+        const resp = await axios.get(`${apiBaseUrl}/user/uid?username=${handle}`);
+        if (uid === resp.data.uid ){
+          history.push('/dashboard');
+          alert(`Cannot view your own portfolio, redirected to dashboard`,'error');
+        } 
+        setUid(resp.data.uid); 
       } catch (e){
         alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
       }
     }
 
+    const sendRequest = async (e) => {
+      e.preventDefault();
+      try {
+        await axios.post(`${apiBaseUrl}/friends/add`, {token, friendID:friendUid});
+        alert("Friend request has been sent",'success'); 
+      } catch (e){
+        alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
+      }
+    }
+
+    const loadPortfolios = async () => {
+      console.log(friendUid);
+      try {
+        const resp = await axios.get(`${apiBaseUrl}/friends/portfolios?token=${token}&uid=${friendUid}`);
+        setPortfolio(resp.data);
+        if (resp.data.length > 0 ){
+          setPublic(1);
+        }
+      } catch (e) {
+        alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
+      }
+    }
     // calls the backend to check if the page is viewable from the current user 
     const checkPublic = async () => {
       try {
-
+      // go through friends list 
+      
       } catch (e){
         alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
       }
@@ -64,18 +117,19 @@ export default function Friend() {
                 <PfBody>
                 <LeftBody elevation={10}>
                 <PfBar>
-                  <Heading>Public Portfolio </Heading>
+                  <Heading>{handle} </Heading>
                 </PfBar>
-
               </LeftBody>
               <RightBody elevation={10}>
                 <RightCard elevation={5}>
+                  <div style={{textAlign:'center'}}>
+                    <img style={{height:"auto", width:"50px"}} src={leaderboard} alt="leaderboard icon"/>
+                  </div>
                   <h3 style={{textAlign:'center'}}>Ranking amongst friends</h3>
                   <RankTable
                     rows={rows}
                     myRanking={myRanking}
                   />
-                  
                 </RightCard>
                 <RightCard elevation={5}>
                   <h3 style={{textAlign:'center'}}>Friend Activity</h3>
@@ -87,7 +141,7 @@ export default function Friend() {
             <PfBody>
               <WatchlistBody elevation={10}>
                 <PfBar>
-                  <Heading>Private Portfolio </Heading>
+                  <Heading>{handle} (private portfolio) </Heading>
                   <Button id="addFriend" onClick={sendRequest}> 
                       Send Friend Request
                   </Button>

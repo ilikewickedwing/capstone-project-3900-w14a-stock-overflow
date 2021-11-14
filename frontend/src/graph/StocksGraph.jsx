@@ -69,6 +69,49 @@ export default function StocksGraph(props) {
           return api.stocksInfo(2, company, interval, null);
         case "monthly":
           return api.stocksInfo(2, company, interval, null);
+        /*
+        case "1 day": {
+          const start = new Date();
+          start.setDate(now.getDate()-1);
+          const time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2) + " 00:00";
+          return api.stocksInfo(3, company, '1min', time.toString());
+        }
+        case "5 day": {
+          const start = new Date();
+          start.setDate(now.getDate()-5);
+          const time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2) + " 00:00";
+          return api.stocksInfo(3, company, '15min', time.toString());
+        }
+        case "1 month": {
+          const start = new Date();
+          start.setMonth(now.getMonth() - 1);
+          const time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
+          return api.stocksInfo(2, company, 'daily', time.toString());
+        }
+        case "6 month": {
+          const start = new Date();
+          start.setMonth(now.getMonth() - 6);
+          const time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
+          return api.stocksInfo(2, company, 'daily', time.toString());
+        }
+        case "1 year": {
+          const start = new Date();
+          start.setFullYear(start.getFullYear() - 1);
+          const time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
+          return api.stocksInfo(2, company, 'weekly', time.toString());
+        }
+        case "5 year": {
+          const start = new Date();
+          start.setFullYear(start.getFullYear() - 5);
+          const time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
+          return api.stocksInfo(2, company, 'weekly', time.toString());
+        }
+        case "10 year": {
+          const start = new Date();
+          start.setFullYear(start.getFullYear() - 10);
+          const time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
+          return api.stocksInfo(2, company, 'monthly', time.toString())
+        } */
         default:
           throw Error(`Invalid interval of ${interval}`);
       }

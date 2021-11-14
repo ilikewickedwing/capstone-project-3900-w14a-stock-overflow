@@ -6,7 +6,6 @@ import { FriendCardContainer } from '../styles/styling';
 
 const FriendListCard = ({name}) => {
     const history = useHistory();
-
     const handleClick = () => {
         history.push(`/user/${name}`)
     }

@@ -3,16 +3,17 @@ import cors from 'cors';
 import { Database } from "./database";
 import swaggerUI from 'swagger-ui-express';
 import { swaggerDocs } from "./docs";
-import { createPf, deletePf, openPf, userPfs, getPid, editPf } from "./portfolio";
-import { calcPf } from "./performance";
+import { createPf, deletePf, openPf, userPfs, getPid, editPf, openFriendPf } from "./portfolio";
+import { calcPf, getAllRankings, getFriendRankings } from "./performance";
 import { authDelete, authLogin, authLogout, authRegister } from "./auth";
 import { getDefBroker, getUserProfile, getUserUid, postUserProfile, setDefBroker } from "./user";
 import { addStock, modifyStock, getAllStocks, checkStock, getStock } from "./stocks";
+import { addFriend, declineFriend, removeFriend, getFriends, getFriendReq, comment, getComments, like, voteStock, getVotes, getActivity } from "./social";
 import { getAdminCelebrityRequests, postAdminCelebrityHandlerequest, postCelebrityMakeRequest } from "./admin";
 import { getUserNotifications, deleteUserNotifications } from "./notifications";
 import fileUpload from 'express-fileupload';
 import { handleFileDownload, handleFileUpload } from "./file";
-import { getCelebrityDiscover, postCelebrityFollow } from "./celebrity";
+import { getCelebrityDiscover, postCelebrityFollow, getUserCelebrities } from "./celebrity";
 
 // Make the server instance
 export const app = express();
@@ -91,7 +92,7 @@ export const database = new Database();
  *         username: XStockMaster64X
  */
 app.get('/', (req, res) => {
-  res.status(200).send('This is the root page. Go to /docs for documentation.')
+    res.status(200).send('This is the root page. Go to /docs for documentation.')
 })
 
 /**
@@ -118,9 +119,9 @@ app.get('/', (req, res) => {
  *       404:
  *         description: Invalid user not found
  */
-app.get('/user/uid', async (req, res) => {
-  const { username } = req.query;
-  getUserUid(username, database, res);
+app.get('/user/uid', async(req, res) => {
+    const { username } = req.query;
+    getUserUid(username, database, res);
 })
 
 // Get endpoint for getting user data
@@ -151,14 +152,14 @@ app.get('/user/uid', async (req, res) => {
  *       403:
  *         description: Invalid uid or invalid user permissions
  */
-app.get('/user/profile', async (req, res) => {
-  const { uid, token } = req.query;
-  const resp = await getUserProfile(uid, token, database);
-  if (resp !== null) {
-    res.status(200).send(resp);
-    return;
-  }
-  res.status(403).send({ message: 'Invalid uid' });
+app.get('/user/profile', async(req, res) => {
+    const { uid, token } = req.query;
+    const resp = await getUserProfile(uid, token, database);
+    if (resp !== null) {
+        res.status(200).send(resp);
+        return;
+    }
+    res.status(403).send({ message: 'Invalid uid' });
 })
 
 // Get endpoint for editing user data
@@ -195,15 +196,15 @@ app.get('/user/profile', async (req, res) => {
  *       403:
  *         description: Incorrect priveleges or invalid uid
  */
-app.post('/user/profile', async (req, res) => {
-  // TODO
-  const { uid, token, userData } = req.body;
-  await postUserProfile(uid, token, userData, database, res);
-  // if (resp) {
-  //   res.status(200).send();
-  //   return;
-  // }
-  // res.status(403).send({ message: 'Invalid token or uid' });
+app.post('/user/profile', async(req, res) => {
+    // TODO
+    const { uid, token, userData } = req.body;
+    await postUserProfile(uid, token, userData, database, res);
+    // if (resp) {
+    //   res.status(200).send();
+    //   return;
+    // }
+    // res.status(403).send({ message: 'Invalid token or uid' });
 })
 
 // Post endpoint for logging into the server
@@ -242,17 +243,17 @@ app.post('/user/profile', async (req, res) => {
  *       403:
  *         description: Invalid username and password combination
  */
-app.post('/auth/login', async (req, res) => {
-  // Get the post parameter
-  const { username, password } = req.body;
-  const resp = await authLogin(username, password, database);
-  // Valid so return token
-  if (resp !== null) {
-    res.status(200).send(resp);
-    return;
-  }
-  // Invalid so send 403 response
-  res.status(403).send({ message: 'Invalid username and password combination' });
+app.post('/auth/login', async(req, res) => {
+    // Get the post parameter
+    const { username, password } = req.body;
+    const resp = await authLogin(username, password, database);
+    // Valid so return token
+    if (resp !== null) {
+        res.status(200).send(resp);
+        return;
+    }
+    // Invalid so send 403 response
+    res.status(403).send({ message: 'Invalid username and password combination' });
 })
 
 // Post endpoint for logging into the server
@@ -274,15 +275,15 @@ app.post('/auth/login', async (req, res) => {
  *       403:
  *         description: Invalid token
  */
-app.post('/auth/logout', async (req, res) => {
-  // Get the post parameter
-  const { token } = req.body;
-  const resp = await authLogout(token, database);
-  if (resp) {
-    res.status(200).send();
-    return;
-  }
-  res.status(403).send({ message: 'Invalid token' });
+app.post('/auth/logout', async(req, res) => {
+    // Get the post parameter
+    const { token } = req.body;
+    const resp = await authLogout(token, database);
+    if (resp) {
+        res.status(200).send();
+        return;
+    }
+    res.status(403).send({ message: 'Invalid token' });
 })
 
 // Post endpoint for logging into the server
@@ -318,22 +319,22 @@ app.post('/auth/logout', async (req, res) => {
  *       403:
  *         description: Username already exists
  */
-app.post('/auth/register', async (req, res) => {
-  // Get the post parameter
-  const { username, password } = req.body;
-  // Make sure username and password arent empty
-  if (username.length === 0 || password.length === 0) {
-    res.status(403).send({ message: 'Cannot have empty username or password' });
-    return;
-  }
-  const resp = await authRegister(username, password, database);
-  // Valid so return token
-  if (resp !== null) {
-    res.status(200).send(resp);
-    return;
-  }
-  // Invalid so send 403 response
-  res.status(403).send({ message: 'username already exists' });
+app.post('/auth/register', async(req, res) => {
+    // Get the post parameter
+    const { username, password } = req.body;
+    // Make sure username and password arent empty
+    if (username.length === 0 || password.length === 0) {
+        res.status(403).send({ message: 'Cannot have empty username or password' });
+        return;
+    }
+    const resp = await authRegister(username, password, database);
+    // Valid so return token
+    if (resp !== null) {
+        res.status(200).send(resp);
+        return;
+    }
+    // Invalid so send 403 response
+    res.status(403).send({ message: 'username already exists' });
 })
 
 // Delete endpoint for removing user from server
@@ -355,44 +356,44 @@ app.post('/auth/register', async (req, res) => {
  *       403:
  *         description: Invalid token
  */
-app.delete('/auth/delete', async (req, res) => {
-  // Get the post parameter
-  const { token } = req.body;
-  const resp = await authDelete(token, database);
-  if (resp) {
-    res.status(200).send();
-    return;
-  }
-  res.status(403).send({ message: 'Uid does not exist' });
+app.delete('/auth/delete', async(req, res) => {
+    // Get the post parameter
+    const { token } = req.body;
+    const resp = await authDelete(token, database);
+    if (resp) {
+        res.status(200).send();
+        return;
+    }
+    res.status(403).send({ message: 'Uid does not exist' });
 })
 
 // Get endpoint for getting default broker price
-app.get('/user/getDefBroker', async (req, res) => {
-  const { token } = req.query;
-  const resp = await getDefBroker(token, database);
-  console.log
-  if (resp === 2) {
-    res.status(401).send({ error: "Invalid token" });
-  } else {
-    res.status(200).send({ defBroker: resp });
-  }
+app.get('/user/getDefBroker', async(req, res) => {
+    const { token } = req.query;
+    const resp = await getDefBroker(token, database);
+    console.log
+    if (resp === 2) {
+        res.status(401).send({ error: "Invalid token" });
+    } else {
+        res.status(200).send({ defBroker: resp });
+    }
 })
 
 // Post endpoint for setting default broker price
-app.post('/user/setDefBroker', async (req, res) => {
-  const { token, defBroker, brokerFlag } = req.body;
-  const resp = await setDefBroker(token, defBroker, brokerFlag, database);
-  if (resp === 2) {
-    res.status(401).send({ error: "Invalid token" });
-  } else if (resp === 3) {
-    res.status(403).send({ error: "Invalid brokerage fee" });
-  } else if (resp === 4) {
-    res.status(403).send({ error: "Invalid brokerage type" });
-  } else if (resp === 0) {
-    res.status(404).send();
-  } else if (resp === 1) {
-    res.status(200).send();
-  }
+app.post('/user/setDefBroker', async(req, res) => {
+    const { token, defBroker, brokerFlag } = req.body;
+    const resp = await setDefBroker(token, defBroker, brokerFlag, database);
+    if (resp === 2) {
+        res.status(401).send({ error: "Invalid token" });
+    } else if (resp === 3) {
+        res.status(403).send({ error: "Invalid brokerage fee" });
+    } else if (resp === 4) {
+        res.status(403).send({ error: "Invalid brokerage type" });
+    } else if (resp === 0) {
+        res.status(404).send();
+    } else if (resp === 1) {
+        res.status(200).send();
+    }
 })
 
 // Post endpoint for creating a single portfolio
@@ -424,19 +425,19 @@ app.post('/user/setDefBroker', async (req, res) => {
  *       403: 
  *         description: Invalid token
  */
-app.post('/user/portfolios/create', async (req, res) => {
-  const { token, name } = req.body;
-  const resp = await createPf(token, name, database);
-  if (resp === null) {
-    res.status(400).send({ error: "Portfolio name already in use" });
+app.post('/user/portfolios/create', async(req, res) => {
+    const { token, name } = req.body;
+    const resp = await createPf(token, name, database);
+    if (resp === null) {
+        res.status(400).send({ error: "Portfolio name already in use" });
+        return;
+    } else if (resp === false) {
+        res.status(401).send({ error: "Invalid token" });
+        return;
+    } else if (resp === 1) {
+        res.status(400).send({ error: "Invalid portfolio name" });
+    } else res.status(200).send(resp);
     return;
-  } else if (resp === false) {
-    res.status(401).send({ error: "Invalid token" });
-    return;
-  } else if (resp === 1) {
-    res.status(400).send({ error: "Invalid portfolio name" });
-  } else res.status(200).send(resp);
-  return;
 })
 
 // Get endpoint for getting user portfolios
@@ -463,16 +464,16 @@ app.post('/user/portfolios/create', async (req, res) => {
  *       403: 
  *         description: Invalid uid
  */
-app.get('/user/portfolios', async (req, res) => {
-  const { token } = req.query;
-  const resp = await userPfs(token, database);
-  if (resp === 1) {
-    res.status(401).send({ error: "Invalid token" });
-  } else if (resp === 2) {
-    res.status(404).send({ error: "Portfolios not found" });
-  } else { 
-    res.status(200).send(resp);
-  }
+app.get('/user/portfolios', async(req, res) => {
+    const { token } = req.query;
+    const resp = await userPfs(token, database);
+    if (resp === 1) {
+        res.status(401).send({ error: "Invalid token" });
+    } else if (resp === 2) {
+        res.status(404).send({ error: "Portfolios not found" });
+    } else {
+        res.status(200).send(resp);
+    }
 })
 
 // Get endpoint for opening single portfolio
@@ -505,18 +506,20 @@ app.get('/user/portfolios', async (req, res) => {
  *       403: 
  *         description: Invalid pid
  */
-app.get('/user/portfolios/open', async (req, res) => {
-  const { token, pid } = req.query;
-  const resp = await openPf(token, pid, database);
-  if (resp === null) {
-    res.status(403).send({ error: "Invalid pid" });
-  } else if (resp === 1) {
-    res.status(401).send({ error: "Invalid token" });
-  } else if (resp === 2) {
-    res.status(401).send({ error: "You do not have access to this portfolio" });
-  } else {
-    res.status(200).send(resp);
-  }
+app.get('/user/portfolios/open', async(req, res) => {
+    const { token, pid } = req.query;
+    const resp = await openPf(token, pid, database);
+    if (resp === null) {
+        res.status(403).send({ error: "Invalid pid" });
+    } else if (resp === 1) {
+        res.status(401).send({ error: "Invalid token" });
+    } else if (resp === 2) {
+        res.status(401).send({ error: "You do not have access to this portfolio" });
+    } else if (resp === 3) {
+        res.status(200).send(resp);
+    } else {
+        res.status(200).send(resp);
+    }
 })
 
 
@@ -552,18 +555,18 @@ app.get('/user/portfolios/open', async (req, res) => {
  *       403: 
  *         description: Invalid name
  */
-app.get('/user/portfolios/getPid', async (req, res) => {
-  const { token, name } = req.query;
-  const resp = await getPid(token, name, database);
-  if (resp === 1) {
-    res.status(401).send({ error: "Invalid token" });
-  } else if (resp === null) {
-    res.status(403).send({ error: "Invalid name" });
-  } else {
-    res.status(200).send(resp);
-  }
+app.get('/user/portfolios/getPid', async(req, res) => {
+    const { token, name } = req.query;
+    const resp = await getPid(token, name, database);
+    if (resp === 1) {
+        res.status(401).send({ error: "Invalid token" });
+    } else if (resp === null) {
+        res.status(403).send({ error: "Invalid name" });
+    } else {
+        res.status(200).send(resp);
+    }
 
-  return;
+    return;
 })
 
 // Get endpoint for calculating a single portfolio performance
@@ -598,24 +601,24 @@ app.get('/user/portfolios/getPid', async (req, res) => {
  *       403: 
  *         description: Invalid pid, watchlist performance not existent
  */
-app.get('/user/portfolios/calculate', async (req, res) => {
-  const { token, pid } = req.query;
-  const resp = await calcPf(token, pid, database);
-  if (resp === -1) {
-    res.status(401).send({ error: "You do not have access to this portfolio" });
-  } else if (resp === -2) {
-    res.status(401).send({ error: "Invalid token" });
-  } else if (resp === -3) {
-    res.status(403).send({ error: "Invalid pid" });
-  } else if (resp === -4) {
-    res.status(403).send({ error: "Can not perform for watchlist" });
-  } else if (resp === -5) {
-    res.status(404).send({ error: "Could not update database" });
-  } else {
-    res.status(200).send({ performance: resp });
-  }
+app.get('/user/portfolios/calculate', async(req, res) => {
+    const { token, pid } = req.query;
+    const resp = await calcPf(token, pid, database);
+    if (resp === -1) {
+        res.status(401).send({ error: "You do not have access to this portfolio" });
+    } else if (resp === -2) {
+        res.status(401).send({ error: "Invalid token" });
+    } else if (resp === -3) {
+        res.status(403).send({ error: "Invalid pid" });
+    } else if (resp === -4) {
+        res.status(403).send({ error: "Can not perform for watchlist" });
+    } else if (resp === -5) {
+        res.status(404).send({ error: "Could not update database" });
+    } else {
+        res.status(200).send({ performance: resp });
+    }
 
-  return;
+    return;
 })
 
 // Delete endpoint for deleting single portfolio
@@ -649,26 +652,26 @@ app.get('/user/portfolios/calculate', async (req, res) => {
  *       403: 
  *         description: Invalid token, or watchlist edit attempted
  */
-app.post('/user/portfolios/edit', async (req, res) => {
-  const { token, pid, name } = req.body;
-  const resp =  await editPf(token, pid, name, database);
-  if (resp === -1) {
-    res.status(400).send({ error: "Name already in use" });
-  } else if (resp === 2) {
-    res.status(400).send({ error: "Invalid name" });
-  } else if (resp === 3) {
-    res.status(401).send({ error: "Invalid token" });
-  } else if (resp === 4) {
-    res.status(400).send({ error: "Invalid pid" });
-  } else if (resp === 5) {
-    res.status(403).send({ error: "Can not edit watchlist" });
-  } else if (resp === 6) {
-    res.status(401).send({ error: "You do not have access to this portfolio" });
-  } else if (resp === 1) {
-    res.status(200).send();
-  } else {
-    res.status(404).send();
-  }
+app.post('/user/portfolios/edit', async(req, res) => {
+    const { token, pid, name } = req.body;
+    const resp = await editPf(token, pid, name, database);
+    if (resp === -1) {
+        res.status(400).send({ error: "Name already in use" });
+    } else if (resp === 2) {
+        res.status(400).send({ error: "Invalid name" });
+    } else if (resp === 3) {
+        res.status(401).send({ error: "Invalid token" });
+    } else if (resp === 4) {
+        res.status(400).send({ error: "Invalid pid" });
+    } else if (resp === 5) {
+        res.status(403).send({ error: "Can not edit watchlist" });
+    } else if (resp === 6) {
+        res.status(401).send({ error: "You do not have access to this portfolio" });
+    } else if (resp === 1) {
+        res.status(200).send();
+    } else {
+        res.status(404).send();
+    }
 })
 
 // Delete endpoint for deleting single portfolio
@@ -692,22 +695,22 @@ app.post('/user/portfolios/edit', async (req, res) => {
  *       403:
  *         description: Invalid token or watchlist deletion attempted
  */
-app.delete('/user/portfolios/delete', async (req, res) => {
-  const { token, pid } = req.body;
-  const resp = await deletePf(token, pid, database);
-  if (resp === 1) {
-    res.status(200).send();
-  } else if (resp === 2) {
-    res.status(401).send({ error: "Invalid token" });
-  } else if (resp === 3) {
-    res.status(400).send({ error: "Invalid pid" });
-  } else if (resp === 4) {
-    res.status(403).send({ error: "Can not delete watchlist" });
-  } else if (resp === 0) {
-    res.status(500).send({ error: "Portfolio not deleted" });
-  } else if (resp === -1) {
-    res.status(401).send({ error: "You do not have access to this portfolio" });
-  }
+app.delete('/user/portfolios/delete', async(req, res) => {
+    const { token, pid } = req.body;
+    const resp = await deletePf(token, pid, database);
+    if (resp === 1) {
+        res.status(200).send();
+    } else if (resp === 2) {
+        res.status(401).send({ error: "Invalid token" });
+    } else if (resp === 3) {
+        res.status(400).send({ error: "Invalid pid" });
+    } else if (resp === 4) {
+        res.status(403).send({ error: "Can not delete watchlist" });
+    } else if (resp === 0) {
+        res.status(500).send({ error: "Portfolio not deleted" });
+    } else if (resp === -1) {
+        res.status(401).send({ error: "You do not have access to this portfolio" });
+    }
 })
 
 // Post endpoint for adding a stock to a portfolio
@@ -763,31 +766,31 @@ app.delete('/user/portfolios/delete', async (req, res) => {
  *       403:
  *         description: Invalid pid or invalid stock
  */
-app.post('/user/stocks/add', async (req, res) => {
-  const { token, pid, stock, price, quantity, brokerage, flag } = req.body;
-  const resp = await addStock(token, pid, stock, price, quantity, brokerage, flag, database);
-  if (resp === 1) {
-    res.status(401).send({ error: "Invalid token" });
-  } else if (resp === 2) {
-    res.status(403).send({ error: "Invalid stock" });
-  } else if (resp === 3) {
-    res.status(403).send({ error: "Invalid pid" });
-  } else if (resp === 4) {
-    res.status(400).send({ error: "Must include valid quantity purchased" });
-  } else if (resp === 5) {
-    res.status(400).send({ error: "Must include valid price purchased at" });
-  } else if (resp === 6) {
-    res.status(403).send({ error: "Stock already in watchlist" });
-  } else if (resp === 7) {
-    res.status(403).send({ error: "Default brokerage cost not set" });
-  } else if (resp === 8) {
-    res.status(403).send({ error: "Invalid brokerage cost" });
-  } else if (resp === 9) {
-    res.status(403).send({ error: "Invalid brokerage type" });
-  } else {
-    res.status(200).send();
-  }
-  return;
+app.post('/user/stocks/add', async(req, res) => {
+    const { token, pid, stock, price, quantity, brokerage, flag } = req.body;
+    const resp = await addStock(token, pid, stock, price, quantity, brokerage, flag, database);
+    if (resp === 1) {
+        res.status(401).send({ error: "Invalid token" });
+    } else if (resp === 2) {
+        res.status(403).send({ error: "Invalid stock" });
+    } else if (resp === 3) {
+        res.status(403).send({ error: "Invalid pid" });
+    } else if (resp === 4) {
+        res.status(400).send({ error: "Must include valid quantity purchased" });
+    } else if (resp === 5) {
+        res.status(400).send({ error: "Must include valid price purchased at" });
+    } else if (resp === 6) {
+        res.status(403).send({ error: "Stock already in watchlist" });
+    } else if (resp === 7) {
+        res.status(403).send({ error: "Default brokerage cost not set" });
+    } else if (resp === 8) {
+        res.status(403).send({ error: "Invalid brokerage cost" });
+    } else if (resp === 9) {
+        res.status(403).send({ error: "Invalid brokerage type" });
+    } else {
+        res.status(200).send();
+    }
+    return;
 })
 
 // Put endpoint for adding or removing stocks
@@ -848,33 +851,33 @@ app.post('/user/stocks/add', async (req, res) => {
  *       404:
  *         description: Stock not in portfolio
  */
-app.put('/user/stocks/edit', async (req, res) => {
-  const { token, pid, stock, price, quantity, option, brokerage, flag } = req.body;
-  const resp = await modifyStock(token, pid, stock, price, quantity, option, brokerage, flag, database);
-  if (resp === -1) {
-    res.status(200).send();
-  } else if (resp === 1) {
-    res.status(401).send({ error: "Invalid token" });
-  } else if (resp === 2) {
-    res.status(403).send({ error: "Invalid stock" });
-  } else if (resp === 3) {
-    res.status(403).send({ error: "Invalid pid" });
-  } else if (resp === 4) {
-    res.status(403).send({ error: "Quantity to sell too high" });
-  } else if (resp === 5) {
-    res.status(404).send({ error: "Stock is not in portfolio" });
-  } else if (resp === 6) {
-    res.status(400).send({ error: "Must include valid quantity sold" });
-  } else if (resp === 7) {
-    res.status(400).send({ error: "Must include valid price sold at" });
-  } else if (resp === 8) {
-    res.status(403).send({ error: "Invalid brokerage cost" });
-  } else if (resp === 9) {
-    res.status(403).send({ error: "Default brokerage cost not set" });
-  } else if (resp === 10) {
-    res.status(403).send({ error: "Invalid brokerage type" });
-  }
-  return;
+app.put('/user/stocks/edit', async(req, res) => {
+    const { token, pid, stock, price, quantity, option, brokerage, flag } = req.body;
+    const resp = await modifyStock(token, pid, stock, price, quantity, option, brokerage, flag, database);
+    if (resp === -1) {
+        res.status(200).send();
+    } else if (resp === 1) {
+        res.status(401).send({ error: "Invalid token" });
+    } else if (resp === 2) {
+        res.status(403).send({ error: "Invalid stock" });
+    } else if (resp === 3) {
+        res.status(403).send({ error: "Invalid pid" });
+    } else if (resp === 4) {
+        res.status(403).send({ error: "Quantity to sell too high" });
+    } else if (resp === 5) {
+        res.status(404).send({ error: "Stock is not in portfolio" });
+    } else if (resp === 6) {
+        res.status(400).send({ error: "Must include valid quantity sold" });
+    } else if (resp === 7) {
+        res.status(400).send({ error: "Must include valid price sold at" });
+    } else if (resp === 8) {
+        res.status(403).send({ error: "Invalid brokerage cost" });
+    } else if (resp === 9) {
+        res.status(403).send({ error: "Default brokerage cost not set" });
+    } else if (resp === 10) {
+        res.status(403).send({ error: "Invalid brokerage type" });
+    }
+    return;
 })
 
 // Get endpoint for getting every active stock
@@ -891,14 +894,14 @@ app.put('/user/stocks/edit', async (req, res) => {
  *       502:
  *         description: Could not connect to API
  */
-app.get('/stocks/all', async (req, res) => {
-  const resp = await getAllStocks();
-  if (resp === null) {
-    res.status(502).send({ error: "Could not connect to API" });
+app.get('/stocks/all', async(req, res) => {
+    const resp = await getAllStocks();
+    if (resp === null) {
+        res.status(502).send({ error: "Could not connect to API" });
+        return;
+    }
+    res.status(200).send(resp);
     return;
-  }
-  res.status(200).send(resp);
-  return;
 })
 
 // Get endpoint for searching for stock info
@@ -945,57 +948,527 @@ app.get('/stocks/all', async (req, res) => {
  *       502:
  *         description: Could not connect to API
  */
-app.get('/stocks/info', async (req, res) => {
-  const { type, stocks, interval, start } = req.query;
-  const resp = await getStock(type, stocks, interval, start);
+app.get('/stocks/info', async(req, res) => {
+    const { type, stocks, interval, start } = req.query;
+    const resp = await getStock(type, stocks, interval, start);
 
-  if (resp === -1) {
-    res.status(403).send({ error: "Invalid stock" });
-  } else if (resp === -2) {
-    res.status(403).send({ error: "Invalid type" });
-  } else if (resp === -3) {
-    res.status(403).send({ error: "Invalid interval" });
-  } else if (resp === -4) {
-    res.status(403).send({ error: "Invalid start" });
-  } else if (resp === null) {
-    res.status(502).send({ error: "Could not connect to API" });
-  } else res.status(200).send(resp);
+    if (resp === -1) {
+        res.status(403).send({ error: "Invalid stock" });
+    } else if (resp === -2) {
+        res.status(403).send({ error: "Invalid type" });
+    } else if (resp === -3) {
+        res.status(403).send({ error: "Invalid interval" });
+    } else if (resp === -4) {
+        res.status(403).send({ error: "Invalid start" });
+    } else if (resp === null) {
+        res.status(502).send({ error: "Could not connect to API" });
+    } else res.status(200).send(resp);
 
-  return;
+    return;
 })
 
+// Post endpoint for voting on a stock
 /**
  * @swagger
- * /user/notifications:
- *   get:
- *     tags: [User]
- *     description: Get the recent notifications for the user
+ * /stocks/vote:
+ *   post:
+ *     tags: [Stocks]
+ *     description: endpoint for voting on a stock
  *     parameters:
  *      - name: token
- *        description: The token of the admin
+ *        description: token of user
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: stock
+ *        description: name of the stock (the abbreviated name e.g. AAPL for Apple)
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: type
+ *        description: The type of call being made;
+ *          0. Voting Bearish;
+ *          1. Voting Bullish;
  *        in: body
  *        required: true
  *        type: string
  *     responses:
  *       200:
- *         description: Returns the an array of notifications
- *         schema:
- *            type: object
- *            properties:
- *              requests:
- *                type: array
- *                description: An array of notifications
+ *         description: Successfully voted bearish/bullish on a stock
+ *       400:
+ *         description: Invalid stock
+ */
+app.post('/stocks/vote', async(req, res) => {
+    const { token, stock, type } = req.body;
+    const resp = await voteStock(token, stock, type, database);
+
+    if (resp === -1) {
+        res.status(401).send({ error: "Invalid token" });
+    } else if (resp === -2) {
+        res.status(400).send({ error: "Invalid stock" });
+    } else res.status(200).send(resp);
+
+    return;
+})
+
+// Get endpoint for getting all the votes on a stock
+/**
+ * @swagger
+ * /stocks/votes:
+ *   get:
+ *     tags: [Stocks]
+ *     description: endpoint getting all the votes on a stock
+ *     parameters:
+ *      - name: token
+ *        description: token of user
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: stock
+ *        description: name of the stock (the abbreviated name e.g. AAPL for Apple)
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Successfully got votes on a stock
+ */
+app.get('/stocks/votes', async(req, res) => {
+    const { token, stock } = req.query;
+    const resp = await getVotes(token, stock, database);
+
+    if (resp === -1) {
+        res.status(401).send({ error: "Invalid token" });
+    } else res.status(200).send(resp);
+
+    return;
+})
+
+// Post endpoint for adding friends
+/**
+ * @swagger
+ * /friends/add:
+ *   post:
+ *     tags: [Friends]
+ *     description: endpoint for adding friends
+ *     parameters:
+ *      - name: token
+ *        description: token of user
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: friendID
+ *        description: uid of friend that wants to be added
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Successfully added friend/ sent friend request
+ *       401:
+ *         description: Invalid token, user does not exist
+ *       400:
+ *         description: Already a friend, Invalid friend id, can't add urself
+ */
+app.post('/friends/add', async(req, res) => {
+    const { token, friendID } = req.body;
+    const resp = await addFriend(token, friendID, database);
+
+    if (resp === -1) {
+        res.status(400).send({ error: "Invalid friendID" });
+    } else if (resp === -2) {
+        res.status(401).send({ error: "Invalid token" });
+    } else if (resp === -3) {
+        res.status(401).send({ error: "User does not exist" });
+    } else if (resp === -4) {
+        res.status(400).send({ error: "Already a friend" });
+    } else if (resp === -5) {
+        res.status(400).send({ error: "Already sent a request" });
+    } else if (resp === -6) {
+        res.status(400).send({ error: "Can't add urself" });
+    } else res.status(200).send(resp);
+
+    return;
+})
+
+// Delete endpoint for declining friend request
+/**
+ * @swagger
+ * /friends/decline:
+ *   delete:
+ *     tags: [Friends]
+ *     description: endpoint for declining friend request
+ *     parameters:
+ *      - name: token
+ *        description: token of user
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: friendID
+ *        description: uid of friend that wants to be added
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Successfully added friend/ sent friend request
+ *       401:
+ *         description: Invalid token, user does not exist
+ *       400:
+ *         description: Already a friend, Invalid friend id, No friend request
+ */
+app.delete('/friends/decline', async(req, res) => {
+        const { token, friendID } = req.body;
+        const resp = await declineFriend(token, friendID, database);
+
+        if (resp === -1) {
+            res.status(400).send({ error: "Invalid friendID" });
+        } else if (resp === -2) {
+            res.status(401).send({ error: "Invalid token" });
+        } else if (resp === -3) {
+            res.status(401).send({ error: "User does not exist" });
+        } else if (resp === -4) {
+            res.status(400).send({ error: "Already a friend" });
+        } else if (resp === -5) {
+            res.status(400).send({ error: "No friend request" });
+        } else res.status(200).send(resp);
+
+        return;
+    })
+    // Delete endpoint for removing friends
+    /**
+     * @swagger
+     * /friends/remove:
+     *   delete:
+     *     tags: [Friends]
+     *     description: endpoint for removing friends
+     *     parameters:
+     *      - name: token
+     *        description: token of user
+     *        in: body
+     *        required: true
+     *        type: string
+     *      - name: friendID
+     *        description: uid of friend that wants to be added
+     *        in: body
+     *        required: true
+     *        type: string
+     *     responses:
+     *       200:
+     *         description: Successfully removed friend
+     *       401:
+     *         description: Invalid token, userdoes not exist
+     *       400:
+     *         description: Invalid friend id
+     */
+app.delete('/friends/remove', async(req, res) => {
+    const { token, friendID } = req.body;
+    const resp = await removeFriend(token, friendID, database);
+
+    if (resp === -1) {
+        res.status(400).send({ error: "Invalid friendID" });
+    } else if (resp === -2) {
+        res.status(401).send({ error: "Invalid token" });
+    } else if (resp === -3) {
+        res.status(401).send({ error: "User does not exist" });
+    } else res.status(200).send(resp);
+
+    return;
+})
+
+// Get endpoint for getting every friend of a user
+/**
+ * @swagger
+ * /friends/all:
+ *   get:
+ *     tags: [Friends]
+ *     description: endpoint for getting user's friends
+ *     parameters:
+ *      - name: token
+ *        description: token of user
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Returns a list of friend ids of the user
+ *       401:
+ *         description: Invalid token
+ *       403:
+ *         description: Invalid friend id
+ */
+app.get('/friends/all', async(req, res) => {
+    const { token } = req.query;
+    const resp = await getFriends(token, database);
+
+    if (resp === -1) {
+        res.status(401).send({ error: "Invalid token" });
+    } else if (resp === -2) {
+        res.status(401).send({ error: "User does not exist" });
+    } else res.status(200).send(resp);
+
+    return;
+})
+
+// Get endpoint for getting every friend request of a user
+/**
+ * @swagger
+ * /friends/requests:
+ *   get:
+ *     tags: [Friends]
+ *     description: endpoint for getting user's friends
+ *     parameters:
+ *      - name: token
+ *        description: token of user
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Returns a list of friend ids of the user
+ *       401:
+ *         description: Invalid token
+ *       403:
+ *         description: Invalid friend id
+ */
+app.get('/friends/requests', async(req, res) => {
+    const { token } = req.query;
+    const resp = await getFriendReq(token, database);
+
+    if (resp === -1) {
+        res.status(401).send({ error: "Invalid token" });
+    } else if (resp === -2) {
+        res.status(401).send({ error: "User does not have up to date data stored" });
+    } else res.status(200).send(resp);
+
+    return;
+})
+
+// Get endpoint for getting portfolios of a friend/celebrity
+/**
+ * @swagger
+ * /friends/portfolios:
+ *   get:
+ *     tags: [Friends]
+ *     description: endpoint for getting portfolios of a friend/celebrity
+ *     parameters:
+ *      - name: token
+ *        description: token of user
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: uid
+ *        description: uid of friend/celebrity
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Returns a list of portfolios for given friend/celebrity
+ *       401:
+ *         description: Invalid token
+ *       403:
+ *         description: Invalid friend id
+ */
+app.get('/friends/portfolios', async(req, res) => {
+    const { token, uid } = req.query;
+    const resp = await openFriendPf(token, uid, database);
+    if (resp === 1) {
+        res.status(401).send({ error: "Invalid token" });
+    } else if (resp === 2) {
+        res.status(200).send([]);
+    } else if (resp === 3) {
+        res.status(401).send({ error: "Invalid Uid" });
+    } else res.status(200).send(resp);
+
+    return;
+})
+
+// Post endpoint for commenting on an activity
+/**
+ * @swagger
+ * /activity/comment:
+ *   post:
+ *     tags: [Activity]
+ *     description: endpoint for commenting on an activity
+ *     parameters:
+ *      - name: token
+ *        description: token of user
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: aid
+ *        description: id of the activity
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: message
+ *        description: the message the user wants to comment
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Successfully commented on activity
+ *       401:
+ *         description: Invalid token
+ *       400:
+ *         description: Invalid aid
+ */
+app.post('/activity/comment', async(req, res) => {
+    const { token, aid, message } = req.body;
+    const resp = await comment(token, aid, message, database);
+
+    if (resp === -1) {
+        res.status(401).send({ error: "Invalid token" });
+    } else if (resp === -2) {
+        res.status(403).send({ error: "Empty message" });
+    } else if (resp === -3) {
+        res.status(400).send({ error: "Invalid aid" });
+    } else res.status(200).send(resp);
+
+    return;
+})
+
+// Get endpoint for getting every comment on an activity
+/**
+ * @swagger
+ * /activity/comments:
+ *   get:
+ *     tags: [Activity]
+ *     description: endpoint for getting every comment on an activity
+ *     parameters: 
+ *      - name: token
+ *        description: token of user
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: aid
+ *        description: id of the activity
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Successfully got all comments on activity
+ *       401:
+ *         description: Invalid token
+ *       400:
+ *         description: Invalid aid
+ */
+app.get('/activity/comments', async(req, res) => {
+    const { token, aid } = req.query;
+    const resp = await getComments(token, aid, database);
+
+    if (resp === -1) {
+        res.status(401).send({ error: "Invalid token" });
+    } else if (resp === -2) {
+        res.status(400).send({ error: "Invalid aid" });
+    } else res.status(200).send(resp);
+
+    return;
+})
+
+// Post endpoint for liking an activity
+/**
+ * @swagger
+ * /activity/like:
+ *   post:
+ *     tags: [Activity]
+ *     description: endpoint for liking an activity
+ *     parameters: 
+ *      - name: token
+ *        description: token of user
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: aid
+ *        description: id of the activity
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Successfully liked activity
+ *       401:
+ *         description: Invalid token
+ *       400:
+ *         description: Invalid aid
+ */
+app.post('/activity/like', async(req, res) => {
+    const { token, aid } = req.body;
+    const resp = await like(token, aid, database);
+
+    if (resp === -1) {
+        res.status(401).send({ error: "Invalid token" });
+    } else if (resp === -2) {
+        res.status(400).send({ error: "Invalid aid" });
+    } else res.status(200).send(resp);
+
+    return;
+})
+
+// Get endpoint for getting activity feed for a certain user
+/**
+ * @swagger
+ * /activity/all:
+ *   get:
+ *     tags: [Activity]
+ *     description: endpoint for getting activity feed
+ *     parameters:  
+ *     - name: token
+ *       description: token of user
+ *       in: body
+ *       required: true
+ *       type: string
+ *     responses:
+ *       200:
+ *         description: Successfully liked activity
  *       401:
  *         description: Invalid token
  */
-app.get('/user/notifications', async (req, res) => {
-  const { token } = req.query;
-  getUserNotifications(token, database, res);
+app.get('/activity/all', async(req, res) => {
+        const { token } = req.query;
+        const resp = await getActivity(token, database);
+
+        if (resp === -1) {
+            res.status(401).send({ error: "Invalid token" });
+        } else res.status(200).send(resp);
+
+        return;
+    })
+    /**
+     * @swagger
+     * /user/notifications:
+     *   get:
+     *     tags: [User]
+     *     description: Get the recent notifications for the user
+     *     parameters:
+     *      - name: token
+     *        description: The token of the admin
+     *        in: body
+     *        required: true
+     *        type: string
+     *     responses:
+     *       200:
+     *         description: Returns the an array of notifications
+     *         schema:
+     *            type: object
+     *            properties:
+     *              requests:
+     *                type: array
+     *                description: An array of notifications
+     *       401:
+     *         description: Invalid token
+     */
+app.get('/user/notifications', async(req, res) => {
+    const { token } = req.query;
+    getUserNotifications(token, database, res);
 })
 
-app.delete('/user/notifications/clear', async (req, res) => {
-  const { token } = req.body;
-  deleteUserNotifications(token, database, res);
+app.delete('/user/notifications/clear', async(req, res) => {
+    const { token } = req.body;
+    deleteUserNotifications(token, database, res);
 })
 
 /**
@@ -1023,7 +1496,7 @@ app.delete('/user/notifications/clear', async (req, res) => {
  *     responses:
  *       200:
  *         description: Returns the rid
-*         schema:
+ *         schema:
  *            type: object
  *            properties:
  *              rid:
@@ -1036,9 +1509,9 @@ app.delete('/user/notifications/clear', async (req, res) => {
  *       403:
  *         description: Request has already been made
  */
-app.post('/celebrity/makerequest', async (req, res) => {
-  const { token, info, fids } = req.body;
-  await postCelebrityMakeRequest(token, info, fids, database, res);
+app.post('/celebrity/makerequest', async(req, res) => {
+    const { token, info, fids } = req.body;
+    await postCelebrityMakeRequest(token, info, fids, database, res);
 })
 
 /**
@@ -1060,8 +1533,8 @@ app.post('/celebrity/makerequest', async (req, res) => {
  *                type: object
  *                description: Maps the celebrity uid to an array of followers (uid)
  */
-app.get('/celebrity/discover', async (req, res) => {
-  getCelebrityDiscover(res, database);
+app.get('/celebrity/discover', async(req, res) => {
+    getCelebrityDiscover(res, database);
 })
 
 /**
@@ -1096,9 +1569,39 @@ app.get('/celebrity/discover', async (req, res) => {
  *       401:
  *         description: Invalid token
  */
-app.post('/celebrity/follow', async (req, res) => {
-  const { token, isFollow, celebUid } = req.body;
-  await postCelebrityFollow(token, isFollow, celebUid, res, database);
+app.post('/celebrity/follow', async(req, res) => {
+    const { token, isFollow, celebUid } = req.body;
+    await postCelebrityFollow(token, isFollow, celebUid, res, database);
+})
+
+// Get endpoint for getting every celebrity a user follows
+/**
+ * @swagger
+ * /celebrity/following:
+ *   get:
+ *     tags: [Celebrity]
+ *     description: endpoint for getting every celebrity a user follows
+ *     parameters:
+ *      - name: token
+ *        description: token of user
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Returns a list of friend ids of the user
+ *       401:
+ *         description: Invalid token
+ */
+app.get('/celebrity/following', async(req, res) => {
+    const { token } = req.query;
+    const resp = await getUserCelebrities(token, database);
+
+    if (resp === -1) {
+        res.status(401).send({ error: "Invalid token" });
+    } else res.status(200).send(resp);
+
+    return;
 })
 
 /**
@@ -1130,9 +1633,9 @@ app.post('/celebrity/follow', async (req, res) => {
  *       403:
  *         description: User is not an admin
  */
-app.get('/admin/celebrity/requests', async (req, res) => {
-  const { token } = req.query;
-  await getAdminCelebrityRequests(token, database, res);
+app.get('/admin/celebrity/requests', async(req, res) => {
+    const { token } = req.query;
+    await getAdminCelebrityRequests(token, database, res);
 })
 
 /**
@@ -1167,9 +1670,9 @@ app.get('/admin/celebrity/requests', async (req, res) => {
  *       400:
  *         description: Invalid rid
  */
-app.post('/admin/celebrity/handlerequest', async (req, res) => {
-  const { token, approve, rid } = req.body;
-  await postAdminCelebrityHandlerequest(token, approve, rid, database, res);
+app.post('/admin/celebrity/handlerequest', async(req, res) => {
+    const { token, approve, rid } = req.body;
+    await postAdminCelebrityHandlerequest(token, approve, rid, database, res);
 })
 
 // Post endpoint for uploading files
@@ -1196,8 +1699,8 @@ app.post('/admin/celebrity/handlerequest', async (req, res) => {
  *       401:
  *         description: Invalid token
  */
-app.post('/file/upload', async (req, res) => {
-  await handleFileUpload(req, res, database);
+app.post('/file/upload', async(req, res) => {
+    await handleFileUpload(req, res, database);
 })
 
 /**
@@ -1234,14 +1737,22 @@ app.post('/file/upload', async (req, res) => {
  *       403:
  *         description: Invalid permissions
  */
-app.get('/file/download', async (req, res) => {
-  const { token, fid } = req.query;
-  await handleFileDownload(token, fid, res, database);
+app.get('/file/download', async(req, res) => {
+    const { token, fid } = req.query;
+    await handleFileDownload(token, fid, res, database);
 })
 
-app.get('/rankings/global', async (req, res) => {
-  const resp = await getRankings(database);
-  if (rank !== null) {
-    res.status(200).send(resp);
-  } else res.status(404).send({ error: "A system error occurred" });
+app.get('/rankings/global', async(req, res) => {
+    const resp = await getAllRankings(database);
+    if (resp !== null) {
+        res.status(200).send(resp);
+    } else res.status(404).send({ error: "A system error occurred" });
+})
+
+app.get('/rankings/friends', async(req, res) => {
+    const { token } = req.query;
+    const resp = await getFriendRankings(token, database);
+    if (resp !== null) {
+        res.status(200).send(resp);
+    } else res.status(404).send({ error: "A system error occurred" });
 })
