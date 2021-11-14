@@ -1103,7 +1103,7 @@ export class Database {
     return true;
   }
 
-  async declineFriendRequest(uid, friend) {
+  async declineFriend(uid, friend) {
     // Check whether given friend id is valid
     const friendResp = await this.getUser(friend);
     if (friendResp === null) {
@@ -1388,18 +1388,23 @@ export class Database {
       await this.createStockColl(stock);
       stocksResp = await stocks.findOne({stock : stock});
     }
-    let vote = -1
+    let vote = "none"
     if (stocksResp.bear.indexOf(uid) !== -1) {
-      vote = 0;
+      vote = "bearish";
     } else if (stocksResp.bull.indexOf(uid) !== -1) {
-      vote = 1;
+      vote = "bullish";
     }
     let totalVotes = stocksResp.bear.length + stocksResp.bull.length;
     if (totalVotes === 0) {
       totalVotes = 1;
     }
-    const bearPerc = stocksResp.bear.length / totalVotes;
-    const bullPerc = stocksResp.bull.length / totalVotes;
+    let bearPerc = stocksResp.bear.length / totalVotes;
+    let bullPerc = stocksResp.bull.length / totalVotes;
+
+    if ( bearPerc === 0 && bullPerc === 0) {
+      bearPerc = .5;
+      bullPerc = .5;
+    }
     return {
       bear: (bearPerc.toFixed(2)) * 100,
       bull: (bullPerc.toFixed(2))* 100,

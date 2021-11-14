@@ -45,7 +45,7 @@ const AddStock = ({token, pid, onAddCallback, load = () => {}, name}) => {
         setFlag(res.data.defBroker.brokerFlag);
         
         } catch (e) {
-        alert(`Status Code ${e.status} : ${e.response.data.message}`,'error');
+        alert(`Status Code ${e.status} : ${e.response.data.error}`,'error');
         }
     }
     

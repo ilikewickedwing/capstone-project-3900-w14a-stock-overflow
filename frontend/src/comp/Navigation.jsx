@@ -31,8 +31,9 @@ const stubFriends= [{
 
 const Navigation = () => {
     const api = React.useContext(ApiContext);
-    const alert = useContext(AlertContext)
+    const alert = useContext(AlertContext);
     const history = useHistory();
+    const token = localStorage.getItem('token');
 
     // const [query, setQuery] = React.useState('');
     const [queryRes, setRes] = React.useState([]);
@@ -42,7 +43,6 @@ const Navigation = () => {
 
     // handle logout
     const onLogOut = async () => {
-        const token = localStorage.getItem('token');
         try {
             await axios.post(`${apiBaseUrl}/auth/logout`,{token});
             history.push('/');
@@ -70,8 +70,10 @@ const Navigation = () => {
           })
           // TODO CALL ENPOINT TO PUSH FRIENDS 
           const friendList =[];
+          const request2 = await axios.get(`${apiBaseUrl}/friends/all?token=${token}`);
+          console.log(request2.data);
           newList.push(...stubFriends);
-
+          
           // TODO CALL ENDPOINT TO PUSH CELEBRITIES 
           const celebList = [];
 
@@ -103,13 +105,35 @@ const Navigation = () => {
                 disablePortal
                 options={queryRes}
                 sx={{ width: 300 }}
+                filterOptions={(options, params) => {
+                const filtered = filter(options, params);
+        
+                const { inputValue } = params;
+                // Suggest the creation of a new value
+                const isExisting = options.some((option) => inputValue === option.code);
+                if (inputValue !== '' && !isExisting) {
+                    filtered.push({
+                    inputValue,
+                    code: `Add "${inputValue}"`,
+                    });
+                }
+                return filtered;
+                }}
                 inputValue={search}
                 groupBy={(option) => option.type}
                 getOptionLabel={ (e) => {
+                    // Value selected with enter, right from the input
+                    if (typeof e === 'string') {
+                        return e;
+                    }
+                    // Add "xxx" option created dynamically
+                    if (e.inputValue) {
+                        return e.inputValue;
+                    }
                     if (e.type === "Friends"){
                         return e.code;
                     }
-                return e.code+" "+ e.name;
+                    return e.code+" "+ e.name;
                 }}
 
                 onInputChange={(e,v) => {

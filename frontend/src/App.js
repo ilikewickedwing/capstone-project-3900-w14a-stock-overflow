@@ -49,7 +49,7 @@ function App() {
               </Alert>
             </Snackbar> 
             <Switch>
-              <Route path="/user" component={Friend} /> 
+              <Route path="/user/:handle" component={Friend} /> 
               <Route path="/signup" component={SignUp} />
               <Route path="/dashboard" component={Dashboard} />
               <Route path="/portfolio/:pid" component={Portfolio} />
