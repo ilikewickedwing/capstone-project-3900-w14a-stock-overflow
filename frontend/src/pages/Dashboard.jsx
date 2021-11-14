@@ -30,7 +30,7 @@ export default function Dashboard() {
   const getGlobalRanks = async () => {
     try {
       const request = axios.get(`${apiBaseUrl}/rankings/global`);
-      console.log(request.data);
+      console.log(request);
     } catch (e) {
       alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
     }

@@ -68,11 +68,19 @@ const Navigation = () => {
                   name: obj["name"]
               })
           })
-          // TODO CALL ENPOINT TO PUSH FRIENDS 
+
+          // append friends to the search pool 
           const friendList =[];
           const request2 = await axios.get(`${apiBaseUrl}/friends/all?token=${token}`);
-          console.log(request2.data);
-          newList.push(...stubFriends);
+          console.log(request2.data.friends);
+          request2.data.friends.forEach(obj => {
+            friendList.push({
+                type: "Friends",
+                code: obj["username"],
+                name: obj["uid"]
+            })
+          })
+          newList.push(...friendList);
           
           // TODO CALL ENDPOINT TO PUSH CELEBRITIES 
           const celebList = [];

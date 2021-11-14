@@ -37,6 +37,7 @@ const myRanking = createData('dollalilz', 300, 99999);
 
 // note: friend is inclusive of celebrity profiles except celebrities are public profiles while friends are private 
 export default function Friend() {
+    let history = useHistory();
     const alert = React.useContext(AlertContext);
     const { handle } = useParams();
     const token = localStorage.getItem('token');
@@ -53,6 +54,7 @@ export default function Friend() {
         const resp = await axios.get(`${apiBaseUrl}/user/uid?username=${handle}`);
         setUid(resp.data.uid); 
       } catch (e){
+        history.push('/oops/');
         alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
       }
     }
