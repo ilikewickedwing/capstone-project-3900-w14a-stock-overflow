@@ -997,7 +997,7 @@ app.get('/stocks/info', async (req, res) => {
  *         description: Invalid stock
  */
 app.post('/stocks/vote', async (req, res) => {
-  const { token, stock, type } = req.query;
+  const { token, stock, type } = req.body;
   const resp = await voteStock(token, stock, type, database);
 
   if (resp === -1) {
@@ -1085,6 +1085,50 @@ app.post('/friends/add', async (req, res) => {
   return;
 })
 
+// Delete endpoint for declining friend request
+/**
+ * @swagger
+ * /friends/decline:
+ *   delete:
+ *     tags: [Friends]
+ *     description: endpoint for declining friend request
+ *     parameters:
+ *      - name: token
+ *        description: token of user
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: friendID
+ *        description: uid of friend that wants to be added
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Successfully added friend/ sent friend request
+ *       401:
+ *         description: Invalid token, user does not exist
+ *       400:
+ *         description: Already a friend, Invalid friend id, No friend request
+ */
+ app.delete('/friends/decline', async (req, res) => {
+  const { token, friendID } = req.body;
+  const resp = await addFriend(token, friendID, database);
+
+  if (resp === -1) {
+    res.status(400).send({ error: "Invalid friendID" });
+  } else if (resp === -2) {
+    res.status(401).send({ error: "Invalid token" });
+  } else if (resp === -3) {
+    res.status(401).send({ error: "User does not exist" });
+  } else if (resp === -4) {
+    res.status(400).send({ error: "Already a friend" });
+  } else if (resp === -5) {
+    res.status(400).send({ error: "No friend request" });
+  } else res.status(200).send(resp);
+
+  return;
+})
 // Delete endpoint for removing friends
 /**
  * @swagger
@@ -1188,7 +1232,7 @@ app.get('/friends/all', async (req, res) => {
   if (resp === -1) {
     res.status(401).send({ error: "Invalid token" });
   } else if (resp === -2) {
-    res.status(401).send({ error: "User does not exist" });
+    res.status(401).send({ error: "User does not have up to date data stored" });
   } else res.status(200).send(resp);
 
   return;
@@ -1226,7 +1270,7 @@ app.get('/friends/all', async (req, res) => {
  *         description: Invalid aid
  */
 app.post('/activity/comment', async (req, res) => {
-  const { token, aid, message } = req.query;
+  const { token, aid, message } = req.body;
   const resp = await comment(token, aid, message, database);
 
   if (resp === -1) {
@@ -1306,7 +1350,7 @@ app.get('/activity/comments', async (req, res) => {
  *         description: Invalid aid
  */
 app.post('/activity/like', async (req, res) => {
-  const { token, aid } = req.query;
+  const { token, aid } = req.body;
   const resp = await like(token, aid, database);
 
   if (resp === -1) {
