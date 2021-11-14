@@ -1,7 +1,8 @@
+import API, { ApiContext } from "./api";
 import Login from "./pages/Login";
 import {BrowserRouter, Route, Switch} from 'react-router-dom'; 
+import NotFound from "./pages/NotFound";
 import Dashboard from "./pages/Dashboard";
-import API, { ApiContext } from "./api";
 import SignUp from "./pages/SignUp";
 import Portfolio from "./pages/Portfolio";
 import Profile from "./pages/Profile";
@@ -14,7 +15,6 @@ import DiscoverCelebrityPage from "./celebrity/DiscoverCelebrity";
 import { Snackbar } from "@material-ui/core";
 import MuiAlert from '@mui/material/Alert';
 import { createContext, useState,forwardRef } from "react";
-import NotFound from "./pages/NotFound";
 
 const Alert = forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
@@ -50,8 +50,8 @@ function App() {
               </Alert>
             </Snackbar> 
             <Switch>
-              <Route path="/user/:handle" component={Friend} /> 
               <Route path="/oops" component={NotFound} />
+              <Route path="/user/:handle" component={Friend} /> 
               <Route path="/signup" component={SignUp} />
               <Route path="/dashboard" component={Dashboard} />
               <Route path="/portfolio/:pid" component={Portfolio} />

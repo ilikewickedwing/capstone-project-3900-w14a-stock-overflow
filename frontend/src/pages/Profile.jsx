@@ -125,7 +125,6 @@ export default function Profile() {
   const getFriendRequests = async () => {
     try {
       const res = await axios.get(`${apiBaseUrl}/friends/requests?token=${token}`);
-      console.log(res);
       setReqlist(res.data.friendReq);
     } catch (e) {
       alert(`Status Code ${e.status} : ${e.response.data.error}`,'error');

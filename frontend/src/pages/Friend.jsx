@@ -54,7 +54,7 @@ export default function Friend() {
         const resp = await axios.get(`${apiBaseUrl}/user/uid?username=${handle}`);
         setUid(resp.data.uid); 
       } catch (e){
-        history.push('/oops/');
+        history.push('/oops');
         alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
       }
     }

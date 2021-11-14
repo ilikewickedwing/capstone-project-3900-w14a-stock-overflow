@@ -3,6 +3,7 @@ import * as React from 'react';
 import { 
   PfBody, 
   PageBody,
+  WatchlistBody,
 } from '../styles/styling';
 import Button from '@mui/material/Button';
 import Navigation from '../comp/Navigation';
@@ -16,10 +17,13 @@ const NotFound = () => {
         <Navigation />
         <Tabs />
         <PfBody>
-        USER OR CELEBRITY YOU SEARCHED DOES NOT EXIST 
-        <Button onClick={history.push('/dashboard')}>
-            Go Back
-        </Button>
+        <WatchlistBody elevation={10}>
+            USER OR CELEBRITY YOU SEARCHED DOES NOT EXIST 
+            < br />
+            <Button onClick={()=> history.push('/dashboard')}>
+                Go Back
+            </Button>
+        </WatchlistBody>
         </PfBody>
     </PageBody>
     )
