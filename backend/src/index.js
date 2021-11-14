@@ -1080,6 +1080,8 @@ app.post('/friends/add', async (req, res) => {
     res.status(401).send({ error: "User does not exist" });
   } else if (resp === -4) {
     res.status(400).send({ error: "Already a friend" });
+  } else if (resp === -5) {
+    res.status(400).send({ error: "Already sent a request" });
   } else res.status(200).send(resp);
 
   return;

@@ -1085,6 +1085,10 @@ export class Database {
 
     const requestIndex = userRequests.indexOf(friend);
     if (requestIndex === -1) { // other user has not sent a friend request
+      if (friendRequests.indexOf(uid) !== -1) {
+        return -5;
+      }
+
       friendRequests.push(uid);
 
       await friends.updateOne({ownerUid : friend}, {$set: {requests: friendRequests}});
