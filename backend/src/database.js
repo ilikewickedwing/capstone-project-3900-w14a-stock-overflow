@@ -1465,6 +1465,31 @@ export class Database {
     return activities;
   }
   
+  async getFriendActivity(uid, friend) {
+    if (!await this.checkFriend(uid, friend)) {
+      const celebrities = await this.getAllCelebrityUsers();
+      const filtered = celebrities.filter((e) => e.uid === uid);
+      if (filtered.length === 0) {
+        return -2;
+      }
+    }
+    let activities = [];
+    const userActivity = this.database.collection('userActivity');
+    const activity = this.database.collection('activity');
+
+    // Get friends' and user's activities
+    const userActResp = await userActivity.findOne({ownerUid: friend});
+    const userActs = userActResp.activities;
+    const poop = await activity.find({aid: {$in: userActs}}).toArray();
+    for (let index = 0; index < poop.length; index++) {
+      const i = poop[index];
+      activities.push(i);
+    }
+    
+    activities.sort((first, second) => first.time - second.time);
+    return activities;
+  }
+
   async activityCanbeSeen(uid, act) {
     let currAct = act;
     const activity = this.database.collection('activity');
