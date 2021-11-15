@@ -70,7 +70,16 @@ const Portfolio = () => {
       if (portfolioData.name === "Watchlist"){
         setIsWatchlist(1);
       } else {
-        setStocks(portfolioData.stocks);
+        let stockList =[];
+        console.log(portfolioData.stocks);
+
+        // push the stock if its not quantity 0 (which is kept for history purposes)
+        for (let i = 0; i < portfolioData.stocks.length; i++){
+          if (portfolioData.stocks[i].quantity !== 0){
+            stockList.push(portfolioData.stocks[i]);
+          }
+        }
+        setStocks(stockList);
         setIsWatchlist(0);
       }
     } catch (e) {
@@ -127,6 +136,7 @@ const Portfolio = () => {
     }
   }
 
+  // stock details for displaying on watchlist 
   async function getStockDetails(stockSymbol) {
     const resp = await api.stocksInfo(1, stockSymbol, null, null);
     const jsonResp = await resp.json();
@@ -159,18 +169,7 @@ const Portfolio = () => {
     return data;
   }
 
-  async function handleReload() {
-    const res = await axios.get(`${apiBaseUrl}/user/portfolios/getPid`, {
-      params: {
-        token: token,
-        name: 'Watchlist'
-      }
-    })
-    const pid = res.data;
-    // history.push(`/dashboard`)
-    history.push(`/portfolio/${pid}`)
-  }
-  //console.log(selected)
+  
   return (
       <PageBody className="font-two">
           <Navigation />
