@@ -112,6 +112,7 @@ const Portfolio = () => {
                             key={item.stock}
                             name={item.stock}
                             onDeleteCallback={() => { loadPorfolioData() }}
+                            isFriend={0}
                           />
                         })
                       }

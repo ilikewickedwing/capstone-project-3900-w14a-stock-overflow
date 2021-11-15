@@ -14,7 +14,8 @@ import {
 } from '../styles/styling';
 import { AlertContext } from '../App';
 
-const WatchlistCard = ({name,onDeleteCallback = () => {}}, isFriend) => {
+const WatchlistCard = ({name,onDeleteCallback = () => {}, isFriend} ) => {
+  console.log(isFriend);
     const api = useContext(ApiContext);
     const alert = useContext(AlertContext);
     const history = useHistory();
@@ -117,7 +118,7 @@ const WatchlistCard = ({name,onDeleteCallback = () => {}}, isFriend) => {
       </div>
       <div>
         {
-            isFriend === 1 &&
+            isFriend === 0 &&
             <IconButton onClick={handleDeleteStock}>
             <ClearIcon />
             </IconButton>
