@@ -50,8 +50,11 @@ const makeMockFriendResponse = () => {
 }
 
 export default function PerformanceGraph(props) {
+  // Maps pid to performance array
   const [ dataCache, setDataCache ] = useState({});
   const [ pidToName, setPidToName ] = useState({});
+  // When it is in friend mode, store all their portfolio ids
+  const [ totalFriendPids, setTotalFriendPids ] = useState([]);
   const api = useContext(ApiContext);
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -83,18 +86,16 @@ export default function PerformanceGraph(props) {
       const resp = await api.friendsPortfolios(token, props.friendUid);
       if (resp.status === 200) {
         const portfolios = await resp.json();
-        // Loop through each of the pids
-        for (const pid of props.pids.split(",")) {
-          for (const pf of portfolios) {
-            if (pf.pid === pid) {
-              dataCacheCopy[pid] = pf.value.performance;
-              pidToNameCopy[pid] = pf.name;
-              break;
-            }
-          }
+        const friendsPid = [];
+        // Loop through and store each of the pids
+        for (const pf of portfolios) {
+          dataCacheCopy[pf.pid] = pf.value.performance;
+          pidToNameCopy[pf.pid] = pf.name;
+          friendsPid.push(pf.pid);
         }
         setDataCache(dataCacheCopy);
         setPidToName(pidToNameCopy);
+        setTotalFriendPids(friendsPid);
       }
     }
     if (props.isFriend === true) {
@@ -107,6 +108,17 @@ export default function PerformanceGraph(props) {
   }, [api, props.pids]);
   
   const renderLines = () => {
+    // Return net lines
+    if (props.pids.length === 0) {
+      if (props.isFriend) {
+        return (
+          <Line unit="%" dot={false} type="monotone" dataKey="Average Performance"
+            stroke={randomColor({ luminosity: 'dark' })}>
+          </Line>
+        )
+      }
+    }
+    // Return multiple lines
     const pids = props.pids.split(",");
     const hasAllPData = pids.every(pid => pid in dataCache);
     if (hasAllPData) {
@@ -122,7 +134,11 @@ export default function PerformanceGraph(props) {
   return (
     <ResponsiveContainer width={'99%'} height={props.height}>
       <LineChart
-        data={transformDataCache(props.pids.split(","), dataCache, pidToName)}
+        data={
+          props.pids.length !== 0 ? 
+          transformDataCache(props.pids.split(","), dataCache, pidToName) :
+          transformNetDataCache(totalFriendPids, dataCache, [])
+        }
         margin={{ top: 25, bottom: 25, left: 25 }}
       >
         <XAxis minTickGap={25} dataKey="date" dy={15}></XAxis>
@@ -148,6 +164,45 @@ PerformanceGraph.propTypes = {
   isFriend: PropTypes.bool,
   // This is the friends uid - you can leave this blank if viewing your own graph
   friendUid: PropTypes.string,
+}
+
+// Transforms a net of the data cache into one line of data
+const transformNetDataCache = (pids, dataCache, pidToName) => {
+  // Return empty array if datacache is empty
+  if (Object.keys(dataCache).length === 0) {
+    return [];
+  }
+  // Maps the date to the an object containing running avg performance and number
+  // of points
+  const dateMap = {};
+  for (const pid of pids) {
+    for (const timePoint of dataCache[pid]) {
+      // Add point to date map
+      if (!(timePoint.date in dateMap)) {
+        dateMap[timePoint.date] = {
+          num: 1,
+          avgPerf: timePoint.performance
+        }
+      } else {
+        const oldAvg = dateMap[timePoint.date].avgPerf;
+        const oldNum = dateMap[timePoint.date].num;
+        const oldTotal = oldAvg * oldNum;
+        const newTotal = oldTotal + timePoint.performance;
+        const newNum = oldNum + 1;
+        const newAvg = newTotal / newNum;
+        dateMap[timePoint.date].num = newNum;
+        dateMap[timePoint.date].avgPerf = newAvg;
+      }
+    }
+  }
+  // Convert the map into an array
+  const output = Object.keys(dateMap).map(date => {
+    return {
+      date: date,
+      'Average Performance': dateMap[date].avgPerf
+    }
+  })
+  return output;
 }
 
 // Transform the datacache into a format that can be displayed

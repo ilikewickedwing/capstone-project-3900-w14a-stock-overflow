@@ -15,6 +15,7 @@ import DiscoverCelebrityPage from "./celebrity/DiscoverCelebrity";
 import { Snackbar } from "@material-ui/core";
 import MuiAlert from '@mui/material/Alert';
 import { createContext, useState,forwardRef } from "react";
+import PerformanceGraph from "./graph/PerformanceGraph";
 
 const Alert = forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
@@ -37,6 +38,7 @@ function App() {
   return (
     <ApiContext.Provider value={api}>
       <AlertContext.Provider value={alert}>
+        <PerformanceGraph pids="" height={500} isFriend={true} friendUid={'adf'}/>
         <BrowserRouter>
           <div className="App">
             {/* This is a custom alert component (default alert is ugly) */}
