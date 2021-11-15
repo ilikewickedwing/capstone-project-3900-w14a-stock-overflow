@@ -39,7 +39,6 @@ const Navigation = () => {
     const [queryRes, setRes] = React.useState([]);
     // textinput state
     const [search, setSearch ] = React.useState("");
-    const [currCode, setCode] = React.useState("");
 
     // handle logout
     const onLogOut = async () => {

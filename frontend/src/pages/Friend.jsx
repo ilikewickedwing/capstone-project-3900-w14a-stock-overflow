@@ -19,6 +19,8 @@ import { AlertContext } from '../App';
 import { useHistory, useParams } from 'react-router-dom';
 import axios from "axios";
 import { apiBaseUrl } from '../comp/const';
+import FriendTab from '../comp/FriendTab';
+import PfTable from '../comp/PfTable';
 
 // stub data for rankings
 function createData(name, performance, rank) {
@@ -51,6 +53,11 @@ export default function Friend() {
     // private: 0, public: 1
     const [isPublic, setPublic] = React.useState(0);
 
+    // set which current stocks and tab to view 
+    const [tab, setTab] = React.useState('');
+    const [stocks, setStocks] = React.useState([]);
+    const [selected, setGraphSelected] = React.useState([]);
+
       // on first load 
     React.useEffect(() => {   
       getUid();
@@ -61,8 +68,7 @@ export default function Friend() {
       loadPortfolios();
     },[friendUid]);
 
-    
-
+  
     const getUid = async() => {
       try {
         const resp = await axios.get(`${apiBaseUrl}/user/uid?username=${handle}`);
@@ -87,10 +93,10 @@ export default function Friend() {
     }
 
     const loadPortfolios = async () => {
-      console.log(friendUid);
       try {
         const resp = await axios.get(`${apiBaseUrl}/friends/portfolios?token=${token}&uid=${friendUid}`);
         setPortfolio(resp.data);
+        console.log(portData);
         if (resp.data.length > 0 ){
           setPublic(1);
         }
@@ -98,15 +104,6 @@ export default function Friend() {
         alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
       }
     }
-    // calls the backend to check if the page is viewable from the current user 
-    const checkPublic = async () => {
-      try {
-      // go through friends list 
-      
-      } catch (e){
-        alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
-      }
-    } 
 
   return (
     <PageBody className="font-two">
@@ -119,6 +116,21 @@ export default function Friend() {
                 <PfBar>
                   <Heading>{handle} </Heading>
                 </PfBar>
+                  {portData.map((e)=>(
+                    <FriendTab
+                      name={e.name}
+                      stocks={e.stocks}
+                      setTab={setTab} 
+                      setStocks={setStocks}
+                    / >
+                  ))}
+                  {stocks.length > 0 && (
+                    <PfTable 
+                      stocks={stocks}
+                      load={loadPortfolios}
+                      setGraphSelected={setGraphSelected}
+                    />
+                  )}
               </LeftBody>
               <RightBody elevation={10}>
                 <RightCard elevation={5}>
