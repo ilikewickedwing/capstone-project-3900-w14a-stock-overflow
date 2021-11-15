@@ -19,11 +19,7 @@ import axios from "axios";
 import { apiBaseUrl } from '../comp/const';
 import FriendTab from '../comp/FriendTab';
 import PfTable from '../comp/PfTable';
-
 import Tab from '@mui/material/Tab';
-import TabContext from '@mui/lab/TabContext';
-import TabList from '@mui/lab/TabList';
-import TabPanel from '@mui/lab/TabPanel';
 
 
 // note: friend is inclusive of celebrity profiles except celebrities are public profiles while friends are private 
