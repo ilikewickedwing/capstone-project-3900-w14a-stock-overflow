@@ -702,10 +702,12 @@ export class Database {
     const userPortos = this.database.collection('userPortos');
     const query = { ownerUid: uid };
     const userPortoResp = await userPortos.findOne(query);
+    console.dir(userPortoResp, {depth:null});
 
     const users = this.database.collection('users');
     const query2 = { uid: uid };
     const userResp = await users.findOne(query2);
+    console.dir(userResp, {depth:null});
     const perf = {
       name: userResp.username,
       performance: userPortoResp.performance,
