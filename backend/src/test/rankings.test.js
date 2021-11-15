@@ -92,7 +92,7 @@ describe('Rank multiple user portfolio performances', () => {
     expect(friend4).toBe(true);
     const friend5 = await addFriend(token3, uid1, d);
     expect(friend5).toBe(true);
-    const friend6 = await addFriend(token3, uid3, d);
+    const friend6 = await addFriend(token3, uid2, d);
     expect(friend6).toBe(true);
   })
 	it('Add stocks to portfolio', async () => {

@@ -1122,7 +1122,7 @@ app.post('/friends/add', async(req, res) => {
     } else if (resp === -5) {
         res.status(400).send({ error: "Already sent a request" });
     } else if (resp === -6) {
-        res.status(400).send({ error: "Can't add urself" });
+        res.status(400).send({ error: "Can't add yourself" });
     } else res.status(200).send(resp);
 
     return;
