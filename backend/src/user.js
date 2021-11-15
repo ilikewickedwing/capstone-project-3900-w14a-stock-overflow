@@ -15,6 +15,10 @@ export const getUserUid = async (username, database, res) => {
 }
 
 export const userPasswordchange = async (token, uid, newpassword, database, res) => {
+  if (newpassword.length === 0) {
+    res.status(400).send({ message: 'Your new password cant be empty' });
+    return;
+  }
   // Check token is valid
   const adminUid = await database.getTokenUid(token);
   if (adminUid === null) {

@@ -136,7 +136,7 @@ app.get('/user/uid', async(req, res) => {
  *        in: body
  *        required: true
  *        type: string
- *      - name: username
+ *      - name: uid
  *        description: The uid of the user to change
  *        in: body
  *        required: true

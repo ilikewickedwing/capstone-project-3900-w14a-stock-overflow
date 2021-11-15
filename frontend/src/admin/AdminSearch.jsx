@@ -7,6 +7,7 @@ import PropTypes from 'prop-types';
 
 export default function AdminSearch() {
   const [ username, setUsername ] = useState('');
+  const [ newPassword, setNewPassword ] = useState('');
   const [ userData, setUserData ] = useState({});
   const [ loadedUid, setLoadedUid ] = useState('');
   const [ showSnackBar, setShowSnackBar ] = useState(false);
@@ -56,9 +57,19 @@ export default function AdminSearch() {
     const resp = await api.postUserProfile(loadedUid, token, userData);
     if (resp.status !== 200) {
       const respJson = await resp.json();
-      alert(respJson.message);
+      alert(respJson.message, 'error');
       return;
     }
+    // Update password if needed
+    if (newPassword.length !== 0) {
+      const passwordResp = await api.userPasswordChange(token, loadedUid, newPassword);
+      if (passwordResp.status !== 200) {
+        const passwordRespJson = passwordResp.json();
+        alert(passwordRespJson.message, 'error');
+        return;
+      }
+    }
+    
     // Update data of user
     const profileResp = await api.userProfile(loadedUid, token);
     if (profileResp.status !== 200) {
@@ -116,6 +127,8 @@ export default function AdminSearch() {
             setUserData={setUserData}
             saveChanges={onSaveChanges}
             onDelete={() => setShowSnackBar(true)}
+            newPassword={newPassword}
+            setNewPassword={setNewPassword}
           /> 
         )
       }

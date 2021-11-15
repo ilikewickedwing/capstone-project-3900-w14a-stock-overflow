@@ -212,6 +212,7 @@ export class Database {
     const user = await users.findOne(query, options);
     return user !== null;
   }
+  
   /**
    * Given a username, return the uid, otherwise return null
    * @param {string} username 

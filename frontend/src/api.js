@@ -13,7 +13,21 @@ export default class API {
   userUid(username) {
     return fetch(`${ENDPOINT}/user/uid?username=${username}`);
   }
-
+  
+  userPasswordChange(token, uid, newpassword) {
+    return fetch(`${ENDPOINT}/user/passwordchange`, {
+      method: 'POST',
+      headers: {
+        'Content-Type' : 'application/json'
+      },
+      body: JSON.stringify({
+        uid: uid,
+        token: token,
+        newpassword: newpassword,
+      })
+    });
+  }
+  
   /**
    * Fetches the user profile from the backend endpoint
    * @param {string} uid 
@@ -24,6 +38,8 @@ export default class API {
   }
   
   postUserProfile(uid, token, userData) {
+    console.log("called");
+    console.log(userData);
     return fetch(`${ENDPOINT}/user/profile`, {
       method: 'POST',
       headers: {
