@@ -177,3 +177,13 @@ export const getActivity = async(token, database) => {
   }
   return resp;
 }
+
+export const getFriendActivity = async(token, friend, database) => {
+  // Return error if user not found
+  const uid = await database.getTokenUid(token);
+  if (uid === null) {
+    return -1;
+  }
+  const resp = await database.getFriendActivity(uid, friend);
+  return resp;
+}
