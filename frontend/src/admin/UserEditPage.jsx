@@ -55,6 +55,7 @@ export default function UserEditPage(props) {
       <div style={compWrapper}>
         <InputLabel>New password</InputLabel>
         <TextField
+          type="password"
           variant="outlined"
           value={props.newPassword}
           onChange={e => props.setNewPassword(e.target.value)}

@@ -33,13 +33,14 @@ export default function CelebrityRequestPage() {
     justifyContent: 'center',
     alignItems: 'center',
     boxSizing: 'border-box',
+    marginBottom: '5vh',
   }
   const widgetWrapperStyle = {
     backgroundColor: '#ffffff',
     padding: '2rem',
     borderRadius: '5px',
     width: '75vw',
-    height: '75vh',
+    minHeight: '75vh',
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',

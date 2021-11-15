@@ -47,7 +47,7 @@ export default function AdminPage() {
       flexDirection: 'column',
       justifyContent: 'center',
       alignItems: 'center',
-      width: '500px',
+      width: '75%',
     }
     const dpStyle = {
       height: '7rem',
