@@ -21,24 +21,24 @@ const api = new API();
  * @returns {Promise<Pfs | null>}
  */
 export const createPf = async(token, name, database) => {
-    // Return error if no name given
-    if (name == "") {
-        return 1;
-    }
+  // Return error if no name given
+  if (name == "") {
+    return 1;
+  }
 
-    // Return error if user not found
-    const uid = await database.getTokenUid(token);
-    if (uid === null) {
-        return false;
-    }
+  // Return error if user not found
+  const uid = await database.getTokenUid(token);
+  if (uid === null) {
+    return false;
+  }
 
-    // Create the portfolio and return the result
-    const pidResp = await database.insertPf(uid, name);
-    if (pidResp !== null) {
-        const obj = { pid: pidResp };
-        return obj;
-    }
-    return null;
+  // Create the portfolio and return the result
+  const pidResp = await database.insertPf(uid, name);
+  if (pidResp !== null) {
+    const obj = { pid: pidResp };
+    return obj;
+  }
+  return null;
 }
 
 /**
@@ -53,13 +53,13 @@ export const createPf = async(token, name, database) => {
  * @returns {Promise<array>}
  */
 export const userPfs = async(token, database) => {
-    // Return error if user not found
-    const uid = await database.getTokenUid(token);
-    if (uid === null) return 1;
+  // Return error if user not found
+  const uid = await database.getTokenUid(token);
+  if (uid === null) return 1;
 
-    // Return result of database function
-    const userPf = await database.getPfs(uid);
-    return userPf;
+  // Return result of database function
+  const userPf = await database.getPfs(uid);
+  return userPf;
 }
 
 /**
@@ -70,15 +70,15 @@ export const userPfs = async(token, database) => {
  * @returns {Promise<string | null>}
  */
 export const getPid = async(token, name, database) => {
-    // Return error if user not found
-    const uid = await database.getTokenUid(token);
-    if (uid === null) {
-        return 1;
-    }
+  // Return error if user not found
+  const uid = await database.getTokenUid(token);
+  if (uid === null) {
+    return 1;
+  }
 
-    // Return result of database function
-    const pid = await database.getPid(uid, name);
-    return pid;
+  // Return result of database function
+  const pid = await database.getPid(uid, name);
+  return pid;
 }
 
 /**
@@ -90,24 +90,24 @@ export const getPid = async(token, name, database) => {
  * @returns {Promise<Object>}
  */
 export const openPf = async(token, pid, database) => {
-    const Pf = await database.openPf(pid);
-    if (Pf === null) return Pf;
+  const Pf = await database.openPf(pid);
+  if (Pf === null) return Pf;
 
-    // Return error if user is not found
-    const uid = await database.getTokenUid(token);
-    if (uid === null) {
-        return 1;
-    }
+  // Return error if user is not found
+  const uid = await database.getTokenUid(token);
+  if (uid === null) {
+    return 1;
+  }
 
-    // Return error if portfolio not owned by user
-    const verify = await verifyPf(uid, pid, database);
-    if (!verify) return 2;
+  // Return error if portfolio not owned by user
+  const verify = await verifyPf(uid, pid, database);
+  if (!verify) return 2;
 
-    const friend = await checkAccess(uid, pid, database);
-    if (friend) return 3;
+  const friend = await checkAccess(uid, pid, database);
+  if (friend) return 3;
 
-    // Return result of database function
-    return Pf;
+  // Return result of database function
+  return Pf;
 }
 
 /**
@@ -120,30 +120,30 @@ export const openPf = async(token, pid, database) => {
  * @returns 
  */
 export const editPf = async(token, pid, name, database) => {
-    // Return error if name is not valid
-    if (name == '') {
-        return 2;
-    }
+  // Return error if name is not valid
+  if (name == '') {
+    return 2;
+  }
 
-    // Return error if user is not found
-    const uid = await database.getTokenUid(token);
-    if (uid === null) {
-        return 3;
-    }
+  // Return error if user is not found
+  const uid = await database.getTokenUid(token);
+  if (uid === null) {
+    return 3;
+  }
 
-    // Return error if pid is not valid
-    const Pf = await database.openPf(pid);
-    if (Pf == null) {
-        return 4;
-    }
+  // Return error if pid is not valid
+  const Pf = await database.openPf(pid);
+  if (Pf == null) {
+    return 4;
+  }
 
-    // Return error if portfolio not owned by user
-    const verify = await verifyPf(uid, pid, database);
-    if (!verify) return 6;
+  // Return error if portfolio not owned by user
+  const verify = await verifyPf(uid, pid, database);
+  if (!verify) return 6;
 
-    // Return result of database function
-    const update = await database.editPf(uid, pid, name);
-    return update;
+  // Return result of database function
+  const update = await database.editPf(uid, pid, name);
+  return update;
 }
 
 /**
@@ -154,36 +154,36 @@ export const editPf = async(token, pid, name, database) => {
  * @returns {Promise<boolean>}
  */
 export const verifyPf = async(uid, pid, database) => {
-    const userPfs = await database.getPfs(uid, database);
-    let check = 0;
+  const userPfs = await database.getPfs(uid, database);
+  let check = 0;
 
-    for (let i = 0; i < userPfs.length; i++) {
-        if (userPfs[i].pid === pid) {
-            check = 1;
-            break;
-        }
+  for (let i = 0; i < userPfs.length; i++) {
+    if (userPfs[i].pid === pid) {
+      check = 1;
+      break;
     }
+  }
 
 
 
-    // Check that the user is an admin
-    const user = await database.getUser(uid);
-    if (user.userType === 'admin') check = 1;
+  // Check that the user is an admin
+  const user = await database.getUser(uid);
+  if (user.userType === 'admin') check = 1;
 
-    return (check === 1);
+  return (check === 1);
 }
 
-export const checkAccess = async(uid, pid, database) => {
-    const friends = await database.getFriends(uid);
-    for (let i = 0; i < friends.length; i++) {
-        const pfs = await database.getPfs(friends[i].uid);
-        for (let j = 0; j < pfs.length; j++) {
-            if (pfs[j].pid === pid) return true;
-        }
+/* export const checkAccess = async(uid, pid, database) => {
+  const friends = await database.getFriends(uid);
+  for (let i = 0; i < friends.length; i++) {
+    const pfs = await database.getPfs(friends[i].uid);
+    for (let j = 0; j < pfs.length; j++) {
+      if (pfs[j].pid === pid) return true;
     }
+  }
 
-    return false;
-}
+  return false;
+} */
 
 /**
  * Deletes portfolio from database
@@ -192,58 +192,58 @@ export const checkAccess = async(uid, pid, database) => {
  * @returns {Promise<boolean>}
  */
 export const deletePf = async(token, pid, database) => {
-    // Return error if user is not found
-    const uid = await database.getTokenUid(token);
-    if (uid === null) {
-        return 2;
-    }
+  // Return error if user is not found
+  const uid = await database.getTokenUid(token);
+  if (uid === null) {
+    return 2;
+  }
 
-    // Return error if pid is not valid
-    // Return error if pid belongs to watchlist
-    const Pf = await database.openPf(pid);
-    if (Pf == null) {
-        return 3;
-    } else if (Pf.name == "Watchlist") {
-        return 4;
-    }
+  // Return error if pid is not valid
+  // Return error if pid belongs to watchlist
+  const Pf = await database.openPf(pid);
+  if (Pf == null) {
+    return 3;
+  } else if (Pf.name == "Watchlist") {
+    return 4; 
+  }
 
-    // Return error if portfolio not owned by user
-    const verify = await verifyPf(uid, pid, database);
-    if (!verify) return -1;
+  // Return error if portfolio not owned by user
+  const verify = await verifyPf(uid, pid, database);
+  if (!verify) return -1;
 
-    // Return result of database function
-    const del = await database.deletePf(uid, pid);
-    return del;
+  // Return result of database function
+  const del = await database.deletePf(uid, pid);
+  return del;
 }
 
 export const openFriendPf = async(token, uid, database) => {
-    // Return error if user is not found
-    const userUid = await database.getTokenUid(token);
-    if (userUid === null) {
-        return 1;
+  // Return error if user is not found
+  const userUid = await database.getTokenUid(token);
+  if (userUid === null) {
+    return 1;
+  }
+
+  if (!await database.checkFriend(userUid, uid)) {
+    const celebrities = await database.getAllCelebrityUsers();
+    const filtered = celebrities.filter((e) => e.uid === uid);
+    if (filtered.length === 0) {
+      return 2;
     }
+  }
 
-    if (!await database.checkFriend(userUid, uid)) {
-        const celebrities = await database.getAllCelebrityUsers();
-        const filtered = celebrities.filter((e) => e.uid === uid);
-        if (filtered.length === 0) {
-            return 2;
-        }
-    }
+  const pfs = await database.getPfs(uid);
 
-    const pfs = await database.getPfs(uid);
+  if (pfs === 2) {
+    return 3;
+  }
 
-    if (pfs === 2) {
-        return 3;
-    }
+  let result = [];
 
-    let result = [];
+  for (let i = 0; i < pfs.length; i++) {
+    const e = pfs[i].pid;
+    const Pf = await database.openPf(e);
+    result.push(Pf);
+  }
 
-    for (let i = 0; i < pfs.length; i++) {
-        const e = pfs[i].pid;
-        const Pf = await database.openPf(e);
-        result.push(Pf);
-    }
-
-    return result;
+  return result;
 }

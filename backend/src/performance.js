@@ -358,22 +358,22 @@ export const getAllRankings = async (database) => {
 // }
 
 export const getFriendRankings = async (token, database) => {
-  // console.log('FriendRankings2');
+  // console.log('FriendRankings');
   // Return error if user is not found
   const uid = await database.getTokenUid(token);
   if (uid == null) {
     return -2;
   }
   const friends = await database.getFriends(uid);
-  // console.log('Friends are ' + friends);
+  // console.dir(friends, {depth : null});
   const friendPerf = [];
   for (let i = 0; i < friends.length; i++) {
-    // console.log('Now searching for ' + friends[i]);
-    const friend = await database.getUserPerf(friends[i]);
-    // console.log(friend);
+    // console.dir(friends[i], {depth : null});
+    const friend = await database.getUserPerf(friends[i].uid);
+    console.log(friend);
     friendPerf.push({
       rank: 0,
-      uid: friends[i],
+      uid: friends[i].uid,
       name: friend.name,
       performance: friend.performance
     })
