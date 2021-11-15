@@ -21,3 +21,13 @@ Flex week.
 
 Week 7
 Changed api from Alphavantage to Tradier since rate limits too much. Also worked one portfolio table. Implemented calls to Tradier with Richard.
+
+Week 8
+Started backend for friends, community sentiment and activity.
+finished: friend add and list
+Todo: complete the backend of community, endpoint implementation and write tests
+
+Week 9
+Finsihed all the backend for friends, community sentiment, activity and their endpoints. Wrote endpoint to get all portfolios and their datas at once.
+Helped frontend with many bugs. Partially implemented activities for frontend.
+TODO: rigorous testing of community feed; frontend blackbox testing

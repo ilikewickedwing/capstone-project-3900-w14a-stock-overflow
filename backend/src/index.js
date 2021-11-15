@@ -1497,7 +1497,7 @@ app.get('/activity/all', async(req, res) => {
  *       200:
  *         description: Successfully liked activity
  *       401:
- *         description: Invalid token
+ *         description: Invalid token, Not a friend/celebrity
  */
  app.get('/activity/friend', async(req, res) => {
   const { token, friendId } = req.query;

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { ApiContext } from "../api";
 
 import { 
   PfBody, 
@@ -30,11 +31,12 @@ import CommentIcon from '@mui/icons-material/Comment';
 
 // note: friend is inclusive of celebrity profiles except celebrities are public profiles while friends are private 
 export default function Friend() {
-    let history = useHistory();
-    const alert = React.useContext(AlertContext);
-    const { handle } = useParams();
-    const token = localStorage.getItem('token');
-    const uid = localStorage.getItem('uid');
+  const api = React.useContext(ApiContext);
+  let history = useHistory();
+  const alert = React.useContext(AlertContext);
+  const { handle } = useParams();
+  const token = localStorage.getItem('token');
+  const uid = localStorage.getItem('uid');
 
     const [friendUid, setUid] = React.useState('');
     // list of portfolios of all the portfolios given a uid 
@@ -53,6 +55,8 @@ export default function Friend() {
     // Store friends activities
     const [activity, setActivity] = React.useState([]);
 
+    const [followers, setFollowers] = React.useState([]);
+
       // on first load 
     React.useEffect(() => {   
       getUid();
@@ -63,10 +67,28 @@ export default function Friend() {
       loadPortfolios();
       loadActivities();
       getUserType();
+      loadDiscover();
 
     },[friendUid]);
 
+    const loadDiscover = async () => {
+      try {
+        const resp = await axios.get(`${apiBaseUrl}/celebrity/discover`);
+        setFollowers(resp.data.followers[friendUid]);
+      } 
+      catch (e) {
+        alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
+      }
+    }
 
+    const followCeleb = async () => {
+      try {
+        await axios.post(`${apiBaseUrl}/celebrity/follow`,{token, isFollow: !followers.includes(uid), celebUid: friendUid});
+        loadDiscover();
+      } catch (e) {
+        alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
+      }
+    }
     const loadActivities = async () => {
       if (friendUid === "") {
         return;
@@ -77,8 +99,7 @@ export default function Friend() {
         list.push(... resp.data);
         setActivity(list);
       } catch (e) {
-        console.log(e);
-        // alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
+        alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
       }
     }
 
@@ -88,8 +109,10 @@ export default function Friend() {
       }
       try {
         const resp = await axios.get(`${apiBaseUrl}/user/profile?uid=${friendUid}&token=${token}`);
-        console.log(resp.data);
-        
+        setUserType(resp.data.userType);
+        if (resp.data.userType ==="celebrity"){
+          loadDiscover();
+        }
       } catch (e) {
         alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
       }
@@ -135,8 +158,7 @@ export default function Friend() {
           setPublic(1);
         }
       } catch (e) {
-        console.log(e);
-        // alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
+        alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
       }
     }
 
@@ -160,6 +182,11 @@ export default function Friend() {
                 <LeftBody elevation={10}>
                 <PfBar>
                   <Heading>{handle} </Heading>
+                  {userType==="celebrity" && 
+                    <Button variant="outlined" color="secondary" id="addFriend" onClick={followCeleb}> 
+                      {`${followers.includes(uid) ? 'Unfollow' : 'Follow'}`}
+                    </Button>
+                  }
                 </PfBar>
                   {portData.map((e)=>(
                       <FriendTab

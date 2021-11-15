@@ -1472,7 +1472,7 @@ export class Database {
   async getFriendActivity(uid, friend) {
     if (!await this.checkFriend(uid, friend)) {
       const celebrities = await this.getAllCelebrityUsers();
-      const filtered = celebrities.filter((e) => e.uid === uid);
+      const filtered = celebrities.filter((e) => e.uid === friend);
       if (filtered.length === 0) {
         return -2;
       }
