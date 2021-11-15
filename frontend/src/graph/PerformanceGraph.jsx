@@ -6,8 +6,9 @@ import { ApiContext } from "../api";
 import { transformTimeStr } from "./StocksGraph";
 
 // Used for testing
-const makeMockResponse = () => {
+const makeMockResponse = (pid) => {
   return {
+    pid: pid,
     name: `Porfolio ${Math.floor(Math.random() * 100)}`,
     value: {
       performance: [
@@ -40,12 +41,21 @@ const makeMockResponse = () => {
   }
 }
 
+const makeMockFriendResponse = () => {
+  const output = []
+  for (let i = 0; i < 5; i++) {
+    output.push(makeMockResponse(i.toString()));
+  }
+  return output;
+}
+
 export default function PerformanceGraph(props) {
   const [ dataCache, setDataCache ] = useState({});
   const [ pidToName, setPidToName ] = useState({});
   const api = useContext(ApiContext);
   useEffect(() => {
     const token = localStorage.getItem('token');
+    
     // Fetch the portfolio performance for each of the portfolios that arent cached
     const callApi = async () => {
       const dataCacheCopy = Object.assign({}, dataCache);
@@ -65,7 +75,33 @@ export default function PerformanceGraph(props) {
       setDataCache(dataCacheCopy);
       setPidToName(pidToNameCopy);
     }
-    callApi();
+    
+    // Fetch data if in friend mode
+    const callFriendApi = async () => {
+      const dataCacheCopy = Object.assign({}, dataCache);
+      const pidToNameCopy = Object.assign({}, pidToName);
+      const resp = await api.friendsPortfolios(token, props.friendUid);
+      if (resp.status === 200) {
+        const portfolios = await resp.json();
+        // Loop through each of the pids
+        for (const pid of props.pids.split(",")) {
+          for (const pf of portfolios) {
+            if (pf.pid === pid) {
+              dataCacheCopy[pid] = pf.value.performance;
+              pidToNameCopy[pid] = pf.name;
+              break;
+            }
+          }
+        }
+        setDataCache(dataCacheCopy);
+        setPidToName(pidToNameCopy);
+      }
+    }
+    if (props.isFriend === true) {
+      callFriendApi();
+    } else {
+      callApi();
+    }
     // Note: Please dont put dataCache or pidToName in the dependency list or it
     // leads to a continuous loop
   }, [api, props.pids]);
@@ -108,6 +144,10 @@ PerformanceGraph.propTypes = {
   // pids of the portfolio. For multiple portfolios, separate them with a comma
   pids: PropTypes.string,
   height: PropTypes.number,
+  // Set this to true if viewing a friends graph
+  isFriend: PropTypes.bool,
+  // This is the friends uid - you can leave this blank if viewing your own graph
+  friendUid: PropTypes.string,
 }
 
 // Transform the datacache into a format that can be displayed
