@@ -28,14 +28,13 @@ function createData(name, performance, rank) {
 }
 
 const rows = [
-  createData('Frozen yoghurt', 159, 6.0),
-  createData('Ice cream sandwich', 237, 9.0),
-  createData('Eclair', 262, 16.0),
-  createData('Cupcake', 305, 3.7),
-  createData('Gingerbread', 356, 16.0),
+  createData('richard_mo', '+400', 1),
+  createData('elon_musk', '+150', 2),
+  createData('user1', "+100", 3),
+  createData('dragonalxd', "+59", 4),
 ];
 
-const myRanking = createData('dollalilz', 300, 99999);
+const myRanking = createData('dollalilz', "-300%", 99999);
 
 // note: friend is inclusive of celebrity profiles except celebrities are public profiles while friends are private 
 export default function Friend() {
@@ -54,9 +53,10 @@ export default function Friend() {
     const [isPublic, setPublic] = React.useState(0);
 
     // set which current stocks and tab to view 
-    const [tab, setTab] = React.useState('');
+    const [tab, setTab] = React.useState('Summary');
     const [stocks, setStocks] = React.useState([]);
     const [selected, setGraphSelected] = React.useState([]);
+    const [rankings, setRankings] = React.useState(rows);
 
       // on first load 
     React.useEffect(() => {   
@@ -66,6 +66,7 @@ export default function Friend() {
     // load based on friendUId getting awaited 
     React.useEffect(() => {   
       loadPortfolios();
+      getRanking();
     },[friendUid]);
 
   
@@ -78,6 +79,7 @@ export default function Friend() {
         } 
         setUid(resp.data.uid); 
       } catch (e){
+        history.push('/oops');
         alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
       }
     }
@@ -94,15 +96,32 @@ export default function Friend() {
 
     const loadPortfolios = async () => {
       try {
+        let list = [];
+        const summary = {
+          name: "Summary",
+          stocks: []
+        }
+        list.push(summary);
         const resp = await axios.get(`${apiBaseUrl}/friends/portfolios?token=${token}&uid=${friendUid}`);
-        setPortfolio(resp.data);
-        console.log(portData);
+        list.push(...resp.data);
+        setPortfolio(list);
+        console.dir(list, {depth:null});
         if (resp.data.length > 0 ){
           setPublic(1);
         }
       } catch (e) {
         alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
       }
+    }
+
+    const getRanking = async () => {
+      // try {
+      //   const resp = await axios.get(`${apiBaseUrl}/rankings/friends?token=${token}`);
+      //   console.log(resp);
+      //   // todo set ranking of the new thing 
+      // } catch (e) {
+      //   alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
+      // }
     }
 
   return (
@@ -118,12 +137,15 @@ export default function Friend() {
                 </PfBar>
                   {portData.map((e)=>(
                     <FriendTab
+                      key={e.name}
                       name={e.name}
                       stocks={e.stocks}
                       setTab={setTab} 
                       setStocks={setStocks}
                     / >
                   ))}
+                  < br/> 
+                  <h3>{tab}</h3>
                   {stocks.length > 0 && (
                     <PfTable 
                       stocks={stocks}
@@ -139,12 +161,12 @@ export default function Friend() {
                   </div>
                   <h3 style={{textAlign:'center'}}>Ranking amongst friends</h3>
                   <RankTable
-                    rows={rows}
+                    rows={rankings}
                     myRanking={myRanking}
                   />
                 </RightCard>
                 <RightCard elevation={5}>
-                  <h3 style={{textAlign:'center'}}>Friend Activity</h3>
+                  <h3 style={{textAlign:'center'}}>{handle}'s Activity</h3>
                 </RightCard>
               </RightBody>
             </PfBody>

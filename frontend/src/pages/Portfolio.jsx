@@ -111,7 +111,6 @@ const Portfolio = () => {
   
   const getWatchlist = async () => {
     let array = [];
-    const token = localStorage.getItem('token');
     // get pid for the watchlist
     try {
       const res = await axios.get(`${apiBaseUrl}/user/portfolios/getPid`, {
