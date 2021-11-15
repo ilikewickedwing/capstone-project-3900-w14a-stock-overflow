@@ -118,7 +118,7 @@ const Navigation = () => {
             <Autocomplete
                 disablePortal
                 options={queryRes}
-                sx={{ width: 300 }}
+                sx={{ width: '100%' }}
                 filterOptions={(options, params) => {
                 const filtered = filter(options, params);
         

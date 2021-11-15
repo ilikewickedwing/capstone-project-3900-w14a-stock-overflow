@@ -157,6 +157,7 @@ export default function Friend() {
                       stocks={stocks}
                       load={loadPortfolios}
                       setGraphSelected={setGraphSelected}
+                      isFriend={1}
                     />
                   )}
               </LeftBody>

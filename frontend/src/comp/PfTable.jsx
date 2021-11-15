@@ -183,7 +183,8 @@ const style = {
 
 const EnhancedTableToolbar = (props) => {
   const alert = React.useContext(AlertContext);
-  const { numSelected, selected, load } = props;
+  const { numSelected, selected, load, isFriend } = props;
+  
   const { pid } = useParams();
   const token = localStorage.getItem('token');
 
@@ -281,7 +282,7 @@ const EnhancedTableToolbar = (props) => {
         >
         </Typography>
       )}
-      {numSelected === 1 &&
+      {numSelected === 1 && isFriend !== 1 &&
         <Tooltip title="Edit">
           <IconButton onClick={editClick}>
             <EditIcon /> 
@@ -349,10 +350,11 @@ const EnhancedTableToolbar = (props) => {
 EnhancedTableToolbar.propTypes = {
   numSelected: PropTypes.number.isRequired,
   selected: PropTypes.array.isRequired,
-  load: PropTypes.func.isRequired
+  load: PropTypes.func.isRequired,
+  isFriend: PropTypes.number
 };
 
-export default function PfTable({stocks, load, setGraphSelected}) {
+export default function PfTable({stocks, load, setGraphSelected, isFriend}) {
   const alert = React.useContext(AlertContext);
   const [order, setOrder] = React.useState("asc");
   const [orderBy, setOrderBy] = React.useState("prices");
@@ -467,6 +469,7 @@ export default function PfTable({stocks, load, setGraphSelected}) {
           numSelected={selected.length}
           selected={selected} 
           load = {load}
+          isFriend={isFriend}
         />
         <TableContainer>
           <Table

@@ -14,9 +14,9 @@ const RankTable = ({rows, myRanking}) => {
         <Table aria-label="simple table">
             <TableHead>
             <TableRow>
-                <TableCell>Friend</TableCell>
-                <TableCell align="right">% Peformance</TableCell>
-                <TableCell align="right">Rank</TableCell>
+                <TableCell style={{fontWeight:"bold"}}>Friend</TableCell>
+                <TableCell style={{fontWeight:"bold"}} align="right">% Peformance</TableCell>
+                <TableCell style={{fontWeight:"bold"}} align="right">Rank</TableCell>
             </TableRow>
             </TableHead>
             <TableBody>
@@ -30,7 +30,9 @@ const RankTable = ({rows, myRanking}) => {
                 <TableCell align="right">#{row.rank}</TableCell>
                 </TableRow>
             ))}
-            my ranking
+            <TableRow>
+                <TableCell component="th" scope="row" style={{fontWeight:"bold"}}>My Ranking</TableCell>
+            </TableRow>
             <TableRow>
                 <TableCell component="th" scope="row">@{myRanking.name}</TableCell>
                 <TableCell align="right">{myRanking.performance}</TableCell>

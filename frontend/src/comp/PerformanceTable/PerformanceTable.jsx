@@ -20,8 +20,6 @@ const PerformanceTable = ({portfolios,setPerfSelected}) => {
   const isSelected = (name) => selected.indexOf(name) !== -1;
 
   const handleClick = (event, name) => {
-    console.log('handking click');
-    console.log(name);
     const selectedIndex = selected.indexOf(name);
     let newSelected = [];
 
