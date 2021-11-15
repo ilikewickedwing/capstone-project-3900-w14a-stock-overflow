@@ -35,6 +35,7 @@ export default function UserEditPage(props) {
       <div style={compWrapper}>
         <InputLabel>Username</InputLabel>
         <TextField
+          variant="outlined"
           value={props.userData.username}
           onChange={e => setUsername(e.target.value)}
         />
@@ -42,6 +43,7 @@ export default function UserEditPage(props) {
       <div style={compWrapper}>
         <InputLabel>User type</InputLabel>
         <Select
+          variant="outlined"
           value={props.userData.userType}
           onChange={e => setUserType(e.target.value)}
         >
@@ -51,12 +53,31 @@ export default function UserEditPage(props) {
         </Select>
       </div>
       <div style={compWrapper}>
+        <InputLabel>New password</InputLabel>
+        <TextField
+          type="password"
+          variant="outlined"
+          value={props.newPassword}
+          onChange={e => props.setNewPassword(e.target.value)}
+        />
+      </div>
+      <div style={compWrapper}>
         <Button 
+          style={{ backgroundColor: '#58BF71' }}
           color="secondary"
           variant="contained"
           onClick={() => props.saveChanges()}
         >
           Save Changes
+        </Button>
+      </div>
+      <div style={compWrapper}>
+        <Button 
+          color="secondary"
+          variant="contained"
+          onClick={() => props.onDelete()}
+        >
+          Delete Account
         </Button>
       </div>
     </div>
@@ -66,5 +87,8 @@ export default function UserEditPage(props) {
 UserEditPage.propTypes = {
   userData: PropTypes.object,
   setUserData: PropTypes.func,
+  newPassword: PropTypes.string,
+  setNewPassword: PropTypes.func,
   saveChanges: PropTypes.func,
+  onDelete: PropTypes.func,
 }

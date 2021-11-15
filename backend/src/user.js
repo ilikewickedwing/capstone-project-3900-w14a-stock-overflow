@@ -2,6 +2,7 @@
   This file manages all user specific functions
 */
 
+import { encryptPassword } from "./auth";
 import { Database } from "./database";
 
 export const getUserUid = async (username, database, res) => {
@@ -11,6 +12,33 @@ export const getUserUid = async (username, database, res) => {
     return
   }
   res.status(200).send({ uid: uid });
+}
+
+export const userPasswordchange = async (token, uid, newpassword, database, res) => {
+  if (newpassword.length === 0) {
+    res.status(400).send({ message: 'Your new password cant be empty' });
+    return;
+  }
+  // Check token is valid
+  const adminUid = await database.getTokenUid(token);
+  if (adminUid === null) {
+    res.status(401).send({ message: 'Invalid token' });
+    return;
+  }
+  // Get the uid to change
+  const userData = await database.getUser(uid);
+  if (userData === null) {
+    res.status(400).send({ message: `User with uid ${uid} doesnt exist` });
+    return;
+  }
+  const adminData = await database.getUser(adminUid);
+  // Only an admin or the user itself can change their password
+  if (adminData.uid !== uid && adminData.userType !== 'admin') {
+    res.status(403).send({ message: 'You do not have the correct privileges' });
+    return;
+  }
+  const resp = await database.updatePassword(uid, encryptPassword(newpassword));
+  res.status(200).send();
 }
 
 /**
@@ -25,7 +53,10 @@ export const getUserProfile = async (uid, token, database) => {
   const userData = await database.getUser(uid);
   // Checks that either the person calling owns the profile or
   // the person is an admin, or the user searched is a celebrity
-  if (ownerUid !== uid && ownerData.userType !== 'admin' && userData.userType !== 'celebrity') {
+  if (
+    ownerUid !== uid && ownerData !== null && ownerData.userType !== 'admin' 
+    && userData !== null && userData.userType !== 'celebrity'
+  ) {
     return null;
   }
   return userData;

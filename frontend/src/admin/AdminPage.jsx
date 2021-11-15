@@ -1,4 +1,4 @@
-import { Button } from "@material-ui/core";
+import { Button, Tab, Tabs } from "@material-ui/core";
 import { useContext, useEffect, useState } from "react"
 import { useHistory } from "react-router";
 import { ApiContext } from "../api";
@@ -8,12 +8,13 @@ import ExitToAppRoundedIcon from '@material-ui/icons/ExitToAppRounded';
 import FileDownload from "../files/FileDownload";
 import { AlertContext } from "../App";
 import AdminSearch from "./AdminSearch";
+import PropTypes from 'prop-types';
 
-const callApi = async (api, token, setResponse) => {
+const callApi = async (api, token, setResponse, alert) => {
   const resp = await api.getAdminCelebrityRequests(token);
   const respJson = await resp.json();
   if (resp.status !== 200) {
-    alert(respJson.error, 'error');
+    console.log(respJson.error);
     return
   }
   setResponse(respJson);
@@ -21,6 +22,7 @@ const callApi = async (api, token, setResponse) => {
 
 export default function AdminPage() {
   const [ response, setResponse ] = useState({});
+  const [ tabValue, setTabValue ] = useState(0);
   const api = useContext(ApiContext);
   const alert = useContext(AlertContext);
   const history = useHistory();
@@ -31,7 +33,7 @@ export default function AdminPage() {
       alert('No token saved. Please log in','error');
       history.push('/');
     }
-    callApi(api, token, setResponse);
+    callApi(api, token, setResponse, alert);
   }, [history, api]);
   
   const renderRequests = () => {
@@ -45,7 +47,7 @@ export default function AdminPage() {
       flexDirection: 'column',
       justifyContent: 'center',
       alignItems: 'center',
-      width: '500px',
+      width: '75%',
     }
     const dpStyle = {
       height: '7rem',
@@ -90,7 +92,7 @@ export default function AdminPage() {
             return;
           }
           // Get updated data
-          callApi(api, token, setResponse);
+          callApi(api, token, setResponse, alert);
         }
         
         const onReject = async () => {
@@ -100,7 +102,7 @@ export default function AdminPage() {
             return;
           }
           // Get updated data
-          callApi(api, token, setResponse);
+          callApi(api, token, setResponse, alert);
         }
         
         return (
@@ -167,15 +169,35 @@ export default function AdminPage() {
             Log Out
         </LogoutButton >
       </div>
-      <div style={{ display: 'flex' }}>
+      <Tabs value={tabValue} onChange={(e, v) => setTabValue(v)}>
+        <Tab label="Celebrity Requests"/>
+        <Tab label="User Search"/>
+      </Tabs>
+      <TabPanel value={tabValue} index={0}>
         <div style={{ width: '100%' }} >
           <div className='font-two' style={requestsHeaderStyle}>Celebrity Requests</div>
           <div style={requestsWrapStyle}>
             { renderRequests() }
           </div>
         </div>
+      </TabPanel>
+      <TabPanel value={tabValue} index={1}>
         <AdminSearch/>
-      </div>
+      </TabPanel>
     </div>
   )
+}
+
+function TabPanel (props) {
+  return (
+    <div hidden={props.index !== props.value}>
+      { props.children }
+    </div>
+  )
+}
+
+TabPanel.propTypes = {
+  value: PropTypes.number,
+  index: PropTypes.number,
+  children: PropTypes.any,
 }

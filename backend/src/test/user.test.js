@@ -1,8 +1,9 @@
 import { Database } from "../database";
-import { authRegister } from "../auth";
+import { authLogin, authRegister } from "../auth";
 import { postUserProfile, getUserProfile } from '../user';
 import { app, database } from '../index';
 import request from 'supertest';
+import { nanoid } from "nanoid";
 
 describe('Get uid endpoint test', () => {
   beforeAll(async () => {
@@ -17,6 +18,80 @@ describe('Get uid endpoint test', () => {
   it('404 on invalid username', async () => {
     const response = await request(app).get(`/user/uid?username=Ashleybasdfdsaob`).send();
     expect(response.statusCode).toBe(404);
+  })
+  // Close the database after all tests
+  afterAll(async () => {
+    await database.disconnect();
+  })
+})
+
+describe('User password change endpoint test', () => {
+  beforeAll(async () => {
+    await database.connect();
+  })
+  it('200 on changing password (User themselves)', async () => {
+    const username = nanoid();
+    const resp = await authRegister(username, 'strongpassword', database);
+    const response = await request(app).post(`/user/passwordchange`).send({
+      token: resp.token,
+      uid: resp.uid,
+      newpassword: 'password2'
+    });
+    expect(response.statusCode).toBe(200);
+    const resp2 = await authLogin(username, 'password2', database);
+    expect(resp2).not.toBe(null);
+  })
+  it('200 on changing password (Admin)', async () => {
+    const adminUid = await database.insertUser(nanoid(), 'admin');
+    const adminToken = await database.insertToken(adminUid);
+    const username = nanoid();
+    const resp = await authRegister(username, 'strongpassword', database);
+    const response = await request(app).post(`/user/passwordchange`).send({
+      token: adminToken,
+      uid: resp.uid,
+      newpassword: 'password2'
+    });
+    expect(response.statusCode).toBe(200);
+    const resp2 = await authLogin(username, 'password2', database);
+    expect(resp2).not.toBe(null);
+  })
+  it('401 on invalid token', async () => {
+    const username = nanoid();
+    const resp = await authRegister(username, 'strongpassword', database);
+    const response = await request(app).post(`/user/passwordchange`).send({
+      token: 'asdfads',
+      uid: resp.uid,
+      newpassword: 'password2'
+    });
+    expect(response.statusCode).toBe(401);
+    const resp2 = await authLogin(username, 'strongpassword', database);
+    expect(resp2).not.toBe(null);
+  })
+  it('403 on invalid privileges', async () => {
+    const adminUid = await database.insertUser(nanoid());
+    const adminToken = await database.insertToken(adminUid);
+    const username = nanoid();
+    const resp = await authRegister(username, 'strongpassword', database);
+    const response = await request(app).post(`/user/passwordchange`).send({
+      token: adminToken,
+      uid: resp.uid,
+      newpassword: 'password2'
+    });
+    expect(response.statusCode).toBe(403);
+    const resp2 = await authLogin(username, 'strongpassword', database);
+    expect(resp2).not.toBe(null);
+  })
+  it('400 on invalid user', async () => {
+    const username = nanoid();
+    const resp = await authRegister(username, 'strongpassword', database);
+    const response = await request(app).post(`/user/passwordchange`).send({
+      token: resp.token,
+      uid: 'asdfasd',
+      newpassword: 'password2'
+    });
+    expect(response.statusCode).toBe(400);
+    const resp2 = await authLogin(username, 'strongpassword', database);
+    expect(resp2).not.toBe(null);
   })
   // Close the database after all tests
   afterAll(async () => {

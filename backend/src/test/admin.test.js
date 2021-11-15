@@ -242,3 +242,70 @@ describe('Post Admin Celebrity Handle Request endpoint test', () => {
     await database.disconnect();
   })
 })
+
+describe('Admin User Delete endpoint test', () => {
+  beforeAll(async () => {
+    await database.connect();
+  })
+  it('200 on making valid request', async () => {
+    // Make user
+    const uid = await database.insertUser(nanoid());
+    // Make admin
+    const adminUid = await database.insertUser(nanoid(), 'admin');
+    const adminToken = await database.insertToken(adminUid);
+    const response = await request(app).delete(`/admin/user/delete`).send({
+      token: adminToken,
+      uid: uid,
+    });
+    expect(response.statusCode).toBe(200);
+    // Check user is deleted
+    const userData = await database.getUser(uid);
+    expect(userData).toBe(null);
+  })
+  it('401 on invalid token', async () => {
+    // Make user
+    const uid = await database.insertUser(nanoid());
+    // Make admin
+    const adminUid = await database.insertUser(nanoid(), 'admin');
+    const adminToken = await database.insertToken(adminUid);
+    const response = await request(app).delete(`/admin/user/delete`).send({
+      token: 'adsfasdf',
+      uid: uid,
+    });
+    expect(response.statusCode).toBe(401);
+    // Check user is not deleted
+    const userData = await database.getUser(uid);
+    expect(userData).not.toBe(null);
+  })
+  it('403 when user is not an admin', async () => {
+    // Make user
+    const uid = await database.insertUser(nanoid());
+    // Make admin
+    const adminUid = await database.insertUser(nanoid());
+    const adminToken = await database.insertToken(adminUid);
+    const response = await request(app).delete(`/admin/user/delete`).send({
+      token: adminToken,
+      uid: uid,
+    });
+    expect(response.statusCode).toBe(403);
+    // Check user is not deleted
+    const userData = await database.getUser(uid);
+    expect(userData).not.toBe(null);
+  })
+  it('400 when user doesnt exist', async () => {
+    // Make user
+    const uid = await database.insertUser(nanoid());
+    // Make admin
+    const adminUid = await database.insertUser(nanoid(), 'admin');
+    const adminToken = await database.insertToken(adminUid);
+    const response = await request(app).delete(`/admin/user/delete`).send({
+      token: adminToken,
+      uid: 'adfasdfas',
+    });
+    expect(response.statusCode).toBe(400);
+  })
+  // Close the database after all tests
+  afterAll(async () => {
+    await database.disconnect();
+  })
+})

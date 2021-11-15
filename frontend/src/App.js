@@ -42,6 +42,7 @@ function App() {
             {/* This is a custom alert component (default alert is ugly) */}
             <Snackbar 
               open={showAlert}
+              onClose={() => setShowAlert(false)}
               anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
               autoHideDuration={6000} 
             >

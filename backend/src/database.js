@@ -212,6 +212,7 @@ export class Database {
     const user = await users.findOne(query, options);
     return user !== null;
   }
+  
   /**
    * Given a username, return the uid, otherwise return null
    * @param {string} username 
@@ -383,6 +384,21 @@ export class Database {
       password: password
     })
   }
+  
+  /**
+   * Updates password into the database
+   * @param {string} uid 
+   * @param {string} password 
+   */
+  async updatePassword(uid, password) {
+    const passwords = this.database.collection('passwords');
+    const query = { ownerUid: uid };
+    const result = await passwords.updateOne(query, { $set: {
+      password: password
+    }})
+    return result.modifiedCount !== 0;
+  }
+  
   /**
    * deletes a password from the database and returns whether it was successful.
    * Note: Make sure the user is also deleted otherwise you will be left with a user

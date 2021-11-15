@@ -105,6 +105,34 @@ export const postAdminCelebrityHandlerequest = async (token, approve, rid, datab
   res.status(200).send();
 }
 
+export const adminUserDelete = async (token, uid, database, res) => {
+  const adminUid = await database.getTokenUid(token);
+  if (adminUid === null) {
+    res.status(401).send({ error: 'invalid token' });
+    return;
+  }
+  const adminData = await database.getUser(adminUid);
+  if (adminData.userType !== 'admin') {
+    res.status(403).send({ error: 'You must be an admin to delete a user account' });
+    return;
+  }
+  // Check user exists
+  const userData = await database.getUser(uid);
+  if (userData === null) {
+    res.status(400).send({ error: `User with uid ${uid} does not exist` });
+    return;
+  }
+  // Delete user
+  const portfolios = await database.getPfs(uid);
+  for (let i = 0; i < portfolios.length; i++) {
+    await database.deletePf(uid, portfolios[i].pid);
+  }
+  await database.deleteUser(uid);
+  await database.deletePassword(uid);
+  await database.deleteAllTokensOfUser(uid);
+  res.status(200).send();
+}
+
 // Makes sure that there is at least one admin
 export const insertDefaultAdmin =  async (database) => {
   const uid = await database.getUid(DEFAULTADMIN.username);

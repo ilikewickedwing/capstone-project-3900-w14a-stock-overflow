@@ -6,10 +6,10 @@ import { swaggerDocs } from "./docs";
 import { createPf, deletePf, openPf, userPfs, getPid, editPf, openFriendPf } from "./portfolio";
 import { calcPf, getAllRankings, getFriendRankings } from "./performance";
 import { authDelete, authLogin, authLogout, authRegister } from "./auth";
-import { getDefBroker, getUserProfile, getUserUid, postUserProfile, setDefBroker } from "./user";
+import { getDefBroker, getUserProfile, getUserUid, postUserProfile, setDefBroker, userPasswordchange } from "./user";
 import { addStock, modifyStock, getAllStocks, checkStock, getStock } from "./stocks";
 import { addFriend, declineFriend, removeFriend, getFriends, getFriendReq, comment, getComments, like, voteStock, getVotes, getActivity } from "./social";
-import { getAdminCelebrityRequests, postAdminCelebrityHandlerequest, postCelebrityMakeRequest } from "./admin";
+import { adminUserDelete, getAdminCelebrityRequests, postAdminCelebrityHandlerequest, postCelebrityMakeRequest } from "./admin";
 import { getUserNotifications, deleteUserNotifications } from "./notifications";
 import fileUpload from 'express-fileupload';
 import { handleFileDownload, handleFileUpload } from "./file";
@@ -120,8 +120,45 @@ app.get('/', (req, res) => {
  *         description: Invalid user not found
  */
 app.get('/user/uid', async(req, res) => {
-    const { username } = req.query;
-    getUserUid(username, database, res);
+  const { username } = req.query;
+  getUserUid(username, database, res);
+})
+
+/**
+ * @swagger
+ * /user/passwordchange:
+ *   post:
+ *     tags: [User]
+ *     description: Endpoint for changing the password of a user
+ *     parameters:
+ *      - name: token
+ *        description: The token of the user requesting the change
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: uid
+ *        description: The uid of the user to change
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: newpassword
+ *        description: The new password
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Everything went well
+ *       401:
+ *         description: Invalid token
+ *       403:
+ *         description: Incorrect privileges
+ *       400:
+ *         description: User doesnt exist
+ */
+app.post('/user/passwordchange', async (req, res) => {
+  const { token, uid, newpassword } = req.body;
+  userPasswordchange(token, uid, newpassword, database, res);
 })
 
 // Get endpoint for getting user data
@@ -1673,6 +1710,37 @@ app.get('/admin/celebrity/requests', async(req, res) => {
 app.post('/admin/celebrity/handlerequest', async(req, res) => {
     const { token, approve, rid } = req.body;
     await postAdminCelebrityHandlerequest(token, approve, rid, database, res);
+})
+/**
+ * @swagger
+ * /admin/user/delete:
+ *   delete:
+ *     tags: [Admin]
+ *     description: Deletes a given user
+ *     parameters:
+ *      - name: token
+ *        description: The token of the admin
+ *        in: body
+ *        required: true
+ *        type: string
+ *      - name: uid
+ *        description: The id of the user
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Everything went okay
+ *       401:
+ *         description: Invalid token
+ *       403:
+ *         description: Not an admin
+ *       400:
+ *         description: User of uid does not exist
+ */
+app.delete('/admin/user/delete', async (req, res) => {
+  const { token, uid } = req.body;
+  adminUserDelete(token, uid, database, res);
 })
 
 // Post endpoint for uploading files
