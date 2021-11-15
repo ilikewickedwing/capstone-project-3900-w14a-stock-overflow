@@ -130,7 +130,7 @@ describe('Auth Delete', () => {
     const resp = await authRegister('Ashley5', 'bobiscool', d);
     const pid = await createPf(resp.token,"test", d);
     const delResp = await authDelete(resp.token, d);
-    const portfolioResp = await openPf(pid.pid, d);
+    const portfolioResp = await openPf(resp.token, pid.pid, d);
     expect(portfolioResp).toBe(null);
   })
   it('Deleting the user will not allow for login again', async () => {
