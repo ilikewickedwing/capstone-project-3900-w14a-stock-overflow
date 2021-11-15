@@ -48,17 +48,7 @@ export const userPasswordchange = async (token, uid, newpassword, database, res)
  * @returns {Promise<User | null>}
  */
 export const getUserProfile = async (uid, token, database) => {
-  const ownerUid = await database.getTokenUid(token);
-  const ownerData = await database.getUser(ownerUid);
   const userData = await database.getUser(uid);
-  // Checks that either the person calling owns the profile or
-  // the person is an admin, or the user searched is a celebrity
-  if (
-    ownerUid !== uid && ownerData !== null && ownerData.userType !== 'admin' 
-    && userData !== null && userData.userType !== 'celebrity'
-  ) {
-    return null;
-  }
   return userData;
 }
 
