@@ -148,6 +148,8 @@ export default function Profile() {
           <Grid>
           <Paper elevation={10} style={paperStyle}>
               <h2 style={{textAlign:'center'}}>Change account details</h2>
+              <h3>Current Username</h3>
+              {localStorage.getItem('username')}
               <h3>Change Username</h3>
               <TextField style = {{marginBottom:'5%'}}
                   value = {username} onChange={e => setUsername(e.target.value)}

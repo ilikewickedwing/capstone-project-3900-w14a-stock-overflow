@@ -50,14 +50,16 @@ export default function PerformanceGraph(props) {
     const callApi = async () => {
       const dataCacheCopy = Object.assign({}, dataCache);
       const pidToNameCopy = Object.assign({}, pidToName);
-      // Loop through each of the pids
-      for (const pid of props.pids.split(",")) {
-        const resp = await api.userPortfoliosOpen(pid, token);
-        if (resp.status === 200) {
-          const respJson = await resp.json();
-          // Store in datacache
-          dataCacheCopy[pid] = respJson.value.performance;
-          pidToNameCopy[pid] = respJson.name;
+      if(props.pids !== ""){
+        // Loop through each of the pids
+        for (const pid of props.pids.split(",")) {
+          const resp = await api.userPortfoliosOpen(pid, token);
+          if (resp.status === 200) {
+            const respJson = await resp.json();
+            // Store in datacache
+            dataCacheCopy[pid] = respJson.value.performance;
+            pidToNameCopy[pid] = respJson.name;
+          }
         }
       }
       setDataCache(dataCacheCopy);

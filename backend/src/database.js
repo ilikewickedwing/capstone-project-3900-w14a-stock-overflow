@@ -1200,6 +1200,9 @@ export class Database {
 
     const usersResp = this.database.collection('users');
     const userFriends = usersResp.find({uid : { $in : friendsResp.friends}})
+    if (userFriends === null) {
+      return [];
+    }
     return userFriends.toArray();
   }
 

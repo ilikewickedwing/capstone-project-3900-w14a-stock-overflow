@@ -44,6 +44,7 @@ const Navigation = () => {
     const onLogOut = async () => {
         try {
             await axios.post(`${apiBaseUrl}/auth/logout`,{token});
+            localStorage.clear();
             history.push('/');
         } catch (e) {
             alert(`Status Code ${e.response.status} : ${e.response.data.message}`,'error');
