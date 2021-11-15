@@ -8,7 +8,7 @@ import { calcPf, getAllRankings, getFriendRankings } from "./performance";
 import { authDelete, authLogin, authLogout, authRegister } from "./auth";
 import { getDefBroker, getUserProfile, getUserUid, postUserProfile, setDefBroker, userPasswordchange } from "./user";
 import { addStock, modifyStock, getAllStocks, checkStock, getStock } from "./stocks";
-import { addFriend, declineFriend, removeFriend, getFriends, getFriendReq, comment, getComments, like, voteStock, getVotes, getActivity } from "./social";
+import { addFriend, declineFriend, removeFriend, getFriends, getFriendReq, comment, getComments, like, voteStock, getVotes, getActivity, getFriendActivity } from "./social";
 import { adminUserDelete, getAdminCelebrityRequests, postAdminCelebrityHandlerequest, postCelebrityMakeRequest } from "./admin";
 import { getUserNotifications, deleteUserNotifications } from "./notifications";
 import fileUpload from 'express-fileupload';
@@ -1465,39 +1465,77 @@ app.post('/activity/like', async(req, res) => {
  *         description: Invalid token
  */
 app.get('/activity/all', async(req, res) => {
-        const { token } = req.query;
-        const resp = await getActivity(token, database);
+  const { token } = req.query;
+  const resp = await getActivity(token, database);
 
-        if (resp === -1) {
-            res.status(401).send({ error: "Invalid token" });
-        } else res.status(200).send(resp);
+  if (resp === -1) {
+    res.status(401).send({ error: "Invalid token" });
+  } else res.status(200).send(resp);
 
-        return;
-    })
-    /**
-     * @swagger
-     * /user/notifications:
-     *   get:
-     *     tags: [User]
-     *     description: Get the recent notifications for the user
-     *     parameters:
-     *      - name: token
-     *        description: The token of the admin
-     *        in: body
-     *        required: true
-     *        type: string
-     *     responses:
-     *       200:
-     *         description: Returns the an array of notifications
-     *         schema:
-     *            type: object
-     *            properties:
-     *              requests:
-     *                type: array
-     *                description: An array of notifications
-     *       401:
-     *         description: Invalid token
-     */
+  return;
+})
+
+// Get endpoint for getting every activity for a friend/celebrity
+/**
+ * @swagger
+ * /activity/friend:
+ *   get:
+ *     tags: [Activity]
+ *     description: endpoint for getting every activity for a friend/celebrity
+ *     parameters:  
+ *     - name: token
+ *       description: token of user
+ *       in: body
+ *       required: true
+ *       type: string
+ *     - name: friendId
+ *       description: id of friend/celebrity
+ *       in: body
+ *       required: true
+ *       type: string
+ *     responses:
+ *       200:
+ *         description: Successfully liked activity
+ *       401:
+ *         description: Invalid token, Not a friend/celebrity
+ */
+ app.get('/activity/friend', async(req, res) => {
+  const { token, friendId } = req.query;
+  const resp = await getFriendActivity(token, friendId, database);
+
+  if (resp === -1) {
+    res.status(401).send({ error: "Invalid token" });
+  } else if (resp === -2) {
+    res.status(401).send({ error: "Not a friend/celebrity" });
+  } else res.status(200).send(resp);
+
+  return;
+})
+
+/**
+ * @swagger
+ * /user/notifications:
+ *   get:
+ *     tags: [User]
+ *     description: Get the recent notifications for the user
+ *     parameters:
+ *      - name: token
+ *        description: The token of the admin
+ *        in: body
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Returns the an array of notifications
+ *         schema:
+ *            type: object
+ *            properties:
+ *              requests:
+ *                type: array
+ *                description: An array of notifications
+ *       401:
+ *         description: Invalid token
+ */
 app.get('/user/notifications', async(req, res) => {
     const { token } = req.query;
     getUserNotifications(token, database, res);

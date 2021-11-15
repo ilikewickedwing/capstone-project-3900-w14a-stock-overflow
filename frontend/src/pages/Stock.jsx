@@ -260,7 +260,6 @@ const Stock = () => {
                   anchorEl={anchorEl}
                   open={isOpen}
                   onClose={handleClose}
-                  autoWidth="true"
                 >
                   { portfolios && 
                     portfolios.map((a) => 

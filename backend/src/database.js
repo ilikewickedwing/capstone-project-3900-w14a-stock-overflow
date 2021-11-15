@@ -102,6 +102,7 @@ const COLLECTIONS = [
   /**
     This stores all activities in the following form:
     {
+      ownerName: string,
       ownerUid: string,
       parentId: string,
       aid: string,
@@ -1243,6 +1244,7 @@ export class Database {
     const userComment = userResp.username + ' ' + message;
     const aid = nanoid();
     const obj = {
+      ownerName: userResp.username,
       ownerUid: uid,
       parentId: parentId,
       aid: aid,
@@ -1267,8 +1269,10 @@ export class Database {
   }
 
   async comment(uid, aid, message) {
+    const user = await this.getUser(uid);
     const cid = nanoid();
     const obj = {
+      ownerName: user.username,
       ownerUid: uid,
       parentId: aid,
       aid: cid,
@@ -1465,6 +1469,31 @@ export class Database {
     return activities;
   }
   
+  async getFriendActivity(uid, friend) {
+    if (!await this.checkFriend(uid, friend)) {
+      const celebrities = await this.getAllCelebrityUsers();
+      const filtered = celebrities.filter((e) => e.uid === friend);
+      if (filtered.length === 0) {
+        return -2;
+      }
+    }
+    let activities = [];
+    const userActivity = this.database.collection('userActivity');
+    const activity = this.database.collection('activity');
+
+    // Get friends' and user's activities
+    const userActResp = await userActivity.findOne({ownerUid: friend});
+    const userActs = userActResp.activities;
+    const poop = await activity.find({aid: {$in: userActs}}).toArray();
+    for (let index = 0; index < poop.length; index++) {
+      const i = poop[index];
+      activities.push(i);
+    }
+    
+    activities.sort((first, second) => first.time - second.time);
+    return activities;
+  }
+
   async activityCanbeSeen(uid, act) {
     let currAct = act;
     const activity = this.database.collection('activity');
