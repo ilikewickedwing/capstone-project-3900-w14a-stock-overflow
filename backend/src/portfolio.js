@@ -103,8 +103,8 @@ export const openPf = async(token, pid, database) => {
   const verify = await verifyPf(uid, pid, database);
   if (!verify) return 2;
 
-  const friend = await checkAccess(uid, pid, database);
-  if (friend) return 3;
+  /* const friend = await checkAccess(uid, pid, database);
+  if (friend) return 3; */
 
   // Return result of database function
   return Pf;

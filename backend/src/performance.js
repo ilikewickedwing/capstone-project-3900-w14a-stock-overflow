@@ -380,6 +380,14 @@ export const getFriendRankings = async (token, database) => {
     // console.dir(friendPerf, {depth:null});
   }
 
+  const self = await database.getUserPerf(uid);
+  friendPerf.push({
+    rank: 0,
+    uid: uid,
+    name: self.name,
+    performance: self.performance
+  })
+
   const friendRank = mergeSort(friendPerf);
   for (let i = 0; i < friendRank.length; i++) {
     friendRank[i].rank = i + 1;
