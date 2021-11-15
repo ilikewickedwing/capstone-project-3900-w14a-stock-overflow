@@ -19,11 +19,9 @@ import axios from "axios";
 import { apiBaseUrl } from '../comp/const';
 import FriendTab from '../comp/FriendTab';
 import PfTable from '../comp/PfTable';
+import PerformanceGraph from '../graph/PerformanceGraph';
+import WatchlistCard from '../comp/WatchlistCard';
 
-import Tab from '@mui/material/Tab';
-import TabContext from '@mui/lab/TabContext';
-import TabList from '@mui/lab/TabList';
-import TabPanel from '@mui/lab/TabPanel';
 
 
 // note: friend is inclusive of celebrity profiles except celebrities are public profiles while friends are private 
@@ -35,7 +33,6 @@ export default function Friend() {
     const uid = localStorage.getItem('uid');
 
     const [friendUid, setUid] = React.useState('');
-    
     // list of portfolios of all the portfolios given a uid 
     const [portData, setPortfolio ] = React.useState([]);
 
@@ -43,9 +40,14 @@ export default function Friend() {
     const [isPublic, setPublic] = React.useState(0);
 
     // set which current stocks and tab to view 
+    const [pid, setPid] = React.useState('');
     const [tab, setTab] = React.useState('Summary');
     const [stocks, setStocks] = React.useState([]);
     const [selected, setGraphSelected] = React.useState([]);
+
+    // Store friends activities
+    const [activity, setActivity] = React.useState([]);
+    const [likes, setLikes] = React.useState([]);
 
       // on first load 
     React.useEffect(() => {   
@@ -55,9 +57,44 @@ export default function Friend() {
     // load based on friendUId getting awaited 
     React.useEffect(() => {   
       loadPortfolios();
+      loadActivities();
+
     },[friendUid]);
 
-  
+    const loadActivities = async () => {
+      if (friendUid === "") {
+        return;
+      }
+      try {
+        let list = [];
+        let likesList = [];
+        const resp = await axios.get(`${apiBaseUrl}/activity/friend?token=${token}&friendId=${friendUid}`);
+        list.push(...resp.data);
+        for (let index = 0; index < resp.data.length; index++) {
+          const e = resp.data[index];
+          list.push(e);
+          let liked = 0;
+          if(e.likedUsers.indexOf(friendUid) !== -1) {
+            liked = 1;
+          }
+          likesList.push(liked);
+        }
+        setActivity(list);
+        setLikes(likesList);
+      } catch (e) {
+        alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
+      }
+    }
+
+    const getUserType = async () => {
+      try {
+        const resp = await axios.get(`${apiBaseUrl}/user/profile?uid=`);
+        
+      } catch (e) {
+        alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
+      }
+    }
+
     const getUid = async() => {
       try {
         const resp = await axios.get(`${apiBaseUrl}/user/uid?username=${handle}`);
@@ -102,6 +139,22 @@ export default function Friend() {
       }
     }
 
+    const likeClick = async (id) => {
+      try {
+        let likesArray = likes;
+        await axios.post(`${apiBaseUrl}/activity/like`, {token, aid: id});
+        const newActivity = activity.map((e, i) => {
+          if (e.aid === id) {
+            likesArray[i] = (likesArray[i] + 1) % 2;
+          }
+        });
+        setLikes(likesArray);
+      } catch (e){
+        alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
+      }
+    }
+    
+
   return (
     <PageBody className="font-two">
       <Navigation />
@@ -113,32 +166,58 @@ export default function Friend() {
                 <PfBar>
                   <Heading>{handle} </Heading>
                 </PfBar>
-                  {portData.map((e) =>(
-                    <Tab key={e.name} label={e.name} onClick={setStocks(e.stocks)} />
-                  ))}
                   {portData.map((e)=>(
                       <FriendTab
                         key={e.name}
                         name={e.name}
+                        pid={e.pid}
                         stocks={e.stocks}
                         setTab={setTab} 
                         setStocks={setStocks}
+                        setPid={setPid}
                       / >
                   ))}
                   < br/> 
                   <h3>{tab}</h3>
-                  {stocks.length > 0 && (
-                    <PfTable 
-                      stocks={stocks}
-                      load={loadPortfolios}
-                      setGraphSelected={setGraphSelected}
+                  {stocks.length > 0 && 
+                  tab !== "Watchlist" ?(
+                    <div>
+                      <PerformanceGraph 
+                        pids={pid}
+                        height={300}
+                        isFriend={true}
+                        friendUid={friendUid}
+                      />
+                      <PfTable 
+                        stocks={stocks}
+                        load={loadPortfolios}
+                        setGraphSelected={setGraphSelected}
+                        isFriend={1}
+                      />
+                    </div>
+                  ) : (
+                    stocks.map(item => {
+                    return <WatchlistCard
+                      key={item.stock}
+                      name={item.stock}
                       isFriend={1}
-                    />
-                  )}
+                    />})
+                  )
+                  }
               </LeftBody>
               <RightBody elevation={10}>
-                <RightCard elevation={5}>
+                <RightCard elevation={5} style={{overflowY:'scroll', height:'50vh'}}>
                   <h3 style={{textAlign:'center'}}>{handle}'s Activity</h3>
+                  {activity.map((e, index) => (
+                    <div key={index} >
+                      <div>{e.ownerName}  Time: {e.time.split('T')[0]} {e.time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}</div>
+                      <div>{e.message}</div>
+                      <div>{e.likes} </div>
+                      <Button onClick={()=> likeClick(e.aid)} style={ likes[index] ? {color:'green'} : {color:'grey'}}>Like</Button>
+                      <Button onClick={()=> {}}>Comment</Button>
+                    </div>
+                  ))
+                  }
                 </RightCard>
               </RightBody>
             </PfBody>

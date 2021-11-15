@@ -1499,7 +1499,7 @@ app.get('/activity/all', async(req, res) => {
  *       401:
  *         description: Invalid token
  */
- app.get('/activity/all', async(req, res) => {
+ app.get('/activity/friend', async(req, res) => {
   const { token, friendId } = req.query;
   const resp = await getFriendActivity(token, friendId, database);
 

@@ -102,6 +102,7 @@ const COLLECTIONS = [
   /**
     This stores all activities in the following form:
     {
+      ownerName: string,
       ownerUid: string,
       parentId: string,
       aid: string,
@@ -1243,6 +1244,7 @@ export class Database {
     const userComment = userResp.username + ' ' + message;
     const aid = nanoid();
     const obj = {
+      ownerName: userResp.username,
       ownerUid: uid,
       parentId: parentId,
       aid: aid,
@@ -1267,8 +1269,10 @@ export class Database {
   }
 
   async comment(uid, aid, message) {
+    const user = await this.getUser(uid);
     const cid = nanoid();
     const obj = {
+      ownerName: user.username,
       ownerUid: uid,
       parentId: aid,
       aid: cid,
