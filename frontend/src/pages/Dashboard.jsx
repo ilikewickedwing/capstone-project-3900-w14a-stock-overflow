@@ -49,12 +49,12 @@ export default function Dashboard() {
   },[]);
 
 const getGlobalRanks = async () => {
-  // try {
-  //   const request = await axios.get(`${apiBaseUrl}/rankings/global`);
-  //   setGlobal(request.data); 
-  // } catch (e) {
-  //   alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
-  // }
+  try {
+    const request = await axios.get(`${apiBaseUrl}/rankings/global`);
+    setGlobal(request.data); 
+  } catch (e) {
+    alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
+  }
 }
 
   const fetchPortfolios = async () => {

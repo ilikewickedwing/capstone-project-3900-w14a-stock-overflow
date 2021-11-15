@@ -115,13 +115,19 @@ export default function Friend() {
     }
 
     const getRanking = async () => {
-      // try {
-      //   const resp = await axios.get(`${apiBaseUrl}/rankings/friends?token=${token}`);
-      //   console.log(resp);
-      //   // todo set ranking of the new thing 
-      // } catch (e) {
-      //   alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
-      // }
+      try {
+        const resp = await axios.get(`${apiBaseUrl}/rankings/friends?token=${token}`);
+        console.log(resp);
+        let list = [];
+        for (let i=0; i< resp.data.length; i++){
+          list.push(createData(resp.data[i].name, resp.data[i].performance, resp.data[i].rank));
+        }
+        setRankings(list);
+
+        // todo set ranking of the new thing 
+      } catch (e) {
+        alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
+      }
     }
 
   return (
