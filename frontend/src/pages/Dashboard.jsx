@@ -23,6 +23,8 @@ import leaderboard from '../assets/leaderboard.png';
 import star from '../assets/star.png';
 import globe from '../assets/globe.png';
 
+import Activity from './Activity';
+
 function createData(code, name, buyPrice, currPrice, changePer, units, value, profitLoss) {
   return {
     code,
@@ -55,6 +57,9 @@ export default function Dashboard() {
   const alert = useContext(AlertContext);
   const [selected, setSelected] = React.useState([]);
   const [portfolios, setPortfolios] = React.useState([]);
+  
+  // friend's activity
+  const [activity, setActivity] = React.useState([]); 
 
   // rankings 
   const [globalRank, setGlobal ] = React.useState(rows);
@@ -67,6 +72,10 @@ export default function Dashboard() {
     fetchPortfolios();
     getFriendRanking();
   },[]);
+
+  React.useEffect(()=>{
+    getActivity();
+  }, []);
 
 const getGlobalRanks = async () => {
   // try {
@@ -144,7 +153,15 @@ const getFriendRanking = async () => {
     }
   };
 
-
+   
+  const getActivity = async() => {
+    try {
+    const resp = await axios.get(`${apiBaseUrl}/activity/all?token=${token}`);
+    setActivity(resp.data);
+    } catch (e) {
+      alert(e);
+    }
+  }
   
   return (
     <PageBody className="font-two">
@@ -163,6 +180,15 @@ const getFriendRanking = async () => {
                 <PerformanceTable 
                   portfolios={portfolios}
                   setPerfSelected={setSelected} />
+                <div style={{marginTop: 30, fontWeight: 'bold'}}>
+                  Friend's activities:
+                </div>
+                {
+                  activity.length > 0 ? activity.map(index =>{
+                    let subString = index.time.substring(11,16)
+                    return <Activity message={index.message} time={subString}></Activity>
+                  }): <p>Empty feed :\</p>
+                }
               </LeftBody>
               <RightBody elevation={10}>
                 <RightCard elevation={5}>
