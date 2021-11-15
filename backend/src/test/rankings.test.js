@@ -255,7 +255,7 @@ describe('Rank multiple user portfolio performances', () => {
 	})
 })
 
-/* describe('Rank multiple user portfolios performances endpoint test', () => {
+describe('Rank multiple user portfolios performances endpoint test', () => {
   beforeAll(async () => {
     await database.connect();
   })
@@ -623,9 +623,7 @@ describe('Rank multiple user portfolio performances', () => {
 	it('CalcAll', async () => {
 		await calcAll(database, true);
     let rankings = null;
-    // setTimeout(async () => {
-      rankings = await database.getRankings();
-    // }, 10000);
+    rankings = await request(app).get(`/rankings/global`).send();
     console.dir(rankings, { depth: null });
     expect(rankings).not.toBe(null);
 	})
@@ -643,7 +641,7 @@ describe('Rank multiple user portfolio performances', () => {
   afterAll(async() => {
     await database.disconnect();
   })
-}) */
+})
 
 /* describe('Calling rankAll early', () => {
   beforeAll(async () => {
