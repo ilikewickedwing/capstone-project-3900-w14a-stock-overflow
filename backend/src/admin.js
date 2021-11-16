@@ -1,10 +1,26 @@
+/**
+  This file manages all admin specific functions
+*/
+
 import { authRegister } from "./auth";
 
+/**
+ * Create default admin user
+ */
 export const DEFAULTADMIN = {
   username: 'admin',
   password: 'admin'
 }
 
+/**
+ * Function for posting celebrity requests
+ * @param {string} token 
+ * @param {string} info 
+ * @param {string} fids 
+ * @param {Database} database 
+ * @param {Function} res 
+ * @returns res
+ */
 export const postCelebrityMakeRequest = async (token, info, fids, database, res) => {
   // Validate token
   const uid = await database.getTokenUid(token);
@@ -39,6 +55,13 @@ export const postCelebrityMakeRequest = async (token, info, fids, database, res)
   });
 }
 
+/**
+ * Function for an admin to get celebrity requests
+ * @param {string} token 
+ * @param {Database} database 
+ * @param {Function} res 
+ * @returns res
+ */
 export const getAdminCelebrityRequests = async (token, database, res) => {
   // Validate token
   const uid = await database.getTokenUid(token);
@@ -73,6 +96,15 @@ export const getAdminCelebrityRequests = async (token, database, res) => {
   })
 }
 
+/**
+ * Function to handle celebrity requests
+ * @param {string} token 
+ * @param {boolean} approve 
+ * @param {string} rid 
+ * @param {Database} database 
+ * @param {Function} res 
+ * @returns res
+ */
 export const postAdminCelebrityHandlerequest = async (token, approve, rid, database, res) => {
   // Validate token
   const uid = await database.getTokenUid(token);
@@ -105,6 +137,14 @@ export const postAdminCelebrityHandlerequest = async (token, approve, rid, datab
   res.status(200).send();
 }
 
+/**
+ * Function for the admin to delete users
+ * @param {string} token 
+ * @param {string} uid 
+ * @param {Database} database 
+ * @param {Function} res 
+ * @returns res
+ */
 export const adminUserDelete = async (token, uid, database, res) => {
   const adminUid = await database.getTokenUid(token);
   if (adminUid === null) {
@@ -133,7 +173,10 @@ export const adminUserDelete = async (token, uid, database, res) => {
   res.status(200).send();
 }
 
-// Makes sure that there is at least one admin
+/**
+ * Function to ensure that there is at least one admin in the system
+ * @param {Database} database 
+ */
 export const insertDefaultAdmin =  async (database) => {
   const uid = await database.getUid(DEFAULTADMIN.username);
   if (uid === null) {
