@@ -67,7 +67,6 @@ const Tabs = ({isChanged}) => {
     }
   }
 
-// TODO IMPLEMENT PROFILE AND DELETE ACC
     return (
         <TabBar>
             <TabButton onClick={gotoDash}>

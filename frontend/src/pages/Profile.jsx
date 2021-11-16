@@ -22,7 +22,7 @@ const style = {
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
-  width: 400,
+  width: "100%",
   bgcolor: 'background.paper',
   border: '2px solid #000',
   boxShadow: 24,
@@ -30,8 +30,7 @@ const style = {
 };
 
 
-const paperStyle={padding :20,width:280, margin:'3em'}
-const avatarStyle={backgroundColor:'#1bbd7e'}
+const paperStyle={padding :20,width:"90%", margin:'3em'}
 const btnstyle={margin:'8px 0'}
 
 export default function Profile() {
@@ -76,7 +75,7 @@ export default function Profile() {
   // handle delete user
   const onDeleteUser = async () => {
     try {
-      const resp = await axios.delete(`${apiBaseUrl}/auth/delete`, {data: {token}});
+      await axios.delete(`${apiBaseUrl}/auth/delete`, {data: {token}});
       alert('Account has been deleted','success');
       history.push('/');
     } catch (e){
@@ -87,7 +86,7 @@ export default function Profile() {
   // handle edit submit 
   const onEditUser = async() => {
     try {
-      const resp = await axios.post(`${apiBaseUrl}/user/profile`, {uid, token, userData: {username}})
+      await axios.post(`${apiBaseUrl}/user/profile`, {uid, token, userData: {username}})
       alert('username changed','success');
       history.push('/');
     } catch (e){
@@ -148,6 +147,8 @@ export default function Profile() {
           <Grid>
           <Paper elevation={10} style={paperStyle}>
               <h2 style={{textAlign:'center'}}>Change account details</h2>
+              <h3>Current Username</h3>
+              {localStorage.getItem('username')}
               <h3>Change Username</h3>
               <TextField style = {{marginBottom:'5%'}}
                   value = {username} onChange={e => setUsername(e.target.value)}

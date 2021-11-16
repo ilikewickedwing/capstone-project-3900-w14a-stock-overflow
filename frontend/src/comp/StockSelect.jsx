@@ -8,6 +8,7 @@ import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
 import Button from '@material-ui/core/Button';
 import { AlertContext } from '../App';
+import Select from '@mui/material/Select';
 
 const style = {
     position: 'absolute',
@@ -19,6 +20,7 @@ const style = {
     border: '2px solid #000',
     boxShadow: 24,
     p: 4,
+    textAlign: 'center'
   };
 
 const StockSelect = ({stockCode, name,pid, setClose}) => {
@@ -27,12 +29,15 @@ const StockSelect = ({stockCode, name,pid, setClose}) => {
 
     const [price, setPrice] = React.useState("");
     const [quantity, setQuantity] = React.useState(0);
+    const [brokerage, setBroker] = React.useState('');
+    const [flag, setFlag] = React.useState(0);
 
     // modal states 
     const [open, setOpen] = React.useState(false);
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
-
+    const handleChange = (e) => setFlag(e.target.value);
+    
 
     const handleAddStock = async (e) => {
         e.preventDefault();
@@ -56,7 +61,7 @@ const StockSelect = ({stockCode, name,pid, setClose}) => {
             var floatPrice = parseFloat(price); 
             var intQuantity = parseInt(quantity);
             await axios.post(`${apiBaseUrl}/user/stocks/add`, 
-                {token, pid, stock: stockCode, price: floatPrice, quantity: intQuantity});
+                {token, pid, stock: stockCode, price: floatPrice, quantity: intQuantity, brokerage, flag});
             handleClose();
             setClose();
         } catch (e){
@@ -83,9 +88,22 @@ const StockSelect = ({stockCode, name,pid, setClose}) => {
                         <TextField type="number" required variant="standard" label="price"
                             onChange={e => setPrice(e.target.value)}/>
                         <br />
-                        <TextField type="number" required variant="standard" label="quantity"
+                        <TextField style={{marginBottom:"2%"}} type="number" required variant="standard" label="quantity"
                         onChange={e => setQuantity(e.target.value)}/>
                          <br />
+                         select brokerage fee option
+                         <Select
+                            style={{marginRight:"3%"}}
+                            value={flag}
+                            onChange={handleChange}
+                            label="Select Option"
+                            displayEmpty
+                        >
+                            <MenuItem style={{width:"100%"}} value={1}>Percentage (_%) </MenuItem>
+                            <MenuItem style={{width:"100%"}} value={0}>Flat Fee ($USD)</MenuItem>
+                        </Select>
+                        <TextField style = {{marginBottom:'5%'}} type="number" required variant="standard" label="Brokerage fee (USD$)"
+                        onChange={e => setBroker(e.target.value)}/>
                         <Button style={{margin: "10px 0", width: "100%"}} type='submit' onClick={handleSubmit}>
                             Add Stock
                         </Button>

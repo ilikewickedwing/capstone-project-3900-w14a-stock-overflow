@@ -78,7 +78,7 @@ const AddStock = ({token, pid, onAddCallback, load = () => {}, name}) => {
         try {
             var floatPrice = parseFloat(price); 
             var intQuantity = parseInt(quantity);
-            const res = await axios.post(`${apiBaseUrl}/user/stocks/add`, 
+            await axios.post(`${apiBaseUrl}/user/stocks/add`, 
                 {token, pid, stock: currCode, price: floatPrice, quantity: intQuantity, brokerage, flag});
             onAddCallback();
             load();

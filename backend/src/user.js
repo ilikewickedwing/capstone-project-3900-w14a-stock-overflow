@@ -48,17 +48,7 @@ export const userPasswordchange = async (token, uid, newpassword, database, res)
  * @returns {Promise<User | null>}
  */
 export const getUserProfile = async (uid, token, database) => {
-  const ownerUid = await database.getTokenUid(token);
-  const ownerData = await database.getUser(ownerUid);
   const userData = await database.getUser(uid);
-  // Checks that either the person calling owns the profile or
-  // the person is an admin, or the user searched is a celebrity
-  if (
-    ownerUid !== uid && ownerData !== null && ownerData.userType !== 'admin' 
-    && userData !== null && userData.userType !== 'celebrity'
-  ) {
-    return null;
-  }
   return userData;
 }
 
@@ -100,7 +90,12 @@ export const postUserProfile = async (uid, token, userData, database, res) => {
     }
   }
   // If usertype changed, make sure it is a valid type
+  // and that they are an admin
   if ('userType' in userData) {
+    if (adminData.userType !== 'admin') {
+      res.status(403).send({ message: 'Only an admin can change the usertype' })
+      return;
+    }
     if (!['user','celebrity', 'admin'].includes(userData.userType)) {
       res.status(400).send({ message: 'Invalid user type' });
       return;
