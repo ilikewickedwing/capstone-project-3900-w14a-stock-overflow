@@ -79,35 +79,42 @@ export default function Dashboard() {
   }, []);
 
 const getGlobalRanks = async () => {
-  // try {
-  //   const request = await axios.get(`${apiBaseUrl}/rankings/global`);
-  //   let list = [];
-  //   for (let i=0; i< request.data.length; i++){
-  //     list.push(createRankData(request.data[i].name, request.data[i].performance, request.data[i].rank));
-  //     if (request.data[i].name === myName){
-  //       setMyGlobal(createRankData(request.data[i].name, request.data[i].performance, request.data[i].rank));
-  //     }
-  //   }
-  //   setGlobal(list);
-  // } catch (e) {
-  //   alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
-  // }
+  try {
+    // const request = await axios.get(`${apiBaseUrl}/rankings/global`);
+    // let list = [];
+    // for (let i=0; i< request.data.length; i++){
+    //   // push the top 5 global ranks
+    //   if (i < 5) {
+    //     list.push(createRankData(request.data[i].name, request.data[i].performance, request.data[i].rank));
+    //   }
+    //   if (request.data[i].name === myName){
+    //     setMyGlobal(createRankData(request.data[i].name, request.data[i].performance, request.data[i].rank));
+    //   }
+    // }
+    // setGlobal(list);
+  } catch (e) {
+    alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
+  }
 }
 
 const getFriendRanking = async () => {
   try {
     const resp = await axios.get(`${apiBaseUrl}/rankings/friends?token=${token}`);
     let list = [];
+    console.log(resp.data);
     for (let i=0; i< resp.data.length; i++){
-      list.push(createRankData(resp.data[i].name, resp.data[i].performance, resp.data[i].rank));
+      if (i < 5){
+        list.push(createRankData(resp.data[i].name, resp.data[i].performance.performance, resp.data[i].rank));
+      }
       if (resp.data[i].name === myName){
-        setMyRanking(createRankData(resp.data[i].name, resp.data[i].performance, resp.data[i].rank));
+        setMyRanking(createRankData(resp.data[i].name, resp.data[i].performance.performance, resp.data[i].rank));
       }
     }
     setRankings(list);
 
     // todo set ranking of the new thing 
   } catch (e) {
+    // console.log(e);
     alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
   }
 }

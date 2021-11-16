@@ -1,3 +1,7 @@
+/**
+  This file manages all API specific functions
+*/
+
 import axios from "axios";
 
 let apikey = 'NJGHG3ZAKLAELM3E';
@@ -15,36 +19,38 @@ export class API {
     // Stores the full information of stocks
     this.infoCache = [];
     // How long in millisecond before calling get all stocks again
-    // const pollingInterval = 60000;
-    // this.intervalObj = setInterval(() => {this._getAllStocks()}, pollingInterval);
     this.useCounter = 0;
   }
 
+	/**
+	 * Function to get list of all stocks
+	 * @returns {Promise<Array>}
+	 */
   async getAllStocks() {
     // Return cached stocks if available
     if (this.fullCache !== null) {
-      // console.log("returning cache")
       return this.fullCache;
     }
-    // console.log("fetching cache");
     // Else cache doesnt exist so fetch it
     const resp = await this._getAllStocks();
     return resp;
   }
   
-  // This makes the actual call to alpha vantage
-  // Dont call this directly
+  /**
+	 * Function to call AlphaVantage to get all stocks
+	 * @returns {Promise<Array>}
+	 */
   async _getAllStocks() {
     const stocks = [];
     // Fetching the list of active stocks
     const request = await axios.get(`https://www.alphavantage.co/query?function=LISTING_STATUS&apikey=${apikey}`);
-    let result = request.data;  // Converting result into text
+    let result = request.data;  				// Converting result into text
     result = result.split('\n');        // Splitting every entry
 
     // Going through every entry
     result.forEach(stock => {
         const info = stock.split(',');
-        if (info[3] == "Stock") {   // only add to list if the entry is a stock and not a fund
+        if (info[3] == "Stock") {   		// only add to list if the entry is a stock and not a fund
             stocks.push({
                 symbol: info[0],
                 name: info[1],
@@ -56,13 +62,17 @@ export class API {
     return stocks;
   }
 
+	/**
+	 * Function to call the api for stocks given
+	 * @param {string} stocks 
+	 * @returns {Promise<Array>}
+	 */
   async lookupStock(stocks) {
     const search = this.cachedStocks.filter(o => (o.stocks === stocks));
     if (search.length !== 0) {
-      // console.log('returning cache');
       return search[0].check;
     }
-    // console.log('tradier is searching up ' + stocks);
+
     const resp = await this._callTradier(-1, stocks);
     if (resp.securities == null) return null;
     const check = resp.securities.security;
@@ -71,37 +81,39 @@ export class API {
       stocks: stocks,
       check: check
     }
-    // console.log(obj);
 
     this.cachedStocks.push(obj);
     return check;
   }
 
+	/**
+	 * Function to check on market status
+	 * @returns {Promise<Boolean>}
+	 */
   async marketStatus() {
     const status = await this._callTradier(4);
     return (status === 'closed');
   }
 
+	/**
+	 * Function to search stock information based on parameter
+	 * @param {string} type 
+	 * @param {string} stocks 
+	 * @param {string} interval 
+	 * @param {string} start 
+	 * @returns {Promise<Object>}
+	 */
   async getStock(type, stocks, interval, start) {
-    // console.log(this.infoCache);
-    // console.log("stock requested is " + stock);
     // Search for stock in cache
     const search = this.infoCache.filter(o => (o.symbol === stocks) && (o.param === type) && (o.interval === interval) && (o.start === start));
     const time = Date.now();
 
-    if (search.length !== 0) {
-      // console.log(search[0].time);
-      // console.log(time - search[0].time);
-    }
     if (search.length !== 0 && time - search[0].time < 600000) {
-      // console.log("returning cached stock");
       return search[0];
     }
 
-    // console.log("fetching cache");
     // Fetch stock and add to cache
     const resp = await this._getStock(type, stocks, interval, start);
-    // console.log(resp);
     return resp;
   }
 
@@ -155,7 +167,6 @@ export class API {
    */
   async _callAlpha(type, stock) {
 
-    // console.log("useCounter is " + this.useCounter);
     let url = null;
 
     if (type === -1) url = "LISTING_STATUS";
@@ -167,14 +178,9 @@ export class API {
       this.useCounter = 0;
     }
 
-    // console.log("THE KEY IS " + apikey);
     const request = await axios.get(`https://www.alphavantage.co/query?function=${url}&symbol=${stock}&apikey=${apikey}`);
     
-    
-    // console.log(request.data);
-    // how do this work
     if (request.data.Note !== undefined) {
-      // console.log("note detected, we go again");
       this.useCounter = 5;
       return await this._callAlpha(type, stock);
     }
@@ -206,8 +212,6 @@ export class API {
     let symbol = null;
     let q = null;
     let indexes = null;
-
-    // console.log('tradier api call');
     
     if (type === 1) {
       url = 'quotes';
@@ -226,14 +230,6 @@ export class API {
       indexes = false;
     }
 
-    /* console.log("url is " + url + ", symbol is " + symbol + ", symbols is " + symbols);
-    if (interval !== null) {
-      console.log('interval is ' + interval);
-    }
-    if (start !== null) {
-      console.log('start is ' + start);
-    } */
-
     const request = await axios({
       method: 'get',
       url: url,
@@ -251,18 +247,6 @@ export class API {
         console.log(response.statusCode);
         console.log(body);
     });
-    // console.log(request.data);
     return request.data;
   }
-
-  /* checkStock(check, against) {
-    return check == against;
-  } */
-
-  /* // Call this when deleting this object to remove all time intervals
-  // to prevent a memory leak
-  destroy() {
-    // Clear interval
-    clearInterval(this.intervalObj);
-  } */
 }

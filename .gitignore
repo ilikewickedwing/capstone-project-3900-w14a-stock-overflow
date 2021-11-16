@@ -5,6 +5,5 @@
 /mockgenerator/node_modules
 /mockgenerator/package-lock.json
 /node_modules
-package.json
 yarn.lock
 package-lock.json
