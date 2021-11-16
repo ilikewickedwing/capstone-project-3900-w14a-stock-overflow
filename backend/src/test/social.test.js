@@ -132,22 +132,22 @@ describe('Activity', () => {
     it('Checking activity after liking a post', async() => {
         await voteStock(token1, 'IBM', 1, d);
         const activity1 = await getActivity(token1, d);
-        aid = activity1[0].aid;
-        expect(activity1.length).toStrictEqual(1);
+        expect(activity1.length).toStrictEqual(0);
+        const activity2 = await getActivity(token2, d);
+        expect(activity2.length).toStrictEqual(1);
+        aid = activity2[0].aid;
         await like(token2, aid, d);
-        const activity2 = await getActivity(token1, d);
-        expect(activity2.length).toStrictEqual(2);
         const activity3 = await getActivity(token2, d);
-        expect(activity3.length).toStrictEqual(2);
+        expect(activity3.length).toStrictEqual(1);
         const activity4 = await getActivity(token3, d);
         expect(activity4.length).toStrictEqual(0);
     })
     it('Checking activity after commenting a post', async() => {
         await comment(token2, aid, "yeet", d);
         const activity1 = await getActivity(token1, d);
-        expect(activity1.length).toStrictEqual(3);
+        expect(activity1.length).toStrictEqual(2);
         const activity2 = await getActivity(token2, d);
-        expect(activity2.length).toStrictEqual(3);
+        expect(activity2.length).toStrictEqual(1);
         const activity3 = await getActivity(token3, d);
         expect(activity3.length).toStrictEqual(0);
     })
