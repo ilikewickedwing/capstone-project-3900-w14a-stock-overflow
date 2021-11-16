@@ -114,8 +114,8 @@ const getFriendRanking = async () => {
 
     // todo set ranking of the new thing 
   } catch (e) {
-    console.log(e);
-    // alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
+    // console.log(e);
+    alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
   }
 }
 
