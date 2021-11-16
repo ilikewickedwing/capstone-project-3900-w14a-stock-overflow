@@ -69,14 +69,11 @@ export default function Dashboard() {
   const [myGlobalRanking, setMyGlobal] = React.useState(createRankData("lily","20","8888"));
 
   React.useEffect(() => {  
-    getGlobalRanks();
+    // getGlobalRanks();
     fetchPortfolios();
-    getFriendRanking();
-  },[]);
-
-  React.useEffect(()=>{
+    // getFriendRanking();
     getActivity();
-  }, []);
+  },[]);
 
 const getGlobalRanks = async () => {
   try {
@@ -98,25 +95,21 @@ const getGlobalRanks = async () => {
 }
 
 const getFriendRanking = async () => {
-  try {
-    const resp = await axios.get(`${apiBaseUrl}/rankings/friends?token=${token}`);
-    let list = [];
-    console.log(resp.data);
-    for (let i=0; i< resp.data.length; i++){
-      if (i < 5){
-        list.push(createRankData(resp.data[i].name, resp.data[i].performance.performance, resp.data[i].rank));
-      }
-      if (resp.data[i].name === myName){
-        setMyRanking(createRankData(resp.data[i].name, resp.data[i].performance.performance, resp.data[i].rank));
-      }
-    }
-    setRankings(list);
+  // try {
+  //   const resp = await axios.get(`${apiBaseUrl}/rankings/friends?token=${token}`);
+  //   let list = [];
+  //   for (let i=0; i< resp.data.length; i++){
+  //     list.push(createRankData(resp.data[i].name, resp.data[i].performance, resp.data[i].rank));
+  //     if (resp.data[i].name === myName){
+  //       setMyRanking(createRankData(resp.data[i].name, resp.data[i].performance, resp.data[i].rank));
+  //     }
+  //   }
+  //   setRankings(list);
 
-    // todo set ranking of the new thing 
-  } catch (e) {
-    // console.log(e);
-    alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
-  }
+  //   // todo set ranking of the new thing 
+  // } catch (e) {
+  //   alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
+  // }
 }
 
   const fetchPortfolios = async () => {
@@ -165,6 +158,7 @@ const getFriendRanking = async () => {
   const getActivity = async() => {
     try {
     const resp = await axios.get(`${apiBaseUrl}/activity/all?token=${token}`);
+    console.log(resp.data);
     setActivity(resp.data);
     } catch (e) {
       alert(e);
@@ -195,7 +189,7 @@ const getFriendRanking = async () => {
                 {
                   activity.length > 0 ? activity.map(index =>{
                     let subString = index.time.substring(11,16)
-                    return <Activity message={index.message} time={subString}></Activity>
+                    return <Activity message={index.message} time={subString} aid={index.aid} likes={index.likes} getActivityCallBack={getActivity} userComments={index.userComments}></Activity>
                   }): <p>Empty feed :\</p>
                 }
               </LeftBody>
