@@ -85,10 +85,10 @@ const getGlobalRanks = async () => {
     // for (let i=0; i< request.data.length; i++){
     //   // push the top 5 global ranks
     //   if (i < 5) {
-    //     list.push(createRankData(request.data[i].name, request.data[i].performance, request.data[i].rank));
+    //     list.push(createRankData(request.data[i].name, request.data[i].performance.performance, request.data[i].rank));
     //   }
     //   if (request.data[i].name === myName){
-    //     setMyGlobal(createRankData(request.data[i].name, request.data[i].performance, request.data[i].rank));
+    //     setMyGlobal(createRankData(request.data[i].name, request.data[i].performance.performance, request.data[i].rank));
     //   }
     // }
     // setGlobal(list);
