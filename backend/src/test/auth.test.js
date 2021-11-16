@@ -22,12 +22,12 @@ describe('Auth register', () => {
     expect(resp).toBe(null);
   })
   it('Registering a new user returns a valid uid', async () => {
-    const resp = await authRegister('Bob Dylan', 'strongpassword', d);
+    const resp = await authRegister('BobDylan', 'strongpassword', d);
     const user = await d.getUser(resp.uid);
     expect(user).not.toBe(null);
   })
   it('Registering a new user returns a valid token', async () => {
-    const resp = await authRegister('Bob Dylan 2', 'strongpassword', d);
+    const resp = await authRegister('BobDylan2', 'strongpassword', d);
     const uid = await d.getTokenUid(resp.token);
     expect(uid).toBe(resp.uid);
   })

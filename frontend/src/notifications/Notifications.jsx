@@ -150,6 +150,7 @@ const Notifications = forwardRef((props, ref) => {
   }
   let panelWrapperStyle = {
     position: 'absolute',
+    zIndex: '99999999',
     top: '0px',
     right: '0px',
     backgroundColor: '#ffffff',
