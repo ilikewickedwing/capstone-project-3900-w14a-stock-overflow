@@ -3,6 +3,7 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
 import { nanoid } from 'nanoid';
 import { insertDefaultAdmin } from "./admin";
 import { calcAll } from './performance';
+import { getFriends } from "./social";
 
 // This is the uri authentication for the mongodb database in the cloud
 // It is the pretty mcuh the password to accessing the deployment database
@@ -1263,6 +1264,13 @@ export class Database {
     await activity.insertOne(obj);
     await userActivity.updateOne( query, { $set : { activities: activities } } );
 
+    // Sending notification to every friend
+    const friends = this.getFriends(uid);
+    for (let i= 0; i < friends.length; i++) {
+      const e = array[i].uid;
+      await this.insertUserNotification(e, message);
+    }
+
     return aid;
   }
 
@@ -1296,7 +1304,7 @@ export class Database {
     // Creating activity
     const users = this.database.collection('users');
     const userResp = await users.findOne({uid: activityResp.ownerUid});
-    await this.createActivity(uid, `commented on ${userResp.username}'s post/comment`,aid);
+    await this.createActivity(uid, `commented on ${userResp.username}'s activity 💬💬`,aid);
 
     return cid;
   }
@@ -1336,10 +1344,9 @@ export class Database {
     let message = '';
     if (index === -1) {
       likedUsers.push(uid);
-      message = `has liked ${userResp.username}'s post`;
+      message = `has liked ${userResp.username}'s post 👍👍`;
     } else {
       likedUsers.splice(index, 1);
-      message = `has unliked ${userResp.username}'s post`;
     }
     likes = likedUsers.length;
     await activity.updateOne({aid: id}, {$set: {likes: likes, likedUsers:likedUsers}});
@@ -1382,7 +1389,7 @@ export class Database {
           bear.splice(index, 1);
         }
         bull.push(uid);
-        message = `voted ${stock} as bullish`;
+        message = `voted ${stock} as bullish 🐮🐮`;
       }
     } else { // Voted bearish
       let index = bear.indexOf(uid);
@@ -1394,7 +1401,7 @@ export class Database {
           bull.splice(index, 1);
         }
         bear.push(uid);
-        message = `voted ${stock} as bearish`;
+        message = `voted ${stock} as bearish 🐻🐻`;
       }
     }
     
@@ -1447,7 +1454,7 @@ export class Database {
     // Get friends' and user's activities
     const friends = await this.getFriends(uid);
     const celebs = await this.getUserCelebrities(uid);
-    const everyone = [... friends, ... celebs, {uid : uid}];
+    const everyone = [... friends, ... celebs];
     for (let i = 0; i < everyone.length; i++) {
       const e = everyone[i].uid;
       const userActResp = await userActivity.findOne({ownerUid: e});
