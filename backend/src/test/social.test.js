@@ -144,8 +144,9 @@ describe('Activity', () => {
     })
     it('Checking activity after commenting a post', async() => {
         await comment(token2, aid, "yeet", d);
+        await comment(token2, aid, "another message", d);
         const activity1 = await getActivity(token1, d);
-        expect(activity1.length).toStrictEqual(2);
+        expect(activity1.length).toStrictEqual(3);
         const activity2 = await getActivity(token2, d);
         expect(activity2.length).toStrictEqual(1);
         const activity3 = await getActivity(token3, d);

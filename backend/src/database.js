@@ -1444,10 +1444,10 @@ export class Database {
     await userActivity.updateOne( query, { $set : { activities: activities } } );
 
     // Sending notification to every friend
-    const friends = this.getFriends(uid);
+    const friends = await this.getFriends(uid);
     for (let i= 0; i < friends.length; i++) {
-      const e = array[i].uid;
-      await this.insertUserNotification(e, message);
+      const e = friends[i].uid;
+      await this.insertUserNotification(e, userComment);
     }
 
     return aid;
@@ -1474,18 +1474,19 @@ export class Database {
       likedUsers: [],
       userComments: [],
     }
-
+    
     const activity = this.database.collection('activity');
     const query = { aid: aid };
     const activityResp = await activity.findOne(query);
-
+    
     if (activityResp == null) {
       return -3;
     }
-
+    
     let userComments = activityResp.userComments;
     userComments.push(cid);
-
+    
+    
     await activity.insertOne(obj);
     await activity.updateOne( query, { $set : { userComments: userComments } } );
 
@@ -1685,7 +1686,9 @@ export class Database {
           for (let j = 0; j < i.userComments.length; j++) {
             const element = i.userComments[j];
             const comment = await activity.findOne({aid: element});
-            newComments.push(comment);
+            if (comment !== null) {
+              newComments.push(comment);
+            }
           }
           i.userComments = newComments;
           activities.push(i);
