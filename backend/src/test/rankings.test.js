@@ -9,7 +9,7 @@ import { app, database } from "../index";
 import { getDefBroker, setDefBroker } from "../user";
 import { addFriend } from "../social";
 
-/* describe('Rank multiple user portfolio performances', () => {
+describe('Rank multiple user portfolio performances', () => {
 	const d = new Database(true);
 	beforeAll(async () => {
 	  await d.connect();
@@ -242,7 +242,7 @@ import { addFriend } from "../social";
     // console.dir(stocks2, { depth: null });
     // console.dir(stocks3, { depth: null });
     // console.dir(stocks4, { depth: null });
-    console.dir(rankings, { depth: null });
+    // console.dir(rankings, { depth: null });
     expect(rankings).not.toBe(null);
 	})
   // it('Test friend rank 1', async () => {
@@ -259,7 +259,7 @@ import { addFriend } from "../social";
 	afterAll(async () => {
 	  await d.disconnect();
 	})
-}) */
+})
 
 describe('Rank multiple user portfolios performances endpoint test', () => {
   beforeAll(async () => {
