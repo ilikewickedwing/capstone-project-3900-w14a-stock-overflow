@@ -499,6 +499,7 @@ export class Database {
 		const perf = {
 			name: userResp.username,
 			performance: userPortoResp.performance,
+			change: userPortoResp.change,
 		};
 
 		return perf;

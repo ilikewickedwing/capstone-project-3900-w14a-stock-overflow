@@ -383,7 +383,11 @@ export const getFriendRankings = async (token, database) => {
       performance: {
         performance: friend.performance[friend.performance.length - 1].performance,
         money: friend.performance[friend.performance.length - 1].money,
-      }
+      },
+			change: {
+				percentage: friend.change[friend.change.length - 1].percentage,
+				money: friend.change[friend.change.length - 1].money
+			}
     })
   }
 
@@ -396,7 +400,11 @@ export const getFriendRankings = async (token, database) => {
     performance: {
       performance: self.performance[self.performance.length - 1].performance,
       money: self.performance[self.performance.length - 1].money,
-    }
+    },
+		change: {
+			percentage: self.change[self.change.length - 1].percentage,
+			money: self.change[self.change.length - 1].money
+		}
   })
 
 	// Sort array
