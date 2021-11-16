@@ -1240,6 +1240,7 @@ export class Database {
     const friends = this.database.collection('friends');
     const friendsResp = await friends.findOne({ownerUid: friend});
     const userResp = await friends.findOne({ownerUid: uid});
+    const usernameResp = await this.getUser(uid);
 
     if (friendsResp == null) {
       return -3;
@@ -1256,7 +1257,7 @@ export class Database {
       friendRequests.push(uid);
 
       await friends.updateOne({ownerUid : friend}, {$set: {requests: friendRequests}});
-      await this.insertUserNotification(friend, `${friendResp.username} has sent you a friend request 🥺🥺`);
+      await this.insertUserNotification(friend, `${usernameResp.username} has sent you a friend request 🥺🥺`);
     } else { // other user has already sent a friend request
       userRequests.splice(requestIndex, 1);
 
@@ -1267,7 +1268,6 @@ export class Database {
 
       await friends.updateOne({ownerUid: friend}, {$set: {friends: friendList}});
       await friends.updateOne({ownerUid: uid}, {$set: {friends: userList, requests: userRequests}});
-      const usernameResp = await this.getUser(uid);
       await this.insertUserNotification(friend, `🌙 You are now friends with ${usernameResp.username} 🌙`);
     }
 
