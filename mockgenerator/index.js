@@ -4,7 +4,6 @@
 import fetch from "node-fetch";
 import fs from 'fs';
 import axios from 'axios';
-import { stringMatching } from "expect";
 
 // This is the port number of the backend server
 const ENDPOINT = `http://localhost:5050`;
@@ -43,7 +42,7 @@ const generateMockData = async () => {
   // users = await makeCelebrities(users, CELEBRITIES);
   await loadUsers();
   await loadCeleb();
-  await makeFriend();
+  await makeFriends();
 }
 
 /**
@@ -111,10 +110,11 @@ const loadUsers = async () => {
   for (let i= 0; i < 3; i++){
     try{
       const rego = await axios.post(`${ENDPOINT}/auth/register`,{username: users[i].username, password: users[i].password});
+			console.dir(rego.data, {depth:null});
 			userInfo.push({
 				userNum: i,
-				token: rego.body.token,
-				uid: rego.body.uid
+				token: rego.data.token,
+				uid: rego.data.uid
 			})
     } catch (e) {
       console.log(e);
@@ -127,7 +127,7 @@ const loadCeleb = async () => {
   try { 
     // log in to admin acc 
     const resp = await axios.post(`${ENDPOINT}/auth/login`,{username: 'admin', password:'admin'});
-    const adminToken = resp.body.token;
+    const adminToken = resp.data.token;
     // make celeb
     await axios.post(`${ENDPOINT}/user/profile`,{uid:userInfo[2].uid, token: adminToken, userData:{userType:"celebrity"}});
   } catch (e) {
@@ -173,7 +173,7 @@ const createPfs = async () =>{
 	})
 	pids.push({
 		user: userInfo[0].uid,
-		pid: resp1.body.pid,
+		pid: resp1.data.pid,
 	})
 	const resp2 = await axios.post(`${ENDPOINT}/user/portfolios/create`,{
 		token: userInfo[1].token,
@@ -181,7 +181,7 @@ const createPfs = async () =>{
 	})
 	pids.push({
 		user: userInfo[1].uid,
-		pid: resp2.body.pid,
+		pid: resp2.data.pid,
 	})
 	const resp3 = await axios.post(`${ENDPOINT}/user/portfolios/create`,{
 		token: userInfo[2].token,
@@ -189,7 +189,7 @@ const createPfs = async () =>{
 	})
 	pids.push({
 		user: userInfo[2].uid,
-		pid: resp3.body.pid,
+		pid: resp3.data.pid,
 	})
 	const resp4 = await axios.post(`${ENDPOINT}/user/portfolios/create`,{
 		token: userInfo[2].token,
@@ -197,7 +197,7 @@ const createPfs = async () =>{
 	})
 	pids.push({
 		user: userInfo[2].uid,
-		pid: resp4.body.pid,
+		pid: resp4.data.pid,
 	})
 }
 
