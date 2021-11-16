@@ -45,10 +45,10 @@ function createRankData(name, performance, rank) {
 
 // demo data for rankings
 const rows = [
-  createData('richard_mo', '+400', 1),
-  createData('elon_musk', '+150', 2),
-  createData('user1', "+100", 3),
-  createData('dragonalxd', "+59", 4),
+  createData('richard_mo', '400', 1),
+  createData('elon_musk', '150', 2),
+  createData('user1', "100", 3),
+  createData('dragonalxd', "59", 4),
 ];
 
 
