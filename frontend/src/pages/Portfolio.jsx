@@ -50,6 +50,8 @@ const Portfolio = () => {
   },[pid]);
   
   const loadPorfolioData = async () => {
+    // reset the stocks list (cached from loads)
+    setStocks([]);
     try {
       const request = await axios.get(`${apiBaseUrl}/user/portfolios/open?token=${token}&pid=${pid}`);
       const portfolioData = request.data;
@@ -161,7 +163,7 @@ const Portfolio = () => {
                 <h3 style={{textAlign:'center'}}>Daily Estimated Earnings</h3>
               </RightCard>
               <RightCard elevation={5}>
-                2nd card
+              <h3 style={{textAlign:'center'}}>Net Profit</h3>
               </RightCard>
             </RightBody>
             </PfBody>

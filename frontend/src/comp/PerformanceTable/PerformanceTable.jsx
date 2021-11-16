@@ -8,11 +8,9 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 
-import axios from 'axios';
-import { apiBaseUrl } from '../../comp/const';
 import PerformanceRow from './PerformanceRow';
 
-// layer 1= overview: portfolio name, total value and profit loss 
+// layer 1= overview: portfolio name
 // layer 2 = stocks: code,name, buyprice, current price, change %, units, value, pro/loss
 
 const PerformanceTable = ({portfolios,setPerfSelected}) => {

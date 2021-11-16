@@ -43,6 +43,7 @@ function createRankData(name, performance, rank) {
   return { name, performance, rank };
 }
 
+// demo data for rankings
 const rows = [
   createData('richard_mo', '+400', 1),
   createData('elon_musk', '+150', 2),
@@ -174,8 +175,9 @@ const getFriendRanking = async () => {
               </PfBar>
                 <h3>Overall Performance</h3>
                 <PerformanceGraph 
-                  height={400}
                   pids={selected.toString()} 
+                  height={400}
+                  isFriend={false}
                   />
                 <PerformanceTable 
                   portfolios={portfolios}

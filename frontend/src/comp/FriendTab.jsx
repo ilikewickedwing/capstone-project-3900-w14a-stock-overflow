@@ -1,6 +1,5 @@
 import React from 'react';
 import { TabButton } from '../styles/styling';
-import {useHistory} from 'react-router-dom';
 
 const FriendTab = ({
   name, stocks,pid, setTab, setStocks, setPid

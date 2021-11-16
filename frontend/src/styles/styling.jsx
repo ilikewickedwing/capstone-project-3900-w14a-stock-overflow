@@ -49,12 +49,11 @@ export const LeftBody= styled(BoxShadow)`
     flex:2;
 `;
 
-export const RightBody= styled(BoxShadow)`
+export const RightBody= styled.div`
     display:flex;
     flex-direction: column;
     margin:1%;
-    padding: 2%;
-    background-color: white;
+    //background-color: white;
     flex-wrap: wrap;
     flex:1;
 `;
@@ -94,7 +93,7 @@ export const WatchlistCardContainer = styled(BoxShadow)`
 `;
 
 export const ReqCardContainer = styled(BoxShadow)`
-    padding: 3%;
+    padding: 4%;
     margin: 3%;
     display:flex;
     align-items:center;
@@ -185,7 +184,7 @@ export const ConfirmCancel = styled(FlexRows)`
 
 export const RightCard = styled(BoxShadow)`
     padding: 4%;
-    margin: 1%; 
+    margin-bottom: 2%;
     background-color: white;
 `;
 

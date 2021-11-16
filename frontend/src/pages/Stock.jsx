@@ -11,12 +11,9 @@ import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import Button from '@mui/material/Button';
 import MenuList from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-
-import { SearchDiv } from '../styles/styling';
+import { SearchDiv, TextInput } from '../styles/styling';
 import { Autocomplete } from '@mui/material';
-import { TextInput } from '../styles/styling';
 import { IconButton } from '@material-ui/core';
 import SearchIcon from '@mui/icons-material/Search';
 
@@ -77,6 +74,12 @@ const Stock = () => {
   // sentiment: set the bullish %
   const [sentiment, setSentiment] = React.useState({});
 
+  // comparing stock
+  // fetch stocklist
+  const [queryRes, setRes] = React.useState([]);
+  const [search, setSearch ] = React.useState("");
+  const [stockList, setStockList] = React.useState([stockCode]);
+
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -91,11 +94,19 @@ const Stock = () => {
     fetchSentiment();
   },[]);
 
+
+  React.useEffect(() => {   
+    fetchStockList();
+    setStockList([stockCode])
+  },[stockCode]);
+
+  // calculate the percentage of profit 
   function calculatePerc(a,b){
     let res = ((a-b)/a)*100; 
     return `${res.toFixed(2)}`;
   }
 
+  // fetch the portfolio based information 
   const fetchPortfolios = async () => {
     try {
       const request = await axios.get(`${apiBaseUrl}/user/portfolios?token=${token}`);
@@ -105,6 +116,7 @@ const Stock = () => {
     }
   };
   
+  // fetch the sentiment of bullish/bearish; grabs the % of bullish
   const fetchSentiment = async () => {
     try {
       const request = await axios.get(`${apiBaseUrl}/stocks/votes?token=${token}&stock=${stockCode}`);
@@ -112,9 +124,9 @@ const Stock = () => {
     } catch (e) {
       alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
     }
-
   };
 
+  // reformat the infomation need to display the stocks information 
   const loadStockInfo = async () => {
     try {
       const request = await axios.get(`${apiBaseUrl}/stocks/info?type=1&stocks=${stockCode}`);
@@ -171,6 +183,7 @@ const Stock = () => {
     }
   }
 
+  // load the stock description overview (from alphavantage)
   const loadOverview = async () => {
     request.get({
       url: url,
@@ -186,22 +199,6 @@ const Stock = () => {
       }
   });
   }
-
-  //popup form to submit if its not watchlist
-  const submitAdd = async (e) => {
-    e.preventDefault();
-  }
-
-  // comparing stock
-  // fetch stocklist
-  const [queryRes, setRes] = React.useState([]);
-  const [search, setSearch ] = React.useState("");
-  const [stockList, setStockList] = React.useState([stockCode]);
-
-  React.useEffect(() => {   
-    fetchStockList();
-    setStockList([stockCode])
-  },[stockCode]);
 
   const fetchStockList = async () => {
     try {

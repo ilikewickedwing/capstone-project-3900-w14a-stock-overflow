@@ -15,7 +15,6 @@ import {
 import { AlertContext } from '../App';
 
 const WatchlistCard = ({name,onDeleteCallback = () => {}, isFriend} ) => {
-  console.log(isFriend);
     const api = useContext(ApiContext);
     const alert = useContext(AlertContext);
     const history = useHistory();

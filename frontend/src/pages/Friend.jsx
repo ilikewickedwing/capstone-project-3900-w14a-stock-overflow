@@ -1,6 +1,4 @@
 import * as React from 'react';
-import { ApiContext } from "../api";
-
 import { 
   PfBody, 
   LeftBody, 
@@ -24,14 +22,13 @@ import PerformanceGraph from '../graph/PerformanceGraph';
 import WatchlistCard from '../comp/WatchlistCard';
 
 import IconButton from '@mui/material/IconButton';
-import ThumbUpIcon from '@mui/icons-material/ThumbUp';
-import CommentIcon from '@mui/icons-material/Comment';
-
+import ThumbUpOutlinedIcon from '@mui/icons-material/ThumbUpOutlined';
+import CommentOutlinedIcon from '@mui/icons-material/CommentOutlined';
+import StocksGraph from '../graph/StocksGraph';
 
 
 // note: friend is inclusive of celebrity profiles except celebrities are public profiles while friends are private 
 export default function Friend() {
-  const api = React.useContext(ApiContext);
   let history = useHistory();
   const alert = React.useContext(AlertContext);
   const { handle } = useParams();
@@ -71,6 +68,7 @@ export default function Friend() {
 
     },[friendUid]);
 
+    // load all current celebrities 
     const loadDiscover = async () => {
       try {
         const resp = await axios.get(`${apiBaseUrl}/celebrity/discover`);
@@ -81,6 +79,7 @@ export default function Friend() {
       }
     }
 
+    // loop through the current celebrities and determine whether to follow or unfollow celeb
     const followCeleb = async () => {
       try {
         await axios.post(`${apiBaseUrl}/celebrity/follow`,{token, isFollow: !followers.includes(uid), celebUid: friendUid});
@@ -89,6 +88,8 @@ export default function Friend() {
         alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
       }
     }
+    
+    // load the friend/ celeb's activities
     const loadActivities = async () => {
       if (friendUid === "") {
         return;
@@ -103,6 +104,7 @@ export default function Friend() {
       }
     }
 
+    // check if user is celeb/ user
     const getUserType = async () => {
       if (friendUid === "") {
         return;
@@ -118,6 +120,7 @@ export default function Friend() {
       }
     }
 
+    // grab uid based on username 
     const getUid = async() => {
       try {
         const resp = await axios.get(`${apiBaseUrl}/user/uid?username=${handle}`);
@@ -132,6 +135,7 @@ export default function Friend() {
       }
     }
 
+    // handle add friend event 
     const sendRequest = async (e) => {
       e.preventDefault();
       try {
@@ -142,8 +146,8 @@ export default function Friend() {
       }
     }
 
+    // load all the portfolios and a summary page of overall performance 
     const loadPortfolios = async () => {
-
       try {
         let list = [];
         const summary = {
@@ -156,16 +160,28 @@ export default function Friend() {
         setPortfolio(list);
         if (resp.data.length > 0 ){
           setPublic(1);
+        } else {
+          setPublic(0);
         }
       } catch (e) {
         alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
       }
     }
 
+    //handle like activity event 
     const likeClick = async (id) => {
       try {
         await axios.post(`${apiBaseUrl}/activity/like`, {token, aid: id});
         loadActivities();
+      } catch (e){
+        alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
+      }
+    }
+
+    const unfriend = async () => {
+      try {
+        await axios.delete(`${apiBaseUrl}/friends/remove`,{data:{token, friendID: friendUid}});
+        setPublic(0);
       } catch (e){
         alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
       }
@@ -181,10 +197,15 @@ export default function Friend() {
                 <PfBody>
                 <LeftBody elevation={10}>
                 <PfBar>
-                  <Heading>{handle} </Heading>
+                  <Heading>{handle}'s Portfolios </Heading>
                   {userType==="celebrity" && 
                     <Button variant="outlined" color="secondary" id="addFriend" onClick={followCeleb}> 
                       {`${followers.includes(uid) ? 'Unfollow' : 'Follow'}`}
+                    </Button>
+                  }
+                  {userType==="user" && 
+                    <Button variant="outlined" color="secondary" id="addFriend" onClick={unfriend}> 
+                      Unfriend
                     </Button>
                   }
                 </PfBar>
@@ -201,6 +222,13 @@ export default function Friend() {
                   ))}
                   < br/> 
                   <h3>{tab}</h3>
+                  {tab ==='Summary' &&
+                  <PerformanceGraph 
+                  pids={''}
+                  height={300}
+                  isFriend={true}
+                  friendUid={friendUid}
+                />}
                   {stocks.length > 0 && 
                   tab !== "Watchlist" ?(
                     <div>
@@ -227,8 +255,17 @@ export default function Friend() {
                   )
                   }
               </LeftBody>
-              <RightBody elevation={10}>
-                <RightCard elevation={5} style={{overflowY:'scroll', height:'50vh'}}>
+              <RightBody>
+                <RightCard elevation={10}>
+                  <h3 style={{textAlign:'center'}}>{handle}'s Net Profits</h3>
+                </RightCard>
+                {selected.length > 0 && 
+                  <RightCard elevation={10}>
+                    <h3 style={{textAlign:'center'}}>Stocks Comparison</h3>
+                    <StocksGraph companyId={selected.toString()} height={150}/>
+                  </RightCard>
+                }
+                <RightCard elevation={10} style={{overflowY:'scroll', height:'50vh'}}>
                   <h3 style={{textAlign:'center'}}>{handle}'s Activity</h3>
                   {activity.map((e, index) => (
                     <div key={index} >
@@ -238,14 +275,14 @@ export default function Friend() {
                       <IconButton onClick={()=> likeClick(e.aid)}>
                           {
                             (e.likedUsers.indexOf(uid) !== -1) ? (
-                              <ThumbUpIcon style={{color:"green"}} />
+                              <ThumbUpOutlinedIcon style={{color:"green"}} />
                             ):(
-                              <ThumbUpIcon style={{color:"grey"}}  />  
+                              <ThumbUpOutlinedIcon style={{color:"grey"}}  />  
                             )
                           }
                       </IconButton>
                       <IconButton>
-                          <CommentIcon /> 
+                          <CommentOutlinedIcon /> 
                       </IconButton>
                     </div>
                   ))
@@ -258,7 +295,7 @@ export default function Friend() {
             <PfBody>
               <WatchlistBody elevation={10}>
                 <PfBar>
-                  <Heading>{handle} (private portfolio) </Heading>
+                  <Heading>{handle}'s (private) </Heading>
                   <Button id="addFriend" onClick={sendRequest}> 
                       Send Friend Request
                   </Button>
