@@ -80,7 +80,7 @@ export const calcPf = async (token, pid, database, admin, test, testDate, testDa
       const price = values.data.quotes.quote['last'];
       const value = price * stocks[i].quantity;
       const spent = stocks[i].avgPrice * stocks[i].quantity;
-      const amt = (value - spent)/spent;
+      const amt = (value - spent)/spent * 100;
       stocks[i].performance.push({ date: date, performance: amt });
       gain += value;
     }
@@ -88,10 +88,23 @@ export const calcPf = async (token, pid, database, admin, test, testDate, testDa
 
     // Calculate profit as a percentage
     const profit = gain - Pf.value.spent;
-    perf = profit/Pf.value.spent;
+    perf = profit/Pf.value.spent * 100;
+    let prevVal = null;
+    let prevPerc = null;
 
     // Add performance history to portfolio array
-    Pf.value.performance.push({ date: date, performance: perf });
+    const prevPerf = Pf.value.performance[Pf.value.performance.length - 1];
+    if (prevPerf) {
+      prevVal = prevPerf.money;
+      prevPerc = prevPerf.performance;
+    } else {
+      prevVal = 0;
+      prevPerc = 0;
+    }
+    Pf.value.performance.push({ date: date, performance: perf, money: profit });
+    const change = profit - prevVal;
+    const changePerc = perf - prevPerc;
+    Pf.value.change.push({ date: date, percentage: changePerc, money: change });
 
     /*   console.log(Pf);
 
@@ -113,6 +126,7 @@ export const calcPf = async (token, pid, database, admin, test, testDate, testDa
     // Amount of days to be calculated is testDays
 
     if (testDate === 'today') {
+      // console.log('Performing calcution for today: ' + date);
       let perf = 0;
       let gain = Pf.value.sold;
       
@@ -125,19 +139,35 @@ export const calcPf = async (token, pid, database, admin, test, testDate, testDa
         const price = values.data.quotes.quote['last'];
         const value = price * stocks[i].quantity;
         const spent = stocks[i].avgPrice * stocks[i].quantity;
-        const amt = (value - spent)/spent;
+        const amt = (value - spent)/spent * 100;
         stocks[i].performance.push({ date: date, performance: amt });
         gain += value;
       }
 
       const profit = gain - Pf.value.spent;
-      perf = profit/Pf.value.spent;
+      perf = profit/Pf.value.spent * 100;
+
+      let prevVal = null;
+      let prevPerc = null;
 
       // Add performance history to portfolio array
-      Pf.value.performance.push({ date: date, performance: perf });
+      const prevPerf = Pf.value.performance[Pf.value.performance.length - 1];
+      if (prevPerf) {
+        prevVal = prevPerf.money;
+        prevPerc = prevPerf.performance;
+      } else {
+        prevVal = 0;
+        prevPerc = 0;
+      }
+      Pf.value.performance.push({ date: date, performance: perf, money: profit });
+      const change = profit - prevVal;
+      const changePerc = perf - prevPerc;
+      Pf.value.change.push({ date: date, percentage: changePerc, money: change });
       await database.calcPf(pid, Pf.value, Pf.stocks);
       return;
     }
+
+    // console.log('Performing calcution for ' + testDate + ' and the following ' + testDays + ' days');
 
     // Get stocklist
     const stocks = Pf.stocks;
@@ -179,8 +209,23 @@ export const calcPf = async (token, pid, database, admin, test, testDate, testDa
       // Add performance history to portfolio array
       if (Pf.value.performance[0].date === date) {
         Pf.value.performance.splice(0, 1);
+        Pf.value.change.splice(0, 1);
       }
-      Pf.value.performance.push({ date: setDate, performance: perf });
+      let prevVal = null;
+      let prevPerc = null;
+      // console.dir(Pf, {depth:null});
+      const prevPerf = Pf.value.performance[Pf.value.performance.length - 1];
+      if (prevPerf) {
+        prevVal = prevPerf.money;
+        prevPerc = prevPerf.performance;
+      } else {
+        prevVal = 0;
+        prevPerc = 0;
+      }
+      Pf.value.performance.push({ date: setDate, performance: perf, money: profit });
+      const change = profit - prevVal;
+      const changePerc = perf - prevPerc;
+      Pf.value.change.push({ date: setDate, percentage: changePerc, money: change });
     }
 
     await database.calcPf(pid, Pf.value, Pf.stocks);
@@ -194,11 +239,11 @@ export const calcPf = async (token, pid, database, admin, test, testDate, testDa
  * @param {Database} database 
  */
 export const calcAll = async (database, testmode) => {
-  const rule = new schedule.RecurrenceRule();
-  rule.hour = 16;
-  rule.tz = 'US/Eastern';
+  const rule1 = new schedule.RecurrenceRule();
+  rule1.hour = 16;
+  rule1.tz = 'US/Eastern';
 
-  const job = schedule.scheduleJob(rule, async () => {
+  const job = schedule.scheduleJob(rule1, async () => {
     console.log('Market is now closed. Portfolio calculation has begun.');
     const portfolios = await database.getAllPfs();
     for (let i = 0; i < portfolios.length; i++) {
@@ -246,9 +291,9 @@ export const rankAll = async (database) => {
     if (users[i].userType !== 'admin') {
       const pfs = await database.getPfs(users[i].uid);
       const avgPerf = await rankOne(pfs, database);
-      await database.setUserPerf(users[i].uid, avgPerf);
+      const percentage = await database.setUserPerf(users[i].uid, avgPerf);
       // console.log('rank is ' + (rank + 1) + ', uid is ' + users[i].uid + ', name is ' + users[i].username + ', avgPerf is ' + avgPerf);
-      rankings.push({ rank: null, uid: users[i].uid, name: users[i].username, performance: avgPerf });
+      rankings.push({ rank: null, uid: users[i].uid, name: users[i].username, performance: { performance: percentage, money: avgPerf.money }});
     } 
   }
 
@@ -257,6 +302,8 @@ export const rankAll = async (database) => {
   for (let i = 0; i < newRank.length; i++) {
     newRank[i].rank = i + 1;
   }
+
+  console.dir(newRank, {depth:null});
 
   await database.updateRankings(newRank);
 }
@@ -276,7 +323,7 @@ const merge = (left, right) => {
   var result = [];
 
   while (left.length && right.length) {
-      if (left[0].performance >= right[0].performance) {
+      if (left[0].performance.performance >= right[0].performance.performance) {
           result.push(left.shift());
       } else {
           result.push(right.shift());
@@ -300,17 +347,25 @@ const merge = (left, right) => {
  */
 const rankOne = async (pfs, database) => {
   let total = 0;
+  let totalSpend = 0;
+  let totalSold = 0;
   for (let i = 0; i < pfs.length; i++) {
     const pf = await database.openPf(pfs[i].pid);
     if (pf.name !== 'Watchlist') {
       // console.dir(pf, { depth: null });
       const performances = pf.value.performance;
-      const perf = performances[performances.length - 1].performance;
+      const perf = performances[performances.length - 1].money;
       total += perf;
+      totalSpend += pf.value.spent;
+      totalSold += pf.value.sold;
     }
   }
 
-  return (total/(pfs.length - 1));
+  return { 
+    money: total,
+    spent: totalSpend,
+    sold: totalSold
+  };
 }
 
 export const getAllRankings = async (database) => {
@@ -370,12 +425,15 @@ export const getFriendRankings = async (token, database) => {
   for (let i = 0; i < friends.length; i++) {
     // console.dir(friends[i], {depth : null});
     const friend = await database.getUserPerf(friends[i].uid);
-    console.log(friend);
+    // console.log(friend);
     friendPerf.push({
       rank: 0,
       uid: friends[i].uid,
       name: friend.name,
-      performance: friend.performance
+      performance: {
+        performance: friend.performance[friend.performance.length - 1].performance,
+        money: friend.performance[friend.performance.length - 1].money,
+      }
     })
     // console.dir(friendPerf, {depth:null});
   }
@@ -385,7 +443,10 @@ export const getFriendRankings = async (token, database) => {
     rank: 0,
     uid: uid,
     name: self.name,
-    performance: self.performance
+    performance: {
+      performance: self.performance[self.performance.length - 1].performance,
+      money: self.performance[self.performance.length - 1].money,
+    }
   })
 
   const friendRank = mergeSort(friendPerf);
@@ -395,4 +456,26 @@ export const getFriendRankings = async (token, database) => {
 
   // Filter through friends list
   return friendRank;
+}
+
+export const getUserPerf = async (token, uid, database) => {
+  // console.log('FriendRankings');
+  // Return error if user is not found
+  const userUid = await database.getTokenUid(token);
+  if (userUid == null) {
+    return 1;
+  }
+
+  if (userUid !== uid) {
+    if (!await database.checkFriend(userUid, uid)) {
+      const celebrities = await database.getAllCelebrityUsers();
+      const filtered = celebrities.filter((e) => e.uid === uid);
+      if (filtered.length === 0) {
+        return 2;
+      }
+    }
+  }
+
+  const perf = await database.getUserPerf(uid);
+  return perf;
 }
