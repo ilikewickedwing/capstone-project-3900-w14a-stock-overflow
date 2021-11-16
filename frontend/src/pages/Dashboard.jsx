@@ -45,10 +45,10 @@ function createRankData(name, performance, rank) {
 
 // demo data for rankings
 const rows = [
-  createData('richard_mo', '+400', 1),
-  createData('elon_musk', '+150', 2),
-  createData('user1', "+100", 3),
-  createData('dragonalxd', "+59", 4),
+  createData('richard_mo', '400', 1),
+  createData('elon_musk', '150', 2),
+  createData('user1', "100", 3),
+  createData('dragonalxd', "59", 4),
 ];
 
 
@@ -72,28 +72,25 @@ export default function Dashboard() {
     getGlobalRanks();
     fetchPortfolios();
     getFriendRanking();
-  },[]);
-
-  React.useEffect(()=>{
     getActivity();
-  }, []);
+  },[]);
 
 const getGlobalRanks = async () => {
   try {
-    // const request = await axios.get(`${apiBaseUrl}/rankings/global`);
-    // let list = [];
-    // for (let i=0; i< request.data.length; i++){
-    //   // push the top 5 global ranks
-    //   if (i < 5) {
-    //     list.push(createRankData(request.data[i].name, request.data[i].performance, request.data[i].rank));
-    //   }
-    //   if (request.data[i].name === myName){
-    //     setMyGlobal(createRankData(request.data[i].name, request.data[i].performance, request.data[i].rank));
-    //   }
-    // }
-    // setGlobal(list);
+    const request = await axios.get(`${apiBaseUrl}/rankings/global`);
+    let list = [];
+    for (let i=0; i< request.data.length; i++){
+      // push the top 5 global ranks
+      if (i < 5) {
+        list.push(createRankData(request.data[i].name, request.data[i].performance.performance, request.data[i].rank));
+      }
+      if (request.data[i].name === myName){
+        setMyGlobal(createRankData(request.data[i].name, request.data[i].performance.performance, request.data[i].rank));
+      }
+    }
+    setGlobal(list);
   } catch (e) {
-    alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
+    // alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
   }
 }
 
@@ -101,11 +98,8 @@ const getFriendRanking = async () => {
   try {
     const resp = await axios.get(`${apiBaseUrl}/rankings/friends?token=${token}`);
     let list = [];
-    console.log(resp.data);
     for (let i=0; i< resp.data.length; i++){
-      if (i < 5){
-        list.push(createRankData(resp.data[i].name, resp.data[i].performance.performance, resp.data[i].rank));
-      }
+      list.push(createRankData(resp.data[i].name, resp.data[i].performance.performance, resp.data[i].rank));
       if (resp.data[i].name === myName){
         setMyRanking(createRankData(resp.data[i].name, resp.data[i].performance.performance, resp.data[i].rank));
       }
@@ -114,7 +108,6 @@ const getFriendRanking = async () => {
 
     // todo set ranking of the new thing 
   } catch (e) {
-    // console.log(e);
     alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
   }
 }
@@ -165,6 +158,7 @@ const getFriendRanking = async () => {
   const getActivity = async() => {
     try {
     const resp = await axios.get(`${apiBaseUrl}/activity/all?token=${token}`);
+    console.log(resp.data);
     setActivity(resp.data);
     } catch (e) {
       alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
@@ -195,7 +189,7 @@ const getFriendRanking = async () => {
                 {
                   activity.length > 0 ? activity.map(index =>{
                     let subString = index.time.substring(11,16)
-                    return <Activity message={index.message} time={subString}></Activity>
+                    return <Activity message={index.message} time={subString} aid={index.aid} likes={index.likes} getActivityCallBack={getActivity} userComments={index.userComments}></Activity>
                   }): <p>Empty feed :\</p>
                 }
               </LeftBody>
@@ -221,6 +215,10 @@ const getFriendRanking = async () => {
                   <img style={{height:"auto", width:"50px"}} src={globe} alt="global icon"/>
                 </div>
                   <h3 style={{textAlign:'center'}}>Global Rankings</h3>
+                    <RankTable
+                      rows={globalRank}
+                      myRanking={myGlobalRanking}
+                    />
                 </RightCard>
               </RightBody>
             </PfBody>

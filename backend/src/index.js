@@ -1995,3 +1995,9 @@ app.post('/rankings/forceCalc', async(req, res) => {
   const resp = await calcAll(database, true);
   res.status(200).send();
 })
+
+app.post('/rankings/forceCalcPf', async(req, res) => {
+  const { token, pid, testDate, testDays } = req.body;
+  const resp = await calcPf(token, pid, database, 'yes', 'yes', testDate, testDays);
+  res.status(200).send();
+})
