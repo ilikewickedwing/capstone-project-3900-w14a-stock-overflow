@@ -194,16 +194,7 @@ export default class API {
   }
   
   friendsPortfolios(token, uid) {
-    return fetch(`${ENDPOINT}/friends/portfolios`, {
-      method: 'POST',
-      headers: {
-        'Content-Type' : 'application/json'
-      },
-      body: JSON.stringify({
-        token: token,
-        uid: uid,
-      })
-    });
+    return fetch(`${ENDPOINT}/friends/portfolios?token=${token}&uid=${uid}`);
   }
   
   postCelebrityFollow(token, isFollow, celebUid) {

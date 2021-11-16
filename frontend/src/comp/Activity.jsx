@@ -74,7 +74,7 @@ const Activity = (props) => {
               let subString = e.time.substring(11,16)
               return (
                 <div style={{margin:'0px 0px 2px 10px'}} key={i}>
-                  <span style={{fontWeight:'bold'}}>{e.time.split('T')[0]} {subString} </span> : {e.ownerName}: {e.message}
+                  <span style={{fontWeight:'bold'}}>{e.time.split('T')[0]} {subString} </span> - {e.ownerName}: {e.message}
                 </div>
               )
             })
