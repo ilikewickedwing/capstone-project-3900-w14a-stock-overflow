@@ -953,7 +953,9 @@ app.put('/user/stocks/edit', async(req, res) => {
 		res.status(403).send({ error: "Default brokerage cost not set" });
 	} else if (resp === 10) {
 		res.status(403).send({ error: "Invalid brokerage type" });
-	}
+	} else if (resp === 11) {
+    res.status(403).send({ error: "Invalid option" });
+  }
 	return;
 })
 

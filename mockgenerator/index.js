@@ -47,8 +47,9 @@ const generateMockData = async () => {
 	await createPfs();
 	await addStocks();
 	await calcPf();
-	await calcAll();
 	await addMoreStocks();
+	await reCalcPf();
+	await sellStocks();
 	await reCalcPf();
 	await calcAll();
 }
@@ -60,7 +61,7 @@ const createUsers = async () => {
     } catch (e) {
       console.log(e);
     }
-  } 
+  }
 }
 /**
  * Registers the given number of users and returns
@@ -72,7 +73,7 @@ const createUsers = async () => {
  *     password: string,
  *     userType: string,
  *   }
- * @param {number} numberOfUsers 
+ * @param {number} numberOfUsers
  * @returns {array}
  */
 const registerUsers = async (numberOfUsers) => {
@@ -114,7 +115,7 @@ const users = [
     username: "user1",
     password: "user1"
   }, {
-    username:"user2", 
+    username:"user2",
     password:"user2"
   }, {
     username:'celeb',
@@ -122,7 +123,7 @@ const users = [
   }
 ]
 
-// register users 
+// register users
 const loadUsers = async () => {
   for (let i= 0; i < 3; i++){
     try{
@@ -136,23 +137,23 @@ const loadUsers = async () => {
     } catch (e) {
       console.log(e);
     }
-  } 
+  }
 }
 
 // make celeb = celeb acc
 const loadCeleb = async () => {
-  try { 
-    // log in to admin acc 
+  try {
+    // log in to admin acc
     const resp = await axios.post(`${ENDPOINT}/auth/login`,{username: 'admin', password:'admin'});
     const adminToken = resp.data.token;
     // make celeb
     await axios.post(`${ENDPOINT}/user/profile`,{uid:userInfo[2].uid, token: adminToken, userData:{userType:"celebrity"}});
   } catch (e) {
-    console.log(e); 
+    console.log(e);
   }
 }
 
-// make user1 friend with user2 
+// make user1 friend with user2
 const makeFriends = async () => {
   const token = userInfo[0].token;
   const friendID = userInfo[1].uid;
@@ -229,126 +230,126 @@ const addStocks = async () => {
 	let values = await axios.get(`${ENDPOINT}/stocks/info?type=2&stocks=AAPL&interval=daily&start=${testDate}`);
 	let price = values.data.data.history.day[0].close;
 	await axios.post(`${ENDPOINT}/user/stocks/add`,{
-		token: userInfo[0].token, 
-		pid: pids[0].pid, 
-		stock: 'AAPL', 
-		price: price, 
-		quantity: 2, 
-		brokerage: null, 
+		token: userInfo[0].token,
+		pid: pids[0].pid,
+		stock: 'AAPL',
+		price: price,
+		quantity: 2,
+		brokerage: null,
 		brokerFlag: null
 	})
 	await axios.post(`${ENDPOINT}/user/stocks/add`,{
-		token: userInfo[1].token, 
-		pid: pids[1].pid, 
-		stock: 'AAPL', 
-		price: price, 
-		quantity: 2, 
-		brokerage: null, 
+		token: userInfo[1].token,
+		pid: pids[1].pid,
+		stock: 'AAPL',
+		price: price,
+		quantity: 2,
+		brokerage: null,
 		brokerFlag: null
 	})
 	await axios.post(`${ENDPOINT}/user/stocks/add`,{
-		token: userInfo[2].token, 
-		pid: pids[2].pid, 
-		stock: 'AAPL', 
-		price: price, 
-		quantity: 2, 
-		brokerage: null, 
+		token: userInfo[2].token,
+		pid: pids[2].pid,
+		stock: 'AAPL',
+		price: price,
+		quantity: 2,
+		brokerage: null,
 		brokerFlag: null
 	})
-	
+
 	values = await axios.get(`${ENDPOINT}/stocks/info?type=2&stocks=NVDA&interval=daily&start=${testDate}`);
 	price = values.data.data.history.day[0].close;
 	await axios.post(`${ENDPOINT}/user/stocks/add`,{
-		token: userInfo[2].token, 
-		pid: pids[3].pid, 
-		stock: 'NVDA', 
-		price: price, 
-		quantity: 2, 
-		brokerage: null, 
+		token: userInfo[2].token,
+		pid: pids[3].pid,
+		stock: 'NVDA',
+		price: price,
+		quantity: 2,
+		brokerage: null,
 		brokerFlag: null
 	})
 
 	values = await axios.get(`${ENDPOINT}/stocks/info?type=2&stocks=AMZN&interval=daily&start=${testDate}`);
 	price = values.data.data.history.day[0].close;
 	await axios.post(`${ENDPOINT}/user/stocks/add`,{
-		token: userInfo[0].token, 
-		pid: pids[0].pid, 
-		stock: 'AMZN', 
-		price: price, 
-		quantity: 2, 
-		brokerage: null, 
+		token: userInfo[0].token,
+		pid: pids[0].pid,
+		stock: 'AMZN',
+		price: price,
+		quantity: 2,
+		brokerage: null,
 		brokerFlag: null
 	})
 	await axios.post(`${ENDPOINT}/user/stocks/add`,{
-		token: userInfo[1].token, 
-		pid: pids[1].pid, 
-		stock: 'AMZN', 
-		price: price, 
-		quantity: 2, 
-		brokerage: null, 
+		token: userInfo[1].token,
+		pid: pids[1].pid,
+		stock: 'AMZN',
+		price: price,
+		quantity: 2,
+		brokerage: null,
 		brokerFlag: null
 	})
 	await axios.post(`${ENDPOINT}/user/stocks/add`,{
-		token: userInfo[2].token, 
-		pid: pids[2].pid, 
-		stock: 'AMZN', 
-		price: price, 
-		quantity: 2, 
-		brokerage: null, 
+		token: userInfo[2].token,
+		pid: pids[2].pid,
+		stock: 'AMZN',
+		price: price,
+		quantity: 2,
+		brokerage: null,
 		brokerFlag: null
 	})
-	
+
 	values = await axios.get(`${ENDPOINT}/stocks/info?type=2&stocks=MSFT&interval=daily&start=${testDate}`);
 	price = values.data.data.history.day[0].close;
 	await axios.post(`${ENDPOINT}/user/stocks/add`,{
-		token: userInfo[2].token, 
-		pid: pids[3].pid, 
-		stock: 'MSFT', 
-		price: price, 
-		quantity: 2, 
-		brokerage: null, 
+		token: userInfo[2].token,
+		pid: pids[3].pid,
+		stock: 'MSFT',
+		price: price,
+		quantity: 2,
+		brokerage: null,
 		brokerFlag: null
 	})
 
 	values = await axios.get(`${ENDPOINT}/stocks/info?type=2&stocks=IBM&interval=daily&start=${testDate}`);
 	price = values.data.data.history.day[0].close;
 	await axios.post(`${ENDPOINT}/user/stocks/add`,{
-		token: userInfo[0].token, 
-		pid: pids[0].pid, 
-		stock: 'IBM', 
-		price: price, 
-		quantity: 2, 
-		brokerage: null, 
+		token: userInfo[0].token,
+		pid: pids[0].pid,
+		stock: 'IBM',
+		price: price,
+		quantity: 2,
+		brokerage: null,
 		brokerFlag: null
 	})
 	await axios.post(`${ENDPOINT}/user/stocks/add`,{
-		token: userInfo[1].token, 
-		pid: pids[1].pid, 
-		stock: 'IBM', 
-		price: price, 
-		quantity: 2, 
-		brokerage: null, 
+		token: userInfo[1].token,
+		pid: pids[1].pid,
+		stock: 'IBM',
+		price: price,
+		quantity: 2,
+		brokerage: null,
 		brokerFlag: null
 	})
 	await axios.post(`${ENDPOINT}/user/stocks/add`,{
-		token: userInfo[2].token, 
-		pid: pids[2].pid, 
-		stock: 'IBM', 
-		price: price, 
-		quantity: 2, 
-		brokerage: null, 
+		token: userInfo[2].token,
+		pid: pids[2].pid,
+		stock: 'IBM',
+		price: price,
+		quantity: 2,
+		brokerage: null,
 		brokerFlag: null
 	})
-	
+
 	values = await axios.get(`${ENDPOINT}/stocks/info?type=2&stocks=FB&interval=daily&start=${testDate}`);
 	price = values.data.data.history.day[0].close;
 	await axios.post(`${ENDPOINT}/user/stocks/add`,{
-		token: userInfo[2].token, 
-		pid: pids[3].pid, 
-		stock: 'FB', 
-		price: price, 
-		quantity: 2, 
-		brokerage: null, 
+		token: userInfo[2].token,
+		pid: pids[3].pid,
+		stock: 'FB',
+		price: price,
+		quantity: 2,
+		brokerage: null,
 		brokerFlag: null
 	})
 }
@@ -360,33 +361,33 @@ const calcPf = async() => {
 	const test = new Date();
 	test.setDate(today.getDate() - daysCalced);
 	const testDate = test.getFullYear() + '-' + ('0' + (test.getMonth() + 1)).slice(-2) + '-' + ('0' + test.getDate()).slice(-2);
-	const testDays = 3;
-	
+	const testDays = 2;
+
 	await axios.post(`${ENDPOINT}/rankings/forceCalcPf`,{
-		token: userInfo[0].token, 
-		pid: pids[0].pid, 
+		token: userInfo[0].token,
+		pid: pids[0].pid,
 		testDate: testDate,
 		testDays: testDays,
 	})
 	await axios.post(`${ENDPOINT}/rankings/forceCalcPf`,{
-		token: userInfo[1].token, 
-		pid: pids[1].pid, 
+		token: userInfo[1].token,
+		pid: pids[1].pid,
 		testDate: testDate,
 		testDays: testDays,
 	})
 	await axios.post(`${ENDPOINT}/rankings/forceCalcPf`,{
-		token: userInfo[2].token, 
-		pid: pids[2].pid, 
+		token: userInfo[2].token,
+		pid: pids[2].pid,
 		testDate: testDate,
 		testDays: testDays,
 	})
 	await axios.post(`${ENDPOINT}/rankings/forceCalcPf`,{
-		token: userInfo[2].token, 
-		pid: pids[3].pid, 
+		token: userInfo[2].token,
+		pid: pids[3].pid,
 		testDate: testDate,
 		testDays: testDays,
 	})
-	daysCalced -= testDays;
+	daysCalced -= testDays + 1;
 }
 
 const calcAll = async () => {
@@ -406,126 +407,126 @@ const addMoreStocks = async () => {
 	let values = await axios.get(`${ENDPOINT}/stocks/info?type=2&stocks=AAPL&interval=daily&start=${testDate}`);
 	let price = values.data.data.history.day[0].close;
 	await axios.post(`${ENDPOINT}/user/stocks/add`,{
-		token: userInfo[0].token, 
-		pid: pids[0].pid, 
-		stock: 'AAPL', 
-		price: price, 
-		quantity: 2, 
-		brokerage: null, 
+		token: userInfo[0].token,
+		pid: pids[0].pid,
+		stock: 'AAPL',
+		price: price,
+		quantity: 2,
+		brokerage: null,
 		brokerFlag: null
 	})
 	await axios.post(`${ENDPOINT}/user/stocks/add`,{
-		token: userInfo[1].token, 
-		pid: pids[1].pid, 
-		stock: 'AAPL', 
-		price: price, 
-		quantity: 2, 
-		brokerage: null, 
+		token: userInfo[1].token,
+		pid: pids[1].pid,
+		stock: 'AAPL',
+		price: price,
+		quantity: 2,
+		brokerage: null,
 		brokerFlag: null
 	})
 	await axios.post(`${ENDPOINT}/user/stocks/add`,{
-		token: userInfo[2].token, 
-		pid: pids[2].pid, 
-		stock: 'AAPL', 
-		price: price, 
-		quantity: 2, 
-		brokerage: null, 
+		token: userInfo[2].token,
+		pid: pids[2].pid,
+		stock: 'AAPL',
+		price: price,
+		quantity: 2,
+		brokerage: null,
 		brokerFlag: null
 	})
-	
+
 	values = await axios.get(`${ENDPOINT}/stocks/info?type=2&stocks=NVDA&interval=daily&start=${testDate}`);
 	price = values.data.data.history.day[0].close;
 	await axios.post(`${ENDPOINT}/user/stocks/add`,{
-		token: userInfo[2].token, 
-		pid: pids[3].pid, 
-		stock: 'NVDA', 
-		price: price, 
-		quantity: 2, 
-		brokerage: null, 
+		token: userInfo[2].token,
+		pid: pids[3].pid,
+		stock: 'NVDA',
+		price: price,
+		quantity: 2,
+		brokerage: null,
 		brokerFlag: null
 	})
 
 	values = await axios.get(`${ENDPOINT}/stocks/info?type=2&stocks=AMZN&interval=daily&start=${testDate}`);
 	price = values.data.data.history.day[0].close;
 	await axios.post(`${ENDPOINT}/user/stocks/add`,{
-		token: userInfo[0].token, 
-		pid: pids[0].pid, 
-		stock: 'AMZN', 
-		price: price, 
-		quantity: 2, 
-		brokerage: null, 
+		token: userInfo[0].token,
+		pid: pids[0].pid,
+		stock: 'AMZN',
+		price: price,
+		quantity: 2,
+		brokerage: null,
 		brokerFlag: null
 	})
 	await axios.post(`${ENDPOINT}/user/stocks/add`,{
-		token: userInfo[1].token, 
-		pid: pids[1].pid, 
-		stock: 'AMZN', 
-		price: price, 
-		quantity: 2, 
-		brokerage: null, 
+		token: userInfo[1].token,
+		pid: pids[1].pid,
+		stock: 'AMZN',
+		price: price,
+		quantity: 2,
+		brokerage: null,
 		brokerFlag: null
 	})
 	await axios.post(`${ENDPOINT}/user/stocks/add`,{
-		token: userInfo[2].token, 
-		pid: pids[2].pid, 
-		stock: 'AMZN', 
-		price: price, 
-		quantity: 2, 
-		brokerage: null, 
+		token: userInfo[2].token,
+		pid: pids[2].pid,
+		stock: 'AMZN',
+		price: price,
+		quantity: 2,
+		brokerage: null,
 		brokerFlag: null
 	})
-	
+
 	values = await axios.get(`${ENDPOINT}/stocks/info?type=2&stocks=MSFT&interval=daily&start=${testDate}`);
 	price = values.data.data.history.day[0].close;
 	await axios.post(`${ENDPOINT}/user/stocks/add`,{
-		token: userInfo[2].token, 
-		pid: pids[3].pid, 
-		stock: 'MSFT', 
-		price: price, 
-		quantity: 2, 
-		brokerage: null, 
+		token: userInfo[2].token,
+		pid: pids[3].pid,
+		stock: 'MSFT',
+		price: price,
+		quantity: 2,
+		brokerage: null,
 		brokerFlag: null
 	})
 
 	values = await axios.get(`${ENDPOINT}/stocks/info?type=2&stocks=IBM&interval=daily&start=${testDate}`);
 	price = values.data.data.history.day[0].close;
 	await axios.post(`${ENDPOINT}/user/stocks/add`,{
-		token: userInfo[0].token, 
-		pid: pids[0].pid, 
-		stock: 'IBM', 
-		price: price, 
-		quantity: 2, 
-		brokerage: null, 
+		token: userInfo[0].token,
+		pid: pids[0].pid,
+		stock: 'IBM',
+		price: price,
+		quantity: 2,
+		brokerage: null,
 		brokerFlag: null
 	})
 	await axios.post(`${ENDPOINT}/user/stocks/add`,{
-		token: userInfo[1].token, 
-		pid: pids[1].pid, 
-		stock: 'IBM', 
-		price: price, 
-		quantity: 2, 
-		brokerage: null, 
+		token: userInfo[1].token,
+		pid: pids[1].pid,
+		stock: 'IBM',
+		price: price,
+		quantity: 2,
+		brokerage: null,
 		brokerFlag: null
 	})
 	await axios.post(`${ENDPOINT}/user/stocks/add`,{
-		token: userInfo[2].token, 
-		pid: pids[2].pid, 
-		stock: 'IBM', 
-		price: price, 
-		quantity: 2, 
-		brokerage: null, 
+		token: userInfo[2].token,
+		pid: pids[2].pid,
+		stock: 'IBM',
+		price: price,
+		quantity: 2,
+		brokerage: null,
 		brokerFlag: null
 	})
-	
+
 	values = await axios.get(`${ENDPOINT}/stocks/info?type=2&stocks=FB&interval=daily&start=${testDate}`);
 	price = values.data.data.history.day[0].close;
 	await axios.post(`${ENDPOINT}/user/stocks/add`,{
-		token: userInfo[2].token, 
-		pid: pids[3].pid, 
-		stock: 'FB', 
-		price: price, 
-		quantity: 2, 
-		brokerage: null, 
+		token: userInfo[2].token,
+		pid: pids[3].pid,
+		stock: 'FB',
+		price: price,
+		quantity: 2,
+		brokerage: null,
 		brokerFlag: null
 	})
 }
@@ -537,40 +538,184 @@ const reCalcPf = async() => {
 	const test = new Date();
 	test.setDate(today.getDate() - daysCalced);
 	const testDate = test.getFullYear() + '-' + ('0' + (test.getMonth() + 1)).slice(-2) + '-' + ('0' + test.getDate()).slice(-2);
-	const testDays = 3;
-	
+	const testDays = 2;
+
 	await axios.post(`${ENDPOINT}/rankings/forceCalcPf`,{
-		token: userInfo[0].token, 
-		pid: pids[0].pid, 
+		token: userInfo[0].token,
+		pid: pids[0].pid,
 		testDate: testDate,
 		testDays: testDays,
 	})
 	await axios.post(`${ENDPOINT}/rankings/forceCalcPf`,{
-		token: userInfo[1].token, 
-		pid: pids[1].pid, 
+		token: userInfo[1].token,
+		pid: pids[1].pid,
 		testDate: testDate,
 		testDays: testDays,
 	})
 	await axios.post(`${ENDPOINT}/rankings/forceCalcPf`,{
-		token: userInfo[2].token, 
-		pid: pids[2].pid, 
+		token: userInfo[2].token,
+		pid: pids[2].pid,
 		testDate: testDate,
 		testDays: testDays,
 	})
 	await axios.post(`${ENDPOINT}/rankings/forceCalcPf`,{
-		token: userInfo[2].token, 
-		pid: pids[3].pid, 
+		token: userInfo[2].token,
+		pid: pids[3].pid,
 		testDate: testDate,
 		testDays: testDays,
 	})
 	daysCalced -= testDays;
 }
 
+const sellStocks = async () => {
+	const test = new Date();
+	test.setDate(today.getDate() - daysCalced);
+	const testDate = test.getFullYear() + '-' + ('0' + (test.getMonth() + 1)).slice(-2) + '-' + ('0' + test.getDate()).slice(-2);
+
+	let values = await axios.get(`${ENDPOINT}/stocks/info?type=2&stocks=AAPL&interval=daily&start=${testDate}`);
+	let price = values.data.data.history.day[0].close;
+	await axios.put(`${ENDPOINT}/user/stocks/edit`,{
+		token: userInfo[0].token,
+		pid: pids[0].pid,
+		stock: 'AAPL',
+		price: price,
+		quantity: 1,
+		option: 0,
+		brokerage: null,
+		brokerFlag: null
+	})
+	await axios.put(`${ENDPOINT}/user/stocks/edit`,{
+		token: userInfo[1].token,
+		pid: pids[1].pid,
+		stock: 'AAPL',
+		price: price,
+		quantity: 1,
+		option: 0,
+		brokerage: null,
+		brokerFlag: null
+	})
+	await axios.put(`${ENDPOINT}/user/stocks/edit`,{
+		token: userInfo[2].token,
+		pid: pids[2].pid,
+		stock: 'AAPL',
+		price: price,
+		quantity: 1,
+		option: 0,
+		brokerage: null,
+		brokerFlag: null
+	})
+
+	values = await axios.get(`${ENDPOINT}/stocks/info?type=2&stocks=NVDA&interval=daily&start=${testDate}`);
+	price = values.data.data.history.day[0].close;
+	await axios.put(`${ENDPOINT}/user/stocks/edit`,{
+		token: userInfo[2].token,
+		pid: pids[3].pid,
+		stock: 'NVDA',
+		price: price,
+		quantity: 1,
+		option: 0,
+		brokerage: null,
+		brokerFlag: null
+	})
+
+	values = await axios.get(`${ENDPOINT}/stocks/info?type=2&stocks=AMZN&interval=daily&start=${testDate}`);
+	price = values.data.data.history.day[0].close;
+	await axios.put(`${ENDPOINT}/user/stocks/edit`,{
+		token: userInfo[0].token,
+		pid: pids[0].pid,
+		stock: 'AMZN',
+		price: price,
+		quantity: 1,
+		option: 0,
+		brokerage: null,
+		brokerFlag: null
+	})
+	await axios.put(`${ENDPOINT}/user/stocks/edit`,{
+		token: userInfo[1].token,
+		pid: pids[1].pid,
+		stock: 'AMZN',
+		price: price,
+		quantity: 1,
+		option: 0,
+		brokerage: null,
+		brokerFlag: null
+	})
+	await axios.put(`${ENDPOINT}/user/stocks/edit`,{
+		token: userInfo[2].token,
+		pid: pids[2].pid,
+		stock: 'AMZN',
+		price: price,
+		quantity: 1,
+		option: 0,
+		brokerage: null,
+		brokerFlag: null
+	})
+
+	values = await axios.get(`${ENDPOINT}/stocks/info?type=2&stocks=MSFT&interval=daily&start=${testDate}`);
+	price = values.data.data.history.day[0].close;
+	await axios.put(`${ENDPOINT}/user/stocks/edit`,{
+		token: userInfo[2].token,
+		pid: pids[3].pid,
+		stock: 'MSFT',
+		price: price,
+		quantity: 1,
+		option: 0,
+		brokerage: null,
+		brokerFlag: null
+	})
+
+	values = await axios.get(`${ENDPOINT}/stocks/info?type=2&stocks=IBM&interval=daily&start=${testDate}`);
+	price = values.data.data.history.day[0].close;
+	await axios.put(`${ENDPOINT}/user/stocks/edit`,{
+		token: userInfo[0].token,
+		pid: pids[0].pid,
+		stock: 'IBM',
+		price: price,
+		quantity: 1,
+		option: 0,
+		brokerage: null,
+		brokerFlag: null
+	})
+	await axios.put(`${ENDPOINT}/user/stocks/edit`,{
+		token: userInfo[1].token,
+		pid: pids[1].pid,
+		stock: 'IBM',
+		price: price,
+		quantity: 1,
+		option: 0,
+		brokerage: null,
+		brokerFlag: null
+	})
+	await axios.put(`${ENDPOINT}/user/stocks/edit`,{
+		token: userInfo[2].token,
+		pid: pids[2].pid,
+		stock: 'IBM',
+		price: price,
+		quantity: 1,
+		option: 0,
+		brokerage: null,
+		brokerFlag: null
+	})
+
+	values = await axios.get(`${ENDPOINT}/stocks/info?type=2&stocks=FB&interval=daily&start=${testDate}`);
+	price = values.data.data.history.day[0].close;
+	await axios.put(`${ENDPOINT}/user/stocks/edit`,{
+		token: userInfo[2].token,
+		pid: pids[3].pid,
+		stock: 'FB',
+		price: price,
+		quantity: 1,
+		option: 0,
+		brokerage: null,
+		brokerFlag: null
+	})
+}
+
 /**
  * Given an array of registered users, make the first N (numberOfCelebrities) users
  * into a celebrity
- * @param {array} users 
- * @param {number} numberOfCelebrities 
+ * @param {array} users
+ * @param {number} numberOfCelebrities
  * @returns {array}
  */
 const makeCelebrities = async (users, numberOfCelebrities) => {
@@ -610,15 +755,15 @@ const makeCelebrities = async (users, numberOfCelebrities) => {
 
 // /**
 //  * Make a request to become a celebrity for the last N users
-//  * @param {*} users 
-//  * @param {*} numberOfRequests 
+//  * @param {*} users
+//  * @param {*} numberOfRequests
 //  */
 // const makeCelebrityRequests = async (users, numberOfRequests) => {
 //   // Get mock license
 //   const data = await fs.promises.readFile('./assets/license.jpg', 'utf8');
 //   for (let i = 0; i < numberOfRequests; i++) {
 //     const userData = users[users.length - i];
-    
+
 //   }
 // }
 
