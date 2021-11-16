@@ -14,32 +14,32 @@ const makeMockResponse = (pid) => {
       performance: [
         {
           date: '2014-5-5',
-          performance: Math.random() * 100,
+          performance: Math.random() * 200 - 100,
           money: Math.random() * 100,
         },
         {
           date: '2014-5-6',
-          performance: Math.random() * 100,
+          performance: Math.random() * 200 - 100,
           money: Math.random() * 100,
         },
         {
           date: '2014-5-7',
-          performance: Math.random() * 100,
+          performance: Math.random() * 200 - 100,
           money: Math.random() * 100,
         },
         {
           date: '2014-5-8',
-          performance: Math.random() * 100,
+          performance: Math.random() * 200 - 100,
           money: Math.random() * 100,
         },
         {
           date: '2014-5-9',
-          performance: Math.random() * 100,
+          performance: Math.random() * 200 - 100,
           money: Math.random() * 100,
         },
         {
           date: '2014-5-10',
-          performance: Math.random() * 100,
+          performance: Math.random() * 200 - 100,
           money: Math.random() * 100,
         }
       ]

@@ -90,7 +90,7 @@ export const addStock = async (token, pid, stock, price, quantity, brokerage, br
     // Return result of adding stock to portfolio
     const addResp = await database.addStocks(pid, stock, price, quantity, brokerageNum, flag);
     // Creating activity
-    await database.createActivity(uid, `bought ${quantity} ${stock} at $${price}`, null);
+    await database.createActivity(uid, `bought ${quantity} ${stock} at $${price} 📈📈`, null);
     return addResp;
   } else {
     // Return result of adding stock to watchlist
@@ -172,13 +172,13 @@ export const modifyStock = async (token, pid, stock, price, quantity, option, br
     // Return result of buying stocks
     resp = await database.addStocks(pid, stock, price, quantity, bkCost, flag);
     // Creating activity
-    await database.createActivity(uid, `bought ${quantity} ${stock} at $${price}`, null);
+    await database.createActivity(uid, `bought ${quantity} ${stock} at $${price} 📈📈`, null);
   }
   else {
     // Return result of selling stocks
     resp = await database.sellStocks(pid, stock, price, quantity, bkCost, flag);
     // Creating activity
-    await database.createActivity(uid, `sold ${quantity} ${stock} at $${price}`, null);
+    await database.createActivity(uid, `sold ${quantity} ${stock} at $${price} 💰💰`, null);
   }
   
   return resp;
