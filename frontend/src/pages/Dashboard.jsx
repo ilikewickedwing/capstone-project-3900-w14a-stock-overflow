@@ -90,7 +90,7 @@ const getGlobalRanks = async () => {
     }
     setGlobal(list);
   } catch (e) {
-    alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
+    // alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
   }
 }
 
@@ -215,10 +215,10 @@ const getFriendRanking = async () => {
                   <img style={{height:"auto", width:"50px"}} src={globe} alt="global icon"/>
                 </div>
                   <h3 style={{textAlign:'center'}}>Global Rankings</h3>
-                  <RankTable
-                    rows={globalRank}
-                    myRanking={myGlobalRanking}
-                  />
+                    <RankTable
+                      rows={globalRank}
+                      myRanking={myGlobalRanking}
+                    />
                 </RightCard>
               </RightBody>
             </PfBody>

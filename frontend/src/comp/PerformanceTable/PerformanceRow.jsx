@@ -54,21 +54,29 @@ const PerformanceRow = ({pid, rowName,stocks, isItemSelected, handleClick}) => {
                         <TableCell>Curr. Price</TableCell>
                         <TableCell>Change(%)</TableCell>
                         <TableCell>Units</TableCell>
-                        <TableCell align="right">Value</TableCell>
-                        <TableCell align="right">Profit/Loss($)</TableCell>
+                        <TableCell align="left">Value</TableCell>
+                        <TableCell align="left">Profit/Loss($)</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {stocks.map((e) => {
                     return (
                       <TableRow key={e.code}>
-                        <TableCell align="center" >{e.code}</TableCell> 
-                        <TableCell align="center" >${e.buyPrice}</TableCell>
-                        <TableCell align="center" >${e.currPrice}</TableCell>
-                        <TableCell align="center" >{e.changePer}%</TableCell>
-                        <TableCell align="center" >{e.units}</TableCell>
-                        <TableCell align="center" >${e.value}</TableCell>
-                        <TableCell align="center" >${e.profitLoss}</TableCell>
+                        <TableCell align="left" >{e.code}</TableCell> 
+                        <TableCell align="left" >${parseFloat(e.buyPrice).toFixed(2)}</TableCell>
+                        <TableCell align="left" >${e.currPrice}</TableCell>
+                        <TableCell align="left" >{e.changePer}%</TableCell>
+                        <TableCell align="left" >{e.units}</TableCell>
+                        {e.value < 0?(
+													<TableCell align="left" >-${Math.abs(parseFloat(e.value)).toFixed(2)}</TableCell>
+												):(
+													<TableCell align="left" >${parseFloat(e.value).toFixed(2)}</TableCell>
+												)}
+                        {e.profitLoss < 0?(
+													<TableCell align="left" >-${Math.abs(parseFloat(e.profitLoss)).toFixed(2)}</TableCell>
+												):(
+													<TableCell align="left" >${parseFloat(e.profitLoss).toFixed(2)}</TableCell>
+												)}
                       </TableRow>
                     )})}
                   </TableBody>

@@ -55,6 +55,14 @@ const generateMockData = async () => {
   await loadUsers();
   await loadCeleb();
   await makeFriends();
+	await setDefBroker();
+	await createPfs();
+	await addStocks();
+	await calcPf();
+	await calcAll();
+	await addMoreStocks();
+	await reCalcPf();
+	await calcAll();
 }
 
 const createUsers = async () => {
@@ -131,7 +139,7 @@ const loadUsers = async () => {
   for (let i= 0; i < 3; i++){
     try{
       const rego = await axios.post(`${ENDPOINT}/auth/register`,{username: users[i].username, password: users[i].password});
-			console.dir(rego.data, {depth:null});
+			// console.dir(rego.data, {depth:null});
 			userInfo.push({
 				userNum: i,
 				token: rego.data.token,
@@ -192,6 +200,7 @@ const createPfs = async () =>{
 		token: userInfo[0].token,
 		name: 'myPf'
 	})
+	// console.dir(resp1, {depth:null});
 	pids.push({
 		user: userInfo[0].uid,
 		pid: resp1.data.pid,
@@ -223,13 +232,14 @@ const createPfs = async () =>{
 }
 
 const addStocks = async () => {
+	console.log('addStocks');
 	daysCalced = 10;
 	const test = new Date();
 	test.setDate(today.getDate() - daysCalced);
 	const testDate = test.getFullYear() + '-' + ('0' + (test.getMonth() + 1)).slice(-2) + '-' + ('0' + test.getDate()).slice(-2);
-	
-	let values = await getStock(2, 'AAPL', 'daily', testDate);
-	let price = values.data.history.day[0].close;
+
+	let values = await axios.get(`${ENDPOINT}/stocks/info?type=2&stocks=AAPL&interval=daily&start=${testDate}`);
+	let price = values.data.data.history.day[0].close;
 	await axios.post(`${ENDPOINT}/user/stocks/add`,{
 		token: userInfo[0].token, 
 		pid: pids[0].pid, 
@@ -258,10 +268,10 @@ const addStocks = async () => {
 		brokerFlag: null
 	})
 	
-	values = await getStock(2, 'NVDA', 'daily', testDate);
-	price = values.data.history.day[0].close;
+	values = await axios.get(`${ENDPOINT}/stocks/info?type=2&stocks=NVDA&interval=daily&start=${testDate}`);
+	price = values.data.data.history.day[0].close;
 	await axios.post(`${ENDPOINT}/user/stocks/add`,{
-		token: token3, 
+		token: userInfo[2].token, 
 		pid: pids[3].pid, 
 		stock: 'NVDA', 
 		price: price, 
@@ -270,8 +280,8 @@ const addStocks = async () => {
 		brokerFlag: null
 	})
 
-	values = await getStock(2, 'AMZN', 'daily', testDate);
-	price = values.data.history.day[0].close;
+	values = await axios.get(`${ENDPOINT}/stocks/info?type=2&stocks=AMZN&interval=daily&start=${testDate}`);
+	price = values.data.data.history.day[0].close;
 	await axios.post(`${ENDPOINT}/user/stocks/add`,{
 		token: userInfo[0].token, 
 		pid: pids[0].pid, 
@@ -291,7 +301,7 @@ const addStocks = async () => {
 		brokerFlag: null
 	})
 	await axios.post(`${ENDPOINT}/user/stocks/add`,{
-		token: token3, 
+		token: userInfo[2].token, 
 		pid: pids[2].pid, 
 		stock: 'AMZN', 
 		price: price, 
@@ -300,10 +310,10 @@ const addStocks = async () => {
 		brokerFlag: null
 	})
 	
-	values = await getStock(2, 'MSFT', 'daily', testDate);
-	price = values.data.history.day[0].close;
+	values = await axios.get(`${ENDPOINT}/stocks/info?type=2&stocks=MSFT&interval=daily&start=${testDate}`);
+	price = values.data.data.history.day[0].close;
 	await axios.post(`${ENDPOINT}/user/stocks/add`,{
-		token: token3, 
+		token: userInfo[2].token, 
 		pid: pids[3].pid, 
 		stock: 'MSFT', 
 		price: price, 
@@ -312,8 +322,8 @@ const addStocks = async () => {
 		brokerFlag: null
 	})
 
-	values = await getStock(2, 'IBM', 'daily', testDate);
-	price = values.data.history.day[0].close;
+	values = await axios.get(`${ENDPOINT}/stocks/info?type=2&stocks=IBM&interval=daily&start=${testDate}`);
+	price = values.data.data.history.day[0].close;
 	await axios.post(`${ENDPOINT}/user/stocks/add`,{
 		token: userInfo[0].token, 
 		pid: pids[0].pid, 
@@ -342,8 +352,8 @@ const addStocks = async () => {
 		brokerFlag: null
 	})
 	
-	values = await getStock(2, 'FB', 'daily', testDate);
-	price = values.data.history.day[0].close;
+	values = await axios.get(`${ENDPOINT}/stocks/info?type=2&stocks=FB&interval=daily&start=${testDate}`);
+	price = values.data.data.history.day[0].close;
 	await axios.post(`${ENDPOINT}/user/stocks/add`,{
 		token: userInfo[2].token, 
 		pid: pids[3].pid, 
@@ -356,12 +366,13 @@ const addStocks = async () => {
 }
 
 const calcPf = async() => {
+	console.log('calcPf');
 	// testDate - the date from which portfolio calculations begin
 	// testDays - the number of days calculated for
 	const test = new Date();
 	test.setDate(today.getDate() - daysCalced);
 	const testDate = test.getFullYear() + '-' + ('0' + (test.getMonth() + 1)).slice(-2) + '-' + ('0' + test.getDate()).slice(-2);
-	const testDays = 8;
+	const testDays = 3;
 	
 	await axios.post(`${ENDPOINT}/rankings/forceCalcPf`,{
 		token: userInfo[0].token, 
@@ -391,7 +402,180 @@ const calcPf = async() => {
 }
 
 const calcAll = async () => {
-	await axios.post(`${ENDPOINT}/performance/calcAll`);
+	console.log('calcAll');
+  try{
+    await axios.post(`${ENDPOINT}/rankings/forceCalc`);
+  }catch (e){
+    console.log(e);
+  }
+}
+
+const addMoreStocks = async () => {
+	const test = new Date();
+	test.setDate(today.getDate() - daysCalced);
+	const testDate = test.getFullYear() + '-' + ('0' + (test.getMonth() + 1)).slice(-2) + '-' + ('0' + test.getDate()).slice(-2);
+
+	let values = await axios.get(`${ENDPOINT}/stocks/info?type=2&stocks=AAPL&interval=daily&start=${testDate}`);
+	let price = values.data.data.history.day[0].close;
+	await axios.post(`${ENDPOINT}/user/stocks/add`,{
+		token: userInfo[0].token, 
+		pid: pids[0].pid, 
+		stock: 'AAPL', 
+		price: price, 
+		quantity: 2, 
+		brokerage: null, 
+		brokerFlag: null
+	})
+	await axios.post(`${ENDPOINT}/user/stocks/add`,{
+		token: userInfo[1].token, 
+		pid: pids[1].pid, 
+		stock: 'AAPL', 
+		price: price, 
+		quantity: 2, 
+		brokerage: null, 
+		brokerFlag: null
+	})
+	await axios.post(`${ENDPOINT}/user/stocks/add`,{
+		token: userInfo[2].token, 
+		pid: pids[2].pid, 
+		stock: 'AAPL', 
+		price: price, 
+		quantity: 2, 
+		brokerage: null, 
+		brokerFlag: null
+	})
+	
+	values = await axios.get(`${ENDPOINT}/stocks/info?type=2&stocks=NVDA&interval=daily&start=${testDate}`);
+	price = values.data.data.history.day[0].close;
+	await axios.post(`${ENDPOINT}/user/stocks/add`,{
+		token: userInfo[2].token, 
+		pid: pids[3].pid, 
+		stock: 'NVDA', 
+		price: price, 
+		quantity: 2, 
+		brokerage: null, 
+		brokerFlag: null
+	})
+
+	values = await axios.get(`${ENDPOINT}/stocks/info?type=2&stocks=AMZN&interval=daily&start=${testDate}`);
+	price = values.data.data.history.day[0].close;
+	await axios.post(`${ENDPOINT}/user/stocks/add`,{
+		token: userInfo[0].token, 
+		pid: pids[0].pid, 
+		stock: 'AMZN', 
+		price: price, 
+		quantity: 2, 
+		brokerage: null, 
+		brokerFlag: null
+	})
+	await axios.post(`${ENDPOINT}/user/stocks/add`,{
+		token: userInfo[1].token, 
+		pid: pids[1].pid, 
+		stock: 'AMZN', 
+		price: price, 
+		quantity: 2, 
+		brokerage: null, 
+		brokerFlag: null
+	})
+	await axios.post(`${ENDPOINT}/user/stocks/add`,{
+		token: userInfo[2].token, 
+		pid: pids[2].pid, 
+		stock: 'AMZN', 
+		price: price, 
+		quantity: 2, 
+		brokerage: null, 
+		brokerFlag: null
+	})
+	
+	values = await axios.get(`${ENDPOINT}/stocks/info?type=2&stocks=MSFT&interval=daily&start=${testDate}`);
+	price = values.data.data.history.day[0].close;
+	await axios.post(`${ENDPOINT}/user/stocks/add`,{
+		token: userInfo[2].token, 
+		pid: pids[3].pid, 
+		stock: 'MSFT', 
+		price: price, 
+		quantity: 2, 
+		brokerage: null, 
+		brokerFlag: null
+	})
+
+	values = await axios.get(`${ENDPOINT}/stocks/info?type=2&stocks=IBM&interval=daily&start=${testDate}`);
+	price = values.data.data.history.day[0].close;
+	await axios.post(`${ENDPOINT}/user/stocks/add`,{
+		token: userInfo[0].token, 
+		pid: pids[0].pid, 
+		stock: 'IBM', 
+		price: price, 
+		quantity: 2, 
+		brokerage: null, 
+		brokerFlag: null
+	})
+	await axios.post(`${ENDPOINT}/user/stocks/add`,{
+		token: userInfo[1].token, 
+		pid: pids[1].pid, 
+		stock: 'IBM', 
+		price: price, 
+		quantity: 2, 
+		brokerage: null, 
+		brokerFlag: null
+	})
+	await axios.post(`${ENDPOINT}/user/stocks/add`,{
+		token: userInfo[2].token, 
+		pid: pids[2].pid, 
+		stock: 'IBM', 
+		price: price, 
+		quantity: 2, 
+		brokerage: null, 
+		brokerFlag: null
+	})
+	
+	values = await axios.get(`${ENDPOINT}/stocks/info?type=2&stocks=FB&interval=daily&start=${testDate}`);
+	price = values.data.data.history.day[0].close;
+	await axios.post(`${ENDPOINT}/user/stocks/add`,{
+		token: userInfo[2].token, 
+		pid: pids[3].pid, 
+		stock: 'FB', 
+		price: price, 
+		quantity: 2, 
+		brokerage: null, 
+		brokerFlag: null
+	})
+}
+
+const reCalcPf = async() => {
+	console.log('calcPf');
+	// testDate - the date from which portfolio calculations begin
+	// testDays - the number of days calculated for
+	const test = new Date();
+	test.setDate(today.getDate() - daysCalced);
+	const testDate = test.getFullYear() + '-' + ('0' + (test.getMonth() + 1)).slice(-2) + '-' + ('0' + test.getDate()).slice(-2);
+	const testDays = 3;
+	
+	await axios.post(`${ENDPOINT}/rankings/forceCalcPf`,{
+		token: userInfo[0].token, 
+		pid: pids[0].pid, 
+		testDate: testDate,
+		testDays: testDays,
+	})
+	await axios.post(`${ENDPOINT}/rankings/forceCalcPf`,{
+		token: userInfo[1].token, 
+		pid: pids[1].pid, 
+		testDate: testDate,
+		testDays: testDays,
+	})
+	await axios.post(`${ENDPOINT}/rankings/forceCalcPf`,{
+		token: userInfo[2].token, 
+		pid: pids[2].pid, 
+		testDate: testDate,
+		testDays: testDays,
+	})
+	await axios.post(`${ENDPOINT}/rankings/forceCalcPf`,{
+		token: userInfo[2].token, 
+		pid: pids[3].pid, 
+		testDate: testDate,
+		testDays: testDays,
+	})
+	daysCalced -= testDays;
 }
 
 /**
