@@ -9,7 +9,7 @@ import { app, database } from "../index";
 import { getDefBroker, setDefBroker } from "../user";
 import { addFriend } from "../social";
 
-/* describe('Rank multiple user portfolio performances', () => {
+describe('Rank multiple user portfolio performances', () => {
 	const d = new Database(true);
 	beforeAll(async () => {
 	  await d.connect();
@@ -234,15 +234,15 @@ import { addFriend } from "../social";
 		await calcAll(d, true);
     let rankings = null;
     rankings = await d.getRankings();
-    // const stocks1 = await openPf(token1, pid1, d);
+    const stocks1 = await openPf(token1, pid1, d);
     // const stocks2 = await openPf(token2, pid2, d);
     // const stocks3 = await openPf(token3, pid3, d);
     // const stocks4 = await openPf(token3, pid4, d);
-	  // console.dir(stocks1, { depth: null });
+	  console.dir(stocks1, { depth: null });
     // console.dir(stocks2, { depth: null });
     // console.dir(stocks3, { depth: null });
     // console.dir(stocks4, { depth: null });
-    console.dir(rankings, { depth: null });
+    // console.dir(rankings, { depth: null });
     expect(rankings).not.toBe(null);
 	})
   // it('Test friend rank 1', async () => {
@@ -259,7 +259,7 @@ import { addFriend } from "../social";
 	afterAll(async () => {
 	  await d.disconnect();
 	})
-}) */
+})
 
 describe('Rank multiple user portfolios performances endpoint test', () => {
   beforeAll(async () => {
@@ -630,7 +630,15 @@ describe('Rank multiple user portfolios performances endpoint test', () => {
 		await calcAll(database, true);
     let rankings = null;
     rankings = await request(app).get(`/rankings/global`).send();
-    // console.dir(rankings.body, { depth: null });
+    const stocks1 = await openPf(token1, pid1, database);
+    // const stocks2 = await openPf(token2, pid2, database);
+    // const stocks3 = await openPf(token3, pid3, database);
+    // const stocks4 = await openPf(token3, pid4, database);
+	  console.dir(stocks1, { depth: null });
+    // console.dir(stocks2, { depth: null });
+    // console.dir(stocks3, { depth: null });
+    // console.dir(stocks4, { depth: null });
+    // console.dir(rankings, { depth: null });
     expect(rankings).not.toBe(null);
 	})
   // it('Test friend rank 1', async () => {

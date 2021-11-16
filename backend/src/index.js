@@ -90,6 +90,42 @@ export const database = new Database();
  *           description: The username of the user
  *       example:
  *         username: XStockMaster64X
+ *     Rankings:
+ *       type: object
+ *       properties:
+ *         rank:
+ *           type: int
+ *           description: The rank of the user
+ *         uid:
+ *           type: string
+ *           description: The uid of the user
+ *         name:
+ *           type: string
+ *           description: The username of the user
+ *         performance:
+ *           type: object
+ *           description: The performance of the user
+ *       example:
+ *         rank: 1
+ *         uid: 'umCRkDWobIDCYD13cKi0T'
+ *         name: 'Richard'
+ *         performance: 0.2633187567592878
+ *     Performance:
+ *       type: object
+ *       properties:
+ *         date:
+ *           type: string
+ *           description: The date of the performance
+ *         performance:
+ *           type: float
+ *           description: The performance, expressed as a percentage
+ *         money:
+ *           type: float
+ *           description: The performance, expressed as monetary gain/loss
+ *       example:
+ *         date: '2021-11-16'
+ *         performance: -4.511124993562567
+ *         money: -715.218499999999
  */
 app.get('/', (req, res) => {
 	res.status(200).send('This is the root page. Go to /docs for documentation.')
@@ -1848,6 +1884,24 @@ app.get('/file/download', async(req, res) => {
 	await handleFileDownload(token, fid, res, database);
 })
 
+/**
+ * @swagger
+ * /rankings/global:
+ *   get:
+ *     tags: [Rankings]
+ *     description: Get endpoint for getting global rankings
+ *     parameters:
+ *     responses:
+ *       200:
+ *         description: Everything went okay
+ *         schema:
+ *            type: array
+ *            properties:
+ *              ranking:
+ *                $ref: '#/components/schemas/Rankings'
+ *       404:
+ *         description: System error
+ */
 app.get('/rankings/global', async(req, res) => {
 	const resp = await getAllRankings(database);
 	if (resp !== null) {
@@ -1855,14 +1909,72 @@ app.get('/rankings/global', async(req, res) => {
 	} else res.status(404).send({ error: "A system error occurred" });
 })
 
+/**
+ * @swagger
+ * /rankings/friends:
+ *   get:
+ *     tags: [Rankings]
+ *     description: Get endpoint for getting friend rankings
+ *     parameters:
+ *      - name: token
+ *        description: The token of the user
+ *        in: header
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Everything went okay
+ *         schema:
+ *            type: array
+ *            properties:
+ *              ranking:
+ *                $ref: '#/components/schemas/Rankings'
+ *       401:
+ *         description: Invalid token
+ */
 app.get('/rankings/friends', async(req, res) => {
 	const { token } = req.query;
 	const resp = await getFriendRankings(token, database);
-	if (resp !== null) {
-		res.status(200).send(resp);
-	} else res.status(404).send({ error: "A system error occurred" });
+	if (resp === 1) {
+		res.status(401).send({ error: "Invalid token" });
+	} else res.status(200).send(resp);
 })
 
+/**
+ * @swagger
+ * /rankings/performance:
+ *   get:
+ *     tags: [Rankings]
+ *     description: Get endpoint for getting user performance
+ *     parameters:
+ *      - name: token
+ *        description: The token of the user accessing the endpoint
+ *        in: header
+ *        required: true
+ *        type: string
+ *      - name: uid
+ *        description: The uid of the user you are getting the information of
+ *        in: header
+ *        required: true
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: Everything went okay
+ *         schema:
+ *            type: object
+ *            properties:
+ *              name:
+ *                type: string
+ *                description: The name of the user
+ *              performance:
+ *                type: array
+ *                properties: 
+ *                  performance:
+ *                    $ref: '#/components/schemas/Performance'
+ *                        
+ *       401:
+ *         description: Invalid token
+ */
 app.get('/rankings/performance', async(req, res) => {
 	const { token, uid } = req.query;
 	const resp = await getUserPerf(token, uid, database);
@@ -1873,4 +1985,8 @@ app.get('/rankings/performance', async(req, res) => {
 	} else {
     res.status(200).send(resp);
   }
+})
+
+app.post('/rankings/forceCalc', async(req, res) => {
+  
 })
