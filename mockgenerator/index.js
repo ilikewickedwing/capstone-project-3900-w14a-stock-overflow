@@ -1,9 +1,9 @@
 /**
   This is a program to generate mock values into the database
 */
-
 import fetch from "node-fetch";
 import fs from 'fs';
+import axios from 'axios';
 
 // This is the port number of the backend server
 const ENDPOINT = `http://localhost:5050`;
@@ -18,6 +18,8 @@ const CELEBRITYREQUESTS = 10;
 
 // Number of celebrities (must be smaller than the number of users)
 const CELEBRITIES = 10;
+
+
 
 const generateMockData = async () => {
   let users = await registerUsers(USERNUM);
@@ -69,6 +71,26 @@ const registerUsers = async (numberOfUsers) => {
     }
   }
   return outputUsers;
+}
+
+const users = [
+  {
+    username: "user1",
+    password: "user1"
+  }, {
+    username:"user2", 
+    password:"user2"
+  }, {
+    username:'celeb',
+    password:'celeb
+  }
+]
+
+
+const loadUsers = async () => {
+  for (let i= 0; i < 3; i++){
+    await axios.post(`${ENDPOINT}/auth/register`,{username: username[i], password: password[i]});
+  } 
 }
 
 /**
