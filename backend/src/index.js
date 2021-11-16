@@ -4,7 +4,7 @@ import { Database } from "./database";
 import swaggerUI from 'swagger-ui-express';
 import { swaggerDocs } from "./docs";
 import { createPf, deletePf, openPf, userPfs, getPid, editPf, openFriendPf } from "./portfolio";
-import { calcPf, getAllRankings, getFriendRankings, getUserPerf } from "./performance";
+import { calcAll, calcPf, getAllRankings, getFriendRankings, getUserPerf } from "./performance";
 import { authDelete, authLogin, authLogout, authRegister } from "./auth";
 import { getDefBroker, getUserProfile, getUserUid, postUserProfile, setDefBroker, userPasswordchange } from "./user";
 import { addStock, modifyStock, getAllStocks, checkStock, getStock } from "./stocks";
@@ -1988,5 +1988,6 @@ app.get('/rankings/performance', async(req, res) => {
 })
 
 app.post('/rankings/forceCalc', async(req, res) => {
-  
+  const resp = await calcAll(database, true);
+  res.status(200).send();
 })
