@@ -493,6 +493,8 @@ export default function PfTable({stocks, load, setGraphSelected, isFriend}) {
                 .map((row, index) => {
                   const isItemSelected = isSelected(row.code);
                   const labelId = `enhanced-table-checkbox-${index}`;
+									const rowValue = parseFloat(row.value);
+									const profLoss = parseFloat(row.profitLoss);
                   return (
                     <TableRow
                       hover
@@ -520,13 +522,21 @@ export default function PfTable({stocks, load, setGraphSelected, isFriend}) {
                       >
                         {row.code}
                       </TableCell>
-                      <TableCell align="center" >{row.name}</TableCell>
-                      <TableCell align="center" >${row.buyPrice}</TableCell>
-                      <TableCell align="center" >${row.currPrice}</TableCell>
-                      <TableCell align="center" >{row.changePer}%</TableCell>
-                      <TableCell align="center" >{row.units}</TableCell>
-                      <TableCell align="center" >${row.value}</TableCell>
-                      <TableCell align="center" >${row.profitLoss}</TableCell>
+                      <TableCell align="left" >{row.name}</TableCell>
+                      <TableCell align="left" >${parseFloat(row.buyPrice).toFixed(2)}</TableCell>
+                      <TableCell align="left" >${parseFloat(row.currPrice).toFixed(2)}</TableCell>
+                      <TableCell align="left" >{parseFloat(row.changePer).toFixed(2)}%</TableCell>
+                      <TableCell align="left" >{parseFloat(row.units).toFixed(2)}</TableCell>
+											{rowValue < 0?(
+                        <TableCell align="left" >-${Math.abs(rowValue).toFixed(2)}</TableCell>
+                      ):(
+                        <TableCell align="left" >${parseFloat(rowValue).toFixed(2)}</TableCell>
+                      )}
+											{profLoss < 0?(
+                        <TableCell align="left" >-${Math.abs(profLoss).toFixed(2)}</TableCell>
+                      ):(
+                        <TableCell align="left" >${parseFloat(profLoss).toFixed(2)}</TableCell>
+                      )}
                     </TableRow>
                   );
                 })}
@@ -535,11 +545,11 @@ export default function PfTable({stocks, load, setGraphSelected, isFriend}) {
                       <TableCell></TableCell>
                       <TableCell></TableCell>
                       <TableCell></TableCell>
-                      <TableCell align="center"></TableCell>
-                      <TableCell align="center" ></TableCell>
+                      <TableCell align="left"></TableCell>
+                      <TableCell align="left" ></TableCell>
                       <TableCell></TableCell>
                       <TableCell>${totalValue.toFixed(2)}</TableCell>
-                      <TableCell align="center" >${totalProf.toFixed(2)}</TableCell>
+                      <TableCell align="left" >${totalProf.toFixed(2)}</TableCell>
                     </TableRow>
               {emptyRows > 0 && (
                 <TableRow
