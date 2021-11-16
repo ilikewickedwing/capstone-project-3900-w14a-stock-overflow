@@ -69,9 +69,9 @@ export default function Dashboard() {
   const [myGlobalRanking, setMyGlobal] = React.useState(createRankData("lily","20","8888"));
 
   React.useEffect(() => {  
-    // getGlobalRanks();
+    getGlobalRanks();
     fetchPortfolios();
-    // getFriendRanking();
+    getFriendRanking();
     getActivity();
   },[]);
 
@@ -95,21 +95,21 @@ const getGlobalRanks = async () => {
 }
 
 const getFriendRanking = async () => {
-  // try {
-  //   const resp = await axios.get(`${apiBaseUrl}/rankings/friends?token=${token}`);
-  //   let list = [];
-  //   for (let i=0; i< resp.data.length; i++){
-  //     list.push(createRankData(resp.data[i].name, resp.data[i].performance, resp.data[i].rank));
-  //     if (resp.data[i].name === myName){
-  //       setMyRanking(createRankData(resp.data[i].name, resp.data[i].performance, resp.data[i].rank));
-  //     }
-  //   }
-  //   setRankings(list);
+  try {
+    const resp = await axios.get(`${apiBaseUrl}/rankings/friends?token=${token}`);
+    let list = [];
+    for (let i=0; i< resp.data.length; i++){
+      list.push(createRankData(resp.data[i].name, resp.data[i].performance.performance, resp.data[i].rank));
+      if (resp.data[i].name === myName){
+        setMyRanking(createRankData(resp.data[i].name, resp.data[i].performance.performance, resp.data[i].rank));
+      }
+    }
+    setRankings(list);
 
-  //   // todo set ranking of the new thing 
-  // } catch (e) {
-  //   alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
-  // }
+    // todo set ranking of the new thing 
+  } catch (e) {
+    alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
+  }
 }
 
   const fetchPortfolios = async () => {
