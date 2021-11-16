@@ -36,18 +36,6 @@ const CELEBRITYREQUESTS = 10;
 const CELEBRITIES = 10;
 
 
-const users = [
-  {
-    username: "user1",
-    password: "user1"
-  }, {
-    username:"user2", 
-    password:"user2"
-  }, {
-    username:'celeb',
-    password:'celeb'
-  }
-]
 
 const generateMockData = async () => {
   // let users = await registerUsers(USERNUM);

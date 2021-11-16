@@ -1268,7 +1268,7 @@ export class Database {
       await friends.updateOne({ownerUid: friend}, {$set: {friends: friendList}});
       await friends.updateOne({ownerUid: uid}, {$set: {friends: userList, requests: userRequests}});
       const usernameResp = await this.getUser(uid);
-      await this.insertUserNotification(friend, `🌙 You are now friends with ${usernameResp.username} 🌙`);
+      await this.insertUserNotification(friend, `🌚 You are now friends with ${usernameResp.username} 🌚`);
     }
 
     return true;

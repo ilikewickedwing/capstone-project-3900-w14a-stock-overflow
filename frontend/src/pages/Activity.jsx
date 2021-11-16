@@ -48,7 +48,7 @@ const Activity = (props) => {
     {
       props.userComments.map(index => {
         let subString = index.time.substring(11,16)
-        return <div>{subString}:{index.ownerName}: {index.message}</div>
+        return <div>{subString} - {index.ownerName}: {index.message}</div>
       })
     }
     <form noValidate autoComplete="off" onSubmit={handleOnSubmit}>

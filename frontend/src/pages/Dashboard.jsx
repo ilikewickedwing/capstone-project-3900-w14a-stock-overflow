@@ -161,7 +161,8 @@ const getFriendRanking = async () => {
     console.log(resp.data);
     setActivity(resp.data);
     } catch (e) {
-      alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
+			console.dir(e, {depth:null});
+      // alert(`Status Code ${e.data.status} : ${e.data.error}`,'error');
     }
   }
   
