@@ -45,11 +45,12 @@ const Activity = (props) => {
       <div style={{marginLeft: 30}}>{props.likes}</div>
       <Button onClick={handleLike}>Like</Button>
     </Paper>
-    {/* {
+    {
       props.userComments.map(index => {
-        return <div>{index.ownerName}: {index.message}</div>
+        let subString = index.time.substring(11,16)
+        return <div>{subString}:{index.ownerName}: {index.message}</div>
       })
-    } */}
+    }
     <form noValidate autoComplete="off" onSubmit={handleOnSubmit}>
       <TextField id="standard-basic" label="Comment" value={comment} onChange={(e) => setComment(e.target.value)}/>
     </form>
