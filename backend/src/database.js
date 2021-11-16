@@ -1256,6 +1256,7 @@ export class Database {
       friendRequests.push(uid);
 
       await friends.updateOne({ownerUid : friend}, {$set: {requests: friendRequests}});
+      await this.insertUserNotification(friend, `${friendResp.username} has sent you a friend request 🥺🥺`);
     } else { // other user has already sent a friend request
       userRequests.splice(requestIndex, 1);
 
@@ -1266,6 +1267,8 @@ export class Database {
 
       await friends.updateOne({ownerUid: friend}, {$set: {friends: friendList}});
       await friends.updateOne({ownerUid: uid}, {$set: {friends: userList, requests: userRequests}});
+      const usernameResp = await this.getUser(uid);
+      await this.insertUserNotification(friend, `🌙 You are now friends with ${usernameResp.username} 🌙`);
     }
 
     return true;
@@ -1552,7 +1555,9 @@ export class Database {
     await activity.updateOne({aid: id}, {$set: {likes: likes, likedUsers:likedUsers}});
 
     // Creating activity
-    await this.createActivity(uid, message, id);
+    if (message !== '' ) {
+      await this.createActivity(uid, message, id);
+    }
 
     return id;
   }
