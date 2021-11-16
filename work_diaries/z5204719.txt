@@ -24,3 +24,9 @@ Worked with Jono to polish api stock calls, stock functions, portfolio functions
 
 Week 8
 Swapped APIs to Tradier and refactored the code to fit with that. Worked with the frontend to ensure that everything else works.
+
+Week 9
+Worked on implementing performance and ranking things, as well as ensuring calculations for everything were correct.
+
+Week 10
+Started working on the report, and finalised implementations for ranking in the backend.
