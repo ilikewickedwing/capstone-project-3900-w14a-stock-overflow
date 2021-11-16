@@ -84,7 +84,10 @@ const Navigation = () => {
       };
 
     const submitQuery = () => {
-        if (search.includes(' ')){
+        // When the search bar is just spaces go to oops page
+        if (search.replaceAll(' ', '').length === 0) {
+            history.push('/oops')
+        } else if (search.includes(' ')){
             var code = search.split(" ")[0];
             history.push(`/stock/${code}`);
         } else {

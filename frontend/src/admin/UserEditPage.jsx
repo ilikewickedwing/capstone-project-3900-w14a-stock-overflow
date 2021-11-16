@@ -40,18 +40,22 @@ export default function UserEditPage(props) {
           onChange={e => setUsername(e.target.value)}
         />
       </div>
-      <div style={compWrapper}>
-        <InputLabel>User type</InputLabel>
-        <Select
-          variant="outlined"
-          value={props.userData.userType}
-          onChange={e => setUserType(e.target.value)}
-        >
-          <MenuItem value="user">User</MenuItem>
-          <MenuItem value="celebrity">Celebrity</MenuItem>
-          <MenuItem value="admin">Admin</MenuItem>
-        </Select>
-      </div>
+      {
+        props.userData.userType !== "admin" && (
+          <div style={compWrapper}>
+            <InputLabel>User type</InputLabel>
+            <Select
+              variant="outlined"
+              value={props.userData.userType}
+              onChange={e => setUserType(e.target.value)}
+            >
+              <MenuItem value="user">User</MenuItem>
+              <MenuItem value="celebrity">Celebrity</MenuItem>
+              <MenuItem value="admin">Admin</MenuItem>
+            </Select>
+          </div>
+        )
+      }
       <div style={compWrapper}>
         <InputLabel>New password</InputLabel>
         <TextField

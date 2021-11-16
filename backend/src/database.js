@@ -1493,7 +1493,7 @@ export class Database {
     // Creating activity
     const users = this.database.collection('users');
     const userResp = await users.findOne({uid: activityResp.ownerUid});
-    await this.createActivity(uid, `commented on ${userResp.username}'s activity 💬💬: "${activityResp.message}`,aid);
+    await this.createActivity(uid, `commented on ${userResp.username}'s activity 💬💬: "${activityResp.message}"`,aid);
 
     return cid;
   }
