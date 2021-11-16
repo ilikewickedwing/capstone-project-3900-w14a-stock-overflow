@@ -63,6 +63,8 @@ export const authRegister = async (username, password, database) => {
   const hasUsername = await database.hasUsername(username);
   if (hasUsername) {
     return null;
+  } else if (username.includes(' ')) {
+    return undefined;
   }
   const uid = await database.insertUser(username);
   await database.insertPassword(uid, encryptPassword(password));
