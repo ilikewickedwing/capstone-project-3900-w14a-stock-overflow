@@ -82,8 +82,12 @@ export default function PerformanceGraph(props) {
       } else {
         const resp = await api.rankingsPerformance(token, localStorage.getItem('uid'));
         if (resp.status === 200) {
-         const respJson = await resp.json();
-         setAvgPerformance(respJson.performance);
+          const respJson = await resp.json();
+          if (respJson.performance !== null) {
+            setAvgPerformance(respJson.performance);
+          } else {
+            setAvgPerformance([]);
+          }
         }
       }
       setDataCache(dataCacheCopy);
@@ -111,8 +115,12 @@ export default function PerformanceGraph(props) {
       } else {
         const resp = await api.rankingsPerformance(token, props.friendUid);
         if (resp.status === 200) {
-         const respJson = await resp.json();
-         setAvgPerformance(respJson.performance);
+          const respJson = await resp.json();
+          if (respJson.performance !== null) {
+            setAvgPerformance(respJson.performance);
+          } else {
+            setAvgPerformance([]);
+          }
         }
       }
     }
