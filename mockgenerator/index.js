@@ -36,6 +36,18 @@ const CELEBRITYREQUESTS = 10;
 const CELEBRITIES = 10;
 
 
+const users = [
+  {
+    username: "user1",
+    password: "user1"
+  }, {
+    username:"user2", 
+    password:"user2"
+  }, {
+    username:'celeb',
+    password:'celeb'
+  }
+]
 
 const generateMockData = async () => {
   // let users = await registerUsers(USERNUM);
@@ -53,6 +65,15 @@ const generateMockData = async () => {
 	await calcAll();
 }
 
+const createUsers = async () => {
+  for (let i= 0; i < 3; i++){
+    try {
+      await axios.post(`${ENDPOINT}/auth/register`,{username: username[i], password: password[i]});
+    } catch (e) {
+      console.log(e);
+    }
+  } 
+}
 /**
  * Registers the given number of users and returns
  * an array of their user data.
