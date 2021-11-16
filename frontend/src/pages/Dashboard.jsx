@@ -69,47 +69,47 @@ export default function Dashboard() {
   const [myGlobalRanking, setMyGlobal] = React.useState(createRankData("lily","20","8888"));
 
   React.useEffect(() => {  
-    // getGlobalRanks();
+    getGlobalRanks();
     fetchPortfolios();
-    // getFriendRanking();
+    getFriendRanking();
     getActivity();
   },[]);
 
 const getGlobalRanks = async () => {
   try {
-    // const request = await axios.get(`${apiBaseUrl}/rankings/global`);
-    // let list = [];
-    // for (let i=0; i< request.data.length; i++){
-    //   // push the top 5 global ranks
-    //   if (i < 5) {
-    //     list.push(createRankData(request.data[i].name, request.data[i].performance.performance, request.data[i].rank));
-    //   }
-    //   if (request.data[i].name === myName){
-    //     setMyGlobal(createRankData(request.data[i].name, request.data[i].performance.performance, request.data[i].rank));
-    //   }
-    // }
-    // setGlobal(list);
+    const request = await axios.get(`${apiBaseUrl}/rankings/global`);
+    let list = [];
+    for (let i=0; i< request.data.length; i++){
+      // push the top 5 global ranks
+      if (i < 5) {
+        list.push(createRankData(request.data[i].name, request.data[i].performance.performance, request.data[i].rank));
+      }
+      if (request.data[i].name === myName){
+        setMyGlobal(createRankData(request.data[i].name, request.data[i].performance.performance, request.data[i].rank));
+      }
+    }
+    setGlobal(list);
   } catch (e) {
     alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
   }
 }
 
 const getFriendRanking = async () => {
-  // try {
-  //   const resp = await axios.get(`${apiBaseUrl}/rankings/friends?token=${token}`);
-  //   let list = [];
-  //   for (let i=0; i< resp.data.length; i++){
-  //     list.push(createRankData(resp.data[i].name, resp.data[i].performance, resp.data[i].rank));
-  //     if (resp.data[i].name === myName){
-  //       setMyRanking(createRankData(resp.data[i].name, resp.data[i].performance, resp.data[i].rank));
-  //     }
-  //   }
-  //   setRankings(list);
+  try {
+    const resp = await axios.get(`${apiBaseUrl}/rankings/friends?token=${token}`);
+    let list = [];
+    for (let i=0; i< resp.data.length; i++){
+      list.push(createRankData(resp.data[i].name, resp.data[i].performance.performance, resp.data[i].rank));
+      if (resp.data[i].name === myName){
+        setMyRanking(createRankData(resp.data[i].name, resp.data[i].performance.performance, resp.data[i].rank));
+      }
+    }
+    setRankings(list);
 
-  //   // todo set ranking of the new thing 
-  // } catch (e) {
-  //   alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
-  // }
+    // todo set ranking of the new thing 
+  } catch (e) {
+    alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
+  }
 }
 
   const fetchPortfolios = async () => {
@@ -215,6 +215,10 @@ const getFriendRanking = async () => {
                   <img style={{height:"auto", width:"50px"}} src={globe} alt="global icon"/>
                 </div>
                   <h3 style={{textAlign:'center'}}>Global Rankings</h3>
+                  <RankTable
+                    rows={globalRank}
+                    myRanking={myGlobalRanking}
+                  />
                 </RightCard>
               </RightBody>
             </PfBody>
