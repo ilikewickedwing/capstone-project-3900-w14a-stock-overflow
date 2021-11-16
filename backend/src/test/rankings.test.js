@@ -627,7 +627,9 @@ describe('Rank multiple user portfolios performances endpoint test', () => {
 		console.dir(rankings, { depth: null });
 	})
 	it('CalcAll', async () => {
-		await calcAll(database, true);
+		// await calcAll(database, true);
+		const resp = await request(app).post(`/rankings/forceCalc`).send();
+		expect(resp.statusCode).toBe(200);
     let rankings = null;
     rankings = await request(app).get(`/rankings/global`).send();
     const stocks1 = await openPf(token1, pid1, database);
