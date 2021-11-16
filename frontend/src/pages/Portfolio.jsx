@@ -41,6 +41,8 @@ const Portfolio = () => {
   const [stocks, setStocks] = React.useState([]);
   const [selected, setGraphSelected] = React.useState([]);
 
+  const [earnings, setEarnings] = React.useState(0);
+
   const open = Boolean(anchorEl);
   const id = open ? 'simple-popover': undefined;
 
@@ -55,6 +57,9 @@ const Portfolio = () => {
     try {
       const request = await axios.get(`${apiBaseUrl}/user/portfolios/open?token=${token}&pid=${pid}`);
       const portfolioData = request.data;
+      console.log(portfolioData.value.performance);
+      const performance = portfolioData.value.performance;
+      setEarnings(performance[performance.length-1]);
       setName(portfolioData.name);
 
       if (portfolioData.name === "Watchlist"){
@@ -159,11 +164,9 @@ const Portfolio = () => {
               />
               </LeftBody>
             <RightBody elevation={10}>
-              <RightCard elevation={5}>
-                <h3 style={{textAlign:'center'}}>Daily Estimated Earnings</h3>
-              </RightCard>
-              <RightCard elevation={5}>
-              <h3 style={{textAlign:'center'}}>Net Profit</h3>
+              <RightCard elevation={5} style={{textAlign:'center'}}>
+                <h3>Daily Estimated Earnings</h3>
+                {earnings.money.toFixed(2)} USD
               </RightCard>
             </RightBody>
             </PfBody>
