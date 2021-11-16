@@ -1474,18 +1474,19 @@ export class Database {
       likedUsers: [],
       userComments: [],
     }
-
+    
     const activity = this.database.collection('activity');
     const query = { aid: aid };
     const activityResp = await activity.findOne(query);
-
+    
     if (activityResp == null) {
       return -3;
     }
-
+    
     let userComments = activityResp.userComments;
     userComments.push(cid);
-
+    
+    
     await activity.insertOne(obj);
     await activity.updateOne( query, { $set : { userComments: userComments } } );
 
@@ -1683,9 +1684,11 @@ export class Database {
         if (await this.activityCanbeSeen(uid, i)){
           let newComments = [];
           for (let j = 0; j < i.userComments.length; j++) {
-            const element = i.userComments[index];
+            const element = i.userComments[j];
             const comment = await activity.findOne({aid: element});
-            newComments.push(comment);
+            if (comment !== null) {
+              newComments.push(comment);
+            }
           }
           i.userComments = newComments;
           activities.push(i);
