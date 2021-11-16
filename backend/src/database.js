@@ -1444,10 +1444,10 @@ export class Database {
     await userActivity.updateOne( query, { $set : { activities: activities } } );
 
     // Sending notification to every friend
-    const friends = this.getFriends(uid);
+    const friends = await this.getFriends(uid);
     for (let i= 0; i < friends.length; i++) {
-      const e = array[i].uid;
-      await this.insertUserNotification(e, message);
+      const e = friends[i].uid;
+      await this.insertUserNotification(e, userComment);
     }
 
     return aid;
