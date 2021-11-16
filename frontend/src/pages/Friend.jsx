@@ -72,9 +72,6 @@ export default function Friend() {
     const loadDiscover = async () => {
       try {
         const resp = await axios.get(`${apiBaseUrl}/celebrity/discover`);
-        console.log(resp);
-        console.log(friendUid);
-        console.log(resp.data.followers[friendUid]);
         setFollowers(resp.data.followers[friendUid]);
       } 
       catch (e) {
@@ -119,8 +116,7 @@ export default function Friend() {
           loadDiscover();
         }
       } catch (e) {
-        console.log(e);
-        // alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
+        alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
       }
     }
 

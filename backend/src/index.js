@@ -402,9 +402,13 @@ app.post('/auth/register', async(req, res) => {
 	}
 	const resp = await authRegister(username, password, database);
 	// Valid so return token
-	if (resp !== null) {
+	if (resp !== null && resp !== undefined) {
 		res.status(200).send(resp);
 		return;
+	}
+	if (resp === undefined) {
+		res.status(403).send({ message: 'You cant have spaces in your name' });
+		return;		
 	}
 	// Invalid so send 403 response
 	res.status(403).send({ message: 'username already exists' });
