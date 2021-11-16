@@ -14,27 +14,33 @@ const makeMockResponse = (pid) => {
       performance: [
         {
           date: '2014-5-5',
-          performance: Math.random() * 100
+          performance: Math.random() * 100,
+          money: Math.random() * 100,
         },
         {
           date: '2014-5-6',
-          performance: Math.random() * 100
+          performance: Math.random() * 100,
+          money: Math.random() * 100,
         },
         {
           date: '2014-5-7',
-          performance: Math.random() * 100
+          performance: Math.random() * 100,
+          money: Math.random() * 100,
         },
         {
           date: '2014-5-8',
-          performance: Math.random() * 100
+          performance: Math.random() * 100,
+          money: Math.random() * 100,
         },
         {
           date: '2014-5-9',
-          performance: Math.random() * 100
+          performance: Math.random() * 100,
+          money: Math.random() * 100,
         },
         {
           date: '2014-5-10',
-          performance: Math.random() * 100
+          performance: Math.random() * 100,
+          money: Math.random() * 100,
         }
       ]
     }
@@ -53,8 +59,7 @@ export default function PerformanceGraph(props) {
   // Maps pid to performance array
   const [ dataCache, setDataCache ] = useState({});
   const [ pidToName, setPidToName ] = useState({});
-  // When it is in friend mode, store all their portfolio ids
-  const [ totalFriendPids, setTotalFriendPids ] = useState([]);
+  const [ avgPerformance, setAvgPerformance ] = useState([]);
   const api = useContext(ApiContext);
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -63,7 +68,7 @@ export default function PerformanceGraph(props) {
     const callApi = async () => {
       const dataCacheCopy = Object.assign({}, dataCache);
       const pidToNameCopy = Object.assign({}, pidToName);
-      if(props.pids !== ""){
+      if(props.pids.length !== 0){
         // Loop through each of the pids
         for (const pid of props.pids.split(",")) {
           const resp = await api.userPortfoliosOpen(pid, token);
@@ -74,6 +79,12 @@ export default function PerformanceGraph(props) {
             pidToNameCopy[pid] = respJson.name;
           }
         }
+      } else {
+        const resp = await api.rankingsPerformance(token, localStorage.getItem('uid'));
+        if (resp.status === 200) {
+         const respJson = await resp.json();
+         setAvgPerformance(respJson.performance);
+        }
       }
       setDataCache(dataCacheCopy);
       setPidToName(pidToNameCopy);
@@ -81,21 +92,28 @@ export default function PerformanceGraph(props) {
     
     // Fetch data if in friend mode
     const callFriendApi = async () => {
-      const dataCacheCopy = Object.assign({}, dataCache);
-      const pidToNameCopy = Object.assign({}, pidToName);
-      const resp = await api.friendsPortfolios(token, props.friendUid);
-      if (resp.status === 200) {
-        const portfolios = await resp.json();
-        const friendsPid = [];
-        // Loop through and store each of the pids
-        for (const pf of portfolios) {
-          dataCacheCopy[pf.pid] = pf.value.performance;
-          pidToNameCopy[pf.pid] = pf.name;
-          friendsPid.push(pf.pid);
+      if (props.pids.length !== 0) {
+        const dataCacheCopy = Object.assign({}, dataCache);
+        const pidToNameCopy = Object.assign({}, pidToName);
+        const resp = await api.friendsPortfolios(token, props.friendUid);
+        if (resp.status === 200) {
+          const portfolios = await resp.json();
+          const friendsPid = [];
+          // Loop through and store each of the pids
+          for (const pf of portfolios) {
+            dataCacheCopy[pf.pid] = pf.value.performance;
+            pidToNameCopy[pf.pid] = pf.name;
+            friendsPid.push(pf.pid);
+          }
+          setDataCache(dataCacheCopy);
+          setPidToName(pidToNameCopy);
         }
-        setDataCache(dataCacheCopy);
-        setPidToName(pidToNameCopy);
-        setTotalFriendPids(friendsPid);
+      } else {
+        const resp = await api.rankingsPerformance(token, props.friendUid);
+        if (resp.status === 200) {
+         const respJson = await resp.json();
+         setAvgPerformance(respJson.performance);
+        }
       }
     }
     if (props.isFriend === true) {
@@ -116,6 +134,12 @@ export default function PerformanceGraph(props) {
             stroke={randomColor({ luminosity: 'dark' })}>
           </Line>
         )
+      } else {
+        return (
+          <Line unit="%" dot={false} type="monotone" dataKey="Average Performance"
+            stroke={randomColor({ luminosity: 'dark' })}>
+          </Line>
+        )
       }
     }
     // Return multiple lines
@@ -131,14 +155,25 @@ export default function PerformanceGraph(props) {
     return null;
   }
   
+  const getTransformedData = () => {
+    if (props.pids.length !== 0) {
+      return transformDataCache(props.pids.split(","), dataCache, pidToName);
+    } else {
+      // This should display net performances
+      return avgPerformance.map(d => {
+        return {
+          date: transformTimeStr(d.date),
+          'Average Performance': d.performance,
+          money: d.money
+        }
+      })
+    }
+  }
+  
   return (
     <ResponsiveContainer width={'99%'} height={props.height}>
       <LineChart
-        data={
-          props.pids.length !== 0 ? 
-          transformDataCache(props.pids.split(","), dataCache, pidToName) :
-          transformNetDataCache(totalFriendPids, dataCache, [])
-        }
+        data={ getTransformedData() }
         margin={{ top: 25, bottom: 25, left: 25 }}
       >
         <XAxis minTickGap={25} dataKey="date" dy={15}></XAxis>
