@@ -198,12 +198,12 @@ export default function Friend() {
                 <LeftBody elevation={10}>
                 <PfBar>
                   <Heading>{handle}'s Portfolios </Heading>
-                  {userType==="celebrity" && 
+                  {(userType==="celebrity" && followers !== undefined) && 
                     <Button variant="outlined" color="secondary" id="addFriend" onClick={followCeleb}> 
                       {`${followers.includes(uid) ? 'Unfollow' : 'Follow'}`}
                     </Button>
                   }
-                  {userType==="user" && 
+                  {(userType==="user" && followers !== undefined) &&
                     <Button variant="outlined" color="secondary" id="addFriend" onClick={unfriend}> 
                       Unfriend
                     </Button>

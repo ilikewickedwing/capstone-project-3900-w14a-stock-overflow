@@ -1492,7 +1492,7 @@ export class Database {
     // Creating activity
     const users = this.database.collection('users');
     const userResp = await users.findOne({uid: activityResp.ownerUid});
-    await this.createActivity(uid, `commented on ${userResp.username}'s activity 💬💬: "${activityResp.message}`,aid);
+    await this.createActivity(uid, `commented on ${userResp.username}'s activity 💬💬: "${activityResp.message}"`,aid);
 
     return cid;
   }
@@ -1683,7 +1683,7 @@ export class Database {
         if (await this.activityCanbeSeen(uid, i)){
           let newComments = [];
           for (let j = 0; j < i.userComments.length; j++) {
-            const element = i.userComments[index];
+            const element = i.userComments[j];
             const comment = await activity.findOne({aid: element});
             newComments.push(comment);
           }
