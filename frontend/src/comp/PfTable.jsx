@@ -493,11 +493,7 @@ export default function PfTable({stocks, load, setGraphSelected, isFriend}) {
                 .map((row, index) => {
                   const isItemSelected = isSelected(row.code);
                   const labelId = `enhanced-table-checkbox-${index}`;
-<<<<<<< HEAD
 									const rowValue = parseFloat(row.value);
-=======
-                  const rowValue = parseFloat(row.value);
->>>>>>> main
 									const profLoss = parseFloat(row.profitLoss);
                   return (
                     <TableRow

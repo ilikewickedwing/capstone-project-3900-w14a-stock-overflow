@@ -92,13 +92,9 @@ const getFriendRanking = async () => {
     let list = [];
     console.log(resp.data);
     for (let i=0; i< resp.data.length; i++){
-<<<<<<< HEAD
       if (i < 5){
         list.push(createRankData(resp.data[i].name, resp.data[i].performance.performance, resp.data[i].rank));
       }
-=======
-      list.push(createRankData(resp.data[i].name, resp.data[i].performance.performance, resp.data[i].rank));
->>>>>>> main
       if (resp.data[i].name === myName){
         setMyRanking(createRankData(resp.data[i].name, resp.data[i].performance.performance, resp.data[i].rank));
       }
