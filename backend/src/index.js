@@ -402,9 +402,13 @@ app.post('/auth/register', async(req, res) => {
 	}
 	const resp = await authRegister(username, password, database);
 	// Valid so return token
-	if (resp !== null) {
+	if (resp !== null && resp !== undefined) {
 		res.status(200).send(resp);
 		return;
+	}
+	if (resp === undefined) {
+		res.status(403).send({ message: 'You cant have spaces in your name' });
+		return;		
 	}
 	// Invalid so send 403 response
 	res.status(403).send({ message: 'username already exists' });
@@ -1989,5 +1993,11 @@ app.get('/rankings/performance', async(req, res) => {
 
 app.post('/rankings/forceCalc', async(req, res) => {
   const resp = await calcAll(database, true);
+  res.status(200).send();
+})
+
+app.post('/rankings/forceCalcPf', async(req, res) => {
+  const { token, pid, testDate, testDays } = req.body;
+  const resp = await calcPf(token, pid, database, 'yes', 'yes', testDate, testDays);
   res.status(200).send();
 })

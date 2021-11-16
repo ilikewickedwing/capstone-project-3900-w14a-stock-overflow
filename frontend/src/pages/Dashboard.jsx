@@ -64,11 +64,8 @@ export default function Dashboard() {
     getGlobalRanks();
     fetchPortfolios();
     getFriendRanking();
-  },[]);
-
-  React.useEffect(()=>{
     getActivity();
-  }, []);
+  },[]);
 
 const getGlobalRanks = async () => {
   try {
@@ -95,9 +92,13 @@ const getFriendRanking = async () => {
     let list = [];
     console.log(resp.data);
     for (let i=0; i< resp.data.length; i++){
+<<<<<<< HEAD
       if (i < 5){
         list.push(createRankData(resp.data[i].name, resp.data[i].performance.performance, resp.data[i].rank));
       }
+=======
+      list.push(createRankData(resp.data[i].name, resp.data[i].performance.performance, resp.data[i].rank));
+>>>>>>> main
       if (resp.data[i].name === myName){
         setMyRanking(createRankData(resp.data[i].name, resp.data[i].performance.performance, resp.data[i].rank));
       }
@@ -156,9 +157,11 @@ const getFriendRanking = async () => {
   const getActivity = async() => {
     try {
     const resp = await axios.get(`${apiBaseUrl}/activity/all?token=${token}`);
+    console.log(resp.data);
     setActivity(resp.data);
     } catch (e) {
-      alert(e);
+			console.dir(e, {depth:null});
+      // alert(`Status Code ${e.data.status} : ${e.data.error}`,'error');
     }
   }
   return (
@@ -185,7 +188,7 @@ const getFriendRanking = async () => {
                 {
                   activity.length > 0 ? activity.map(index =>{
                     let subString = index.time.substring(11,16)
-                    return <Activity message={index.message} time={subString}></Activity>
+                    return <Activity message={index.message} time={subString} aid={index.aid} likes={index.likes} getActivityCallBack={getActivity} userComments={index.userComments}></Activity>
                   }): <p>Empty feed :\</p>
                 }
               </LeftBody>

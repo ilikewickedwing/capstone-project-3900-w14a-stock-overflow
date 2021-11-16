@@ -266,6 +266,10 @@ export default class API {
     });
   }
   
+  rankingsPerformance(token, uid) {
+    return fetch(`${ENDPOINT}/rankings/performance?token=${token}&uid=${uid}`);
+  }
+  
   post(path, options){
     return fetch(`${ENDPOINT}/${path}`,{
       ...options,

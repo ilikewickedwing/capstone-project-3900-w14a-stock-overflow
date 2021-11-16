@@ -54,8 +54,8 @@ const PerformanceRow = ({pid, rowName,stocks, isItemSelected, handleClick}) => {
                         <TableCell>Curr. Price</TableCell>
                         <TableCell>Change(%)</TableCell>
                         <TableCell>Units</TableCell>
-                        <TableCell>Value</TableCell>
-                        <TableCell>Profit/Loss($)</TableCell>
+                        <TableCell align="left">Value</TableCell>
+                        <TableCell align="left">Profit/Loss($)</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>

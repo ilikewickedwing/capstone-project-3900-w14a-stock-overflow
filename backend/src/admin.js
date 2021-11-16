@@ -162,6 +162,11 @@ export const adminUserDelete = async (token, uid, database, res) => {
     res.status(400).send({ error: `User with uid ${uid} does not exist` });
     return;
   }
+  // If user is an admin make sure that its not the last admin
+  if (adminUid === uid) {
+    res.status(400).send({ error: `You cannot delete yourself. Another admin must do it` });
+    return;
+  }
   // Delete user
   const portfolios = await database.getPfs(uid);
   for (let i = 0; i < portfolios.length; i++) {
