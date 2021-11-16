@@ -164,8 +164,6 @@ export const verifyPf = async(uid, pid, database) => {
     }
   }
 
-
-
   // Check that the user is an admin
   const user = await database.getUser(uid);
   if (user.userType === 'admin') check = 1;

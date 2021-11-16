@@ -49,7 +49,24 @@ const COLLECTIONS = [
       ],
       defBroker: float,
       brokerFlag: int,
-      performance: float // Average performance based on all portfolios
+      performance: [
+        {
+          date: string,
+          performance: float,
+          money: float
+        }
+      ],
+      change: [
+        {
+          date: string,
+          percentage: float,
+          money: float
+        }
+      ],
+      value: [
+        spent: float,
+        sold: float
+      ]
     }
    */
   'userPortos',
@@ -75,9 +92,19 @@ const COLLECTIONS = [
         spent: float,
         sold: float,
         performance: [
-          date: string,
-          performance: float
-        ]
+          {
+            date: string,
+            performance: float,
+            money: float
+          }
+        ],
+        change: {
+          [
+            date: string,
+            percentage: float,
+            money: float
+          ]
+        }
       }
     }
    */
@@ -171,7 +198,10 @@ const COLLECTIONS = [
       rank: int
       uid: string
       name: string
-      performance: float // stored as percentage
+      performance: {
+        performance: float,
+        money: float
+      }
     }
   */
   'rankings',
@@ -261,9 +291,47 @@ export class Database {
     const users = this.database.collection('userPortos');
     const query = { ownerUid: uid };
     const user = await users.findOne(query);
-    user.performance = performance;
-    const result = await users.updateOne(query, { $set: { performance: performance }});
-    return result.modifiedCount !== 0;
+    const now = new Date();
+    const today = new Date(now);
+    const time = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + today.getDate()).slice(-2);
+    const date = time.toString();
+  
+    const perc = (performance.money + performance.sold)/performance.spent * 100;
+    
+    const perf = {
+      date: date,
+      performance: perc,
+      money: performance.money
+    }
+    const value = {
+      spent: performance.spent,
+      sold: performance.sold
+    }
+    
+    const performanceArr = user.performance;
+    performanceArr.push(perf);
+    user.value = value;
+
+    let prevVal = null;
+    let prevPerc = null;
+    // console.dir(Pf, {depth:null});
+    const prevPerf = user.performance[user.performance.length - 2];
+    // console.log(prevPerf);
+    if (prevPerf) {
+      prevVal = prevPerf.money;
+      prevPerc = prevPerf.performance;
+    } else {
+      prevVal = 0;
+      prevPerc = 0;
+    }
+    const change = performance.money - prevVal;
+    const changePerc = perc - prevPerc;
+    const newVal = user.change;
+    newVal.push({ date: date, percentage: changePerc, money: change });
+
+    await users.updateOne(query, { $set: { performance: performanceArr, value: value, change: newVal }});
+    // console.dir(user, {depth:null});
+    return perc;
   }
 
   /**
@@ -283,6 +351,11 @@ export class Database {
       userType: userType
     })
 
+    const now = new Date();
+    const today = new Date(now);
+    const time = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + today.getDate()).slice(-2);
+    const date = time.toString();
+
     // Create a new userPorto and add a watchlist for the new user
     const userPortos = this.database.collection('userPortos');
     const watchlistId = nanoid();
@@ -296,7 +369,20 @@ export class Database {
       ],
       defBroker: null,
       brokerFlag: null,
-      performance: null
+      performance: [
+        {
+          date: date,
+          performance: 0,
+          money: 0
+        }
+      ],
+      change: [
+        {
+          date: date,
+          percentage: 0,
+          money: 0
+        }
+      ]
     })
     const pfs = this.database.collection('portfolios');
     await pfs.insertOne({
@@ -306,7 +392,20 @@ export class Database {
       value: {
         spent: null,
         sold: null,
-        performance: null,
+        performance: [
+          {
+            date: null,
+            performance: null,
+            money: null
+          }
+        ],
+        change: [
+          {
+            date: null,
+            percentage: null,
+            money: null
+          }
+        ]
       }
     })
 
@@ -703,12 +802,12 @@ export class Database {
     const userPortos = this.database.collection('userPortos');
     const query = { ownerUid: uid };
     const userPortoResp = await userPortos.findOne(query);
-    console.dir(userPortoResp, {depth:null});
+    // console.dir(userPortoResp, {depth:null});
 
     const users = this.database.collection('users');
     const query2 = { uid: uid };
     const userResp = await users.findOne(query2);
-    console.dir(userResp, {depth:null});
+    // console.dir(userResp, {depth:null});
     const perf = {
       name: userResp.username,
       performance: userPortoResp.performance,
@@ -722,7 +821,7 @@ export class Database {
    * @returns {Promise<Array>}
    */
   async getAllPfs() {
-    console.log('getAllPfs');
+    // console.log('getAllPfs');
     const pfs = this.database.collection('portfolios');
     if (pfs.countDocuments() == 0) return [];
     const requests = await pfs.find().toArray();
@@ -766,7 +865,15 @@ export class Database {
         performance: [
           {
             date: date,
-            performance: 0
+            performance: 0,
+            money: 0
+          }
+        ],
+        change: [
+          {
+            date: date,
+            percentage: 0,
+            money: 0
           }
         ]
       }

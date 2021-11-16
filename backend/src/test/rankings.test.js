@@ -9,7 +9,7 @@ import { app, database } from "../index";
 import { getDefBroker, setDefBroker } from "../user";
 import { addFriend } from "../social";
 
-describe('Rank multiple user portfolio performances', () => {
+/* describe('Rank multiple user portfolio performances', () => {
 	const d = new Database(true);
 	beforeAll(async () => {
 	  await d.connect();
@@ -160,7 +160,7 @@ describe('Rank multiple user portfolio performances', () => {
     const calc2 = await calcPf(token2, pid2, d, 'yes', 'yes', testDate, 3);
     const calc3 = await calcPf(token3, pid3, d, 'yes', 'yes', testDate, 3);
     const calc4 = await calcPf(token3, pid4, d, 'yes', 'yes', testDate, 3);
-    daysCalced -= 4;
+    daysCalced -= 5;
     expect(calc1).not.toBe(null);
     expect(calc2).not.toBe(null);
     expect(calc3).not.toBe(null);
@@ -233,9 +233,15 @@ describe('Rank multiple user portfolio performances', () => {
 	it('CalcAll', async () => {
 		await calcAll(d, true);
     let rankings = null;
-    // setTimeout(async () => {
-      rankings = await d.getRankings();
-    // }, 10000);
+    rankings = await d.getRankings();
+    // const stocks1 = await openPf(token1, pid1, d);
+    // const stocks2 = await openPf(token2, pid2, d);
+    // const stocks3 = await openPf(token3, pid3, d);
+    // const stocks4 = await openPf(token3, pid4, d);
+	  // console.dir(stocks1, { depth: null });
+    // console.dir(stocks2, { depth: null });
+    // console.dir(stocks3, { depth: null });
+    // console.dir(stocks4, { depth: null });
     console.dir(rankings, { depth: null });
     expect(rankings).not.toBe(null);
 	})
@@ -253,7 +259,7 @@ describe('Rank multiple user portfolio performances', () => {
 	afterAll(async () => {
 	  await d.disconnect();
 	})
-})
+}) */
 
 describe('Rank multiple user portfolios performances endpoint test', () => {
   beforeAll(async () => {
@@ -624,7 +630,7 @@ describe('Rank multiple user portfolios performances endpoint test', () => {
 		await calcAll(database, true);
     let rankings = null;
     rankings = await request(app).get(`/rankings/global`).send();
-    console.dir(rankings, { depth: null });
+    // console.dir(rankings.body, { depth: null });
     expect(rankings).not.toBe(null);
 	})
   // it('Test friend rank 1', async () => {
@@ -636,6 +642,16 @@ describe('Rank multiple user portfolios performances endpoint test', () => {
     const friendRank = await getFriendRankings(token1, database);
     expect(friendRank).not.toBe(null);
     console.dir(friendRank, {depth:null});
+  })
+  it('Test get user performance', async () => {
+    const resp = await request(app).get(`/rankings/performance?token=${token1}&uid=${uid1}`).send();
+    expect(resp.statusCode).toBe(200);
+    console.dir(resp.body, {depth:null});
+  })
+  it('Test get friend performance', async () => {
+	const resp = await request(app).get(`/rankings/performance?token=${token1}&uid=${uid2}`).send();
+    expect(resp.statusCode).toBe(200);
+    console.dir(resp.body, {depth:null});
   })
 
   afterAll(async() => {
