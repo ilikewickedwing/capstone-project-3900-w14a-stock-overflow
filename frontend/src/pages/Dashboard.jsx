@@ -80,18 +80,18 @@ export default function Dashboard() {
 
 const getGlobalRanks = async () => {
   try {
-    const request = await axios.get(`${apiBaseUrl}/rankings/global`);
-    let list = [];
-    for (let i=0; i< request.data.length; i++){
-      // push the top 5 global ranks
-      if (i < 5) {
-        list.push(createRankData(request.data[i].name, request.data[i].performance, request.data[i].rank));
-      }
-      if (request.data[i].name === myName){
-        setMyGlobal(createRankData(request.data[i].name, request.data[i].performance, request.data[i].rank));
-      }
-    }
-    setGlobal(list);
+    // const request = await axios.get(`${apiBaseUrl}/rankings/global`);
+    // let list = [];
+    // for (let i=0; i< request.data.length; i++){
+    //   // push the top 5 global ranks
+    //   if (i < 5) {
+    //     list.push(createRankData(request.data[i].name, request.data[i].performance, request.data[i].rank));
+    //   }
+    //   if (request.data[i].name === myName){
+    //     setMyGlobal(createRankData(request.data[i].name, request.data[i].performance, request.data[i].rank));
+    //   }
+    // }
+    // setGlobal(list);
   } catch (e) {
     alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
   }
@@ -114,7 +114,8 @@ const getFriendRanking = async () => {
 
     // todo set ranking of the new thing 
   } catch (e) {
-    alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
+    console.log(e);
+    // alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
   }
 }
 
