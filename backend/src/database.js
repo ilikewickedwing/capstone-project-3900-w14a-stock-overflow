@@ -1421,13 +1421,17 @@ export class Database {
     const userResp = await this.getUser(uid);
     const userComment = userResp.username + ' ' + message;
     const aid = nanoid();
+		const now = new Date();
+		const today = new Date(now);
+		const test = new Date();
+		test.setHours(today.getHours() + 11);
     const obj = {
       ownerName: userResp.username,
       ownerUid: uid,
       parentId: parentId,
       aid: aid,
       message: userComment,
-      time: new Date(),
+      time: test,
       likes: 0,
       likedUsers: [],
       userComments: [],
@@ -1463,13 +1467,17 @@ export class Database {
   async comment(uid, aid, message) {
     const user = await this.getUser(uid);
     const cid = nanoid();
+		const now = new Date();
+		const today = new Date(now);
+		const test = new Date();
+		test.setHours(today.getHours() + 11);
     const obj = {
       ownerName: user.username,
       ownerUid: uid,
       parentId: aid,
       aid: cid,
       message: message,
-      time: new Date(),
+      time: test,
       likes: 0,
       likedUsers: [],
       userComments: [],
