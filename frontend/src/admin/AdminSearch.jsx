@@ -85,7 +85,7 @@ export default function AdminSearch() {
     if (value === 'yes') {
       const resp = await api.adminUserDelete(token, loadedUid);
       if (resp.status !== 200) {
-        const respJson = resp.json();
+        const respJson = await resp.json();
         alert(respJson.error, 'error');
       } else {
         alert("Deletion successful", "success");
