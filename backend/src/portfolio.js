@@ -164,26 +164,12 @@ export const verifyPf = async(uid, pid, database) => {
     }
   }
 
-
-
   // Check that the user is an admin
   const user = await database.getUser(uid);
   if (user.userType === 'admin') check = 1;
 
   return (check === 1);
 }
-
-/* export const checkAccess = async(uid, pid, database) => {
-  const friends = await database.getFriends(uid);
-  for (let i = 0; i < friends.length; i++) {
-    const pfs = await database.getPfs(friends[i].uid);
-    for (let j = 0; j < pfs.length; j++) {
-      if (pfs[j].pid === pid) return true;
-    }
-  }
-
-  return false;
-} */
 
 /**
  * Deletes portfolio from database
@@ -216,6 +202,13 @@ export const deletePf = async(token, pid, database) => {
   return del;
 }
 
+/**
+ * Function to return portfolios of friends or celebrities
+ * @param {string} token 
+ * @param {string} uid 
+ * @param {Database} database 
+ * @returns 
+ */
 export const openFriendPf = async(token, uid, database) => {
   // Return error if user is not found
   const userUid = await database.getTokenUid(token);
@@ -223,6 +216,7 @@ export const openFriendPf = async(token, uid, database) => {
     return 1;
   }
 
+	// Check access permissions
   if (!await database.checkFriend(userUid, uid)) {
     const celebrities = await database.getAllCelebrityUsers();
     const filtered = celebrities.filter((e) => e.uid === uid);
@@ -237,6 +231,7 @@ export const openFriendPf = async(token, uid, database) => {
     return 3;
   }
 
+	// Create array of their portfolios and return it
   let result = [];
 
   for (let i = 0; i < pfs.length; i++) {

@@ -49,7 +49,24 @@ const COLLECTIONS = [
       ],
       defBroker: float,
       brokerFlag: int,
-      performance: float // Average performance based on all portfolios
+      performance: [
+        {
+          date: string,
+          performance: float,
+          money: float
+        }
+      ],
+      change: [
+        {
+          date: string,
+          percentage: float,
+          money: float
+        }
+      ],
+      value: [
+        spent: float,
+        sold: float
+      ]
     }
    */
   'userPortos',
@@ -75,9 +92,19 @@ const COLLECTIONS = [
         spent: float,
         sold: float,
         performance: [
-          date: string,
-          performance: float
-        ]
+          {
+            date: string,
+            performance: float,
+            money: float
+          }
+        ],
+        change: {
+          [
+            date: string,
+            percentage: float,
+            money: float
+          ]
+        }
       }
     }
    */
@@ -171,7 +198,10 @@ const COLLECTIONS = [
       rank: int
       uid: string
       name: string
-      performance: float // stored as percentage
+      performance: {
+        performance: float,
+        money: float
+      }
     }
   */
   'rankings',
@@ -249,7 +279,7 @@ export class Database {
 
   /**
    * Get all users
-   * @returns 
+   * @returns {Promise<Array>}
    */
    async getAllUsers() {
     const users = this.database.collection('users');
@@ -257,23 +287,15 @@ export class Database {
     return requests;
   }
 
-  async setUserPerf(uid, performance) {
-    const users = this.database.collection('userPortos');
-    const query = { ownerUid: uid };
-    const user = await users.findOne(query);
-    user.performance = performance;
-    const result = await users.updateOne(query, { $set: { performance: performance }});
-    return result.modifiedCount !== 0;
-  }
-
+	
   /**
-   * Inserts a new user into the database and returns the uid.
-   * This function does not check if the username already exists, so you must check
-   * before hand to ensure that there arent any duplicate usernames
-   * @param {string} username 
-   * @returns {Promise<string>}
+	 * Inserts a new user into the database and returns the uid.
+	 * This function does not check if the username already exists, so you must check
+	 * before hand to ensure that there arent any duplicate usernames
+	 * @param {string} username 
+	 * @returns {Promise<string>}
    */
-  async insertUser(username, userType = 'user') {
+	async insertUser(username, userType = 'user') {
     // Generate a new unique id
     const uid = nanoid();
     const users = this.database.collection('users');
@@ -282,130 +304,239 @@ export class Database {
       username: username,
       userType: userType
     })
-
+		
+    const now = new Date();
+    const today = new Date(now);
+    const time = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + today.getDate()).slice(-2);
+    const date = time.toString();
+		
     // Create a new userPorto and add a watchlist for the new user
     const userPortos = this.database.collection('userPortos');
     const watchlistId = nanoid();
     await userPortos.insertOne({
-      ownerUid: uid,
+			ownerUid: uid,
       pfs: [
-        {
-          pid: watchlistId,
+				{
+					pid: watchlistId,
           name: "Watchlist",
         }
       ],
       defBroker: null,
       brokerFlag: null,
-      performance: null
+      performance: [
+				{
+					date: date,
+          performance: 0,
+          money: 0
+        }
+      ],
+      change: [
+				{
+					date: date,
+          percentage: 0,
+          money: 0
+        }
+      ]
     })
     const pfs = this.database.collection('portfolios');
     await pfs.insertOne({
-      pid: watchlistId,
+			pid: watchlistId,
       name: "Watchlist",
       stocks: [],
       value: {
-        spent: null,
+				spent: null,
         sold: null,
-        performance: null,
+        performance: [
+					{
+						date: null,
+            performance: null,
+            money: null
+          }
+        ],
+        change: [
+					{
+						date: null,
+            percentage: null,
+            money: null
+          }
+        ]
       }
     })
-
+		
     // Create an empty friends list
     const friends = this.database.collection('friends');
     await friends.insertOne({
-      ownerUid: uid,
+			ownerUid: uid,
       friends: [],
       requests: [],
     })
-
+		
     // Create an empty userActivity
     const activities = this.database.collection('userActivity');
     await activities.insertOne({
-      ownerUid: uid,
+			ownerUid: uid,
       activities: [],
     })
-
+		
     return uid;
   }
   /**
-   * Updates a user object in the database and returns whether it was
-   * successful. The userdata contains all the
-   * properties to be changed in the object. Properties that are missing will
-   * not be changed
-   * @param {string} uid 
-   * @param {User} userData
-   * @returns {Promise<boolean}
+	 * Updates a user object in the database and returns whether it was
+	 * successful. The userdata contains all the
+	 * properties to be changed in the object. Properties that are missing will
+	 * not be changed
+	 * @param {string} uid 
+	 * @param {User} userData
+	 * @returns {Promise<boolean}
    */
-  async updateUser(uid, userData) {
-    const users = this.database.collection('users');
+	async updateUser(uid, userData) {
+		const users = this.database.collection('users');
     const query = { uid: uid };
     const result = await users.updateOne(query, { $set: userData});
     return result.modifiedCount !== 0;
   }
   /**
-   * Given a uid, delete it from the database. Returns whether it was
-   * successful or not. Note: This only deletes the user but not its password, nor
-   * does it invalidate its tokens
-   * @param {string} uid
-   * @returns {Promise<boolean>}
+	 * Given a uid, delete it from the database. Returns whether it was
+	 * successful or not. Note: This only deletes the user but not its password, nor
+	 * does it invalidate its tokens
+	 * @param {string} uid
+	 * @returns {Promise<boolean>}
    */
-  async deleteUser(uid) {
-    const users = this.database.collection('users');
+	async deleteUser(uid) {
+		const users = this.database.collection('users');
     const query = { uid: uid }
     const result = await users.deleteOne(query);
     return result.deletedCount !== 0;
   }
   /**
-   * Returns the password for a given uid, else return null
-   * @param {string} uid 
-   * @returns {Promise<string | null>}
+	 * Returns the password for a given uid, else return null
+	 * @param {string} uid 
+	 * @returns {Promise<string | null>}
    */
-  async getPassword(uid) {
-    const passwords = this.database.collection('passwords');
+	async getPassword(uid) {
+		const passwords = this.database.collection('passwords');
     const query = { ownerUid: uid };
     const options = {
-      // Only include the 'uid' field in the returned document
+			// Only include the 'uid' field in the returned document
       projection: { password: 1 }
     }
     const password = await passwords.findOne(query, options);
     if (password !== null) {
-      return password.password;
+			return password.password;
     }
     return null;
   }
+
+	/**
+	 * Function to set the performance of the user
+	 * @param {string} uid 
+	 * @param {Object} performance 
+	 * @returns float
+	 */
+	async setUserPerf(uid, performance) {
+		const users = this.database.collection('userPortos');
+		const query = { ownerUid: uid };
+		const user = await users.findOne(query);
+		const now = new Date();
+		const today = new Date(now);
+		const time = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + today.getDate()).slice(-2);
+		const date = time.toString();
+	
+		// Calculate the percentage performance
+		const perc = (performance.money + performance.sold)/performance.spent * 100;
+		// Create performance and value objects
+		const perf = {
+			date: date,
+			performance: perc,
+			money: performance.money
+		}
+		const value = {
+			spent: performance.spent,
+			sold: performance.sold
+		}
+		
+		// Update user
+		const performanceArr = user.performance;
+		performanceArr.push(perf);
+		user.value = value;
+
+		// Calculate changes and update
+		let prevVal = null;
+		let prevPerc = null;
+		const prevPerf = user.performance[user.performance.length - 2];
+		if (prevPerf) {
+			prevVal = prevPerf.money;
+			prevPerc = prevPerf.performance;
+		} else {
+			prevVal = 0;
+			prevPerc = 0;
+		}
+		const change = performance.money - prevVal;
+		const changePerc = perc - prevPerc;
+		const newVal = user.change;
+		newVal.push({ date: date, percentage: changePerc, money: change });
+
+		// Update user in database
+		await users.updateOne(query, { $set: { performance: performanceArr, value: value, change: newVal }});
+		return perc;
+	}
+
+	/**
+	 * Function to get the performance of the user
+	 * @param {string} uid 
+	 * @returns {Promise<Object>}
+	 */
+	async getUserPerf(uid) {
+		const userPortos = this.database.collection('userPortos');
+		const query = { ownerUid: uid };
+		const userPortoResp = await userPortos.findOne(query);
+		// console.dir(userPortoResp, {depth:null});
+
+		const users = this.database.collection('users');
+		const query2 = { uid: uid };
+		const userResp = await users.findOne(query2);
+		// console.dir(userResp, {depth:null});
+		const perf = {
+			name: userResp.username,
+			performance: userPortoResp.performance,
+			change: userPortoResp.change,
+		};
+
+		return perf;
+	}
   /**
-   * Enter a new password into the database
-   * @param {string} uid 
-   * @param {string} password 
+	 * Enter a new password into the database
+	 * @param {string} uid 
+	 * @param {string} password 
    */
-  async insertPassword(uid, password) {
-    const passwords = this.database.collection('passwords');
+	async insertPassword(uid, password) {
+		const passwords = this.database.collection('passwords');
     await passwords.insertOne({
-      ownerUid: uid,
+			ownerUid: uid,
       password: password
     })
   }
   
   /**
-   * Updates password into the database
-   * @param {string} uid 
-   * @param {string} password 
+	 * Updates password into the database
+	 * @param {string} uid 
+	 * @param {string} password 
    */
-  async updatePassword(uid, password) {
-    const passwords = this.database.collection('passwords');
+	async updatePassword(uid, password) {
+		const passwords = this.database.collection('passwords');
     const query = { ownerUid: uid };
     const result = await passwords.updateOne(query, { $set: {
-      password: password
+			password: password
     }})
     return result.modifiedCount !== 0;
   }
   
   /**
-   * deletes a password from the database and returns whether it was successful.
-   * Note: Make sure the user is also deleted otherwise you will be left with a user
-   * with no password
-   * @param {string} ownerUid
-   * @returns {Promise<boolean>}
+	 * deletes a password from the database and returns whether it was successful.
+	 * Note: Make sure the user is also deleted otherwise you will be left with a user
+	 * with no password
+	 * @param {string} ownerUid
+	 * @returns {Promise<boolean>}
    */
   async deletePassword(ownerUid) {
     const passwords = this.database.collection('passwords');
@@ -471,6 +602,10 @@ export class Database {
     return null;
   }
   
+	/**
+	 * Function to get an array of all the celebrities
+	 * @returns {Promise<Array>}
+	 */
   async getAllCelebrityUsers() {
     const users = this.database.collection('users');
     const query = { userType: 'celebrity' };
@@ -478,6 +613,11 @@ export class Database {
     return celebs;
   }
   
+	/**
+	 * Function to get an array of all a celebrities followers
+	 * @param {string} celebUid 
+	 * @returns {Promise<Array>}
+	 */
   async getCelebrityFollowers(celebUid) {
     const celebFollowers = this.database.collection('celebrityfollowers');
     const query = { celebUid: celebUid };
@@ -485,6 +625,11 @@ export class Database {
     return followers;
   }
 
+	/**
+	 * Function to get an array of all celebrities a user follows
+	 * @param {string} uid 
+	 * @returns {Promise<Array>}
+	 */
   async getUserCelebrities(uid) {
     const celebFollowers = this.database.collection('celebrityfollowers');
     const query = { followers: uid };
@@ -699,30 +844,12 @@ export class Database {
     else return 0;
   }
 
-  async getUserPerf(uid) {
-    const userPortos = this.database.collection('userPortos');
-    const query = { ownerUid: uid };
-    const userPortoResp = await userPortos.findOne(query);
-    console.dir(userPortoResp, {depth:null});
-
-    const users = this.database.collection('users');
-    const query2 = { uid: uid };
-    const userResp = await users.findOne(query2);
-    console.dir(userResp, {depth:null});
-    const perf = {
-      name: userResp.username,
-      performance: userPortoResp.performance,
-    };
-
-    return perf;
-  }
-
   /**
    * Function to return array of all portfolios in database
    * @returns {Promise<Array>}
    */
   async getAllPfs() {
-    console.log('getAllPfs');
+    // console.log('getAllPfs');
     const pfs = this.database.collection('portfolios');
     if (pfs.countDocuments() == 0) return [];
     const requests = await pfs.find().toArray();
@@ -766,7 +893,15 @@ export class Database {
         performance: [
           {
             date: date,
-            performance: 0
+            performance: 0,
+            money: 0
+          }
+        ],
+        change: [
+          {
+            date: date,
+            percentage: 0,
+            money: 0
           }
         ]
       }
@@ -1082,6 +1217,13 @@ export class Database {
     }
     return null;
   }
+
+	/**
+	 * Function to add a friend
+	 * @param {string} uid 
+	 * @param {string} friend 
+	 * @returns {Promise}
+	 */
   async addFriend(uid, friend) {
     // Check whether given friend id is valid
     const friendResp = await this.getUser(friend);
@@ -1128,6 +1270,12 @@ export class Database {
     return true;
   }
 
+	/**
+	 * Function to decline a friend request
+	 * @param {string} uid 
+	 * @param {string} friend 
+	 * @returns {Promise}
+	 */
   async declineFriend(uid, friend) {
     // Check whether given friend id is valid
     const friendResp = await this.getUser(friend);
@@ -1160,6 +1308,12 @@ export class Database {
     return true;
   }
 
+	/**
+	 * Function to remove a friend
+	 * @param {string} uid 
+	 * @param {string} friend 
+	 * @returns {Promise}
+	 */
   async removeFriend(uid, friend) {
     // Find the friendList for the given uid
     const friends = this.database.collection('friends');
@@ -1189,6 +1343,11 @@ export class Database {
     return true;
   }
 
+	/**
+	 * Function to return array of all a users friends
+	 * @param {string} uid 
+	 * @returns {Promise<Array>}
+	 */
   async getFriends(uid) {
     // Find the friendlist for the given uid
     const friends = this.database.collection('friends');
@@ -1207,6 +1366,11 @@ export class Database {
     return userFriends.toArray();
   }
 
+	/**
+	 * Function to return array of all a users friend requests
+	 * @param {string} uid 
+	 * @returns {Promise<Array>}
+	 */
   async getFriendReq(uid) {
     // Find the friend request list for the given uid
     const friends = this.database.collection('friends');
@@ -1221,6 +1385,12 @@ export class Database {
     return userFriends.toArray();
   }
 
+	/**
+	 * Function to check if two users are friends
+	 * @param {string} uid 
+	 * @param {string} friend 
+	 * @returns {Promise<Boolean>}
+	 */
   async checkFriend(uid, friend) {
     // Find the friendlist for the given uid
     const friends = this.database.collection('friends');
@@ -1239,6 +1409,13 @@ export class Database {
     return true;
   }
 
+	/**
+	 * Function to create an activity
+	 * @param {string} uid 
+	 * @param {string} message 
+	 * @param {string} parentId 
+	 * @returns {Promise<string>}
+	 */
   async createActivity(uid, message, parentId) {
     const userResp = await this.getUser(uid);
     const userComment = userResp.username + ' ' + message;
@@ -1268,6 +1445,13 @@ export class Database {
     return aid;
   }
 
+	/**
+	 * Function to create a comment
+	 * @param {string} uid 
+	 * @param {string} aid 
+	 * @param {string} message 
+	 * @returns {Promise<string>}
+	 */
   async comment(uid, aid, message) {
     const user = await this.getUser(uid);
     const cid = nanoid();
@@ -1305,6 +1489,11 @@ export class Database {
     return cid;
   }
 
+	/**
+	 * Function to get array of comments 
+	 * @param {string} aid 
+	 * @returns {Promise<Array>}
+	 */
   async getComments(aid) {
     const activity = this.database.collection('activity');
     const actResp = await activity.findOne({aid: aid});
@@ -1324,6 +1513,12 @@ export class Database {
     return result;
   }
 
+	/**
+	 * Function to create like
+	 * @param {string} uid 
+	 * @param {string} id 
+	 * @returns {Promise}
+	 */
   async like(uid, id) {
     const users = this.database.collection('users');
     const activity = this.database.collection('activity');
@@ -1354,6 +1549,7 @@ export class Database {
     return id;
   }
 
+	// Is this needed??
   async createStockColl(stock) {
     const stocks = this.database.collection('stocks');
     await stocks.insertOne({
@@ -1363,7 +1559,14 @@ export class Database {
     })
   }
 
-  // type: 0 = bear, 1 = bull
+	/**
+	 * Function to vote on a stock
+	 * type: 0 = bear, 1 = bull
+	 * @param {string} uid 
+	 * @param {string} stock 
+	 * @param {int} type 
+	 * @returns {Promise}
+	 */
   async voteStock(uid, stock, type) {
     const stocks = this.database.collection('stocks');
     let stocksResp = await stocks.findOne({stock : stock});
@@ -1412,6 +1615,12 @@ export class Database {
     return message;
   }
 
+	/**
+	 * Function to get the votes on a stock
+	 * @param {string} uid 
+	 * @param {string} stock 
+	 * @returns {Promise<Object>}
+	 */
   async getVotes(uid, stock) {
     const stocks = this.database.collection('stocks');
     let stocksResp = await stocks.findOne({stock : stock});
@@ -1438,11 +1647,16 @@ export class Database {
     }
     return {
       bear: (bearPerc.toFixed(2)) * 100,
-      bull: (bullPerc.toFixed(2))* 100,
+      bull: (bullPerc.toFixed(2)) * 100,
       vote: vote,
     };
   }
 
+	/**
+	 * Function to get array of activities
+	 * @param {string} uid 
+	 * @returns {Promise<Array>}
+	 */
   async getActivity(uid) {
     let activities = [];
     const userActivity = this.database.collection('userActivity');
@@ -1469,6 +1683,12 @@ export class Database {
     return activities;
   }
   
+	/**
+	 * Function to get activity of friends
+	 * @param {string} uid 
+	 * @param {string} friend 
+	 * @returns {Promise<Array>}
+	 */
   async getFriendActivity(uid, friend) {
     if (!await this.checkFriend(uid, friend)) {
       const celebrities = await this.getAllCelebrityUsers();
@@ -1494,6 +1714,12 @@ export class Database {
     return activities;
   }
 
+	/**
+	 * 
+	 * @param {*} uid 
+	 * @param {*} act 
+	 * @returns 
+	 */
   async activityCanbeSeen(uid, act) {
     let currAct = act;
     const activity = this.database.collection('activity');
