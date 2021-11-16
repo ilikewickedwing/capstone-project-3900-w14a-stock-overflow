@@ -4,11 +4,11 @@ import { nanoid } from 'nanoid';
 import { insertDefaultAdmin } from "./admin";
 import { calcAll } from './performance';
 
+const DATABASENAME = "stockoverflow";
+
 // This is the uri authentication for the mongodb database in the cloud
 // It is the pretty mcuh the password to accessing the deployment database
-const URI = `mongodb+srv://deployment:deployment@cluster0.86ffq.mongodb.net/stockportfolio?retryWrites=true&w=majority`;
-
-const DATABASENAME = "stockportfolio";
+const URI = `mongodb+srv://stockoverflow:stockoverflow@cluster0.4fgf0.mongodb.net/${DATABASENAME}?retryWrites=true&w=majority`;
 
 // These are all the collections to be made on the database
 const COLLECTIONS = [
