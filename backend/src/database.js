@@ -1681,6 +1681,13 @@ export class Database {
       for (let index = 0; index < poop.length; index++) {
         const i = poop[index];
         if (await this.activityCanbeSeen(uid, i)){
+          let newComments = [];
+          for (let j = 0; j < i.userComments.length; j++) {
+            const element = i.userComments[index];
+            const comment = await activity.findOne({aid: element});
+            newComments.push(comment);
+          }
+          i.userComments = newComments;
           activities.push(i);
         }
       }
