@@ -1683,7 +1683,7 @@ export class Database {
         if (await this.activityCanbeSeen(uid, i)){
           let newComments = [];
           for (let j = 0; j < i.userComments.length; j++) {
-            const element = i.userComments[index];
+            const element = i.userComments[j];
             const comment = await activity.findOne({aid: element});
             newComments.push(comment);
           }
