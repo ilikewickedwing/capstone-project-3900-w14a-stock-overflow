@@ -32,3 +32,30 @@ Started wokrking on Sign up page
 Fixed bugs on Sing up page
 Started working on Edit user name
 Finsehd working on Edit user name 
+
+Week 6:
+
+Stu Vac 
+
+Week 7:
+
+Started working on watchlist story
+Fixed bugs
+styling
+Retro review
+
+Week 8:
+
+Finished watchlist story
+Presentation
+
+Week 9:
+
+Started working on story 3.3, being able to see multiple graph at once
+Finished 3.3
+Missed Tut
+
+Week 10:
+
+Started working on 5.2, able to see your friends activity
+Finshed 

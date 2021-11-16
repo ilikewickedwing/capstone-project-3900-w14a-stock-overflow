@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useHistory } from "react-router";
+import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
 
 import { FriendCardContainer } from '../styles/styling';
 
@@ -12,6 +13,7 @@ const FriendListCard = ({name}) => {
 
     return(
         <FriendCardContainer onClick={handleClick} elevation={5}>
+            <AccountCircleOutlinedIcon />
             {name}
         </FriendCardContainer>
     );

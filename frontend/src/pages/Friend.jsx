@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 import { 
   PfBody, 
   LeftBody, 
@@ -13,50 +12,47 @@ import {
 import Button from '@mui/material/Button';
 import Navigation from '../comp/Navigation';
 import Tabs from '../comp/Tabs';
-import RankTable from '../comp/RankTable'; 
-import leaderboard from '../assets/leaderboard.png';
 import { AlertContext } from '../App';
 import { useHistory, useParams } from 'react-router-dom';
 import axios from "axios";
 import { apiBaseUrl } from '../comp/const';
 import FriendTab from '../comp/FriendTab';
 import PfTable from '../comp/PfTable';
+import PerformanceGraph from '../graph/PerformanceGraph';
+import WatchlistCard from '../comp/WatchlistCard';
 
-// stub data for rankings
-function createData(name, performance, rank) {
-  return { name, performance, rank };
-}
+import IconButton from '@mui/material/IconButton';
+import ThumbUpOutlinedIcon from '@mui/icons-material/ThumbUpOutlined';
+import CommentOutlinedIcon from '@mui/icons-material/CommentOutlined';
+import StocksGraph from '../graph/StocksGraph';
 
-const rows = [
-  createData('richard_mo', '+400', 1),
-  createData('elon_musk', '+150', 2),
-  createData('user1', "+100", 3),
-  createData('dragonalxd', "+59", 4),
-];
-
-const myRanking = createData('dollalilz', "-300%", 99999);
 
 // note: friend is inclusive of celebrity profiles except celebrities are public profiles while friends are private 
 export default function Friend() {
-    let history = useHistory();
-    const alert = React.useContext(AlertContext);
-    const { handle } = useParams();
-    const token = localStorage.getItem('token');
-    const uid = localStorage.getItem('uid');
+  let history = useHistory();
+  const alert = React.useContext(AlertContext);
+  const { handle } = useParams();
+  const token = localStorage.getItem('token');
+  const uid = localStorage.getItem('uid');
 
     const [friendUid, setUid] = React.useState('');
-    
     // list of portfolios of all the portfolios given a uid 
     const [portData, setPortfolio ] = React.useState([]);
 
     // private: 0, public: 1
     const [isPublic, setPublic] = React.useState(0);
+    const [userType, setUserType] = React.useState('');
 
     // set which current stocks and tab to view 
+    const [pid, setPid] = React.useState('');
     const [tab, setTab] = React.useState('Summary');
     const [stocks, setStocks] = React.useState([]);
     const [selected, setGraphSelected] = React.useState([]);
-    const [rankings, setRankings] = React.useState(rows);
+
+    // Store friends activities
+    const [activity, setActivity] = React.useState([]);
+
+    const [followers, setFollowers] = React.useState([]);
 
       // on first load 
     React.useEffect(() => {   
@@ -66,10 +62,65 @@ export default function Friend() {
     // load based on friendUId getting awaited 
     React.useEffect(() => {   
       loadPortfolios();
-      getRanking();
+      loadActivities();
+      getUserType();
+      loadDiscover();
+
     },[friendUid]);
 
-  
+    // load all current celebrities 
+    const loadDiscover = async () => {
+      try {
+        const resp = await axios.get(`${apiBaseUrl}/celebrity/discover`);
+        setFollowers(resp.data.followers[friendUid]);
+      } 
+      catch (e) {
+        alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
+      }
+    }
+
+    // loop through the current celebrities and determine whether to follow or unfollow celeb
+    const followCeleb = async () => {
+      try {
+        await axios.post(`${apiBaseUrl}/celebrity/follow`,{token, isFollow: !followers.includes(uid), celebUid: friendUid});
+        loadDiscover();
+      } catch (e) {
+        alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
+      }
+    }
+    
+    // load the friend/ celeb's activities
+    const loadActivities = async () => {
+      if (friendUid === "") {
+        return;
+      }
+      try {
+        let list = [];
+        const resp = await axios.get(`${apiBaseUrl}/activity/friend?token=${token}&friendId=${friendUid}`);
+        list.push(... resp.data);
+        setActivity(list);
+      } catch (e) {
+        alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
+      }
+    }
+
+    // check if user is celeb/ user
+    const getUserType = async () => {
+      if (friendUid === "") {
+        return;
+      }
+      try {
+        const resp = await axios.get(`${apiBaseUrl}/user/profile?uid=${friendUid}&token=${token}`);
+        setUserType(resp.data.userType);
+        if (resp.data.userType ==="celebrity"){
+          loadDiscover();
+        }
+      } catch (e) {
+        alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
+      }
+    }
+
+    // grab uid based on username 
     const getUid = async() => {
       try {
         const resp = await axios.get(`${apiBaseUrl}/user/uid?username=${handle}`);
@@ -84,6 +135,7 @@ export default function Friend() {
       }
     }
 
+    // handle add friend event 
     const sendRequest = async (e) => {
       e.preventDefault();
       try {
@@ -94,6 +146,7 @@ export default function Friend() {
       }
     }
 
+    // load all the portfolios and a summary page of overall performance 
     const loadPortfolios = async () => {
       try {
         let list = [];
@@ -105,24 +158,35 @@ export default function Friend() {
         const resp = await axios.get(`${apiBaseUrl}/friends/portfolios?token=${token}&uid=${friendUid}`);
         list.push(...resp.data);
         setPortfolio(list);
-        console.dir(list, {depth:null});
         if (resp.data.length > 0 ){
           setPublic(1);
+        } else {
+          setPublic(0);
         }
       } catch (e) {
         alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
       }
     }
 
-    const getRanking = async () => {
-      // try {
-      //   const resp = await axios.get(`${apiBaseUrl}/rankings/friends?token=${token}`);
-      //   console.log(resp);
-      //   // todo set ranking of the new thing 
-      // } catch (e) {
-      //   alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
-      // }
+    //handle like activity event 
+    const likeClick = async (id) => {
+      try {
+        await axios.post(`${apiBaseUrl}/activity/like`, {token, aid: id});
+        loadActivities();
+      } catch (e){
+        alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
+      }
     }
+
+    const unfriend = async () => {
+      try {
+        await axios.delete(`${apiBaseUrl}/friends/remove`,{data:{token, friendID: friendUid}});
+        setPublic(0);
+      } catch (e){
+        alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
+      }
+    }
+    
 
   return (
     <PageBody className="font-two">
@@ -133,40 +197,96 @@ export default function Friend() {
                 <PfBody>
                 <LeftBody elevation={10}>
                 <PfBar>
-                  <Heading>{handle} </Heading>
+                  <Heading>{handle}'s Portfolios </Heading>
+                  {userType==="celebrity" && 
+                    <Button variant="outlined" color="secondary" id="addFriend" onClick={followCeleb}> 
+                      {`${followers.includes(uid) ? 'Unfollow' : 'Follow'}`}
+                    </Button>
+                  }
+                  {userType==="user" && 
+                    <Button variant="outlined" color="secondary" id="addFriend" onClick={unfriend}> 
+                      Unfriend
+                    </Button>
+                  }
                 </PfBar>
                   {portData.map((e)=>(
-                    <FriendTab
-                      key={e.name}
-                      name={e.name}
-                      stocks={e.stocks}
-                      setTab={setTab} 
-                      setStocks={setStocks}
-                    / >
+                      <FriendTab
+                        key={e.name}
+                        name={e.name}
+                        pid={e.pid}
+                        stocks={e.stocks}
+                        setTab={setTab} 
+                        setStocks={setStocks}
+                        setPid={setPid}
+                      / >
                   ))}
                   < br/> 
                   <h3>{tab}</h3>
-                  {stocks.length > 0 && (
-                    <PfTable 
-                      stocks={stocks}
-                      load={loadPortfolios}
-                      setGraphSelected={setGraphSelected}
-                    />
-                  )}
+                  {tab ==='Summary' &&
+                  <PerformanceGraph 
+                  pids={''}
+                  height={300}
+                  isFriend={true}
+                  friendUid={friendUid}
+                />}
+                  {stocks.length > 0 && 
+                  tab !== "Watchlist" ?(
+                    <div>
+                      <PerformanceGraph 
+                        pids={pid}
+                        height={300}
+                        isFriend={true}
+                        friendUid={friendUid}
+                      />
+                      <PfTable 
+                        stocks={stocks}
+                        load={loadPortfolios}
+                        setGraphSelected={setGraphSelected}
+                        isFriend={1}
+                      />
+                    </div>
+                  ) : (
+                    stocks.map(item => {
+                    return <WatchlistCard
+                      key={item.stock}
+                      name={item.stock}
+                      isFriend={1}
+                    />})
+                  )
+                  }
               </LeftBody>
-              <RightBody elevation={10}>
-                <RightCard elevation={5}>
-                  <div style={{textAlign:'center'}}>
-                    <img style={{height:"auto", width:"50px"}} src={leaderboard} alt="leaderboard icon"/>
-                  </div>
-                  <h3 style={{textAlign:'center'}}>Ranking amongst friends</h3>
-                  <RankTable
-                    rows={rankings}
-                    myRanking={myRanking}
-                  />
+              <RightBody>
+                <RightCard elevation={10}>
+                  <h3 style={{textAlign:'center'}}>{handle}'s Net Profits</h3>
                 </RightCard>
-                <RightCard elevation={5}>
+                {selected.length > 0 && 
+                  <RightCard elevation={10}>
+                    <h3 style={{textAlign:'center'}}>Stocks Comparison</h3>
+                    <StocksGraph companyId={selected.toString()} height={150}/>
+                  </RightCard>
+                }
+                <RightCard elevation={10} style={{overflowY:'scroll', height:'50vh'}}>
                   <h3 style={{textAlign:'center'}}>{handle}'s Activity</h3>
+                  {activity.map((e, index) => (
+                    <div key={index} >
+                      <div>{e.ownerName}  Time: {e.time.split('T')[0]} {e.time.substring(11,16)}</div>
+                      <div>{e.message}</div>
+                      <div>{e.likes} </div>
+                      <IconButton onClick={()=> likeClick(e.aid)}>
+                          {
+                            (e.likedUsers.indexOf(uid) !== -1) ? (
+                              <ThumbUpOutlinedIcon style={{color:"green"}} />
+                            ):(
+                              <ThumbUpOutlinedIcon style={{color:"grey"}}  />  
+                            )
+                          }
+                      </IconButton>
+                      <IconButton>
+                          <CommentOutlinedIcon /> 
+                      </IconButton>
+                    </div>
+                  ))
+                  }
                 </RightCard>
               </RightBody>
             </PfBody>
@@ -175,7 +295,7 @@ export default function Friend() {
             <PfBody>
               <WatchlistBody elevation={10}>
                 <PfBar>
-                  <Heading>{handle} (private portfolio) </Heading>
+                  <Heading>{handle}'s (private) </Heading>
                   <Button id="addFriend" onClick={sendRequest}> 
                       Send Friend Request
                   </Button>

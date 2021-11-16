@@ -2,11 +2,9 @@ import React, {useContext} from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import axios from "axios";
 import { apiBaseUrl } from '../comp/const';
-import { ApiContext } from '../api';
 
 import Navigation from '../comp/Navigation'; 
 import Tabs from '../comp/Tabs'; 
-import StockRow from '../comp/StockRow';
 import AddStock from '../comp/AddStock';
 import PfTable from '../comp/PfTable';
 import StocksGraph from "../graph/StocksGraph";
@@ -25,7 +23,7 @@ import {
   PfBar,
   WatchlistBody,
 } from '../styles/styling';
-
+import WatchlistCard from '../comp/WatchlistCard';
 import Button from '@mui/material/Button';
 
 const Portfolio = () => {
@@ -41,16 +39,7 @@ const Portfolio = () => {
   const [isWatchlist, setIsWatchlist] = React.useState(0);
   const [isChanged, setChanged ] = React.useState(0);
   const [stocks, setStocks] = React.useState([]);
-  const [stockArray, setStockArray ] = React.useState([{
-    open: null,
-    stock: null,
-    stockName: null,
-    change: null,
-    changePercentage: null
-  }]);
-
   const [selected, setGraphSelected] = React.useState([]);
-  const api = useContext(ApiContext);
 
   const open = Boolean(anchorEl);
   const id = open ? 'simple-popover': undefined;
@@ -58,10 +47,11 @@ const Portfolio = () => {
   // on first load 
   React.useEffect(() => {   
     loadPorfolioData();
-    getWatchlist();
   },[pid]);
   
   const loadPorfolioData = async () => {
+    // reset the stocks list (cached from loads)
+    setStocks([]);
     try {
       const request = await axios.get(`${apiBaseUrl}/user/portfolios/open?token=${token}&pid=${pid}`);
       const portfolioData = request.data;
@@ -70,18 +60,17 @@ const Portfolio = () => {
       if (portfolioData.name === "Watchlist"){
         setIsWatchlist(1);
       } else {
-        let stockList =[];
-        console.log(portfolioData.stocks);
-
-        // push the stock if its not quantity 0 (which is kept for history purposes)
-        for (let i = 0; i < portfolioData.stocks.length; i++){
-          if (portfolioData.stocks[i].quantity !== 0){
-            stockList.push(portfolioData.stocks[i]);
-          }
-        }
-        setStocks(stockList);
         setIsWatchlist(0);
       }
+      let stockList =[];
+      // console.log(portfolioData.stocks);
+      // push the stock if its not quantity 0 (which is kept for history purposes)
+      for (let i = 0; i < portfolioData.stocks.length; i++){
+        if (portfolioData.stocks[i].quantity !== 0){
+          stockList.push(portfolioData.stocks[i]);
+        }
+      }
+      setStocks(stockList);
     } catch (e) {
       alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
     }
@@ -109,66 +98,6 @@ const Portfolio = () => {
     }
   }
   
-  const getWatchlist = async () => {
-    let array = [];
-    // get pid for the watchlist
-    try {
-      const res = await axios.get(`${apiBaseUrl}/user/portfolios/getPid`, {
-        params: {
-          token: token,
-          name: 'Watchlist'
-        }
-      })
-      const pid = res.data;
-      const request = await axios.get(`${apiBaseUrl}/user/portfolios/open?token=${token}&pid=${pid}`);
-      
-      array = request.data['stocks'];
-      let propsArray = [];
-      for (let i = 0; i < array.length; i++) {
-        const data = await getStockDetails(array[i]['stock']);
-        propsArray.push(data);
-      }
-      // console.log(propsArray);
-      setStockArray(propsArray);
-    } catch (e){
-      alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
-    }
-  }
-
-  // stock details for displaying on watchlist 
-  async function getStockDetails(stockSymbol) {
-    const resp = await api.stocksInfo(1, stockSymbol, null, null);
-    const jsonResp = await resp.json();
-    const respData = jsonResp.data.quotes.quote;
-    let data = null; 
-    if (respData.open === null){
-      const resp2 = await api.stocksInfo(2, stockSymbol, null, null);
-      const json2 = await resp2.json();
-      const prevDay = json2.data.history.day;
-      let latest = prevDay.length -1;
-      let difference = (respData.ask - prevDay[latest-1].close).toFixed(4);
-      let percentage = ((difference/respData.ask)*100).toFixed(2);
-
-      data = {
-        open: respData.ask,
-        change: difference,
-        changePercentage: percentage,
-        name: respData.description,
-        stock: respData.symbol,
-      }
-    } else {
-      data = {
-        open: respData.ask,
-        change: respData.change,
-        changePercentage: respData.change_percentage,
-        name: respData.description,
-        stock: respData.symbol
-      }
-    }
-    return data;
-  }
-
-  
   return (
       <PageBody className="font-two">
           <Navigation />
@@ -178,17 +107,21 @@ const Portfolio = () => {
                     <WatchlistBody elevation={10}>
                       <PfBar>
                         <Heading>{name}</Heading> 
-                        {/* <Button onClick={handleReload}>Update Data</Button> */}
                       </PfBar>
                       {
-                        stockArray.map(item => {
-                          return <StockRow key={item.stock} data={item} onDeleteCallback={() => { getWatchlist() }}/>
+                        stocks.map(item => {
+                          return <WatchlistCard
+                            key={item.stock}
+                            name={item.stock}
+                            onDeleteCallback={() => { loadPorfolioData() }}
+                            isFriend={0}
+                          />
                         })
                       }
                       < AddStock 
                         token={token}
                         pid={pid}
-                        onAddCallback={getWatchlist}
+                        onAddCallback={loadPorfolioData}
                         load={loadPorfolioData}
                         name={name}
                       />
@@ -220,7 +153,7 @@ const Portfolio = () => {
               < AddStock 
                 token={token}
                 pid={pid}
-                onAddCallback={getWatchlist}
+                onAddCallback={loadPorfolioData}
                 load={loadPorfolioData}
                 name={name}
               />
@@ -230,7 +163,7 @@ const Portfolio = () => {
                 <h3 style={{textAlign:'center'}}>Daily Estimated Earnings</h3>
               </RightCard>
               <RightCard elevation={5}>
-                2nd card
+              <h3 style={{textAlign:'center'}}>Net Profit</h3>
               </RightCard>
             </RightBody>
             </PfBody>

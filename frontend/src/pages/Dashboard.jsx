@@ -7,6 +7,7 @@ import PerformanceTable from '../comp/PerformanceTable/PerformanceTable';
 import { apiBaseUrl } from '../comp/const';
 import axios from "axios";
 import PerformanceGraph from '../graph/PerformanceGraph';
+import RankTable from '../comp/RankTable'; 
 
 // styling imports 
 import { 
@@ -20,6 +21,9 @@ import {
 } from '../styles/styling';
 import leaderboard from '../assets/leaderboard.png';
 import star from '../assets/star.png';
+import globe from '../assets/globe.png';
+
+import Activity from './Activity';
 
 function createData(code, name, buyPrice, currPrice, changePer, units, value, profitLoss) {
   return {
@@ -34,27 +38,78 @@ function createData(code, name, buyPrice, currPrice, changePer, units, value, pr
   };
 }
 
+// stub data for rankings
+function createRankData(name, performance, rank) {
+  return { name, performance, rank };
+}
+
+// demo data for rankings
+const rows = [
+  createData('richard_mo', '+400', 1),
+  createData('elon_musk', '+150', 2),
+  createData('user1', "+100", 3),
+  createData('dragonalxd', "+59", 4),
+];
+
 
 export default function Dashboard() {
+  const myName = localStorage.getItem('username');
   const token = localStorage.getItem('token');
   const alert = useContext(AlertContext);
-  const [globalRank, setGlobal ] = React.useState([]);
   const [selected, setSelected] = React.useState([]);
   const [portfolios, setPortfolios] = React.useState([]);
+  
+  // friend's activity
+  const [activity, setActivity] = React.useState([]); 
 
-  // first load render 
+  // rankings 
+  const [globalRank, setGlobal ] = React.useState(rows);
+  const [rankings, setRankings] = React.useState(rows);
+  const [myFriendRanking, setMyRanking] =React.useState(createRankData("lily","20","8888"));
+  const [myGlobalRanking, setMyGlobal] = React.useState(createRankData("lily","20","8888"));
+
   React.useEffect(() => {  
     getGlobalRanks();
     fetchPortfolios();
+    getFriendRanking();
   },[]);
+
+  React.useEffect(()=>{
+    getActivity();
+  }, []);
 
 const getGlobalRanks = async () => {
   // try {
   //   const request = await axios.get(`${apiBaseUrl}/rankings/global`);
-  //   setGlobal(request.data); 
+  //   let list = [];
+  //   for (let i=0; i< request.data.length; i++){
+  //     list.push(createRankData(request.data[i].name, request.data[i].performance, request.data[i].rank));
+  //     if (request.data[i].name === myName){
+  //       setMyGlobal(createRankData(request.data[i].name, request.data[i].performance, request.data[i].rank));
+  //     }
+  //   }
+  //   setGlobal(list);
   // } catch (e) {
   //   alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
   // }
+}
+
+const getFriendRanking = async () => {
+  try {
+    const resp = await axios.get(`${apiBaseUrl}/rankings/friends?token=${token}`);
+    let list = [];
+    for (let i=0; i< resp.data.length; i++){
+      list.push(createRankData(resp.data[i].name, resp.data[i].performance, resp.data[i].rank));
+      if (resp.data[i].name === myName){
+        setMyRanking(createRankData(resp.data[i].name, resp.data[i].performance, resp.data[i].rank));
+      }
+    }
+    setRankings(list);
+
+    // todo set ranking of the new thing 
+  } catch (e) {
+    alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
+  }
 }
 
   const fetchPortfolios = async () => {
@@ -99,7 +154,15 @@ const getGlobalRanks = async () => {
     }
   };
 
-
+   
+  const getActivity = async() => {
+    try {
+    const resp = await axios.get(`${apiBaseUrl}/activity/all?token=${token}`);
+    setActivity(resp.data);
+    } catch (e) {
+      alert(e);
+    }
+  }
   
   return (
     <PageBody className="font-two">
@@ -112,23 +175,43 @@ const getGlobalRanks = async () => {
               </PfBar>
                 <h3>Overall Performance</h3>
                 <PerformanceGraph 
-                  height={400}
                   pids={selected.toString()} 
+                  height={400}
+                  isFriend={false}
                   />
                 <PerformanceTable 
                   portfolios={portfolios}
                   setPerfSelected={setSelected} />
+                <div style={{marginTop: 30, fontWeight: 'bold'}}>
+                  Friend's activities:
+                </div>
+                {
+                  activity.length > 0 ? activity.map(index =>{
+                    let subString = index.time.substring(11,16)
+                    return <Activity message={index.message} time={subString}></Activity>
+                  }): <p>Empty feed :\</p>
+                }
               </LeftBody>
               <RightBody elevation={10}>
                 <RightCard elevation={5}>
                   <div style={{textAlign:'center'}}>
                     <img style={{height:"auto", width:"50px"}} src={star} alt="star icon"/>
                   </div>
-                  <h3 style={{textAlign:'center'}}>Today's Top Performer</h3>
+                  <h3 style={{textAlign:'center'}}>Performer of the Month </h3>
+                </RightCard>
+                <RightCard elevation={5}>
+                  <div style={{textAlign:'center'}}>
+                    <img style={{height:"auto", width:"50px"}} src={leaderboard} alt="leaderboard icon"/>
+                  </div>
+                  <h3 style={{textAlign:'center'}}>Friend Rankings</h3>
+                  <RankTable
+                    rows={rankings}
+                    myRanking={myFriendRanking}
+                  />
                 </RightCard>
                 <RightCard elevation={5}>
                 <div style={{textAlign:'center'}}>
-                  <img style={{height:"auto", width:"50px"}} src={leaderboard} alt="leaderboard icon"/>
+                  <img style={{height:"auto", width:"50px"}} src={globe} alt="global icon"/>
                 </div>
                   <h3 style={{textAlign:'center'}}>Global Rankings</h3>
                 </RightCard>

@@ -18,7 +18,7 @@ export const postCelebrityMakeRequest = async (token, info, fids, database, res)
     res.status(403).send({ error: "A celebrity or an admin cannot request to be a celebrity again" })
     return;
   }
-  // make sure the a request doesnt already exist
+  // Make sure that a request doesnt already exist
   const request = await database.getCelebrityRequest(uid);
   if (request !== null) {
     res.status(403).send({ error: "You have already made a request" });

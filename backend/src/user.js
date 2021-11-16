@@ -90,7 +90,12 @@ export const postUserProfile = async (uid, token, userData, database, res) => {
     }
   }
   // If usertype changed, make sure it is a valid type
+  // and that they are an admin
   if ('userType' in userData) {
+    if (adminData.userType !== 'admin') {
+      res.status(403).send({ message: 'Only an admin can change the usertype' })
+      return;
+    }
     if (!['user','celebrity', 'admin'].includes(userData.userType)) {
       res.status(400).send({ message: 'Invalid user type' });
       return;

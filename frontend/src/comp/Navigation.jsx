@@ -1,7 +1,6 @@
 import React, { useContext } from 'react'; 
 import { useHistory } from 'react-router';
 import {Link} from 'react-router-dom';
-import { ApiContext } from '../api';
 import ExitToAppRoundedIcon from '@material-ui/icons/ExitToAppRounded';
 import {NavBar, Logo, LogoutButton, FlexRows, SearchDiv, NavBtnWrapper } from '../styles/styling';
 import {TextInput} from "../styles/styling"; 
@@ -14,23 +13,10 @@ import NotificationButton from '../notifications/Notifications';
 import SettingsIcon from '@mui/icons-material/Settings';
 import ExploreIcon from '@mui/icons-material/Explore';
 import { AlertContext } from '../App';
-
-const label = { inputProps: { 'aria-label': 'toggle' } };
 const filter = createFilterOptions();
 
-const stubFriends= [{
-    type: "Friends",
-    code: "handle_1",
-    name: "handle_1"
-},{
-    type: "Friends",
-    code: "handle_2",
-    name: "handle_2"
-    },
-]
 
 const Navigation = () => {
-    const api = React.useContext(ApiContext);
     const alert = useContext(AlertContext);
     const history = useHistory();
     const token = localStorage.getItem('token');
@@ -118,7 +104,7 @@ const Navigation = () => {
             <Autocomplete
                 disablePortal
                 options={queryRes}
-                sx={{ width: 300 }}
+                sx={{ width: '100%' }}
                 filterOptions={(options, params) => {
                 const filtered = filter(options, params);
         
