@@ -270,19 +270,23 @@ export default function Friend() {
                   <h3 style={{textAlign:'center'}}>{handle}'s Activity</h3>
                   {
                   activity.length > 0 ? activity.map((e,index) =>{
-                    let subString = `${e.time.split('T')[0]}` +" "+`${e.time.substring(11,16)}`;
-                    return <Activity 
-                      key={index} 
-                      message={e.message} 
-                      time={subString} 
-                      aid={e.aid} 
-                      likes={e.likes} 
-                      getActivityCallBack={loadActivities} 
-                      userComments={e.userComments}  
-                      likedUsers={e.likedUsers}
-                      />
-                      }): <p>Empty feed :\</p>
+                    if (e.time){
+                      let subString = `${e.time.split('T')[0]}` +" "+`${e.time.substring(11,16)}`;
+                      return <Activity 
+                        key={index} 
+                        message={e.message} 
+                        time={subString} 
+                        aid={e.aid} 
+                        likes={e.likes} 
+                        getActivityCallBack={loadActivities} 
+                        userComments={e.userComments}  
+                        likedUsers={e.likedUsers}
+                        />
                     }
+                      }): (
+                        <p>Empty feed :\</p>
+                      ) 
+                  }
                 </RightCard>
               </RightBody>
             </PfBody>
