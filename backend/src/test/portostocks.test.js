@@ -63,6 +63,8 @@ describe('Create and delete', () => {
         }
       ],
       quantity: 2,
+			sold: 0,
+			quantitySold: 0
     }]
     const pf = await openPf(token, pid1, d);
     expect(pf).toMatchObject({
@@ -108,7 +110,9 @@ describe('Create and delete', () => {
             performance: 0
           }
         ],
-        quantity: 2
+        quantity: 2,
+				sold: 0,
+				quantitySold: 0
       },
       {
         stock: 'AAPL',
@@ -119,7 +123,9 @@ describe('Create and delete', () => {
             performance: 0
           }
         ],
-        quantity: 2
+        quantity: 2,
+				sold: 0,
+				quantitySold: 0
       },
       {
         stock: 'AMZN',
@@ -130,7 +136,9 @@ describe('Create and delete', () => {
             performance: 0
           }
         ],
-        quantity: 1
+        quantity: 1,
+				sold: 0,
+				quantitySold: 0
       }
     ]
     const pf = await openPf(token, pid1, d);
@@ -163,7 +171,9 @@ describe('Create and delete', () => {
           performance: 0
         }
       ],
-      quantity: 0
+      quantity: 0,
+			sold: 4,
+			quantitySold: 2
     });
     stArray = [
       {
@@ -175,7 +185,9 @@ describe('Create and delete', () => {
             performance: 0
           }
         ],
-        quantity: 0
+        quantity: 0,
+				sold: 4,
+				quantitySold: 2
       },
       {
         stock: 'AAPL',
@@ -186,7 +198,9 @@ describe('Create and delete', () => {
             performance: 0
           }
         ],
-        quantity: 2
+        quantity: 2,
+				sold: 0,
+				quantitySold: 0
       },
       {
         stock: 'AMZN',
@@ -197,7 +211,9 @@ describe('Create and delete', () => {
             performance: 0
           }
         ],
-        quantity: 1
+        quantity: 1,
+				sold: 0,
+				quantitySold: 0
       }
     ]
     const pf = await openPf(token, pid1, d);
@@ -230,7 +246,9 @@ describe('Create and delete', () => {
           performance: 0
         }
       ],
-      quantity: 0
+      quantity: 0,
+			sold: 4,
+			quantitySold: 2
     });
     const sell2 = await modifyStock(token, pid1, 'AMZN', 3, 1, 0, null, null, d);
     expect(sell2).toBe(-1);
@@ -244,7 +262,9 @@ describe('Create and delete', () => {
           performance: 0
         }
       ],
-      quantity: 0
+      quantity: 0,
+			sold: 3,
+			quantitySold: 1
     });
     
     stArray = [
@@ -257,7 +277,9 @@ describe('Create and delete', () => {
             performance: 0
           }
         ],
-        quantity: 0
+        quantity: 0,
+				sold: 4,
+				quantitySold: 2
       },
       {
         stock: 'AAPL',
@@ -268,7 +290,9 @@ describe('Create and delete', () => {
             performance: 0
           }
         ],
-        quantity: 0
+        quantity: 0,
+				sold: 4,
+				quantitySold: 2
       },
       {
         stock: 'AMZN',
@@ -279,7 +303,9 @@ describe('Create and delete', () => {
             performance: 0
           }
         ],
-        quantity: 0
+        quantity: 0,
+				sold: 3,
+				quantitySold: 1
       }
     ]
     const pf = await openPf(token, pid1, d);
@@ -355,7 +381,9 @@ describe('Editing portfolio doesn\'t affect stocks', () => {
           performance: 0
         }
       ],
-      quantity: 2
+      quantity: 2,
+			sold: 0,
+			quantitySold: 0
     })
     const add2 = await addStock(token, pid, 'AMZN', 3, 2, null, null, d);
     expect(add2).toBe(-1);
@@ -369,7 +397,9 @@ describe('Editing portfolio doesn\'t affect stocks', () => {
           performance: 0
         }
       ],
-      quantity: 2
+      quantity: 2,
+			sold: 0,
+			quantitySold: 0
     })
     const add3 = await addStock(token, pid, 'IBM', 1, 1, null, null, d);
     expect(add3).toBe(-1);
@@ -383,7 +413,9 @@ describe('Editing portfolio doesn\'t affect stocks', () => {
           performance: 0
         }
       ],
-      quantity: 1
+      quantity: 1,
+			sold: 0,
+			quantitySold: 0
     })
     const pfs = await userPfs(token, d);
     pfArray = [{ name: 'pf', pid: pid }];
@@ -399,7 +431,9 @@ describe('Editing portfolio doesn\'t affect stocks', () => {
             performance: 0
           }
         ],
-        quantity: 2
+        quantity: 2,
+				sold: 0,
+				quantitySold: 0
       },
       {
         stock: 'AMZN',
@@ -410,7 +444,9 @@ describe('Editing portfolio doesn\'t affect stocks', () => {
             performance: 0
           }
         ],
-        quantity: 2
+        quantity: 2,
+				sold: 0,
+				quantitySold: 0
       },
       {
         stock: 'IBM',
@@ -421,7 +457,9 @@ describe('Editing portfolio doesn\'t affect stocks', () => {
             performance: 0
           }
         ],
-        quantity: 1
+        quantity: 1,
+				sold: 0,
+				quantitySold: 0
       }
     ]
     expect(stocks).toMatchObject({
@@ -520,7 +558,9 @@ describe('Editing stocks doesn\'t affect portfolios', () => {
           performance: 0
         }
       ],
-      quantity: 2
+      quantity: 2,
+			sold: 0,
+			quantitySold: 0
     })
     const add2 = await addStock(token, pid, 'AMZN', 3, 2, null, null, d);
     expect(add2).toBe(-1);
@@ -534,7 +574,9 @@ describe('Editing stocks doesn\'t affect portfolios', () => {
           performance: 0
         }
       ],
-      quantity: 2
+      quantity: 2,
+			sold: 0,
+			quantitySold: 0
     })
     const add3 = await addStock(token, pid, 'IBM', 1, 1, null, null, d);
     expect(add3).toBe(-1);
@@ -548,7 +590,9 @@ describe('Editing stocks doesn\'t affect portfolios', () => {
           performance: 0
         }
       ],
-      quantity: 1
+      quantity: 1,
+			sold: 0,
+			quantitySold: 0
     })
     const pfs = await userPfs(token, d);
     pfArray = [{ name: 'pf', pid: pid }];
@@ -564,7 +608,9 @@ describe('Editing stocks doesn\'t affect portfolios', () => {
             performance: 0
           }
         ],
-        quantity: 2
+        quantity: 2,
+				sold: 0,
+				quantitySold: 0
       },
       {
         stock: 'AMZN',
@@ -575,7 +621,9 @@ describe('Editing stocks doesn\'t affect portfolios', () => {
             performance: 0
           }
         ],
-        quantity: 2
+        quantity: 2,
+				sold: 0,
+				quantitySold: 0
       },
       {
         stock: 'IBM',
@@ -586,7 +634,9 @@ describe('Editing stocks doesn\'t affect portfolios', () => {
             performance: 0
           }
         ],
-        quantity: 1
+        quantity: 1,
+				sold: 0,
+				quantitySold: 0
       }
     ]
     expect(stocks).toMatchObject({
@@ -618,7 +668,9 @@ describe('Editing stocks doesn\'t affect portfolios', () => {
           performance: 0
         }
       ],
-      quantity: 4
+      quantity: 4,
+			sold: 0,
+			quantitySold: 0
     }
     expect(stock).toMatchObject(newStock)
     const pfs = await userPfs(token, d);
@@ -654,7 +706,9 @@ describe('Editing stocks doesn\'t affect portfolios', () => {
           performance: 0
         }
       ],
-      quantity: 5
+      quantity: 5,
+			sold: 0,
+			quantitySold: 0
     }
     expect(stock1).toMatchObject(newStock1);
     const add2 = await modifyStock(token, pid, 'IBM', 5, 3, 1, null, null, d);
@@ -669,7 +723,9 @@ describe('Editing stocks doesn\'t affect portfolios', () => {
           performance: 0
         }
       ],
-      quantity: 4
+      quantity: 4,
+			sold: 0,
+			quantitySold: 0
     }
     expect(stock2).toMatchObject(newStock2);
     const pfs = await userPfs(token, d);
@@ -706,7 +762,9 @@ describe('Editing stocks doesn\'t affect portfolios', () => {
           performance: 0
         }
       ],
-      quantity: 2
+      quantity: 2,
+			sold: 4,
+			quantitySold: 2
     }
     expect(stock).toMatchObject(newStock)
     const pfs = await userPfs(token, d);
@@ -742,7 +800,9 @@ describe('Editing stocks doesn\'t affect portfolios', () => {
           performance: 0
         }
       ],
-      quantity: 3
+      quantity: 3,
+			sold: 3,
+			quantitySold: 2
     }
     expect(stock1).toMatchObject(newStock1);
     const add2 = await modifyStock(token, pid, 'IBM', 1, 2, 0, null, null, d);
@@ -757,7 +817,9 @@ describe('Editing stocks doesn\'t affect portfolios', () => {
           performance: 0
         }
       ],
-      quantity: 2
+      quantity: 2,
+			sold: 2,
+			quantitySold: 2
     }
     expect(stock2).toMatchObject(newStock2);
     const pfs = await userPfs(token, d);
@@ -794,7 +856,9 @@ describe('Editing stocks doesn\'t affect portfolios', () => {
           performance: 0
         }
       ],
-      quantity: 0
+      quantity: 0,
+			sold: 10,
+			quantitySold: 4
     }
     expect(stock).toMatchObject(newStock);
     const pfs = await userPfs(token, d);
@@ -830,7 +894,9 @@ describe('Editing stocks doesn\'t affect portfolios', () => {
           performance: 0
         }
       ],
-      quantity: 0
+      quantity: 0,
+			sold: 9,
+			quantitySold: 5
     }
     expect(stock1).toMatchObject(newStock1);
     const add2 = await modifyStock(token, pid, 'IBM', 5, 2, 0, null, null, d);
@@ -845,7 +911,9 @@ describe('Editing stocks doesn\'t affect portfolios', () => {
           performance: 0
         }
       ],
-      quantity: 0
+      quantity: 0,
+			sold: 12,
+			quantitySold: 4
     }
     expect(stock2).toMatchObject(newStock2);
     const pfs = await userPfs(token, d);
@@ -945,6 +1013,8 @@ describe('Portfolio and stocks endpoint test', () => {
         }
       ],
       quantity: 2,
+			sold: 0,
+			quantitySold: 0
     }]
     const pf = await openPf(token, pid1, database);
     expect(pf).toMatchObject({
@@ -994,7 +1064,9 @@ describe('Portfolio and stocks endpoint test', () => {
             performance: 0
           }
         ],
-        quantity: 2
+        quantity: 2,
+				sold: 0,
+				quantitySold: 0
       },
       {
         stock: 'AAPL',
@@ -1005,7 +1077,9 @@ describe('Portfolio and stocks endpoint test', () => {
             performance: 0
           }
         ],
-        quantity: 2
+        quantity: 2,
+				sold: 0,
+				quantitySold: 0
       },
       {
         stock: 'AMZN',
@@ -1016,7 +1090,9 @@ describe('Portfolio and stocks endpoint test', () => {
             performance: 0
           }
         ],
-        quantity: 1
+        quantity: 1,
+				sold: 0,
+				quantitySold: 0
       }
     ]
     const pf = await openPf(token, pid1, database);
@@ -1057,7 +1133,9 @@ describe('Portfolio and stocks endpoint test', () => {
           performance: 0
         }
       ],
-      quantity: 0
+      quantity: 0,
+			sold: 2,
+			quantitySold: 2
     };
 
     stArray[0] = newStock;
@@ -1110,7 +1188,9 @@ describe('Portfolio and stocks endpoint test', () => {
           performance: 0
         }
       ],
-      quantity: 0
+      quantity: 0,
+			sold: 4,
+			quantitySold: 2
     };
 
     const newStock2 = {
@@ -1122,7 +1202,9 @@ describe('Portfolio and stocks endpoint test', () => {
           performance: 0
         }
       ],
-      quantity: 0
+      quantity: 0,
+			sold: 3,
+			quantitySold: 1
     };
 
     stArray[1] = newStock1;
@@ -1214,7 +1296,9 @@ describe('Adding stocks to watchlist', () => {
           performance: null
         }
       ],
-      quantity: null
+      quantity: null,
+			sold: null,
+			quantitySold: null
     })
     const pfs = await userPfs(token, d);
     pfArray = [{ name: 'Watchlist', pid: pid }];
@@ -1230,7 +1314,9 @@ describe('Adding stocks to watchlist', () => {
             performance: null
           }
         ],
-        quantity: null
+        quantity: null,
+				sold: null,
+				quantitySold: null
       }
     ]
     expect(stocks).toMatchObject({
@@ -1270,6 +1356,8 @@ describe('Adding stocks to watchlist', () => {
           }
         ],
         quantity: null,
+				sold: null,
+				quantitySold: null
       },
       { 
         stock: 'AMZN',
@@ -1281,6 +1369,8 @@ describe('Adding stocks to watchlist', () => {
           }
         ],
         quantity: null,
+				sold: null,
+				quantitySold: null
       },
       {
         stock: 'IBM',
@@ -1291,7 +1381,9 @@ describe('Adding stocks to watchlist', () => {
             performance: null
           }
         ],
-        quantity: null
+        quantity: null,
+				sold: null,
+				quantitySold: null
       }
     ]
     expect(stocks).toMatchObject({
