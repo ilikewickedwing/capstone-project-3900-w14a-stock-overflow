@@ -43,13 +43,19 @@ export default function GraphOptions (props) {
             value={props.timeOptions}
             onChange={e => props.setTimeOptions(e.target.value)}
           >
-            <MenuItem value={"1min"}>1 min</MenuItem>
+            {/* <MenuItem value={"1min"}>1 min</MenuItem>
             <MenuItem value={"5min"}>5 min</MenuItem>
             <MenuItem value={"15min"}>15 min</MenuItem>
             <MenuItem value={"daily"}>Daily</MenuItem>
             <MenuItem value={"weekly"}>Weekly</MenuItem>
-            <MenuItem value={"monthly"}>Monthly</MenuItem>
-          
+            <MenuItem value={"monthly"}>Monthly</MenuItem> */}
+            <MenuItem value={"1 day"}>1 day</MenuItem>
+            <MenuItem value={"5 day"}>5 day</MenuItem>
+            <MenuItem value={"1 month"}>1 month</MenuItem>
+            <MenuItem value={"6 month"}>6 month</MenuItem>
+            <MenuItem value={"1 year"}>1 year</MenuItem>
+            <MenuItem value={"5 year"}>5 year</MenuItem>
+            <MenuItem value={"10 year"}>10 year</MenuItem>
           </Select>
         </div>
         { renderStyleOptions() }
