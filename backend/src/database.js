@@ -1503,6 +1503,9 @@ export class Database {
     }
     if (userResp.userType === 'celebrity') {
       const celebResp = await this.getCelebrityFollowers(uid);
+      if (celebResp === null) {
+        return aid;
+      }
       const followers = celebResp.followers;
       for (let i= 0; i < followers.length; i++) {
         const e = followers[i];
@@ -1818,14 +1821,12 @@ export class Database {
     while (currAct.parentId !== null) {
       currAct = await activity.findOne({aid: currAct.parentId});
     }
-    console.log(act.ownerUid);
     if (uid === currAct.ownerUid || await this.checkFriend(uid,currAct.ownerUid)) {
       return true;
     }
     const followers = await this.getCelebrityFollowers(act.ownerUid);
-    if (followers !== null  || followers.followers.indexOf(uid) !== -1) {
+    if (followers !== null  && (followers.followers.indexOf(uid) !== -1)) {
       return true;
-
     }
     return false;
   }
