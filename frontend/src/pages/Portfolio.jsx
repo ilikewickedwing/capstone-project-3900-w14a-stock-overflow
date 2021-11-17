@@ -69,7 +69,6 @@ const Portfolio = () => {
         setIsWatchlist(0);
       }
       let stockList =[];
-      // console.log(portfolioData.stocks);
       // push the stock if its not quantity 0 (which is kept for history purposes)
       for (let i = 0; i < portfolioData.stocks.length; i++){
         if (portfolioData.stocks[i].quantity !== 0){

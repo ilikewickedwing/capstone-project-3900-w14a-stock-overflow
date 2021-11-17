@@ -1789,9 +1789,17 @@ export class Database {
     const poop = await activity.find({aid: {$in: userActs}}).toArray();
     for (let index = 0; index < poop.length; index++) {
       const i = poop[index];
+      let newComments = [];
+      for (let j = 0; j < i.userComments.length; j++) {
+        const element = i.userComments[j];
+        const comment = await activity.findOne({aid: element});
+        if (comment !== null) {
+          newComments.push(comment);
+        }
+      }
+      i.userComments = newComments;
       activities.push(i);
     }
-    
     activities.sort((first, second) => first.time - second.time);
     return activities;
   }
