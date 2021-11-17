@@ -94,7 +94,8 @@ const getGlobalRanks = async () => {
     }
     setGlobal(list);
   } catch (e) {
-    alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
+    console.log(e);
+    // alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
   }
 }
 
