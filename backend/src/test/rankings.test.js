@@ -395,19 +395,19 @@ describe('Rank multiple user portfolios performances endpoint test', () => {
     const resp1 = await request(app).post(`/user/setDefBroker`).send({
       token: token1,
       defBroker: '5',
-      brokerFlag: '1'
+      flag: '1'
     })
     expect(resp1.statusCode).toBe(200);
     const resp2 = await request(app).post(`/user/setDefBroker`).send({
       token: token2,
       defBroker: '0',
-      brokerFlag: '0'
+      flag: '0'
     })
     expect(resp2.statusCode).toBe(200);
     const resp3 = await request(app).post(`/user/setDefBroker`).send({
       token: token3,
       defBroker: '50',
-      brokerFlag: '0'
+      flag: '0'
     })
     expect(resp3.statusCode).toBe(200);
   })
@@ -458,7 +458,7 @@ describe('Rank multiple user portfolios performances endpoint test', () => {
       price: price, 
       quantity: 2, 
       brokerage: null, 
-      brokerFlag: null
+      flag: null
     })
 	  expect(add1.statusCode).toBe(200);
     const add1_ = await request(app).post(`/user/stocks/add`).send({
@@ -468,7 +468,7 @@ describe('Rank multiple user portfolios performances endpoint test', () => {
       price: price, 
       quantity: 2, 
       brokerage: null, 
-      brokerFlag: null
+      flag: null
     })
 	  expect(add1_.statusCode).toBe(200);
     const add1__ = await request(app).post(`/user/stocks/add`).send({
@@ -478,7 +478,7 @@ describe('Rank multiple user portfolios performances endpoint test', () => {
       price: price, 
       quantity: 2, 
       brokerage: null, 
-      brokerFlag: null
+      flag: null
     })
 	  expect(add1__.statusCode).toBe(200);
     
@@ -491,7 +491,7 @@ describe('Rank multiple user portfolios performances endpoint test', () => {
       price: price, 
       quantity: 2, 
       brokerage: null, 
-      brokerFlag: null
+      flag: null
     })
 	  expect(add1_1.statusCode).toBe(200);
 
@@ -504,7 +504,7 @@ describe('Rank multiple user portfolios performances endpoint test', () => {
       price: price, 
       quantity: 2, 
       brokerage: null, 
-      brokerFlag: null
+      flag: null
     })
 	  expect(add2.statusCode).toBe(200);
     const add2_ = await request(app).post(`/user/stocks/add`).send({
@@ -514,7 +514,7 @@ describe('Rank multiple user portfolios performances endpoint test', () => {
       price: price, 
       quantity: 2, 
       brokerage: null, 
-      brokerFlag: null
+      flag: null
     })
 	  expect(add2_.statusCode).toBe(200);
     const add2__ = await request(app).post(`/user/stocks/add`).send({
@@ -524,7 +524,7 @@ describe('Rank multiple user portfolios performances endpoint test', () => {
       price: price, 
       quantity: 2, 
       brokerage: null, 
-      brokerFlag: null
+      flag: null
     })
 	  expect(add2__.statusCode).toBe(200);
     
@@ -537,7 +537,7 @@ describe('Rank multiple user portfolios performances endpoint test', () => {
       price: price, 
       quantity: 2, 
       brokerage: null, 
-      brokerFlag: null
+      flag: null
     })
 	  expect(add2_1.statusCode).toBe(200);
 
@@ -550,7 +550,7 @@ describe('Rank multiple user portfolios performances endpoint test', () => {
       price: price, 
       quantity: 2, 
       brokerage: null, 
-      brokerFlag: null
+      flag: null
     })
 	  expect(add3.statusCode).toBe(200);
     const add3_ = await request(app).post(`/user/stocks/add`).send({
@@ -560,7 +560,7 @@ describe('Rank multiple user portfolios performances endpoint test', () => {
       price: price, 
       quantity: 2, 
       brokerage: null, 
-      brokerFlag: null
+      flag: null
     })
 	  expect(add3_.statusCode).toBe(200);
     const add3__ = await request(app).post(`/user/stocks/add`).send({
@@ -570,7 +570,7 @@ describe('Rank multiple user portfolios performances endpoint test', () => {
       price: price, 
       quantity: 2, 
       brokerage: null, 
-      brokerFlag: null
+      flag: null
     })
 	  expect(add3__.statusCode).toBe(200);
     
@@ -583,7 +583,7 @@ describe('Rank multiple user portfolios performances endpoint test', () => {
       price: price, 
       quantity: 2, 
       brokerage: null, 
-      brokerFlag: null
+      flag: null
     })
 	  expect(add3_1.statusCode).toBe(200);})
   /* it('200 on first valid portfolio calculation', async () => {
@@ -614,7 +614,7 @@ describe('Rank multiple user portfolios performances endpoint test', () => {
       price: price, 
       quantity: 2, 
       brokerage: null, 
-      brokerFlag: null
+      flag: null
     })
 	  expect(add1.statusCode).toBe(200);
     const add1_ = await request(app).post(`/user/stocks/add`).send({
@@ -624,7 +624,7 @@ describe('Rank multiple user portfolios performances endpoint test', () => {
       price: price, 
       quantity: 2, 
       brokerage: null, 
-      brokerFlag: null
+      flag: null
     })
 	  expect(add1_.statusCode).toBe(200);
 
@@ -637,7 +637,7 @@ describe('Rank multiple user portfolios performances endpoint test', () => {
       price: price, 
       quantity: 2, 
       brokerage: null, 
-      brokerFlag: null
+      flag: null
     })
 	  expect(add2.statusCode).toBe(200);
     const add2_ = await request(app).post(`/user/stocks/add`).send({
@@ -647,7 +647,7 @@ describe('Rank multiple user portfolios performances endpoint test', () => {
       price: price, 
       quantity: 2, 
       brokerage: null, 
-      brokerFlag: null
+      flag: null
     })
     expect(add2_.statusCode).toBe(200);
 
@@ -660,7 +660,7 @@ describe('Rank multiple user portfolios performances endpoint test', () => {
       price: price, 
       quantity: 1, 
       brokerage: null, 
-      brokerFlag: null
+      flag: null
     })
 	  expect(add3.statusCode).toBe(200);
     const add3_ = await request(app).post(`/user/stocks/add`).send({
@@ -670,7 +670,7 @@ describe('Rank multiple user portfolios performances endpoint test', () => {
       price: price, 
       quantity: 1, 
       brokerage: null, 
-      brokerFlag: null
+      flag: null
     })
     expect(add3_.statusCode).toBe(200);
   })
