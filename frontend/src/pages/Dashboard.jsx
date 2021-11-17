@@ -94,8 +94,7 @@ const getGlobalRanks = async () => {
     }
     setGlobal(list);
   } catch (e) {
-    console.log(e);
-    // alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
+    alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
   }
 }
 
@@ -103,7 +102,6 @@ const getFriendRanking = async () => {
   try {
     const resp = await axios.get(`${apiBaseUrl}/rankings/friends?token=${token}`);
     let list = [];
-    console.log(resp.data);
     for (let i=0; i< resp.data.length; i++){
       if (i < 5){
         list.push(createRankData(resp.data[i].name, resp.data[i].performance.performance, resp.data[i].rank));
@@ -116,7 +114,6 @@ const getFriendRanking = async () => {
 
     // todo set ranking of the new thing 
   } catch (e) {
-    // console.log(e);
     alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
   }
 }

@@ -20,7 +20,7 @@ const Activity = (props) => {
         token: token,
         aid: props.aid
     });
-    //console.log(resp.data);
+
     props.getActivityCallBack()
     } catch (e) {
       alert(e);
@@ -30,7 +30,6 @@ const Activity = (props) => {
   const [comment, setComment] = useState('');
   const handleOnSubmit = async(e) => {
     e.preventDefault()
-    console.log(comment);
     try {
       await axios.post(`${apiBaseUrl}/activity/comment`, {
         token: token,
@@ -71,12 +70,12 @@ const Activity = (props) => {
         </div>
           {
             props.userComments.map((e,i) => {
-              let subString = e.time.substring(11,16)
-              return (
-                <div style={{margin:'0px 0px 2px 10px'}} key={i}>
-                  <span style={{fontWeight:'bold'}}>{e.time.split('T')[0]} {subString} </span> - {e.ownerName}: {e.message}
-                </div>
-              )
+                let subString = e.time.substring(11,16)
+                return (
+                  <div style={{margin:'0px 0px 2px 10px'}} key={i}>
+                    <span style={{fontWeight:'bold'}}>{e.time.split('T')[0]} {subString} </span> - {e.ownerName}: {e.message}
+                  </div>
+                )
             })
           }
       </Paper>

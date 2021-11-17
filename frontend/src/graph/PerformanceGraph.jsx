@@ -65,8 +65,7 @@ export default function PerformanceGraph(props) {
   const alert = useContext(AlertContext);
   useEffect(() => {
     const token = localStorage.getItem('token');
-    
-    console.log(props.pids);
+
     
     // Fetch the portfolio performance for each of the portfolios that arent cached
     const callApi = async () => {
