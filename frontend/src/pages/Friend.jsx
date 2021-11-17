@@ -25,6 +25,7 @@ import IconButton from '@mui/material/IconButton';
 import ThumbUpOutlinedIcon from '@mui/icons-material/ThumbUpOutlined';
 import CommentOutlinedIcon from '@mui/icons-material/CommentOutlined';
 import StocksGraph from '../graph/StocksGraph';
+import Activity from '../comp/Activity';
 
 
 // note: friend is inclusive of celebrity profiles except celebrities are public profiles while friends are private 
@@ -203,7 +204,7 @@ export default function Friend() {
                       {`${followers.includes(uid) ? 'Unfollow' : 'Follow'}`}
                     </Button>
                   }
-                  {(userType==="user" && followers !== undefined) &&
+                  {(userType==="user") &&
                     <Button variant="outlined" color="secondary" id="addFriend" onClick={unfriend}> 
                       Unfriend
                     </Button>
@@ -267,25 +268,24 @@ export default function Friend() {
                 }
                 <RightCard elevation={10} style={{overflowY:'scroll', height:'50vh'}}>
                   <h3 style={{textAlign:'center'}}>{handle}'s Activity</h3>
-                  {activity.map((e, index) => (
-                    <div key={index} >
-                      <div>{e.ownerName}  Time: {e.time.split('T')[0]} {e.time.substring(11,16)}</div>
-                      <div>{e.message}</div>
-                      <div>{e.likes} </div>
-                      <IconButton onClick={()=> likeClick(e.aid)}>
-                          {
-                            (e.likedUsers.indexOf(uid) !== -1) ? (
-                              <ThumbUpOutlinedIcon style={{color:"green"}} />
-                            ):(
-                              <ThumbUpOutlinedIcon style={{color:"grey"}}  />  
-                            )
-                          }
-                      </IconButton>
-                      <IconButton>
-                          <CommentOutlinedIcon /> 
-                      </IconButton>
-                    </div>
-                  ))
+                  {
+                  activity.length > 0 ? activity.map((e,index) =>{
+                    if (e.time){
+                      let subString = `${e.time.split('T')[0]}` +" "+`${e.time.substring(11,16)}`;
+                      return <Activity 
+                        key={index} 
+                        message={e.message} 
+                        time={subString} 
+                        aid={e.aid} 
+                        likes={e.likes} 
+                        getActivityCallBack={loadActivities} 
+                        userComments={e.userComments}  
+                        likedUsers={e.likedUsers}
+                        />
+                    }
+                      }): (
+                        <p>Empty feed :\</p>
+                      ) 
                   }
                 </RightCard>
               </RightBody>

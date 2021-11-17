@@ -8,6 +8,7 @@ import GraphOptions from "./GraphOptions";
 import StocksToolTip from "./StocksToolTip";
 import LoadingScreen from "./GraphLoading";
 import randomColor from "randomcolor";
+import { AlertContext } from "../App";
 
 export const GRAPHCOLORS = {
   INCREASING: '#60CD71',
@@ -29,9 +30,10 @@ export default function StocksGraph(props) {
   const [ state, setState ] = useState(STATES.LOADING);
   // Map of companyid to interval to cache
   const [ dataCache, setDataCache ] = useState({});
+  const alert = useContext(AlertContext);
   const api = useContext(ApiContext);
   const [ graphStyle, setGraphStyle ] = useState("line");
-  const [ timeOptions, setTimeOptions ] = useState("daily");
+  const [ timeOptions, setTimeOptions ] = useState("1 day");
   const wrapperStyle = {
     display: "flex",
     flexDirection: "column",
@@ -45,31 +47,6 @@ export default function StocksGraph(props) {
       const today = new Date();
       const now = new Date(today);
       switch (interval) {
-        case "1min": {
-          const start = new Date();
-          start.setDate(now.getDate()-1);
-          const time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2) + " 00:00";
-          return api.stocksInfo(3, company, interval, time.toString());
-        }
-        case "5min": {
-          const start = new Date();
-          start.setDate(now.getDate()-1);
-          const time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2) + " 00:00";
-          return api.stocksInfo(3, company, interval, time.toString());
-        }
-        case "15min": {
-          const start = new Date();
-          start.setDate(now.getDate()-1);
-          const time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2) + " 00:00";
-          return api.stocksInfo(3, company, interval, time.toString());
-        }
-        case "daily":
-          return api.stocksInfo(2, company, interval, null);
-        case "weekly":
-          return api.stocksInfo(2, company, interval, null);
-        case "monthly":
-          return api.stocksInfo(2, company, interval, null);
-        /*
         case "1 day": {
           const start = new Date();
           start.setDate(now.getDate()-1);
@@ -111,7 +88,7 @@ export default function StocksGraph(props) {
           start.setFullYear(start.getFullYear() - 10);
           const time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
           return api.stocksInfo(2, company, 'monthly', time.toString())
-        } */
+        }
         default:
           throw Error(`Invalid interval of ${interval}`);
       }
@@ -147,6 +124,10 @@ export default function StocksGraph(props) {
           try {
             const resp = await callApi(cid.toUpperCase(), timeOptions)
             const respJson = await resp.json();
+            if (resp.status !== 200) {
+              alert(respJson.error, 'error');
+              return null;
+            }
             return respJson  
           } catch (err) {
             console.log(err);
@@ -165,7 +146,7 @@ export default function StocksGraph(props) {
       in the dependency list but please leave it out. If you leave it in
       it leads to an infinite useEffect loop - so just ignore the warning
     */
-  }, [api, props.companyId, timeOptions])
+  }, [ props.companyId, timeOptions])
   
   // Render loading screen if needed
   const renderLoad = () => {
@@ -224,7 +205,7 @@ export default function StocksGraph(props) {
         )
       }
       if (companyIds.length === 1) {
-        const data = transformData(dataCache[props.companyId][timeOptions], graphStyle);
+        const data = transformData(dataCache[props.companyId][timeOptions], graphStyle, alert);
         if (graphStyle === 'line') {
           return (
             <ResponsiveContainer width={'99%'} height={props.height}>
@@ -348,16 +329,21 @@ const getTimeSeriesData = (apiData) => {
  * @param {*} data 
  * @returns 
  */
-const transformData = (data, graphStyle) => {
+const transformData = (data, graphStyle, alert) => {
+  console.log(data);
   if ('series' in data.data) {
-    return transformIntradayData(data, graphStyle);
+    return transformIntradayData(data, graphStyle, alert);
   } else if ('history' in data.data) {
-    return transformNonIntradayData(data, graphStyle)
+    return transformNonIntradayData(data, graphStyle, alert)
   }
   throw new Error("Invalid data received");
 }
   
-function transformIntradayData(data, graphStyle) {
+function transformIntradayData(data, graphStyle, alert) {
+  if (data.data.series === null) {
+    alert('No data found for this time period', 'error');
+    return [];
+  }
   let timeSeriesData = data.data.series.data;
   return timeSeriesData.map(d => {
     switch (graphStyle) {
@@ -398,8 +384,15 @@ function transformIntradayData(data, graphStyle) {
   });
 }
  
-function transformNonIntradayData(data, graphStyle) {
+function transformNonIntradayData(data, graphStyle, alert) {
+  if (data.data.history === null) {
+    alert('No data found for this time period', 'error');
+    return [];
+  }
   let timeSeriesData = data.data.history.day;
+  if (typeof timeSeriesData === 'object') {
+    timeSeriesData = Object.values(timeSeriesData);
+  }
   return timeSeriesData.map(d => {
     switch (graphStyle) {
       case 'candlestick':

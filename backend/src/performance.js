@@ -10,6 +10,18 @@ import { API } from "./api";
 
 const api = new API(); 
 
+export const testCalcPf = async (deets, database, admin, test, daysCalced, testDays) => {
+	const now = new Date();
+	const today = new Date(now);
+	for (let i = 0; i < testDays; i++) {
+		const testTime = new Date();
+    testTime.setDate(today.getDate() - daysCalced);
+    const testDate = testTime.getFullYear() + '-' + ('0' + (testTime.getMonth() + 1)).slice(-2) + '-' + ('0' + testTime.getDate()).slice(-2);
+		for (let j = 0; j < deets.length; j++) await calcPf(deets[j].token, deets[j].pid, database, admin, test, testDate, 1);
+		await rankAll(database);
+		daysCalced -= 2;
+	}
+}
 
 /**
  * Function to calculate the performance of a portfolio
@@ -76,6 +88,7 @@ export const calcPf = async (token, pid, database, admin, test, testDate, testDa
     //  versus the amount invested in portfolio
     let perf = 0;
     let gain = Pf.value.sold;
+		let pfProfit = 0;
 
     // Get stocklist
     const stocks = Pf.stocks;
@@ -89,6 +102,7 @@ export const calcPf = async (token, pid, database, admin, test, testDate, testDa
       const spent = stocks[i].avgPrice * stocks[i].quantity;
       const amt = (value - spent)/spent * 100;
       stocks[i].performance.push({ date: date, performance: amt });
+			pfProfit += stocks[i].sold - (stocks[i].quantitySold * stocks[i].avgPrice);
       gain += value;
     }
 
@@ -112,6 +126,7 @@ export const calcPf = async (token, pid, database, admin, test, testDate, testDa
     const change = profit - prevVal;
     const changePerc = perf - prevPerc;
     Pf.value.change.push({ date: date, percentage: changePerc, money: change });
+		Pf.value.profit = pfProfit;
 
     const update = await database.calcPf(pid, Pf.value, Pf.stocks);
     if (!update) return -5;
@@ -122,6 +137,7 @@ export const calcPf = async (token, pid, database, admin, test, testDate, testDa
     if (testDate === 'today') {
       let perf = 0;
       let gain = Pf.value.sold;
+			let pfProfit = 0;
       
       const stocks = Pf.stocks;
       if (stocks === []) return 0;
@@ -134,6 +150,7 @@ export const calcPf = async (token, pid, database, admin, test, testDate, testDa
         const spent = stocks[i].avgPrice * stocks[i].quantity;
         const amt = (value - spent)/spent * 100;
         stocks[i].performance.push({ date: date, performance: amt });
+				pfProfit += stocks[i].sold - (stocks[i].quantitySold * stocks[i].avgPrice);
         gain += value;
       }
 
@@ -155,10 +172,12 @@ export const calcPf = async (token, pid, database, admin, test, testDate, testDa
       const change = profit - prevVal;
       const changePerc = perf - prevPerc;
       Pf.value.change.push({ date: date, percentage: changePerc, money: change });
+			Pf.value.profit = pfProfit;
       await database.calcPf(pid, Pf.value, Pf.stocks);
       return;
     }
 
+		// If not calcing for today
     // Get stocklist
     const stocks = Pf.stocks;
     let deetArray = [];
@@ -173,18 +192,25 @@ export const calcPf = async (token, pid, database, admin, test, testDate, testDa
     for (let k = 0; k < Math.min(deetArray[0].length, testDays); k++) {
       let perf = 0;
       let gain = Pf.value.sold;
+			let pfProfit = 0;
       let setDate = null;
     
       for (let l = 0; l < deetArray.length; l++) {
         setDate = deetArray[l][k].date;
+				if (stocks[l].performance[stocks[l].performance.length - 1].date === setDate) return;
         const price = deetArray[l][k].close;
         const value = price * stocks[l].quantity;
         const spent = stocks[l].avgPrice * stocks[l].quantity;
         const amt = (value - spent)/spent * 100;
         if (stocks[l].performance[0].date === date) {
           stocks[l].performance.splice(0, 1);
+					stocks[l].performance.push({
+						date: testDate,
+						performance: 0
+					})
         }
         stocks[l].performance.push({ date: setDate, performance: amt });
+				pfProfit += stocks[l].sold - (stocks[l].quantitySold * stocks[l].avgPrice);
         gain += value;
       }
 
@@ -194,22 +220,29 @@ export const calcPf = async (token, pid, database, admin, test, testDate, testDa
       // Add performance history to portfolio array
       if (Pf.value.performance[0].date === date) {
         Pf.value.performance.splice(0, 1);
-        Pf.value.change.splice(0, 1);
+				Pf.value.performance.push({
+					date: testDate,
+					performance: 0,
+					money: 0
+				})
+				Pf.value.change.splice(0, 1);
+				Pf.value.change.push({
+					date: testDate,
+					percentage: 0,
+					money: 0
+				})
       }
+
       let prevVal = null;
       let prevPerc = null;
       const prevPerf = Pf.value.performance[Pf.value.performance.length - 1];
-      if (prevPerf) {
-        prevVal = prevPerf.money;
-        prevPerc = prevPerf.performance;
-      } else {
-        prevVal = 0;
-        prevPerc = 0;
-      }
+			prevVal = prevPerf.money;
+			prevPerc = prevPerf.performance;
       Pf.value.performance.push({ date: setDate, performance: perf, money: profit });
       const change = profit - prevVal;
       const changePerc = perf - prevPerc;
       Pf.value.change.push({ date: setDate, percentage: changePerc, money: change });
+			Pf.value.profit = pfProfit;
     }
 
     await database.calcPf(pid, Pf.value, Pf.stocks);
@@ -230,7 +263,6 @@ export const calcAll = async (database, testmode) => {
   rule1.tz = 'US/Eastern';
 
   const job = schedule.scheduleJob(rule1, async () => {
-    console.log('Market is now closed. Portfolio calculation has begun.');
     const portfolios = await database.getAllPfs();
     for (let i = 0; i < portfolios.length; i++) {
       await calcPf(null, portfolios[i].pid, database, 'yes');
@@ -239,23 +271,20 @@ export const calcAll = async (database, testmode) => {
   })
 
   if (testmode === true) {
-    console.log('Testing calcAll function');
 
     const now = new Date();
     const test = new Date(now);
     test.setSeconds(now.getSeconds() + 1);
-    console.log('Running at ' + now + ', with test scheduled for ' + test);
 
     
     const job = schedule.scheduleJob(test, async () => {
-      console.log('Test calcAll running');
       const portfolios = await database.getAllPfs();
       for (let i = 0; i < portfolios.length; i++) {
         await calcPf(null, portfolios[i].pid, database, 'yes', 'yes', 'today', 1);
       }
       await rankAll(database);
     })
-    // await new Promise(resolve => setTimeout(resolve, 10000));
+    await new Promise(resolve => setTimeout(resolve, 10000));
   }
 }
 
@@ -329,24 +358,39 @@ const rankOne = async (pfs, database) => {
   let total = 0;
   let totalSpend = 0;
   let totalSold = 0;
+	let date = null;
+	let profit = 0;
   for (let i = 0; i < pfs.length; i++) {
     const pf = await database.openPf(pfs[i].pid);
     if (pf.name !== 'Watchlist') {
-      // console.dir(pf, { depth: null });
       const performances = pf.value.performance;
       const perf = performances[performances.length - 1].money;
+			date = performances[performances.length - 1].date;
       total += perf;
       totalSpend += pf.value.spent;
       totalSold += pf.value.sold;
+			profit += pf.value.profit;
     }
   }
 
-  return { 
+  const obj = { 
     money: total,
     spent: totalSpend,
-    sold: totalSold
+    sold: totalSold,
+		profit: profit,
+		date: date
   };
+
+	return obj;
 }
+
+/**
+portfolios
+Money spent subtracted
+Money selling added
+Add value of the stocks right now * quantity of stock
+*/
+
 
 /**
  * Function to get all rankings

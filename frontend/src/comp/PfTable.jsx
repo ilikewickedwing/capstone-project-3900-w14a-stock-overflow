@@ -372,7 +372,6 @@ export default function PfTable({stocks, load, setGraphSelected, isFriend}) {
   },[stocks]);
 
   const loadStocks = async () => {
-    // console.log(stocks);
     if (stocks.length === 0) {
       setRows([]);
       return;
@@ -493,7 +492,7 @@ export default function PfTable({stocks, load, setGraphSelected, isFriend}) {
                 .map((row, index) => {
                   const isItemSelected = isSelected(row.code);
                   const labelId = `enhanced-table-checkbox-${index}`;
-                  const rowValue = parseFloat(row.value);
+									const rowValue = parseFloat(row.value);
 									const profLoss = parseFloat(row.profitLoss);
                   return (
                     <TableRow

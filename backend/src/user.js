@@ -104,6 +104,7 @@ export const postUserProfile = async (uid, token, userData, database, res) => {
       res.status(400).send({ message: 'Invalid user type' });
       return;
     }
+    await database.insertUserNotification(uid, `An administrator has changed your account type to ${userData.userType}`)
   }
   // Make sure you cant change the _id parameter
   if ('_id' in userData) {

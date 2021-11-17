@@ -7,8 +7,10 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
+import { useHistory } from "react-router";
 
 const RankTable = ({rows, myRanking}) => {
+  const history = useHistory();
     return (
     <TableContainer component={Paper}>
         <Table aria-label="simple table">
@@ -22,7 +24,9 @@ const RankTable = ({rows, myRanking}) => {
           <TableBody>
           {rows.map((row) => (
             <TableRow
+            hover
             key={row.name}
+            onClick={()=> history.push(`/user/${row.name}`)}
             sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
             >
               <TableCell component="th" scope="row">@{row.name}</TableCell>

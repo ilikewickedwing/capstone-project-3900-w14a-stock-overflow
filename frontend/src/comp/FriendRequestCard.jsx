@@ -29,7 +29,6 @@ const FriendRequestCard = ({name,uid,reload}) => {
       alert(`You have rejected ${name}'s friend request`,'info');
       reload(); 
     } catch (e){
-      console.log(e);
       alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
     }
   }

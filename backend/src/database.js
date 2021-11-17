@@ -50,6 +50,7 @@ const COLLECTIONS = [
       ],
       defBroker: float,
       brokerFlag: int,
+			profit: float,
       performance: [
         {
           date: string,
@@ -81,6 +82,8 @@ const COLLECTIONS = [
           stock: string,
           avgPrice: float,
           quantity: int,
+					sold: float,
+					quantitySold: int,
           performance: [
             {
               date: string,
@@ -92,6 +95,7 @@ const COLLECTIONS = [
       value: {
         spent: float,
         sold: float,
+				profit: float,
         performance: [
           {
             date: string,
@@ -324,6 +328,7 @@ export class Database {
       ],
       defBroker: null,
       brokerFlag: null,
+			profit: 0,
       performance: [
 				{
 					date: date,
@@ -347,6 +352,7 @@ export class Database {
       value: {
 				spent: null,
         sold: null,
+				profit: null,
         performance: [
 					{
 						date: null,
@@ -438,18 +444,44 @@ export class Database {
 		const users = this.database.collection('userPortos');
 		const query = { ownerUid: uid };
 		const user = await users.findOne(query);
+		const date = performance.date;
+
 		const now = new Date();
 		const today = new Date(now);
 		const time = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + today.getDate()).slice(-2);
-		const date = time.toString();
+		const toDate = time.toString();
+
+		if (user.performance[0].date === toDate) {
+			const nextDay = date;
+			const nextDate = new Date(nextDay);
+			const prevDate = new Date();
+			prevDate.setDate(nextDate.getDate() - 1);
+			const prevTime = prevDate.getFullYear() + '-' + ('0' + (prevDate.getMonth() + 1)).slice(-2) + '-' + ('0' + prevDate.getDate()).slice(-2);
+			const prevToDate = prevTime.toString();
+			
+			user.performance.splice(0, 1);
+			user.performance.push({
+				date: prevToDate,
+				performance: 0,
+				money: 0
+			})
+			user.change.splice(0, 1);
+			user.change.push({
+				date: prevToDate,
+				percentage: 0,
+				money: 0
+			})
+		}
+
+		if (user.performance[user.performance.length - 1].date === date) return;
 	
 		// Calculate the percentage performance
-		const perc = (performance.money + performance.sold)/performance.spent * 100;
+		const perc = (performance.money)/performance.spent * 100;
 		// Create performance and value objects
 		const perf = {
 			date: date,
 			performance: perc,
-			money: performance.money
+			money: (performance.money)
 		}
 		const value = {
 			spent: performance.spent,
@@ -472,13 +504,19 @@ export class Database {
 			prevVal = 0;
 			prevPerc = 0;
 		}
-		const change = performance.money - prevVal;
+		const change = (performance.money) - prevVal;
 		const changePerc = perc - prevPerc;
 		const newVal = user.change;
-		newVal.push({ date: date, percentage: changePerc, money: change });
+		newVal.push({ 
+			date: date, 
+			percentage: changePerc, 
+			money: change 
+		});
+		const profit = performance.profit;
+		user.profit = profit;
 
 		// Update user in database
-		await users.updateOne(query, { $set: { performance: performanceArr, value: value, change: newVal }});
+		await users.updateOne(query, { $set: { profit: profit, performance: performanceArr, value: value, change: newVal }});
 		return perc;
 	}
 
@@ -491,12 +529,10 @@ export class Database {
 		const userPortos = this.database.collection('userPortos');
 		const query = { ownerUid: uid };
 		const userPortoResp = await userPortos.findOne(query);
-		// console.dir(userPortoResp, {depth:null});
 
 		const users = this.database.collection('users');
 		const query2 = { uid: uid };
 		const userResp = await users.findOne(query2);
-		// console.dir(userResp, {depth:null});
 		const perf = {
 			name: userResp.username,
 			performance: userPortoResp.performance,
@@ -615,9 +651,11 @@ export class Database {
   }
   
 	/**
-	 * Function to get an array of all a celebrities followers
+	 * Function to get an object of all a celebrities followers
+	 * NOTE: followers is the datastructure rather than the array
+   * so you access the followers key to get them
 	 * @param {string} celebUid 
-	 * @returns {Promise<Array>}
+	 * @returns {Promise<Object>}
 	 */
   async getCelebrityFollowers(celebUid) {
     const celebFollowers = this.database.collection('celebrityfollowers');
@@ -850,7 +888,6 @@ export class Database {
    * @returns {Promise<Array>}
    */
   async getAllPfs() {
-    // console.log('getAllPfs');
     const pfs = this.database.collection('portfolios');
     if (pfs.countDocuments() == 0) return [];
     const requests = await pfs.find().toArray();
@@ -891,6 +928,7 @@ export class Database {
       value: {
         spent: 0,
         sold: 0,
+				profit: 0,
         performance: [
           {
             date: date,
@@ -1106,6 +1144,8 @@ export class Database {
           stock: stock,
           avgPrice: null,
           quantity: null,
+					sold: null,
+					quantitySold: null,
           performance: [
             {
               date: null,
@@ -1118,6 +1158,8 @@ export class Database {
           stock: stock,
           avgPrice: price,
           quantity: quantity,
+					sold: 0,
+					quantitySold: 0,
           performance: [
             {
               date: date,
@@ -1164,7 +1206,7 @@ export class Database {
     
     if (stkIndex != -1) { // If stock is in the portfolio
       if (pfResp.name !== 'Watchlist') {
-          if (stockList[stkIndex].quantity - quantity < 0) {
+				if (stockList[stkIndex].quantity - quantity < 0) {
           return 4;
         }
         else {
@@ -1172,6 +1214,8 @@ export class Database {
           // if (stockList[stkIndex].quantity == 0) {
           //   stockList.splice(stkIndex, 1);
           // }
+					stockList[stkIndex].sold += price * quantity;
+					stockList[stkIndex].quantitySold += quantity;
         }
       } else {
         stockList.splice(stkIndex, 1);
@@ -1746,9 +1790,17 @@ export class Database {
     const poop = await activity.find({aid: {$in: userActs}}).toArray();
     for (let index = 0; index < poop.length; index++) {
       const i = poop[index];
+      let newComments = [];
+      for (let j = 0; j < i.userComments.length; j++) {
+        const element = i.userComments[j];
+        const comment = await activity.findOne({aid: element});
+        if (comment !== null) {
+          newComments.push(comment);
+        }
+      }
+      i.userComments = newComments;
       activities.push(i);
     }
-    
     activities.sort((first, second) => first.time - second.time);
     return activities;
   }

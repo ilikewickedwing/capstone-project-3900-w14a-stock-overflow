@@ -397,7 +397,9 @@ describe('Calculate portfolio performance', () => {
           performance: 0
         }
       ],
-      quantity: 2
+      quantity: 2,
+			sold: 0,
+			quantitySold: 0
     })
     const add2 = await addStock(token, pid, 'AMZN', 3, 2, null, null, d);
     expect(add2).toBe(-1);
@@ -411,7 +413,9 @@ describe('Calculate portfolio performance', () => {
           performance: 0
         }
       ],
-      quantity: 2
+      quantity: 2,
+			sold: 0,
+			quantitySold: 0
     })
     const add3 = await addStock(token, pid, 'IBM', 1, 1, null, null, d);
     expect(add3).toBe(-1);
@@ -425,7 +429,9 @@ describe('Calculate portfolio performance', () => {
           performance: 0
         }
       ],
-      quantity: 1
+      quantity: 1,
+			sold: 0,
+			quantitySold: 0
     })
     const pfs = await userPfs(token, d);
     pfArray = [{ name: 'pf', pid: pid }];
@@ -441,7 +447,9 @@ describe('Calculate portfolio performance', () => {
             date: date,
             performance: 0
           }
-        ]
+        ],
+				sold: 0,
+				quantitySold: 0
       },
       {
         stock: 'AMZN',
@@ -452,7 +460,9 @@ describe('Calculate portfolio performance', () => {
             date: date,
             performance: 0
           }
-        ]
+        ],
+				sold: 0,
+				quantitySold: 0
       },
       {
         stock: 'IBM',
@@ -463,7 +473,9 @@ describe('Calculate portfolio performance', () => {
             date: date,
             performance: 0
           }
-        ]
+        ],
+				sold: 0,
+				quantitySold: 0
       }
     ]
     expect(stocks).toMatchObject({
@@ -500,7 +512,9 @@ describe('Calculate portfolio performance', () => {
             date: date,
             performance: 0
           },
-        ]
+        ],
+				sold: 0,
+				quantitySold: 0
       },
       {
         stock: 'AMZN',
@@ -511,7 +525,9 @@ describe('Calculate portfolio performance', () => {
             date: date,
             performance: 0
           },
-        ]
+        ],
+				sold: 0,
+				quantitySold: 0
       },
       {
         stock: 'IBM',
@@ -522,7 +538,9 @@ describe('Calculate portfolio performance', () => {
             date: date,
             performance: 0
           },
-        ]
+        ],
+				sold: 0,
+				quantitySold: 0
       }
     ]
     expect(stocks).toMatchObject({
@@ -554,7 +572,9 @@ describe('Calculate portfolio performance', () => {
           performance: 0
         }
       ],
-      quantity: 4
+      quantity: 4,
+			sold: 0,
+			quantitySold: 0
     }
     expect(stock).toMatchObject(newStock)
     const pfs = await userPfs(token, d);
@@ -580,7 +600,9 @@ describe('Calculate portfolio performance', () => {
           performance: 0
         }
       ],
-      quantity: 5
+      quantity: 5,
+			sold: 0,
+			quantitySold: 0
     }
     expect(stock1).toMatchObject(newStock1);
     const add2 = await modifyStock(token, pid, 'IBM', 5, 3, 1, null, null, d);
@@ -595,7 +617,9 @@ describe('Calculate portfolio performance', () => {
           performance: 0
         }
       ],
-      quantity: 4
+      quantity: 4,
+			sold: 0,
+			quantitySold: 0
     }
     expect(stock2).toMatchObject(newStock2);
     const pfs = await userPfs(token, d);
@@ -627,7 +651,9 @@ describe('Calculate portfolio performance', () => {
           performance: 0
         }
       ],
-      quantity: 2
+      quantity: 2,
+			sold: 4,
+			quantitySold: 2
     }
     expect(stock).toMatchObject(newStock)
     const pfs = await userPfs(token, d);
@@ -658,7 +684,9 @@ describe('Calculate portfolio performance', () => {
           performance: 0
         }
       ],
-      quantity: 3
+      quantity: 3,
+			sold: 3,
+			quantitySold: 2
     }
     expect(stock1).toMatchObject(newStock1);
     const add2 = await modifyStock(token, pid, 'IBM', 1, 2, 0, null, null, d);
@@ -673,7 +701,9 @@ describe('Calculate portfolio performance', () => {
           performance: 0
         }
       ],
-      quantity: 2
+      quantity: 2,
+			sold: 2,
+			quantitySold: 2
     }
     expect(stock2).toMatchObject(newStock2);
     const pfs = await userPfs(token, d);
@@ -704,7 +734,9 @@ describe('Calculate portfolio performance', () => {
           performance: 0
         }
       ],
-      quantity: 0
+      quantity: 0,
+			sold: 10,
+			quantitySold: 4
     }
     const stock = await d.getStock(pid, 'AAPL');
     expect(stock).toStrictEqual(newStock);
@@ -735,7 +767,9 @@ describe('Calculate portfolio performance', () => {
           performance: 0
         }
       ],
-      quantity: 0
+      quantity: 0,
+			sold: 9,
+			quantitySold: 5
     }
     const stock1 = await d.getStock(pid, 'AMZN');
     expect(stock1).toStrictEqual(newStock1);
@@ -750,7 +784,9 @@ describe('Calculate portfolio performance', () => {
           performance: 0
         }
       ],
-      quantity: 0
+      quantity: 0,
+			sold: 12,
+			quantitySold: 4
     }
     const stock2 = await d.getStock(pid, 'IBM');
     expect(stock2).toStrictEqual(newStock2);
@@ -849,6 +885,8 @@ describe('Calculate portfolio performance endpoint test', () => {
         }
       ],
       quantity: 2,
+			sold: 0,
+			quantitySold: 0
     }]
     const pf = await openPf(token, pid1, database);
     expect(pf).toMatchObject({
@@ -900,7 +938,9 @@ describe('Calculate portfolio performance endpoint test', () => {
             performance: 0
           }
         ],
-        quantity: 2
+        quantity: 2,
+				sold: 0,
+				quantitySold: 0
       },
       {
         stock: 'AAPL',
@@ -911,7 +951,9 @@ describe('Calculate portfolio performance endpoint test', () => {
             performance: 0
           }
         ],
-        quantity: 2
+        quantity: 2,
+				sold: 0,
+				quantitySold: 0
       },
       {
         stock: 'AMZN',
@@ -922,7 +964,9 @@ describe('Calculate portfolio performance endpoint test', () => {
             performance: 0
           }
         ],
-        quantity: 1
+        quantity: 1,
+				sold: 0,
+				quantitySold: 0
       }
     ]
     const pf = await openPf(token, pid1, database);

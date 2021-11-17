@@ -40,6 +40,8 @@ export default function Profile() {
   const uid = localStorage.getItem('uid');
 
   const [ username, setUsername ] = useState('');
+  const [password, setPassword ] = useState('');
+  const [confirm, setConfirm] = useState('');
   
   // states from get request of current default broker fee
   const [currDef, setDef] = useState('');
@@ -91,6 +93,20 @@ export default function Profile() {
       history.push('/');
     } catch (e){
       alert(`Status Code ${e.response.status} : ${e.response.data.message}`,'error');
+    }
+  }
+
+  const changePassword = async() => {
+    if (password === confirm) {
+      try {
+        await axios.post(`${apiBaseUrl}/user/passwordchange`, {token, uid, newpassword: password});
+        alert('username changed','success');
+        history.push('/');
+      } catch (e){
+        alert(`Status Code ${e.response.status} : ${e.response.data.message}`,'error');
+      }
+    } else {
+      alert(`Passwords does not match`, 'error');
     }
   }
 
@@ -153,11 +169,18 @@ export default function Profile() {
               <TextField style = {{marginBottom:'5%'}}
                   value = {username} onChange={e => setUsername(e.target.value)}
                   label='New username' placeholder='Enter new username' fullWidth/>
-              {/* <TextField
-                  value = {password} onChange={e => setPassword(e.target.value)}
-                  label='New Password' placeholder='Enter new password' type='password' fullWidth required/> */}
               <Button
                   onClick={onEditUser}
+                  type='submit' color='primary' variant="contained" style={btnstyle} fullWidth>Save</Button>
+              <h3>Change Password</h3>
+              <TextField
+                  value = {password} onChange={e => setPassword(e.target.value)}
+                  label='New Password' placeholder='Enter new password' type='password' fullWidth required/>
+              <TextField
+                  value = {confirm} onChange={e => setConfirm(e.target.value)}
+                  label='Confirm Password' placeholder='Confirm Password' type='password' fullWidth required/>
+              <Button
+                  onClick={changePassword}
                   type='submit' color='primary' variant="contained" style={btnstyle} fullWidth>Save</Button>
               <h3>Delete Account</h3>
               <Button variant="contained" color="secondary" fullWidth onClick={confirmDelete}>

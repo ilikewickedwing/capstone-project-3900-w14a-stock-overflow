@@ -45,7 +45,6 @@ const StockSelect = ({stockCode, name,pid, setClose}) => {
             if (name === "Watchlist"){
                 await axios.post(`${apiBaseUrl}/user/stocks/add`, 
                     {token, pid, stock: stockCode, price: 0, quantity: 0});
-                console.log("added to watchlist");
                 setClose();
             } else {
                 handleOpen();

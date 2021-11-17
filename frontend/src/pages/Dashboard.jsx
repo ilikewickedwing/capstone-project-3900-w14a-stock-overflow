@@ -8,7 +8,6 @@ import { apiBaseUrl } from '../comp/const';
 import axios from "axios";
 import PerformanceGraph from '../graph/PerformanceGraph';
 import RankTable from '../comp/RankTable'; 
-
 // styling imports 
 import { 
   PfBody, 
@@ -18,12 +17,13 @@ import {
   PageBody,
   Heading,
   PfBar,
+  Performer
 } from '../styles/styling';
 import leaderboard from '../assets/leaderboard.png';
 import star from '../assets/star.png';
 import globe from '../assets/globe.png';
 
-import Activity from './Activity';
+import Activity from '../comp/Activity';
 
 function createData(code, name, buyPrice, currPrice, changePer, units, value, profitLoss) {
   return {
@@ -37,12 +37,10 @@ function createData(code, name, buyPrice, currPrice, changePer, units, value, pr
     profitLoss,
   };
 }
-
 // stub data for rankings
 function createRankData(name, performance, rank) {
   return { name, performance, rank };
 }
-
 // demo data for rankings
 const rows = [
   createData('richard_mo', '400', 1),
@@ -50,23 +48,22 @@ const rows = [
   createData('user1', "100", 3),
   createData('dragonalxd', "59", 4),
 ];
-
-
 export default function Dashboard() {
   const myName = localStorage.getItem('username');
   const token = localStorage.getItem('token');
+  const uid = localStorage.getItem('uid');
   const alert = useContext(AlertContext);
   const [selected, setSelected] = React.useState([]);
   const [portfolios, setPortfolios] = React.useState([]);
   
   // friend's activity
   const [activity, setActivity] = React.useState([]); 
-
   // rankings 
   const [globalRank, setGlobal ] = React.useState(rows);
   const [rankings, setRankings] = React.useState(rows);
   const [myFriendRanking, setMyRanking] =React.useState(createRankData("lily","20","8888"));
   const [myGlobalRanking, setMyGlobal] = React.useState(createRankData("lily","20","8888"));
+  const [performer, setPerformer] = React.useState({name:"",money:0, performance:0});
 
   React.useEffect(() => {  
     getGlobalRanks();
@@ -81,6 +78,13 @@ const getGlobalRanks = async () => {
     let list = [];
     for (let i=0; i< request.data.length; i++){
       // push the top 5 global ranks
+      if (i === 0){
+        setPerformer({
+          name: request.data[i].name,
+          money: request.data[i].performance.money.toFixed(2),
+          performance: request.data[i].performance.performance.toFixed(2),
+        });
+      }
       if (i < 5) {
         list.push(createRankData(request.data[i].name, request.data[i].performance.performance, request.data[i].rank));
       }
@@ -90,7 +94,7 @@ const getGlobalRanks = async () => {
     }
     setGlobal(list);
   } catch (e) {
-    // alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
+    alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
   }
 }
 
@@ -99,7 +103,9 @@ const getFriendRanking = async () => {
     const resp = await axios.get(`${apiBaseUrl}/rankings/friends?token=${token}`);
     let list = [];
     for (let i=0; i< resp.data.length; i++){
-      list.push(createRankData(resp.data[i].name, resp.data[i].performance.performance, resp.data[i].rank));
+      if (i < 5){
+        list.push(createRankData(resp.data[i].name, resp.data[i].performance.performance, resp.data[i].rank));
+      }
       if (resp.data[i].name === myName){
         setMyRanking(createRankData(resp.data[i].name, resp.data[i].performance.performance, resp.data[i].rank));
       }
@@ -153,19 +159,15 @@ const getFriendRanking = async () => {
       alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
     }
   };
-
    
   const getActivity = async() => {
     try {
     const resp = await axios.get(`${apiBaseUrl}/activity/all?token=${token}`);
-    console.log(resp.data);
     setActivity(resp.data);
     } catch (e) {
-			console.dir(e, {depth:null});
-      // alert(`Status Code ${e.data.status} : ${e.data.error}`,'error');
+      alert(`Status Code ${e.data.status} : ${e.data.error}`,'error');
     }
   }
-  
   return (
     <PageBody className="font-two">
       <Navigation />
@@ -184,22 +186,36 @@ const getFriendRanking = async () => {
                 <PerformanceTable 
                   portfolios={portfolios}
                   setPerfSelected={setSelected} />
-                <div style={{marginTop: 30, fontWeight: 'bold'}}>
-                  Friend's activities:
-                </div>
+                <h3 style={{marginTop: '40px'}}>All activities: </h3>
+                <div style={{overflowY:'scroll', height:'40vh'}}>
                 {
-                  activity.length > 0 ? activity.map(index =>{
-                    let subString = index.time.substring(11,16)
-                    return <Activity message={index.message} time={subString} aid={index.aid} likes={index.likes} getActivityCallBack={getActivity} userComments={index.userComments}></Activity>
+                  activity.length > 0 ? activity.map((e,index) =>{
+                    let subString = `${e.time.split('T')[0]}` +" "+`${e.time.substring(11,16)}`;
+                    return <Activity 
+                      key={index} 
+                      message={e.message} 
+                      time={subString} 
+                      aid={e.aid} 
+                      likes={e.likes} 
+                      getActivityCallBack={getActivity} 
+                      userComments={e.userComments}  
+                      likedUsers={e.likedUsers}
+                      />
                   }): <p>Empty feed :\</p>
                 }
+                </div>
               </LeftBody>
               <RightBody elevation={10}>
-                <RightCard elevation={5}>
-                  <div style={{textAlign:'center'}}>
+                <RightCard elevation={5} style={{textAlign:'center'}}>
+                  <div>
                     <img style={{height:"auto", width:"50px"}} src={star} alt="star icon"/>
                   </div>
-                  <h3 style={{textAlign:'center'}}>Performer of the Month </h3>
+                  <h3> Monthly Top Dog </h3>
+                  <Performer style={{fontSize:'2em', fontWeight:'bold'}}> 🐺{performer.name}🐺</Performer>
+                  <br />
+                  <span style={{fontSize:'2em'}}>{performer.performance}% </span>
+                  <br />
+                  <span style={{fontSize:'1.5em'}}> 💸{performer.money}💸</span>
                 </RightCard>
                 <RightCard elevation={5}>
                   <div style={{textAlign:'center'}}>

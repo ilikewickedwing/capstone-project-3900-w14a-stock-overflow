@@ -4,6 +4,7 @@ import { Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } f
 import PropTypes from 'prop-types';
 import { ApiContext } from "../api";
 import { transformTimeStr } from "./StocksGraph";
+import { AlertContext } from "../App";
 
 // Used for testing
 const makeMockResponse = (pid) => {
@@ -61,8 +62,10 @@ export default function PerformanceGraph(props) {
   const [ pidToName, setPidToName ] = useState({});
   const [ avgPerformance, setAvgPerformance ] = useState([]);
   const api = useContext(ApiContext);
+  const alert = useContext(AlertContext);
   useEffect(() => {
     const token = localStorage.getItem('token');
+
     
     // Fetch the portfolio performance for each of the portfolios that arent cached
     const callApi = async () => {
@@ -111,6 +114,8 @@ export default function PerformanceGraph(props) {
           }
           setDataCache(dataCacheCopy);
           setPidToName(pidToNameCopy);
+        } else {
+          alert(resp.status, 'error');
         }
       } else {
         const resp = await api.rankingsPerformance(token, props.friendUid);
@@ -121,6 +126,8 @@ export default function PerformanceGraph(props) {
           } else {
             setAvgPerformance([]);
           }
+        } else {
+          alert(resp.status, 'error');
         }
       }
     }

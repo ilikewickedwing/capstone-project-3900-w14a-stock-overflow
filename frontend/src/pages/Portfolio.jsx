@@ -40,6 +40,9 @@ const Portfolio = () => {
   const [isChanged, setChanged ] = React.useState(0);
   const [stocks, setStocks] = React.useState([]);
   const [selected, setGraphSelected] = React.useState([]);
+  const [profit, setProfit] = React.useState(0);
+
+  const [earnings, setEarnings] = React.useState(0);
 
   const open = Boolean(anchorEl);
   const id = open ? 'simple-popover': undefined;
@@ -55,6 +58,9 @@ const Portfolio = () => {
     try {
       const request = await axios.get(`${apiBaseUrl}/user/portfolios/open?token=${token}&pid=${pid}`);
       const portfolioData = request.data;
+      const performance = portfolioData.value.performance;
+      setProfit(portfolioData.value.profit);
+      setEarnings(performance[performance.length-1]);
       setName(portfolioData.name);
 
       if (portfolioData.name === "Watchlist"){
@@ -63,7 +69,6 @@ const Portfolio = () => {
         setIsWatchlist(0);
       }
       let stockList =[];
-      // console.log(portfolioData.stocks);
       // push the stock if its not quantity 0 (which is kept for history purposes)
       for (let i = 0; i < portfolioData.stocks.length; i++){
         if (portfolioData.stocks[i].quantity !== 0){
@@ -159,11 +164,13 @@ const Portfolio = () => {
               />
               </LeftBody>
             <RightBody elevation={10}>
-              <RightCard elevation={5}>
-                <h3 style={{textAlign:'center'}}>Daily Estimated Earnings</h3>
+              <RightCard elevation={5} style={{textAlign:'center'}}>
+                <h3>Daily Estimated Earnings</h3>
+                {parseFloat(earnings.money).toFixed(2)} USD
               </RightCard>
-              <RightCard elevation={5}>
-              <h3 style={{textAlign:'center'}}>Net Profit</h3>
+              <RightCard elevation={5} style={{textAlign:'center'}}>
+                <h3>Net Profit</h3>
+                {parseFloat(profit).toFixed(2)} USD
               </RightCard>
             </RightBody>
             </PfBody>

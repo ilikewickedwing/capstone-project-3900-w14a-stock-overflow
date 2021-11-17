@@ -1,12 +1,12 @@
 import { authRegister } from "../auth";
-import { createPf, userPfs, openPf } from "../portfolio";
-import { calcPf, getFriendRankings, rankAll } from "../performance";
+import { createPf, openPf } from "../portfolio";
+import { getFriendRankings, rankAll, testCalcPf } from "../performance";
 import { addStock, modifyStock, getStock } from "../stocks";
 import { Database } from "../database";
 import { calcAll } from "../performance";
 import request from 'supertest';
 import { app, database } from "../index";
-import { getDefBroker, setDefBroker } from "../user";
+import { setDefBroker } from "../user";
 import { addFriend } from "../social";
 
 describe('Rank multiple user portfolio performances', () => {
@@ -29,6 +29,8 @@ describe('Rank multiple user portfolio performances', () => {
   let uid3 = null;
   let pid3 = null;
   let pid4 = null;
+
+	const deetArr = [];
   
 	const now = new Date();
 	const today = new Date(now);
@@ -46,6 +48,10 @@ describe('Rank multiple user portfolio performances', () => {
 		  pid: expect.any(String),
 	  })
 	  pid1 = create.pid;
+		deetArr.push({
+			token: token1,
+			pid: pid1
+		});
 
     const rego2 = await authRegister('Richard', 'strongpassword', d);
     token2 = rego2.token;
@@ -55,6 +61,10 @@ describe('Rank multiple user portfolio performances', () => {
       pid: expect.any(String),
     })
     pid2 = create2.pid;
+		deetArr.push({
+			token: token2,
+			pid: pid2
+		});
 
     const rego3 = await authRegister('Jono', 'strongpassword', d);
     token3 = rego3.token;
@@ -64,11 +74,19 @@ describe('Rank multiple user portfolio performances', () => {
       pid: expect.any(String),
     })
     pid3 = create3.pid;
+		deetArr.push({
+			token: token3,
+			pid: pid3
+		});
     const create4 = await createPf(token3, 'pf2', d);
     expect(create4).toMatchObject({
       pid: expect.any(String),
     })
     pid4 = create4.pid;
+		deetArr.push({
+			token: token3,
+			pid: pid4
+		});
     // console.log(create4);
 	})
 	it('Set default brokerage costs', async () => {
@@ -153,24 +171,17 @@ describe('Rank multiple user portfolio performances', () => {
     // console.dir(check, {depth:null});
 	})
 	it('Calculate portfolio performance first', async () => {
-    const test = new Date();
-    test.setDate(today.getDate() - daysCalced);
-    const testDate = test.getFullYear() + '-' + ('0' + (test.getMonth() + 1)).slice(-2) + '-' + ('0' + test.getDate()).slice(-2);
-    const calc1 = await calcPf(token1, pid1, d, 'yes', 'yes', testDate, 3);
-    const calc2 = await calcPf(token2, pid2, d, 'yes', 'yes', testDate, 3);
-    const calc3 = await calcPf(token3, pid3, d, 'yes', 'yes', testDate, 3);
-    const calc4 = await calcPf(token3, pid4, d, 'yes', 'yes', testDate, 3);
-    daysCalced -= 5;
-    expect(calc1).not.toBe(null);
-    expect(calc2).not.toBe(null);
-    expect(calc3).not.toBe(null);
-    expect(calc4).not.toBe(null);	  // const stocks = await openPf(token1, pid1, d);
+		console.log('CalcPf 1');
+		const testDays = 2;
+    await testCalcPf(deetArr, d, 'yes', 'yes', daysCalced, testDays);
+    daysCalced -= testDays + 1;
     // const stocks1 = await openPf(token1, pid1, d);
     // const stocks2 = await openPf(token2, pid2, d);
     // console.dir(stocks1, { depth: null });
     // console.dir(stocks2, { depth: null });
 	  // console.dir(stocks, { depth: null });
     // console.log(daysCalced);
+		// const pfs = await database.getUserPerf(uid1);
 	})
 	it('Buy extra of all stocks in portfolio', async () => {
     const test = new Date();
@@ -202,18 +213,10 @@ describe('Rank multiple user portfolio performances', () => {
 	  expect(add3_).toBe(-1);
 	})
 	it('Calculate portfolio performance second', async () => {
-	  const test = new Date();
-    test.setDate(today.getDate() - daysCalced);
-    const testDate = test.getFullYear() + '-' + ('0' + (test.getMonth() + 1)).slice(-2) + '-' + ('0' + test.getDate()).slice(-2);
-    const calc1 = await calcPf(token1, pid1, d, 'yes', 'yes', testDate, 2);
-    const calc2 = await calcPf(token2, pid2, d, 'yes', 'yes', testDate, 2);
-    const calc3 = await calcPf(token3, pid3, d, 'yes', 'yes', testDate, 2);
-    const calc4 = await calcPf(token3, pid4, d, 'yes', 'yes', testDate, 2);
-    daysCalced -= 3;
-    expect(calc1).not.toBe(null);
-    expect(calc2).not.toBe(null);
-    expect(calc3).not.toBe(null);
-    expect(calc4).not.toBe(null);
+		console.log('CalcPf 2');
+		const testDays = 2;
+		await testCalcPf(deetArr, d, 'yes', 'yes', daysCalced, testDays);
+    daysCalced -= testDays;
 	  // console.log("calc is " + calc);
 	  // const stocks1 = await openPf(token1, pid1, d);
     // const stocks2 = await openPf(token2, pid2, d);
@@ -230,27 +233,92 @@ describe('Rank multiple user portfolio performances', () => {
 		const rankings = await d.getRankings();
 		console.dir(rankings, { depth: null });
 	})
-	it('CalcAll', async () => {
-		await calcAll(d, true);
-    let rankings = null;
-    rankings = await d.getRankings();
-    const stocks1 = await openPf(token1, pid1, d);
-    // const stocks2 = await openPf(token2, pid2, d);
-    // const stocks3 = await openPf(token3, pid3, d);
-    // const stocks4 = await openPf(token3, pid4, d);
-	  console.dir(stocks1, { depth: null });
-    // console.dir(stocks2, { depth: null });
-    // console.dir(stocks3, { depth: null });
-    // console.dir(stocks4, { depth: null });
-    // console.dir(rankings, { depth: null });
-    expect(rankings).not.toBe(null);
-	})
+	// it('CalcAll', async () => {
+	// 	await calcAll(d, true);
+  //   let rankings = null;
+  //   rankings = await d.getRankings();
+  //   const stocks1 = await openPf(token1, pid1, d);
+  //   // const stocks2 = await openPf(token2, pid2, d);
+  //   // const stocks3 = await openPf(token3, pid3, d);
+  //   // const stocks4 = await openPf(token3, pid4, d);
+	//   console.dir(stocks1, { depth: null });
+  //   // console.dir(stocks2, { depth: null });
+  //   // console.dir(stocks3, { depth: null });
+  //   // console.dir(stocks4, { depth: null });
+  //   // console.dir(rankings, { depth: null });
+  //   expect(rankings).not.toBe(null);
+	// })
   // it('Test friend rank 1', async () => {
   //   const friendRank = await getFriendRankings1(token1, d);
   //   expect(friendRank).not.toBe(null);
   //   console.dir(friendRank, {depth:null});
   // })
   it('Test friend ranks', async () => {
+    const friendRank = await getFriendRankings(token1, d);
+    expect(friendRank).not.toBe(null);
+    console.dir(friendRank, {depth:null});
+  })
+	it('Sell stocks', async () => {
+		const test = new Date();
+    test.setDate(today.getDate() - daysCalced);
+    const testDate = test.getFullYear() + '-' + ('0' + (test.getMonth() + 1)).slice(-2) + '-' + ('0' + test.getDate()).slice(-2);
+
+    let values = await getStock(2, 'AAPL', 'daily', testDate);
+    let price = values.data.history.day[0].close;
+	  const add1 = await modifyStock(token1, pid1, 'AAPL', price, 1, 0, null, null, d);
+	  expect(add1).toBe(-1);
+
+    const add1_ = await modifyStock(token2, pid2, 'AAPL', price, 1, 0, null, null, d);
+	  expect(add1_).toBe(-1);
+
+    values = await getStock(2, 'AMZN', 'daily', testDate);
+    price = values.data.history.day[0].close;
+	  const add2 = await modifyStock(token1, pid1, 'AMZN', price, 1, 0, null, null, d);
+	  expect(add2).toBe(-1);
+
+    const add2_ = await modifyStock(token2, pid2, 'AMZN', price, 1, 0, null, null, d);
+	  expect(add2_).toBe(-1);
+
+    values = await getStock(2, 'IBM', 'daily', testDate);
+    price = values.data.history.day[0].close;
+	  const add3 = await modifyStock(token1, pid1, 'IBM', price, 1, 0, null, null, d);
+	  expect(add3).toBe(-1);
+
+    const add3_ = await modifyStock(token2, pid2, 'IBM', price, 1, 0, null, null, d);
+	  expect(add3_).toBe(-1);
+	})
+	it('Calculate portfolio performance third', async () => {
+		console.log('CalcPf 3');
+	  const testDays = 2;
+		await testCalcPf(deetArr, d, 'yes', 'yes', daysCalced, testDays);
+    daysCalced -= testDays;
+	  // console.log("calc is " + calc);
+	  // const stocks1 = await openPf(token1, pid1, d);
+    // const stocks2 = await openPf(token2, pid2, d);
+    // const stocks3 = await openPf(token3, pid3, d);
+    // const stocks4 = await openPf(token3, pid4, d);
+	  // console.dir(stocks1, { depth: null });
+    // console.dir(stocks2, { depth: null });
+    // console.dir(stocks3, { depth: null });
+    // console.dir(stocks4, { depth: null });
+    // console.log(daysCalced);
+	})
+	it('CalcAll', async () => {
+		await calcAll(d, true);
+    let rankings = null;
+    rankings = await d.getRankings();
+    // const stocks1 = await openPf(token1, pid1, d);
+    // const stocks2 = await openPf(token2, pid2, d);
+    // const stocks3 = await openPf(token3, pid3, d);
+    // const stocks4 = await openPf(token3, pid4, d);
+	  // console.dir(stocks1, { depth: null });
+    // console.dir(stocks2, { depth: null });
+    // console.dir(stocks3, { depth: null });
+    // console.dir(stocks4, { depth: null });
+    // console.dir(rankings, { depth: null });
+    expect(rankings).not.toBe(null);
+	})
+	it('Test friend ranks', async () => {
     const friendRank = await getFriendRankings(token1, d);
     expect(friendRank).not.toBe(null);
     console.dir(friendRank, {depth:null});
@@ -518,20 +586,20 @@ describe('Rank multiple user portfolios performances endpoint test', () => {
       brokerFlag: null
     })
 	  expect(add3_1.statusCode).toBe(200);})
-  it('200 on first valid portfolio calculation', async () => {
+  /* it('200 on first valid portfolio calculation', async () => {
     const test = new Date();
     test.setDate(today.getDate() - daysCalced);
     const testDate = test.getFullYear() + '-' + ('0' + (test.getMonth() + 1)).slice(-2) + '-' + ('0' + test.getDate()).slice(-2);
-    const calc1 = await calcPf(token1, pid1, database, 'yes', 'yes', testDate, 2);
-    const calc2 = await calcPf(token2, pid2, database, 'yes', 'yes', testDate, 2);
-    const calc3 = await calcPf(token3, pid3, database, 'yes', 'yes', testDate, 2);
-    const calc4 = await calcPf(token3, pid4, database, 'yes', 'yes', testDate, 2);
+    const calc1 = await calcPf(token1, pid1, database, 'yes', 'yes', testDate, testDays);
+    const calc2 = await calcPf(token2, pid2, database, 'yes', 'yes', testDate, testDays);
+    const calc3 = await calcPf(token3, pid3, database, 'yes', 'yes', testDate, testDays);
+    const calc4 = await calcPf(token3, pid4, database, 'yes', 'yes', testDate, testDays);
     daysCalced -= 3;
     expect(calc1).not.toBe(null);
     expect(calc2).not.toBe(null);
     expect(calc3).not.toBe(null);
     expect(calc4).not.toBe(null);
-  })
+  }) */
   it('200 on subsequent valid stock additions', async () => {
     const test = new Date();
     test.setDate(today.getDate() - daysCalced);
@@ -606,21 +674,21 @@ describe('Rank multiple user portfolios performances endpoint test', () => {
     })
     expect(add3_.statusCode).toBe(200);
   })
-  it('200 on second valid portfolio calculation', async () => {
+  /* it('200 on second valid portfolio calculation', async () => {
     const test = new Date();
     test.setDate(today.getDate() - daysCalced);
     const testDate = test.getFullYear() + '-' + ('0' + (test.getMonth() + 1)).slice(-2) + '-' + ('0' + test.getDate()).slice(-2);
-    const calc1 = await calcPf(token1, pid1, database, 'yes', 'yes', testDate, 2);
-    const calc2 = await calcPf(token2, pid2, database, 'yes', 'yes', testDate, 2);
-    const calc3 = await calcPf(token3, pid3, database, 'yes', 'yes', testDate, 2);
-    const calc4 = await calcPf(token3, pid4, database, 'yes', 'yes', testDate, 2);
+    const calc1 = await calcPf(token1, pid1, database, 'yes', 'yes', testDate, testDays);
+    const calc2 = await calcPf(token2, pid2, database, 'yes', 'yes', testDate, testDays);
+    const calc3 = await calcPf(token3, pid3, database, 'yes', 'yes', testDate, testDays);
+    const calc4 = await calcPf(token3, pid4, database, 'yes', 'yes', testDate, testDays);
     daysCalced -= 3;
     expect(calc1).not.toBe(null);
     expect(calc2).not.toBe(null);
     expect(calc3).not.toBe(null);
     expect(calc4).not.toBe(null);
     
-  })
+  }) */
   it('Rank portfolios', async () => {
 		await rankAll(database);
 		const rankings = await database.getRankings();
@@ -643,11 +711,6 @@ describe('Rank multiple user portfolios performances endpoint test', () => {
     // console.dir(rankings, { depth: null });
     expect(rankings).not.toBe(null);
 	})
-  // it('Test friend rank 1', async () => {
-  //   const friendRank = await getFriendRankings1(token1, d);
-  //   expect(friendRank).not.toBe(null);
-  //   console.dir(friendRank, {depth:null});
-  // })
   it('Test friend ranks', async () => {
     const friendRank = await getFriendRankings(token1, database);
     expect(friendRank).not.toBe(null);
@@ -668,35 +731,3 @@ describe('Rank multiple user portfolios performances endpoint test', () => {
     await database.disconnect();
   })
 })
-
-/* describe('Calling rankAll early', () => {
-  beforeAll(async () => {
-    await database.connect();
-  })
-
-  it('Call rankAll', async () => {
-    const resp = await request(app).get(`/rankings/global`).send()
-    expect(resp).not.toBe(null);
-    console.log(resp.body);
-  })
-
-  afterAll(async() => {
-    await database.disconnect();
-  })
-}) */
-
-/* describe('Calcing calcAll instantly', () => {
-  beforeAll(async () => {
-    await database.connect();
-  })
-
-  jest.setTimeout(30000);
-
-  it('Call calcAll', async () => {
-    await calcAll(database, true);
-  })
-
-  afterAll(async() => {
-    await database.disconnect();
-  })
-}) */
