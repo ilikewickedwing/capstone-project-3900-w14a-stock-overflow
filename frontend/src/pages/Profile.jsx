@@ -100,7 +100,7 @@ export default function Profile() {
     if (password === confirm) {
       try {
         await axios.post(`${apiBaseUrl}/user/passwordchange`, {token, uid, newpassword: password});
-        alert('username changed','success');
+        alert('password changed','success');
         history.push('/');
       } catch (e){
         alert(`Status Code ${e.response.status} : ${e.response.data.message}`,'error');
