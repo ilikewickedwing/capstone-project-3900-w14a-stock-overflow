@@ -72,9 +72,9 @@ export const getFriends = async(token, database) => {
 
   // get friend list and celeb list of the user
   const friendResp = await database.getFriends(uid);
-  const celebResp = await database.getUserCelebrities(uid);
-  if (Array.isArray(friendResp) || Array.isArray(celebResp)) {
-    const obj = { friends: [...friendResp, ...celebResp] };
+  
+  if (Array.isArray(friendResp)) {
+    const obj = { friends: friendResp };
     return obj;
   }
   return friendResp;
