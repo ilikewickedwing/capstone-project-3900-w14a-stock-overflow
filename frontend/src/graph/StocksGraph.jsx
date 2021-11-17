@@ -47,31 +47,6 @@ export default function StocksGraph(props) {
       const today = new Date();
       const now = new Date(today);
       switch (interval) {
-        // case "1min": {
-        //   const start = new Date();
-        //   start.setDate(now.getDate()-1);
-        //   const time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2) + " 00:00";
-        //   return api.stocksInfo(3, company, interval, time.toString());
-        // }
-        // case "5min": {
-        //   const start = new Date();
-        //   start.setDate(now.getDate()-1);
-        //   const time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2) + " 00:00";
-        //   return api.stocksInfo(3, company, interval, time.toString());
-        // }
-        // case "15min": {
-        //   const start = new Date();
-        //   start.setDate(now.getDate()-1);
-        //   const time = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2) + " 00:00";
-        //   return api.stocksInfo(3, company, interval, time.toString());
-        // }
-        // case "daily":
-        //   return api.stocksInfo(2, company, interval, null);
-        // case "weekly":
-        //   return api.stocksInfo(2, company, interval, null);
-        // case "monthly":
-        //   return api.stocksInfo(2, company, interval, null);
-        
         case "1 day": {
           const start = new Date();
           start.setDate(now.getDate()-1);

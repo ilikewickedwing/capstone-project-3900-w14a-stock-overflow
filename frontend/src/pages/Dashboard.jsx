@@ -165,8 +165,7 @@ const getFriendRanking = async () => {
     const resp = await axios.get(`${apiBaseUrl}/activity/all?token=${token}`);
     setActivity(resp.data);
     } catch (e) {
-			console.dir(e, {depth:null});
-      // alert(`Status Code ${e.data.status} : ${e.data.error}`,'error');
+      alert(`Status Code ${e.data.status} : ${e.data.error}`,'error');
     }
   }
   return (

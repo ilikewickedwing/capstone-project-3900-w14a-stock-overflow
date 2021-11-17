@@ -448,7 +448,6 @@ app.delete('/auth/delete', async(req, res) => {
 app.get('/user/getDefBroker', async(req, res) => {
 	const { token } = req.query;
 	const resp = await getDefBroker(token, database);
-	console.log
 	if (resp === 2) {
 		res.status(401).send({ error: "Invalid token" });
 	} else {

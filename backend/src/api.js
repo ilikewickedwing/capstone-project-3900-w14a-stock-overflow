@@ -136,7 +136,6 @@ export class API {
    */
   async _getStock(type, stocks, interval, start) {
 
-    // console.log("type is " + type);
     let data = null;
     if (parseInt(type) === 0) {
       data = await this._callAlpha(type, stocks);
@@ -154,8 +153,7 @@ export class API {
       time: time
     }
     
-    // console.log(obj);
-    this.infoCache.push(obj);
+		this.infoCache.push(obj);
 
     return obj;
   }
@@ -235,17 +233,17 @@ export class API {
       url: url,
       baseURL: 'https://sandbox.tradier.com/v1/markets/',
       params: {
-          'symbols': symbols,
-          'symbol': symbol,
-          'interval': interval,
-          'start': start,
-          'q': q,
-          'indexes': indexes,
-          'greeks': 'false'
+				'symbols': symbols,
+				'symbol': symbol,
+				'interval': interval,
+				'start': start,
+				'q': q,
+				'indexes': indexes,
+				'greeks': 'false'
       },
     }, (error, response, body) => {
-        console.log(response.statusCode);
-        console.log(body);
+			console.log(response.statusCode);
+			console.log(body);
     });
     return request.data;
   }

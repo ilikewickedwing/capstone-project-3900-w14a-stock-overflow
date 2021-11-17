@@ -1,12 +1,12 @@
 import { authRegister } from "../auth";
-import { createPf, userPfs, openPf } from "../portfolio";
-import { calcPf, getFriendRankings, rankAll, testCalcPf } from "../performance";
+import { createPf, openPf } from "../portfolio";
+import { getFriendRankings, rankAll, testCalcPf } from "../performance";
 import { addStock, modifyStock, getStock } from "../stocks";
 import { Database } from "../database";
 import { calcAll } from "../performance";
 import request from 'supertest';
 import { app, database } from "../index";
-import { getDefBroker, setDefBroker } from "../user";
+import { setDefBroker } from "../user";
 import { addFriend } from "../social";
 
 describe('Rank multiple user portfolio performances', () => {

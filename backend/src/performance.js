@@ -198,7 +198,6 @@ export const calcPf = async (token, pid, database, admin, test, testDate, testDa
       for (let l = 0; l < deetArray.length; l++) {
         setDate = deetArray[l][k].date;
 				if (stocks[l].performance[stocks[l].performance.length - 1].date === setDate) return;
-				// console.log('calcing for ' + setDate);
         const price = deetArray[l][k].close;
         const value = price * stocks[l].quantity;
         const spent = stocks[l].avgPrice * stocks[l].quantity;
@@ -213,7 +212,6 @@ export const calcPf = async (token, pid, database, admin, test, testDate, testDa
         stocks[l].performance.push({ date: setDate, performance: amt });
 				pfProfit += stocks[l].sold - (stocks[l].quantitySold * stocks[l].avgPrice);
         gain += value;
-				// console.log('gain is ' + gain);
       }
 
       const profit = gain - Pf.value.spent;
@@ -221,7 +219,6 @@ export const calcPf = async (token, pid, database, admin, test, testDate, testDa
   
       // Add performance history to portfolio array
       if (Pf.value.performance[0].date === date) {
-				// console.dir(Pf.value, {depth:null});
         Pf.value.performance.splice(0, 1);
 				Pf.value.performance.push({
 					date: testDate,
@@ -246,7 +243,6 @@ export const calcPf = async (token, pid, database, admin, test, testDate, testDa
       const changePerc = perf - prevPerc;
       Pf.value.change.push({ date: setDate, percentage: changePerc, money: change });
 			Pf.value.profit = pfProfit;
-			// console.dir(Pf.value, {depth:null});
     }
 
     await database.calcPf(pid, Pf.value, Pf.stocks);
@@ -267,7 +263,6 @@ export const calcAll = async (database, testmode) => {
   rule1.tz = 'US/Eastern';
 
   const job = schedule.scheduleJob(rule1, async () => {
-    console.log('Market is now closed. Portfolio calculation has begun.');
     const portfolios = await database.getAllPfs();
     for (let i = 0; i < portfolios.length; i++) {
       await calcPf(null, portfolios[i].pid, database, 'yes');
@@ -276,16 +271,13 @@ export const calcAll = async (database, testmode) => {
   })
 
   if (testmode === true) {
-    console.log('Testing calcAll function');
 
     const now = new Date();
     const test = new Date(now);
     test.setSeconds(now.getSeconds() + 1);
-    console.log('Running at ' + now + ', with test scheduled for ' + test);
 
     
     const job = schedule.scheduleJob(test, async () => {
-      console.log('Test calcAll running');
       const portfolios = await database.getAllPfs();
       for (let i = 0; i < portfolios.length; i++) {
         await calcPf(null, portfolios[i].pid, database, 'yes', 'yes', 'today', 1);
@@ -371,10 +363,8 @@ const rankOne = async (pfs, database) => {
   for (let i = 0; i < pfs.length; i++) {
     const pf = await database.openPf(pfs[i].pid);
     if (pf.name !== 'Watchlist') {
-      // console.dir(pf, { depth: null });
       const performances = pf.value.performance;
       const perf = performances[performances.length - 1].money;
-			// console.dir(performances, {depth:null});
 			date = performances[performances.length - 1].date;
       total += perf;
       totalSpend += pf.value.spent;

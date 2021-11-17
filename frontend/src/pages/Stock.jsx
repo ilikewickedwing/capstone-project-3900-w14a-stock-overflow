@@ -131,7 +131,6 @@ const Stock = () => {
     try {
       const request = await axios.get(`${apiBaseUrl}/stocks/info?type=1&stocks=${stockCode}`);
       const reqInfo = request.data.data.quotes.quote;
-      // console.log(reqInfo);
       setName(reqInfo.description);
       setPrice(reqInfo.ask);
       loadOverview();

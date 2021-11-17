@@ -135,7 +135,6 @@ const loadUsers = async () => {
   for (let i= 0; i < 3; i++){
     try{
       const rego = await axios.post(`${ENDPOINT}/auth/register`,{username: users[i].username, password: users[i].password});
-			// console.dir(rego.data, {depth:null});
 			userInfo.push({
 				userNum: i,
 				token: rego.data.token,
@@ -196,7 +195,6 @@ const createPfs = async () =>{
 		token: userInfo[0].token,
 		name: 'myPf'
 	})
-	// console.dir(resp1, {depth:null});
 	pids.push({
 		user: userInfo[0].uid,
 		token: userInfo[0].token,
@@ -232,7 +230,6 @@ const createPfs = async () =>{
 }
 
 const addStocks = async () => {
-	console.log('addStocks');
 	daysCalced = 10;
 	const test = new Date();
 	test.setDate(today.getDate() - daysCalced);
@@ -366,7 +363,6 @@ const addStocks = async () => {
 }
 
 const calcPf = async() => {
-	console.log('calcPf');
 	// testDays - the number of days calculated for
 	const testDays = 2;
 
@@ -380,7 +376,6 @@ const calcPf = async() => {
 }
 
 const calcAll = async () => {
-	console.log('calcAll');
   try{
     await axios.post(`${ENDPOINT}/rankings/forceCalc`);
   }catch (e){
@@ -521,7 +516,6 @@ const addMoreStocks = async () => {
 }
 
 const reCalcPf = async() => {
-	console.log('calcPf');
 	// testDays - the number of days calculated for
 	const testDays = 2;
 

@@ -445,8 +445,6 @@ export class Database {
 		const query = { ownerUid: uid };
 		const user = await users.findOne(query);
 		const date = performance.date;
-		// console.log('setting user performance for ' + uid + ' for ' + date);
-		// console.dir(performance, {depth:null});
 
 		const now = new Date();
 		const today = new Date(now);
@@ -454,7 +452,6 @@ export class Database {
 		const toDate = time.toString();
 
 		if (user.performance[0].date === toDate) {
-			// console.dir(Pf.value, {depth:null});
 			const nextDay = date;
 			const nextDate = new Date(nextDay);
 			const prevDate = new Date();
@@ -518,7 +515,6 @@ export class Database {
 		const profit = performance.profit;
 		user.profit = profit;
 
-		// console.dir(user, {depth:null});
 		// Update user in database
 		await users.updateOne(query, { $set: { profit: profit, performance: performanceArr, value: value, change: newVal }});
 		return perc;
@@ -533,12 +529,10 @@ export class Database {
 		const userPortos = this.database.collection('userPortos');
 		const query = { ownerUid: uid };
 		const userPortoResp = await userPortos.findOne(query);
-		// console.dir(userPortoResp, {depth:null});
 
 		const users = this.database.collection('users');
 		const query2 = { uid: uid };
 		const userResp = await users.findOne(query2);
-		// console.dir(userResp, {depth:null});
 		const perf = {
 			name: userResp.username,
 			performance: userPortoResp.performance,
@@ -894,7 +888,6 @@ export class Database {
    * @returns {Promise<Array>}
    */
   async getAllPfs() {
-    // console.log('getAllPfs');
     const pfs = this.database.collection('portfolios');
     if (pfs.countDocuments() == 0) return [];
     const requests = await pfs.find().toArray();
