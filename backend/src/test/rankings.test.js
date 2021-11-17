@@ -1,12 +1,12 @@
 import { authRegister } from "../auth";
-import { createPf, userPfs, openPf } from "../portfolio";
-import { calcPf, getFriendRankings, rankAll, testCalcPf } from "../performance";
+import { createPf, openPf } from "../portfolio";
+import { getFriendRankings, rankAll, testCalcPf } from "../performance";
 import { addStock, modifyStock, getStock } from "../stocks";
 import { Database } from "../database";
 import { calcAll } from "../performance";
 import request from 'supertest';
 import { app, database } from "../index";
-import { getDefBroker, setDefBroker } from "../user";
+import { setDefBroker } from "../user";
 import { addFriend } from "../social";
 
 describe('Rank multiple user portfolio performances', () => {
@@ -329,7 +329,7 @@ describe('Rank multiple user portfolio performances', () => {
 	})
 })
 
-/* describe('Rank multiple user portfolios performances endpoint test', () => {
+describe('Rank multiple user portfolios performances endpoint test', () => {
   beforeAll(async () => {
     await database.connect();
   })
@@ -586,7 +586,7 @@ describe('Rank multiple user portfolio performances', () => {
       brokerFlag: null
     })
 	  expect(add3_1.statusCode).toBe(200);})
-  it('200 on first valid portfolio calculation', async () => {
+  /* it('200 on first valid portfolio calculation', async () => {
     const test = new Date();
     test.setDate(today.getDate() - daysCalced);
     const testDate = test.getFullYear() + '-' + ('0' + (test.getMonth() + 1)).slice(-2) + '-' + ('0' + test.getDate()).slice(-2);
@@ -599,7 +599,7 @@ describe('Rank multiple user portfolio performances', () => {
     expect(calc2).not.toBe(null);
     expect(calc3).not.toBe(null);
     expect(calc4).not.toBe(null);
-  })
+  }) */
   it('200 on subsequent valid stock additions', async () => {
     const test = new Date();
     test.setDate(today.getDate() - daysCalced);
@@ -674,7 +674,7 @@ describe('Rank multiple user portfolio performances', () => {
     })
     expect(add3_.statusCode).toBe(200);
   })
-  it('200 on second valid portfolio calculation', async () => {
+  /* it('200 on second valid portfolio calculation', async () => {
     const test = new Date();
     test.setDate(today.getDate() - daysCalced);
     const testDate = test.getFullYear() + '-' + ('0' + (test.getMonth() + 1)).slice(-2) + '-' + ('0' + test.getDate()).slice(-2);
@@ -688,7 +688,7 @@ describe('Rank multiple user portfolio performances', () => {
     expect(calc3).not.toBe(null);
     expect(calc4).not.toBe(null);
     
-  })
+  }) */
   it('Rank portfolios', async () => {
 		await rankAll(database);
 		const rankings = await database.getRankings();
@@ -711,11 +711,6 @@ describe('Rank multiple user portfolio performances', () => {
     // console.dir(rankings, { depth: null });
     expect(rankings).not.toBe(null);
 	})
-  // it('Test friend rank 1', async () => {
-  //   const friendRank = await getFriendRankings1(token1, d);
-  //   expect(friendRank).not.toBe(null);
-  //   console.dir(friendRank, {depth:null});
-  // })
   it('Test friend ranks', async () => {
     const friendRank = await getFriendRankings(token1, database);
     expect(friendRank).not.toBe(null);
@@ -735,36 +730,4 @@ describe('Rank multiple user portfolio performances', () => {
   afterAll(async() => {
     await database.disconnect();
   })
-}) */
-
-/* describe('Calling rankAll early', () => {
-  beforeAll(async () => {
-    await database.connect();
-  })
-
-  it('Call rankAll', async () => {
-    const resp = await request(app).get(`/rankings/global`).send()
-    expect(resp).not.toBe(null);
-    console.log(resp.body);
-  })
-
-  afterAll(async() => {
-    await database.disconnect();
-  })
-}) */
-
-/* describe('Calcing calcAll instantly', () => {
-  beforeAll(async () => {
-    await database.connect();
-  })
-
-  jest.setTimeout(30000);
-
-  it('Call calcAll', async () => {
-    await calcAll(database, true);
-  })
-
-  afterAll(async() => {
-    await database.disconnect();
-  })
-}) */
+})

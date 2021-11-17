@@ -69,7 +69,6 @@ export const addStock = async (token, pid, stock, price, quantity, brokerage, br
       const resp = await database.getDefBroker(uid);
       brokerageNum = resp.defBroker;
       flag = resp.brokerFlag;
-      // console.log(brokerageNum);
       if (brokerageNum === null) {
         return 7;
       }
@@ -194,15 +193,11 @@ export const modifyStock = async (token, pid, stock, price, quantity, option, br
  * @returns 
  */
 export const checkStock = async (stock) => {
-  // console.log("checkStock time for " + stock);
   // const stocks = await api.getAllStocks();
-  // console.log("received all stocks");
   const symbols = stock.split(",");
 
   for (let i = 0; i < symbols.length; i++) {
-    // console.log("symbol is " + symbols[i]);
     // const filteredStock = stocks.filter(o => o.symbol === symbols[i])
-    // console.log(symbols[i]);
     const resp = await api.lookupStock(symbols[i]);
     if (resp == null) return false;
     if (Array.isArray(resp)) {
@@ -250,6 +245,5 @@ export const getStock = async (type, stocks, interval, start) => {
   }
 
   const resp = await api.getStock(typeInt, stocks, interval, start);
-  // console.log(stocks);
   return resp;
 }
