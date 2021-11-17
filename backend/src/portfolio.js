@@ -31,7 +31,19 @@ export const createPf = async(token, name, database) => {
   if (uid === null) {
     return false;
   }
-
+  
+  // Check if the person is a celebrity
+  const userData = await database.getUser(uid);
+  if (userData.userType === 'celebrity') {
+    // Notify all their followers
+    const followers = await database.getCelebrityFollowers(uid);
+    if (followers !== null) {
+      for (const uid of followers.followers) {
+        await database.insertUserNotification(uid, `😮${userData.username}, a celebrity you are following has created a new portfolio named ${name}!😮`)
+      }
+    }
+  }
+  
   // Create the portfolio and return the result
   const pidResp = await database.insertPf(uid, name);
   if (pidResp !== null) {

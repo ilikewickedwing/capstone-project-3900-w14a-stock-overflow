@@ -615,9 +615,11 @@ export class Database {
   }
   
 	/**
-	 * Function to get an array of all a celebrities followers
+	 * Function to get an object of all a celebrities followers
+	 * NOTE: followers is the datastructure rather than the array
+   * so you access the followers key to get them
 	 * @param {string} celebUid 
-	 * @returns {Promise<Array>}
+	 * @returns {Promise<Object>}
 	 */
   async getCelebrityFollowers(celebUid) {
     const celebFollowers = this.database.collection('celebrityfollowers');
