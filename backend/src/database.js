@@ -1501,6 +1501,14 @@ export class Database {
       const e = friends[i].uid;
       await this.insertUserNotification(e, userComment);
     }
+    if (userResp.userType === 'celebrity') {
+      const celebResp = await this.getCelebrityFollowers(uid);
+      const followers = celebResp.followers;
+      for (let i= 0; i < followers.length; i++) {
+        const e = followers[i];
+        await this.insertUserNotification(e, userComment);
+      }
+    }
 
     return aid;
   }
@@ -1810,8 +1818,14 @@ export class Database {
     while (currAct.parentId !== null) {
       currAct = await activity.findOne({aid: currAct.parentId});
     }
+    console.log(act.ownerUid);
     if (uid === currAct.ownerUid || await this.checkFriend(uid,currAct.ownerUid)) {
       return true;
+    }
+    const followers = await this.getCelebrityFollowers(act.ownerUid);
+    if (followers !== null  || followers.followers.indexOf(uid) !== -1) {
+      return true;
+
     }
     return false;
   }
