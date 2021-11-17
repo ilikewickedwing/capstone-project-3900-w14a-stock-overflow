@@ -64,7 +64,7 @@ export const addStock = async (token, pid, stock, price, quantity, brokerage, br
     let brokerageNum = parseFloat(brokerage);
 
     // Return error if brokerage is not valid
-    if (brokerage === null) {
+    if (brokerage === null || brokerage === '') {
       // Return error if no default brokerage value set
       const resp = await database.getDefBroker(uid);
       brokerageNum = resp.defBroker;
@@ -145,7 +145,7 @@ export const modifyStock = async (token, pid, stock, price, quantity, option, br
     }
 
     // Return error if brokerage is not valid
-    if (brokerage === null) {
+    if (brokerage === null || brokerage === '') {
       // Return error if no default brokerage value set
       const resp = await database.getDefBroker(uid);
       brokerageNum = resp.defBroker;
