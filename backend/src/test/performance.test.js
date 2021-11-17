@@ -8,7 +8,7 @@ import { app, database } from "../index";
 import { getDefBroker, setDefBroker } from "../user";
 
 
-/* describe('Retrieve stock information', () => {
+describe('Retrieve stock information', () => {
 	const d = new Database(true);
   beforeAll(async () => {
     await d.connect();
@@ -350,7 +350,7 @@ describe('Retrieve stock information endpoint test', () => {
     await database.disconnect();
   })
 })
- */
+
 describe('Calculate portfolio performance', () => {
   const d = new Database(true);
   beforeAll(async () => {
