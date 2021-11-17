@@ -88,6 +88,7 @@ export const calcPf = async (token, pid, database, admin, test, testDate, testDa
     //  versus the amount invested in portfolio
     let perf = 0;
     let gain = Pf.value.sold;
+		let pfProfit = 0;
 
     // Get stocklist
     const stocks = Pf.stocks;
@@ -101,6 +102,7 @@ export const calcPf = async (token, pid, database, admin, test, testDate, testDa
       const spent = stocks[i].avgPrice * stocks[i].quantity;
       const amt = (value - spent)/spent * 100;
       stocks[i].performance.push({ date: date, performance: amt });
+			pfProfit += stocks[i].sold - (stocks[i].quantitySold * stocks[i].avgPrice);
       gain += value;
     }
 
@@ -124,6 +126,7 @@ export const calcPf = async (token, pid, database, admin, test, testDate, testDa
     const change = profit - prevVal;
     const changePerc = perf - prevPerc;
     Pf.value.change.push({ date: date, percentage: changePerc, money: change });
+		Pf.value.profit = pfProfit;
 
     const update = await database.calcPf(pid, Pf.value, Pf.stocks);
     if (!update) return -5;
@@ -134,6 +137,7 @@ export const calcPf = async (token, pid, database, admin, test, testDate, testDa
     if (testDate === 'today') {
       let perf = 0;
       let gain = Pf.value.sold;
+			let pfProfit = 0;
       
       const stocks = Pf.stocks;
       if (stocks === []) return 0;
@@ -146,6 +150,7 @@ export const calcPf = async (token, pid, database, admin, test, testDate, testDa
         const spent = stocks[i].avgPrice * stocks[i].quantity;
         const amt = (value - spent)/spent * 100;
         stocks[i].performance.push({ date: date, performance: amt });
+				pfProfit += stocks[i].sold - (stocks[i].quantitySold * stocks[i].avgPrice);
         gain += value;
       }
 
@@ -167,6 +172,7 @@ export const calcPf = async (token, pid, database, admin, test, testDate, testDa
       const change = profit - prevVal;
       const changePerc = perf - prevPerc;
       Pf.value.change.push({ date: date, percentage: changePerc, money: change });
+			Pf.value.profit = pfProfit;
       await database.calcPf(pid, Pf.value, Pf.stocks);
       return;
     }
@@ -186,6 +192,7 @@ export const calcPf = async (token, pid, database, admin, test, testDate, testDa
     for (let k = 0; k < Math.min(deetArray[0].length, testDays); k++) {
       let perf = 0;
       let gain = Pf.value.sold;
+			let pfProfit = 0;
       let setDate = null;
     
       for (let l = 0; l < deetArray.length; l++) {
@@ -204,6 +211,7 @@ export const calcPf = async (token, pid, database, admin, test, testDate, testDa
 					})
         }
         stocks[l].performance.push({ date: setDate, performance: amt });
+				pfProfit += stocks[l].sold - (stocks[l].quantitySold * stocks[l].avgPrice);
         gain += value;
 				// console.log('gain is ' + gain);
       }
@@ -237,6 +245,7 @@ export const calcPf = async (token, pid, database, admin, test, testDate, testDa
       const change = profit - prevVal;
       const changePerc = perf - prevPerc;
       Pf.value.change.push({ date: setDate, percentage: changePerc, money: change });
+			Pf.value.profit = pfProfit;
 			// console.dir(Pf.value, {depth:null});
     }
 
@@ -358,6 +367,7 @@ const rankOne = async (pfs, database) => {
   let totalSpend = 0;
   let totalSold = 0;
 	let date = null;
+	let profit = 0;
   for (let i = 0; i < pfs.length; i++) {
     const pf = await database.openPf(pfs[i].pid);
     if (pf.name !== 'Watchlist') {
@@ -369,6 +379,7 @@ const rankOne = async (pfs, database) => {
       total += perf;
       totalSpend += pf.value.spent;
       totalSold += pf.value.sold;
+			profit += pf.value.profit;
     }
   }
 
@@ -376,6 +387,7 @@ const rankOne = async (pfs, database) => {
     money: total,
     spent: totalSpend,
     sold: totalSold,
+		profit: profit,
 		date: date
   };
 

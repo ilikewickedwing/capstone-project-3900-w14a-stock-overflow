@@ -50,6 +50,7 @@ const COLLECTIONS = [
       ],
       defBroker: float,
       brokerFlag: int,
+			profit: float,
       performance: [
         {
           date: string,
@@ -81,6 +82,8 @@ const COLLECTIONS = [
           stock: string,
           avgPrice: float,
           quantity: int,
+					sold: float,
+					quantitySold: int,
           performance: [
             {
               date: string,
@@ -92,6 +95,7 @@ const COLLECTIONS = [
       value: {
         spent: float,
         sold: float,
+				profit: float,
         performance: [
           {
             date: string,
@@ -324,6 +328,7 @@ export class Database {
       ],
       defBroker: null,
       brokerFlag: null,
+			profit: 0,
       performance: [
 				{
 					date: date,
@@ -347,6 +352,7 @@ export class Database {
       value: {
 				spent: null,
         sold: null,
+				profit: null,
         performance: [
 					{
 						date: null,
@@ -509,10 +515,12 @@ export class Database {
 			percentage: changePerc, 
 			money: change 
 		});
+		const profit = performance.profit;
+		user.profit = profit;
 
-		console.dir(user, {depth:null});
+		// console.dir(user, {depth:null});
 		// Update user in database
-		await users.updateOne(query, { $set: { performance: performanceArr, value: value, change: newVal }});
+		await users.updateOne(query, { $set: { profit: profit, performance: performanceArr, value: value, change: newVal }});
 		return perc;
 	}
 
@@ -927,6 +935,7 @@ export class Database {
       value: {
         spent: 0,
         sold: 0,
+				profit: 0,
         performance: [
           {
             date: date,
@@ -1142,6 +1151,8 @@ export class Database {
           stock: stock,
           avgPrice: null,
           quantity: null,
+					sold: null,
+					quantitySold: null,
           performance: [
             {
               date: null,
@@ -1154,6 +1165,8 @@ export class Database {
           stock: stock,
           avgPrice: price,
           quantity: quantity,
+					sold: 0,
+					quantitySold: 0,
           performance: [
             {
               date: date,
@@ -1200,7 +1213,7 @@ export class Database {
     
     if (stkIndex != -1) { // If stock is in the portfolio
       if (pfResp.name !== 'Watchlist') {
-          if (stockList[stkIndex].quantity - quantity < 0) {
+				if (stockList[stkIndex].quantity - quantity < 0) {
           return 4;
         }
         else {
@@ -1208,6 +1221,8 @@ export class Database {
           // if (stockList[stkIndex].quantity == 0) {
           //   stockList.splice(stkIndex, 1);
           // }
+					stockList[stkIndex].sold += price * quantity;
+					stockList[stkIndex].quantitySold += quantity;
         }
       } else {
         stockList.splice(stkIndex, 1);
