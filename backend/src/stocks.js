@@ -161,7 +161,7 @@ export const modifyStock = async (token, pid, stock, price, quantity, option, br
 
       // Return error if flag is not valid
       if (!(brokerFlag === 0 || brokerFlag === 1)) {
-        return 9;
+        return 10;
       } else {
         flag = brokerFlag;
       }
