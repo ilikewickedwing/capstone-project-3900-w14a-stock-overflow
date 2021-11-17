@@ -10,6 +10,18 @@ import { API } from "./api";
 
 const api = new API(); 
 
+export const testCalcPf = async (deets, database, admin, test, daysCalced, testDays) => {
+	const now = new Date();
+	const today = new Date(now);
+	for (let i = 0; i < testDays; i++) {
+		const testTime = new Date();
+    testTime.setDate(today.getDate() - daysCalced);
+    const testDate = testTime.getFullYear() + '-' + ('0' + (testTime.getMonth() + 1)).slice(-2) + '-' + ('0' + testTime.getDate()).slice(-2);
+		for (let j = 0; j < deets.length; j++) await calcPf(deets[j].token, deets[j].pid, database, admin, test, testDate, 1);
+		await rankAll(database);
+		daysCalced -= 2;
+	}
+}
 
 /**
  * Function to calculate the performance of a portfolio
@@ -159,6 +171,7 @@ export const calcPf = async (token, pid, database, admin, test, testDate, testDa
       return;
     }
 
+		// If not calcing for today
     // Get stocklist
     const stocks = Pf.stocks;
     let deetArray = [];
@@ -177,15 +190,22 @@ export const calcPf = async (token, pid, database, admin, test, testDate, testDa
     
       for (let l = 0; l < deetArray.length; l++) {
         setDate = deetArray[l][k].date;
+				if (stocks[l].performance[stocks[l].performance.length - 1].date === setDate) return;
+				// console.log('calcing for ' + setDate);
         const price = deetArray[l][k].close;
         const value = price * stocks[l].quantity;
         const spent = stocks[l].avgPrice * stocks[l].quantity;
         const amt = (value - spent)/spent * 100;
         if (stocks[l].performance[0].date === date) {
           stocks[l].performance.splice(0, 1);
+					stocks[l].performance.push({
+						date: testDate,
+						performance: 0
+					})
         }
         stocks[l].performance.push({ date: setDate, performance: amt });
         gain += value;
+				// console.log('gain is ' + gain);
       }
 
       const profit = gain - Pf.value.spent;
@@ -193,23 +213,31 @@ export const calcPf = async (token, pid, database, admin, test, testDate, testDa
   
       // Add performance history to portfolio array
       if (Pf.value.performance[0].date === date) {
+				// console.dir(Pf.value, {depth:null});
         Pf.value.performance.splice(0, 1);
-        Pf.value.change.splice(0, 1);
+				Pf.value.performance.push({
+					date: testDate,
+					performance: 0,
+					money: 0
+				})
+				Pf.value.change.splice(0, 1);
+				Pf.value.change.push({
+					date: testDate,
+					percentage: 0,
+					money: 0
+				})
       }
+
       let prevVal = null;
       let prevPerc = null;
       const prevPerf = Pf.value.performance[Pf.value.performance.length - 1];
-      if (prevPerf) {
-        prevVal = prevPerf.money;
-        prevPerc = prevPerf.performance;
-      } else {
-        prevVal = 0;
-        prevPerc = 0;
-      }
+			prevVal = prevPerf.money;
+			prevPerc = prevPerf.performance;
       Pf.value.performance.push({ date: setDate, performance: perf, money: profit });
       const change = profit - prevVal;
       const changePerc = perf - prevPerc;
       Pf.value.change.push({ date: setDate, percentage: changePerc, money: change });
+			// console.dir(Pf.value, {depth:null});
     }
 
     await database.calcPf(pid, Pf.value, Pf.stocks);
@@ -255,7 +283,7 @@ export const calcAll = async (database, testmode) => {
       }
       await rankAll(database);
     })
-    // await new Promise(resolve => setTimeout(resolve, 10000));
+    await new Promise(resolve => setTimeout(resolve, 10000));
   }
 }
 
@@ -329,24 +357,38 @@ const rankOne = async (pfs, database) => {
   let total = 0;
   let totalSpend = 0;
   let totalSold = 0;
+	let date = null;
   for (let i = 0; i < pfs.length; i++) {
     const pf = await database.openPf(pfs[i].pid);
     if (pf.name !== 'Watchlist') {
       // console.dir(pf, { depth: null });
       const performances = pf.value.performance;
       const perf = performances[performances.length - 1].money;
+			// console.dir(performances, {depth:null});
+			date = performances[performances.length - 1].date;
       total += perf;
       totalSpend += pf.value.spent;
       totalSold += pf.value.sold;
     }
   }
 
-  return { 
+  const obj = { 
     money: total,
     spent: totalSpend,
-    sold: totalSold
+    sold: totalSold,
+		date: date
   };
+
+	return obj;
 }
+
+/**
+portfolios
+Money spent subtracted
+Money selling added
+Add value of the stocks right now * quantity of stock
+*/
+
 
 /**
  * Function to get all rankings

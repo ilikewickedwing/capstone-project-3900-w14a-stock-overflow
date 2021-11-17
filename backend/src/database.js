@@ -438,18 +438,47 @@ export class Database {
 		const users = this.database.collection('userPortos');
 		const query = { ownerUid: uid };
 		const user = await users.findOne(query);
+		const date = performance.date;
+		// console.log('setting user performance for ' + uid + ' for ' + date);
+		// console.dir(performance, {depth:null});
+
 		const now = new Date();
 		const today = new Date(now);
 		const time = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + today.getDate()).slice(-2);
-		const date = time.toString();
+		const toDate = time.toString();
+
+		if (user.performance[0].date === toDate) {
+			// console.dir(Pf.value, {depth:null});
+			const nextDay = date;
+			const nextDate = new Date(nextDay);
+			const prevDate = new Date();
+			prevDate.setDate(nextDate.getDate() - 1);
+			const prevTime = prevDate.getFullYear() + '-' + ('0' + (prevDate.getMonth() + 1)).slice(-2) + '-' + ('0' + prevDate.getDate()).slice(-2);
+			const prevToDate = prevTime.toString();
+			
+			user.performance.splice(0, 1);
+			user.performance.push({
+				date: prevToDate,
+				performance: 0,
+				money: 0
+			})
+			user.change.splice(0, 1);
+			user.change.push({
+				date: prevToDate,
+				percentage: 0,
+				money: 0
+			})
+		}
+
+		if (user.performance[user.performance.length - 1].date === date) return;
 	
 		// Calculate the percentage performance
-		const perc = (performance.money + performance.sold)/performance.spent * 100;
+		const perc = (performance.money)/performance.spent * 100;
 		// Create performance and value objects
 		const perf = {
 			date: date,
 			performance: perc,
-			money: performance.money
+			money: (performance.money)
 		}
 		const value = {
 			spent: performance.spent,
@@ -472,11 +501,16 @@ export class Database {
 			prevVal = 0;
 			prevPerc = 0;
 		}
-		const change = performance.money - prevVal;
+		const change = (performance.money) - prevVal;
 		const changePerc = perc - prevPerc;
 		const newVal = user.change;
-		newVal.push({ date: date, percentage: changePerc, money: change });
+		newVal.push({ 
+			date: date, 
+			percentage: changePerc, 
+			money: change 
+		});
 
+		console.dir(user, {depth:null});
 		// Update user in database
 		await users.updateOne(query, { $set: { performance: performanceArr, value: value, change: newVal }});
 		return perc;

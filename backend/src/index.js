@@ -4,7 +4,7 @@ import { Database } from "./database";
 import swaggerUI from 'swagger-ui-express';
 import { swaggerDocs } from "./docs";
 import { createPf, deletePf, openPf, userPfs, getPid, editPf, openFriendPf } from "./portfolio";
-import { calcAll, calcPf, getAllRankings, getFriendRankings, getUserPerf } from "./performance";
+import { calcAll, calcPf, getAllRankings, getFriendRankings, getUserPerf, testCalcPf } from "./performance";
 import { authDelete, authLogin, authLogout, authRegister } from "./auth";
 import { getDefBroker, getUserProfile, getUserUid, postUserProfile, setDefBroker, userPasswordchange } from "./user";
 import { addStock, modifyStock, getAllStocks, checkStock, getStock } from "./stocks";
@@ -953,7 +953,9 @@ app.put('/user/stocks/edit', async(req, res) => {
 		res.status(403).send({ error: "Default brokerage cost not set" });
 	} else if (resp === 10) {
 		res.status(403).send({ error: "Invalid brokerage type" });
-	}
+	} else if (resp === 11) {
+    res.status(403).send({ error: "Invalid option" });
+  }
 	return;
 })
 
@@ -1997,7 +1999,7 @@ app.post('/rankings/forceCalc', async(req, res) => {
 })
 
 app.post('/rankings/forceCalcPf', async(req, res) => {
-  const { token, pid, testDate, testDays } = req.body;
-  const resp = await calcPf(token, pid, database, 'yes', 'yes', testDate, testDays);
+  const { deetArr, daysCalced, testDays } = req.body;
+  await testCalcPf(deetArr, database, 'yes', 'yes', daysCalced, testDays);
   res.status(200).send();
 })

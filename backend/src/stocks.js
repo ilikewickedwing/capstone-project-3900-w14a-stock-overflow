@@ -119,6 +119,10 @@ export const modifyStock = async (token, pid, stock, price, quantity, option, br
     return 1;
   }
 
+	if (option === null) {
+		return 11;
+	}
+
   // Return error if stock is not valid
   if (!await checkStock(stock)) {
     return 2;

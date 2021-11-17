@@ -8,7 +8,6 @@ import { apiBaseUrl } from '../comp/const';
 import axios from "axios";
 import PerformanceGraph from '../graph/PerformanceGraph';
 import RankTable from '../comp/RankTable'; 
-
 // styling imports 
 import { 
   PfBody, 
@@ -38,12 +37,10 @@ function createData(code, name, buyPrice, currPrice, changePer, units, value, pr
     profitLoss,
   };
 }
-
 // stub data for rankings
 function createRankData(name, performance, rank) {
   return { name, performance, rank };
 }
-
 // demo data for rankings
 const rows = [
   createData('richard_mo', '400', 1),
@@ -51,8 +48,6 @@ const rows = [
   createData('user1', "100", 3),
   createData('dragonalxd', "59", 4),
 ];
-
-
 export default function Dashboard() {
   const myName = localStorage.getItem('username');
   const token = localStorage.getItem('token');
@@ -63,7 +58,6 @@ export default function Dashboard() {
   
   // friend's activity
   const [activity, setActivity] = React.useState([]); 
-
   // rankings 
   const [globalRank, setGlobal ] = React.useState(rows);
   const [rankings, setRankings] = React.useState(rows);
@@ -108,8 +102,11 @@ const getFriendRanking = async () => {
   try {
     const resp = await axios.get(`${apiBaseUrl}/rankings/friends?token=${token}`);
     let list = [];
+    console.log(resp.data);
     for (let i=0; i< resp.data.length; i++){
-      list.push(createRankData(resp.data[i].name, resp.data[i].performance.performance, resp.data[i].rank));
+      if (i < 5){
+        list.push(createRankData(resp.data[i].name, resp.data[i].performance.performance, resp.data[i].rank));
+      }
       if (resp.data[i].name === myName){
         setMyRanking(createRankData(resp.data[i].name, resp.data[i].performance.performance, resp.data[i].rank));
       }
@@ -118,6 +115,7 @@ const getFriendRanking = async () => {
 
     // todo set ranking of the new thing 
   } catch (e) {
+    // console.log(e);
     alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
   }
 }
@@ -163,7 +161,6 @@ const getFriendRanking = async () => {
       alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
     }
   };
-
    
   const getActivity = async() => {
     try {
@@ -174,7 +171,6 @@ const getFriendRanking = async () => {
       // alert(`Status Code ${e.data.status} : ${e.data.error}`,'error');
     }
   }
-  
   return (
     <PageBody className="font-two">
       <Navigation />
