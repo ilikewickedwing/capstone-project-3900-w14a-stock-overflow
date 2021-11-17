@@ -166,7 +166,7 @@ const Portfolio = () => {
             <RightBody elevation={10}>
               <RightCard elevation={5} style={{textAlign:'center'}}>
                 <h3>Daily Estimated Earnings</h3>
-                {earnings.money.toFixed(2)} USD
+                {parseFloat(earnings.money).toFixed(2)} USD
               </RightCard>
             </RightBody>
             </PfBody>

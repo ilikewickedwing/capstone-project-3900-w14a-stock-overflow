@@ -4,6 +4,7 @@
 import fetch from "node-fetch";
 import fs from 'fs';
 import axios from 'axios';
+import { pid } from "process";
 
 // This is the port number of the backend server
 const ENDPOINT = `http://localhost:5050`;
@@ -13,17 +14,23 @@ const ENDPOINT = `http://localhost:5050`;
 // of celebrity requests (because only users can request to be celebrities)
 const USERNUM = 100;
 let userInfo = [];
-// userInfo: {
-// 	userNum: int,
-// 	token: token,
-// 	uid: uid
-// }
+// userInfo: [
+// 	{
+// 		userNum: int,
+// 		token: token,
+//	 	uid: uid
+// 	}
+// ]
 let pids = [];
-// pids: {
-// 	user: uid,
-// 	pid: pid
-// }
+// pids: [
+// 	{
+// 		user: uid,
+//    token: token,
+// 		pid: pid
+// 	}
+// ]
 let daysCalced = 0;
+
 const now = new Date();
 const today = new Date(now);
 const time = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + today.getDate()).slice(-2);
@@ -192,6 +199,7 @@ const createPfs = async () =>{
 	// console.dir(resp1, {depth:null});
 	pids.push({
 		user: userInfo[0].uid,
+		token: userInfo[0].token,
 		pid: resp1.data.pid,
 	})
 	const resp2 = await axios.post(`${ENDPOINT}/user/portfolios/create`,{
@@ -200,6 +208,7 @@ const createPfs = async () =>{
 	})
 	pids.push({
 		user: userInfo[1].uid,
+		token: userInfo[1].token,
 		pid: resp2.data.pid,
 	})
 	const resp3 = await axios.post(`${ENDPOINT}/user/portfolios/create`,{
@@ -208,6 +217,7 @@ const createPfs = async () =>{
 	})
 	pids.push({
 		user: userInfo[2].uid,
+		token: userInfo[2].token,
 		pid: resp3.data.pid,
 	})
 	const resp4 = await axios.post(`${ENDPOINT}/user/portfolios/create`,{
@@ -216,6 +226,7 @@ const createPfs = async () =>{
 	})
 	pids.push({
 		user: userInfo[2].uid,
+		token: userInfo[2].token,
 		pid: resp4.data.pid,
 	})
 }
@@ -356,37 +367,15 @@ const addStocks = async () => {
 
 const calcPf = async() => {
 	console.log('calcPf');
-	// testDate - the date from which portfolio calculations begin
 	// testDays - the number of days calculated for
-	const test = new Date();
-	test.setDate(today.getDate() - daysCalced);
-	const testDate = test.getFullYear() + '-' + ('0' + (test.getMonth() + 1)).slice(-2) + '-' + ('0' + test.getDate()).slice(-2);
 	const testDays = 2;
 
 	await axios.post(`${ENDPOINT}/rankings/forceCalcPf`,{
-		token: userInfo[0].token,
-		pid: pids[0].pid,
-		testDate: testDate,
+		deetArr: pids,
+		daysCalced: daysCalced,
 		testDays: testDays,
 	})
-	await axios.post(`${ENDPOINT}/rankings/forceCalcPf`,{
-		token: userInfo[1].token,
-		pid: pids[1].pid,
-		testDate: testDate,
-		testDays: testDays,
-	})
-	await axios.post(`${ENDPOINT}/rankings/forceCalcPf`,{
-		token: userInfo[2].token,
-		pid: pids[2].pid,
-		testDate: testDate,
-		testDays: testDays,
-	})
-	await axios.post(`${ENDPOINT}/rankings/forceCalcPf`,{
-		token: userInfo[2].token,
-		pid: pids[3].pid,
-		testDate: testDate,
-		testDays: testDays,
-	})
+	
 	daysCalced -= testDays + 1;
 }
 
@@ -533,37 +522,15 @@ const addMoreStocks = async () => {
 
 const reCalcPf = async() => {
 	console.log('calcPf');
-	// testDate - the date from which portfolio calculations begin
 	// testDays - the number of days calculated for
-	const test = new Date();
-	test.setDate(today.getDate() - daysCalced);
-	const testDate = test.getFullYear() + '-' + ('0' + (test.getMonth() + 1)).slice(-2) + '-' + ('0' + test.getDate()).slice(-2);
 	const testDays = 2;
 
 	await axios.post(`${ENDPOINT}/rankings/forceCalcPf`,{
-		token: userInfo[0].token,
-		pid: pids[0].pid,
-		testDate: testDate,
+		deetArr: pids,
+		daysCalced: daysCalced,
 		testDays: testDays,
 	})
-	await axios.post(`${ENDPOINT}/rankings/forceCalcPf`,{
-		token: userInfo[1].token,
-		pid: pids[1].pid,
-		testDate: testDate,
-		testDays: testDays,
-	})
-	await axios.post(`${ENDPOINT}/rankings/forceCalcPf`,{
-		token: userInfo[2].token,
-		pid: pids[2].pid,
-		testDate: testDate,
-		testDays: testDays,
-	})
-	await axios.post(`${ENDPOINT}/rankings/forceCalcPf`,{
-		token: userInfo[2].token,
-		pid: pids[3].pid,
-		testDate: testDate,
-		testDays: testDays,
-	})
+	
 	daysCalced -= testDays;
 }
 
