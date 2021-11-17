@@ -372,7 +372,6 @@ export default function PfTable({stocks, load, setGraphSelected, isFriend}) {
   },[stocks]);
 
   const loadStocks = async () => {
-    // console.log(stocks);
     if (stocks.length === 0) {
       setRows([]);
       return;
