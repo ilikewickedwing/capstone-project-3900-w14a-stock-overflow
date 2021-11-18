@@ -55,6 +55,7 @@ const Portfolio = () => {
   const loadPorfolioData = async () => {
     // reset the stocks list (cached from loads)
     setStocks([]);
+    setGraphSelected([]);
     try {
       const request = await axios.get(`${apiBaseUrl}/user/portfolios/open?token=${token}&pid=${pid}`);
       const portfolioData = request.data;
@@ -107,32 +108,32 @@ const Portfolio = () => {
       <PageBody className="font-two">
           <Navigation />
           <Tabs isChanged={isChanged}/>
-              {isWatchlist 
-              ? (<PfBody>
-                    <WatchlistBody elevation={10}>
-                      <PfBar>
-                        <Heading>{name}</Heading> 
-                      </PfBar>
-                      {
-                        stocks.map(item => {
-                          return <WatchlistCard
-                            key={item.stock}
-                            name={item.stock}
-                            onDeleteCallback={() => { loadPorfolioData() }}
-                            isFriend={0}
-                          />
-                        })
-                      }
-                      < AddStock 
-                        token={token}
-                        pid={pid}
-                        onAddCallback={loadPorfolioData}
-                        load={loadPorfolioData}
-                        name={name}
-                      />
-                    </WatchlistBody>
-                </PfBody>)
-              :
+            {isWatchlist 
+            ? (<PfBody>
+                  <WatchlistBody elevation={10}>
+                    <PfBar>
+                      <Heading>{name}</Heading> 
+                    </PfBar>
+                    {
+                      stocks.map(item => {
+                        return <WatchlistCard
+                          key={item.stock}
+                          name={item.stock}
+                          onDeleteCallback={() => { loadPorfolioData() }}
+                          isFriend={0}
+                        />
+                      })
+                    }
+                    < AddStock 
+                      token={token}
+                      pid={pid}
+                      onAddCallback={loadPorfolioData}
+                      load={loadPorfolioData}
+                      name={name}
+                    />
+                  </WatchlistBody>
+              </PfBody>)
+            :
             (<PfBody>
               <LeftBody elevation={10}>
               <PfBar>
@@ -176,35 +177,35 @@ const Portfolio = () => {
             </PfBody>
             )}
           <Popover
-              id={id}
-              open={open}
-              anchorEl={anchorEl}
-              onClose={() => setAnchorEl(null)}
-              anchorOrigin={{
-              vertical:'bottom',
-              horizontal:'left',
-              }}
-              transformOrigin={{
-              vertical:'top',
-              horizontal:'center',
-              }}
+            id={id}
+            open={open}
+            anchorEl={anchorEl}
+            onClose={() => setAnchorEl(null)}
+            anchorOrigin={{
+            vertical:'bottom',
+            horizontal:'left',
+            }}
+            transformOrigin={{
+            vertical:'top',
+            horizontal:'center',
+            }}
           >
-              <CreatePortContent>
-              <form autoComplete="off" onSubmit={submitPfRename}>
-                  <CreatePortField
-                  required
-                  fullWidth
-                  id="renamePf"
-                  label="Enter New Portfolio Name"
-                  onChange={(e)=> editName(e.target.value)}
-                  />
-                  <br />
-                  <ConfirmCancel>
-                      <Button type="button" onClick={() => setAnchorEl(null)}>Cancel</Button>
-                      <Button type="submit">CONFIRM</Button>
-                  </ConfirmCancel>
-              </form>
-              </CreatePortContent>
+            <CreatePortContent>
+            <form autoComplete="off" onSubmit={submitPfRename}>
+                <CreatePortField
+                required
+                fullWidth
+                id="renamePf"
+                label="Enter New Portfolio Name"
+                onChange={(e)=> editName(e.target.value)}
+                />
+                <br />
+                <ConfirmCancel>
+                    <Button type="button" onClick={() => setAnchorEl(null)}>Cancel</Button>
+                    <Button type="submit">CONFIRM</Button>
+                </ConfirmCancel>
+            </form>
+            </CreatePortContent>
           </Popover>
       </PageBody>
   );

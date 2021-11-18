@@ -10,20 +10,17 @@ import {
   WatchlistBody,
 } from '../styles/styling';
 import Button from '@mui/material/Button';
-import Navigation from '../comp/Navigation';
-import Tabs from '../comp/Tabs';
 import { AlertContext } from '../App';
 import { useHistory, useParams } from 'react-router-dom';
 import axios from "axios";
+
+import Navigation from '../comp/Navigation';
+import Tabs from '../comp/Tabs';
 import { apiBaseUrl } from '../comp/const';
 import FriendTab from '../comp/FriendTab';
 import PfTable from '../comp/PfTable';
 import PerformanceGraph from '../graph/PerformanceGraph';
 import WatchlistCard from '../comp/WatchlistCard';
-
-import IconButton from '@mui/material/IconButton';
-import ThumbUpOutlinedIcon from '@mui/icons-material/ThumbUpOutlined';
-import CommentOutlinedIcon from '@mui/icons-material/CommentOutlined';
 import StocksGraph from '../graph/StocksGraph';
 import Activity from '../comp/Activity';
 
@@ -36,24 +33,24 @@ export default function Friend() {
   const token = localStorage.getItem('token');
   const uid = localStorage.getItem('uid');
 
-    const [friendUid, setUid] = React.useState('');
-    // list of portfolios of all the portfolios given a uid 
-    const [portData, setPortfolio ] = React.useState([]);
+  const [friendUid, setUid] = React.useState('');
+  // list of portfolios of all the portfolios given a uid 
+  const [portData, setPortfolio ] = React.useState([]);
 
-    // private: 0, public: 1
-    const [isPublic, setPublic] = React.useState(0);
-    const [userType, setUserType] = React.useState('');
+  // private: 0, public: 1
+  const [isPublic, setPublic] = React.useState(0);
+  const [userType, setUserType] = React.useState('');
 
-    // set which current stocks and tab to view 
-    const [pid, setPid] = React.useState('');
-    const [tab, setTab] = React.useState('Summary');
-    const [stocks, setStocks] = React.useState([]);
-    const [selected, setGraphSelected] = React.useState([]);
+  // set which current stocks and tab to view 
+  const [pid, setPid] = React.useState('');
+  const [tab, setTab] = React.useState('Summary');
+  const [stocks, setStocks] = React.useState([]);
+  const [selected, setGraphSelected] = React.useState([]);
 
-    // Store friends activities
-    const [activity, setActivity] = React.useState([]);
+  // Store friends activities
+  const [activity, setActivity] = React.useState([]);
 
-    const [followers, setFollowers] = React.useState([]);
+  const [followers, setFollowers] = React.useState([]);
 
       // on first load 
     React.useEffect(() => {   
@@ -169,15 +166,6 @@ export default function Friend() {
       }
     }
 
-    //handle like activity event 
-    const likeClick = async (id) => {
-      try {
-        await axios.post(`${apiBaseUrl}/activity/like`, {token, aid: id});
-        loadActivities();
-      } catch (e){
-        alert(`Status Code ${e.response.status} : ${e.response.data.error}`,'error');
-      }
-    }
 
     const unfriend = async () => {
       try {
@@ -194,113 +182,117 @@ export default function Friend() {
       <Navigation />
       <Tabs />
         {isPublic?(
-                // public to the user portfolio
-                <PfBody>
-                <LeftBody elevation={10}>
-                <PfBar>
-                  <Heading>{handle}'s Portfolios </Heading>
-                  {(userType==="celebrity" && followers !== undefined) && 
-                    <Button variant="outlined" color="secondary" id="addFriend" onClick={followCeleb}> 
-                      {`${followers.includes(uid) ? 'Unfollow' : 'Follow'}`}
-                    </Button>
-                  }
-                  {(userType==="user") &&
-                    <Button variant="outlined" color="secondary" id="addFriend" onClick={unfriend}> 
-                      Unfriend
-                    </Button>
-                  }
-                </PfBar>
-                  {portData.map((e)=>(
-                      <FriendTab
-                        key={e.name}
-                        name={e.name}
-                        pid={e.pid}
-                        stocks={e.stocks}
-                        setTab={setTab} 
-                        setStocks={setStocks}
-                        setPid={setPid}
-                      / >
-                  ))}
-                  < br/> 
-                  <h3>{tab}</h3>
-                  {tab ==='Summary' &&
+          // public to the user portfolio
+          <PfBody>
+            <LeftBody elevation={10}>
+            <PfBar>
+              <Heading>{handle}'s Portfolios </Heading>
+              {(userType==="celebrity" && followers !== undefined) && 
+                <Button variant="outlined" color="secondary" id="addFriend" onClick={followCeleb}> 
+                  {`${followers.includes(uid) ? 'Unfollow' : 'Follow'}`}
+                </Button>
+              }
+              {(userType==="user") &&
+                <Button variant="outlined" color="secondary" id="addFriend" onClick={unfriend}> 
+                  Unfriend
+                </Button>
+              }
+            </PfBar>
+            {portData.map((e)=>(
+                <FriendTab
+                  key={e.name}
+                  name={e.name}
+                  pid={e.pid}
+                  stocks={e.stocks}
+                  setTab={setTab} 
+                  setStocks={setStocks}
+                  setPid={setPid}
+                / >
+            ))}
+            < br/> 
+            <h3>{tab}</h3>
+            {
+              tab ==='Summary' &&
+              <PerformanceGraph 
+              pids={''}
+              height={300}
+              isFriend={true}
+              friendUid={friendUid}
+              />
+            }
+            {
+              stocks.length > 0 && 
+              tab !== "Watchlist" ?
+              (
+                <div>
                   <PerformanceGraph 
-                  pids={''}
-                  height={300}
-                  isFriend={true}
-                  friendUid={friendUid}
-                />}
-                  {stocks.length > 0 && 
-                  tab !== "Watchlist" ?(
-                    <div>
-                      <PerformanceGraph 
-                        pids={pid}
-                        height={300}
-                        isFriend={true}
-                        friendUid={friendUid}
-                      />
-                      <PfTable 
-                        stocks={stocks}
-                        load={loadPortfolios}
-                        setGraphSelected={setGraphSelected}
-                        isFriend={1}
-                      />
-                    </div>
-                  ) : (
-                    stocks.map(item => {
-                    return <WatchlistCard
-                      key={item.stock}
-                      name={item.stock}
-                      isFriend={1}
-                    />})
-                  )
-                  }
-              </LeftBody>
-              <RightBody>
+                    pids={pid}
+                    height={300}
+                    isFriend={true}
+                    friendUid={friendUid}
+                  />
+                  <PfTable 
+                    stocks={stocks}
+                    load={loadPortfolios}
+                    setGraphSelected={setGraphSelected}
+                    isFriend={1}
+                  />
+                </div>
+              ) : (
+                stocks.map(item => {
+                return <WatchlistCard
+                  key={item.stock}
+                  name={item.stock}
+                  isFriend={1}
+                />})
+              )
+            }
+            </LeftBody>
+            <RightBody>
+              <RightCard elevation={10}>
+                <h3 style={{textAlign:'center'}}>{handle}'s Net Profits</h3>
+              </RightCard>
+              {selected.length > 0 && 
                 <RightCard elevation={10}>
-                  <h3 style={{textAlign:'center'}}>{handle}'s Net Profits</h3>
+                  <h3 style={{textAlign:'center'}}>Stocks Comparison</h3>
+                  <StocksGraph companyId={selected.toString()} height={150}/>
                 </RightCard>
-                {selected.length > 0 && 
-                  <RightCard elevation={10}>
-                    <h3 style={{textAlign:'center'}}>Stocks Comparison</h3>
-                    <StocksGraph companyId={selected.toString()} height={150}/>
-                  </RightCard>
-                }
-                <RightCard elevation={10} style={{overflowY:'scroll', height:'50vh'}}>
-                  <h3 style={{textAlign:'center'}}>{handle}'s Activity</h3>
-                  {
-                  activity.length > 0 ? activity.map((e,index) =>{
-                    if (e.time){
-                      let subString = `${e.time.split('T')[0]}` +" "+`${e.time.substring(11,16)}`;
-                      return <Activity 
-                        key={index} 
-                        message={e.message} 
-                        time={subString} 
-                        aid={e.aid} 
-                        likes={e.likes} 
-                        getActivityCallBack={loadActivities} 
-                        userComments={e.userComments}  
-                        likedUsers={e.likedUsers}
-                        />
-                    }
-                      }): (
-                        <p>Empty feed :\</p>
-                      ) 
+              }
+              <RightCard elevation={10} style={{overflowY:'scroll', height:'50vh'}}>
+                <h3 style={{textAlign:'center'}}>{handle}'s Activity</h3>
+                {
+                activity.length > 0 ? activity.map((e,index) =>{
+                  if (e.time){
+                    let subString = `${e.time.split('T')[0]}` +" "+`${e.time.substring(11,16)}`;
+                    return <Activity 
+                      key={index} 
+                      message={e.message} 
+                      time={subString} 
+                      aid={e.aid} 
+                      likes={e.likes} 
+                      getActivityCallBack={loadActivities} 
+                      userComments={e.userComments}  
+                      likedUsers={e.likedUsers}
+                      />
                   }
-                </RightCard>
-              </RightBody>
-            </PfBody>
+                    }): (
+                      <p>Empty feed :\</p>
+                    ) 
+                }
+              </RightCard>
+            </RightBody>
+          </PfBody>
           ):(
             //private portfolio
-            <PfBody>
-              <WatchlistBody elevation={10}>
-                <PfBar>
-                  <Heading>{handle}'s (private) </Heading>
-                  <Button id="addFriend" onClick={sendRequest}> 
-                      Send Friend Request
-                  </Button>
-                </PfBar>
-              </WatchlistBody>
+        <PfBody>
+          <WatchlistBody elevation={10}>
+            <PfBar>
+              <Heading>{handle}'s (private) </Heading>
+              <Button id="addFriend" onClick={sendRequest}> 
+                  Send Friend Request
+              </Button>
+            </PfBar>
+          </WatchlistBody>
         </PfBody>
             )}
     </PageBody>

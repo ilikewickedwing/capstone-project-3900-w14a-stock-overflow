@@ -206,9 +206,9 @@ const Stock = () => {
       const newList = [];
       request.data.forEach(obj => {
           newList.push({
-              type: "Stocks",
-              code: obj["symbol"],
-              name: obj["name"]
+            type: "Stocks",
+            code: obj["symbol"],
+            name: obj["name"]
           })
       })
       setRes(newList);

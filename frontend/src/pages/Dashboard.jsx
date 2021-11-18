@@ -48,10 +48,10 @@ const rows = [
   createData('user1', "100", 3),
   createData('dragonalxd', "59", 4),
 ];
+
 export default function Dashboard() {
   const myName = localStorage.getItem('username');
   const token = localStorage.getItem('token');
-  const uid = localStorage.getItem('uid');
   const alert = useContext(AlertContext);
   const [selected, setSelected] = React.useState([]);
   const [portfolios, setPortfolios] = React.useState([]);
@@ -162,8 +162,8 @@ const getFriendRanking = async () => {
    
   const getActivity = async() => {
     try {
-    const resp = await axios.get(`${apiBaseUrl}/activity/all?token=${token}`);
-    setActivity(resp.data);
+      const resp = await axios.get(`${apiBaseUrl}/activity/all?token=${token}`);
+      setActivity(resp.data);
     } catch (e) {
       alert(`Status Code ${e.data.status} : ${e.data.error}`,'error');
     }
@@ -173,72 +173,72 @@ const getFriendRanking = async () => {
       <Navigation />
       <Tabs />
       <PfBody>
-              <LeftBody elevation={10}>
-              <PfBar>
-                <Heading>Dashboard</Heading> 
-              </PfBar>
-                <h3>Overall Performance</h3>
-                <PerformanceGraph 
-                  pids={selected.toString()} 
-                  height={400}
-                  isFriend={false}
-                  />
-                <PerformanceTable 
-                  portfolios={portfolios}
-                  setPerfSelected={setSelected} />
-                <h3 style={{marginTop: '40px'}}>All activities: </h3>
-                <div style={{overflowY:'scroll', height:'40vh'}}>
-                {
-                  activity.length > 0 ? activity.map((e,index) =>{
-                    let subString = `${e.time.split('T')[0]}` +" "+`${e.time.substring(11,16)}`;
-                    return <Activity 
-                      key={index} 
-                      message={e.message} 
-                      time={subString} 
-                      aid={e.aid} 
-                      likes={e.likes} 
-                      getActivityCallBack={getActivity} 
-                      userComments={e.userComments}  
-                      likedUsers={e.likedUsers}
-                      />
-                  }): <p>Empty feed :\</p>
-                }
-                </div>
-              </LeftBody>
-              <RightBody elevation={10}>
-                <RightCard elevation={5} style={{textAlign:'center'}}>
-                  <div>
-                    <img style={{height:"auto", width:"50px"}} src={star} alt="star icon"/>
-                  </div>
-                  <h3> Monthly Top Dog </h3>
-                  <Performer style={{fontSize:'2em', fontWeight:'bold'}}> 🐺{performer.name}🐺</Performer>
-                  <br />
-                  <span style={{fontSize:'2em'}}>{performer.performance}% </span>
-                  <br />
-                  <span style={{fontSize:'1.5em'}}> 💸{performer.money}💸</span>
-                </RightCard>
-                <RightCard elevation={5}>
-                  <div style={{textAlign:'center'}}>
-                    <img style={{height:"auto", width:"50px"}} src={leaderboard} alt="leaderboard icon"/>
-                  </div>
-                  <h3 style={{textAlign:'center'}}>Friend Rankings</h3>
-                  <RankTable
-                    rows={rankings}
-                    myRanking={myFriendRanking}
-                  />
-                </RightCard>
-                <RightCard elevation={5}>
-                <div style={{textAlign:'center'}}>
-                  <img style={{height:"auto", width:"50px"}} src={globe} alt="global icon"/>
-                </div>
-                  <h3 style={{textAlign:'center'}}>Global Rankings</h3>
-                    <RankTable
-                      rows={globalRank}
-                      myRanking={myGlobalRanking}
-                    />
-                </RightCard>
-              </RightBody>
-            </PfBody>
+        <LeftBody elevation={10}>
+        <PfBar>
+          <Heading>Dashboard</Heading> 
+        </PfBar>
+          <h3>Overall Performance</h3>
+          <PerformanceGraph 
+            pids={selected.toString()} 
+            height={400}
+            isFriend={false}
+            />
+          <PerformanceTable 
+            portfolios={portfolios}
+            setPerfSelected={setSelected} />
+          <h3 style={{marginTop: '40px'}}>All activities: </h3>
+          <div style={{overflowY:'scroll', height:'40vh'}}>
+          {
+            activity.length > 0 ? activity.map((e,index) =>{
+              let subString = `${e.time.split('T')[0]}` +" "+`${e.time.substring(11,16)}`;
+              return <Activity 
+                key={index} 
+                message={e.message} 
+                time={subString} 
+                aid={e.aid} 
+                likes={e.likes} 
+                getActivityCallBack={getActivity} 
+                userComments={e.userComments}  
+                likedUsers={e.likedUsers}
+                />
+            }): <p>Empty feed :\</p>
+          }
+          </div>
+        </LeftBody>
+        <RightBody elevation={10}>
+          <RightCard elevation={5} style={{textAlign:'center'}}>
+            <div>
+              <img style={{height:"auto", width:"50px"}} src={star} alt="star icon"/>
+            </div>
+            <h3> Monthly Top Dog </h3>
+            <Performer style={{fontSize:'2em', fontWeight:'bold'}}> 🐺{performer.name}🐺</Performer>
+            <br />
+            <span style={{fontSize:'2em'}}>{performer.performance}% </span>
+            <br />
+            <span style={{fontSize:'1.5em'}}> 💸{performer.money}💸</span>
+          </RightCard>
+          <RightCard elevation={5}>
+            <div style={{textAlign:'center'}}>
+              <img style={{height:"auto", width:"50px"}} src={leaderboard} alt="leaderboard icon"/>
+            </div>
+            <h3 style={{textAlign:'center'}}>Friend Rankings</h3>
+            <RankTable
+              rows={rankings}
+              myRanking={myFriendRanking}
+            />
+          </RightCard>
+          <RightCard elevation={5}>
+          <div style={{textAlign:'center'}}>
+            <img style={{height:"auto", width:"50px"}} src={globe} alt="global icon"/>
+          </div>
+            <h3 style={{textAlign:'center'}}>Global Rankings</h3>
+            <RankTable
+              rows={globalRank}
+              myRanking={myGlobalRanking}
+            />
+          </RightCard>
+        </RightBody>
+      </PfBody>
     </PageBody>
   );
 }
