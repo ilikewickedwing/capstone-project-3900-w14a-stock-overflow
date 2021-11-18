@@ -15,6 +15,7 @@ import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import { PageBody } from '../styles/styling';
 import { AlertContext } from '../App';
+import logo from '../assets/logo.svg';
 
 // styling 
 const style = {
@@ -284,6 +285,7 @@ export default function Profile() {
               </Typography>
           </Box>
       </Modal>
+      <span style={{position:'absolute', textAlign:'right', bottom:'0', right:'0'}}>Powered by <img src={logo} style={{width:'20%', height:'auto'}}alt="tradier logo" /> </span>
     </PageBody>
    
   )

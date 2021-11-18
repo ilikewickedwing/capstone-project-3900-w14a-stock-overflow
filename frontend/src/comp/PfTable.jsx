@@ -210,22 +210,6 @@ const EnhancedTableToolbar = (props) => {
     setFlag(e.target.value);
   }
 
-  React.useEffect(() => {
-    getDefaultBrokerage();
-  },[])
-
-    // grab the current default brokerage fee
-    const getDefaultBrokerage = async ()=> {
-      try {
-      const res = await axios.get(`${apiBaseUrl}/user/getDefBroker?token=${token}`);
-      setBroker(res.data.defBroker.defBroker); 
-      setFlag(res.data.defBroker.brokerFlag);
-      
-      } catch (e) {
-      alert(`Status Code ${e.status} : ${e.response.data.error}`,'error');
-      }
-  }
-
   const editClick = async () => {
     handleOpen();
   }
